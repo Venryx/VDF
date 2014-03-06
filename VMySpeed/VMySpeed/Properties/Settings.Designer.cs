@@ -34,5 +34,17 @@ namespace VMySpeed.Properties {
                 this["Speed"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int SliderControlFrequency {
+            get {
+                return ((int)(this["SliderControlFrequency"]));
+            }
+            set {
+                this["SliderControlFrequency"] = value;
+            }
+        }
     }
 }

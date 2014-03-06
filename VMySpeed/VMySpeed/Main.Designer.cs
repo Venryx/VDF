@@ -53,13 +53,14 @@
             this.label7 = new System.Windows.Forms.Label();
             this.ProcessName = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label9 = new System.Windows.Forms.Label();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.AttachDetachButton = new System.Windows.Forms.Button();
-            this.EnabledCheckbox = new System.Windows.Forms.CheckBox();
             this.StatusLabel = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
             this.Speed_300 = new System.Windows.Forms.Button();
+            this.EnabledCheckbox = new System.Windows.Forms.CheckBox();
             this.Speed_200 = new System.Windows.Forms.Button();
             this.Speed_150 = new System.Windows.Forms.Button();
             this.Speed_75 = new System.Windows.Forms.Button();
@@ -67,6 +68,9 @@
             this.Speed_100 = new System.Windows.Forms.Button();
             this.SpeedTrackBar = new System.Windows.Forms.TrackBar();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.SliderControlFrequency = new System.Windows.Forms.NumericUpDown();
+            this.ShowHideMySpeedWindow = new System.Windows.Forms.Button();
             this.NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.NotifyIconContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ShowWindow = new System.Windows.Forms.ToolStripMenuItem();
@@ -82,6 +86,8 @@
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedTrackBar)).BeginInit();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SliderControlFrequency)).BeginInit();
             this.NotifyIconContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -139,9 +145,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(7, 19);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(51, 13);
+            this.label1.Size = new System.Drawing.Size(48, 13);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Location:";
+            this.label1.Text = "Address:";
             // 
             // groupBox2
             // 
@@ -159,9 +165,9 @@
             // 
             // Searcher_Location
             // 
-            this.Searcher_Location.Location = new System.Drawing.Point(394, 16);
+            this.Searcher_Location.Location = new System.Drawing.Point(391, 16);
             this.Searcher_Location.Name = "Searcher_Location";
-            this.Searcher_Location.Size = new System.Drawing.Size(88, 20);
+            this.Searcher_Location.Size = new System.Drawing.Size(91, 20);
             this.Searcher_Location.TabIndex = 4;
             this.Searcher_Location.TextChanged += new System.EventHandler(this.textBox3_TextChanged);
             // 
@@ -178,9 +184,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(337, 19);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(51, 13);
+            this.label3.Size = new System.Drawing.Size(48, 13);
             this.label3.TabIndex = 2;
-            this.label3.Text = "Location:";
+            this.label3.Text = "Address:";
             // 
             // label4
             // 
@@ -301,10 +307,22 @@
             this.ProcessName.TabIndex = 8;
             this.ProcessName.Text = "MySpeed";
             // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(8, 40);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(125, 13);
+            this.label9.TabIndex = 11;
+            this.label9.Text = "Slider Control-Frequency:";
+            this.toolTip1.SetToolTip(this.label9, "(the delay between each \'control MySpeed slider\' action, in milliseconds)");
+            this.label9.Click += new System.EventHandler(this.label9_Click_1);
+            // 
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -316,7 +334,6 @@
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.AttachDetachButton);
-            this.tabPage1.Controls.Add(this.EnabledCheckbox);
             this.tabPage1.Controls.Add(this.StatusLabel);
             this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
@@ -335,18 +352,8 @@
             this.AttachDetachButton.TabIndex = 8;
             this.AttachDetachButton.Text = "Attach";
             this.AttachDetachButton.UseVisualStyleBackColor = true;
+            this.AttachDetachButton.Visible = false;
             this.AttachDetachButton.Click += new System.EventHandler(this.AttachButton_Click);
-            // 
-            // EnabledCheckbox
-            // 
-            this.EnabledCheckbox.AutoSize = true;
-            this.EnabledCheckbox.Location = new System.Drawing.Point(9, 95);
-            this.EnabledCheckbox.Name = "EnabledCheckbox";
-            this.EnabledCheckbox.Size = new System.Drawing.Size(65, 17);
-            this.EnabledCheckbox.TabIndex = 7;
-            this.EnabledCheckbox.Text = "Enabled";
-            this.EnabledCheckbox.UseVisualStyleBackColor = true;
-            this.EnabledCheckbox.CheckedChanged += new System.EventHandler(this.EnabledCheckbox_CheckedChanged);
             // 
             // StatusLabel
             // 
@@ -356,11 +363,12 @@
             this.StatusLabel.TabIndex = 1;
             this.StatusLabel.Text = "Status: Not Attached";
             this.StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.StatusLabel.Click += new System.EventHandler(this.label9_Click);
+            this.StatusLabel.Visible = false;
             // 
             // panel1
             // 
             this.panel1.Controls.Add(this.Speed_300);
+            this.panel1.Controls.Add(this.EnabledCheckbox);
             this.panel1.Controls.Add(this.Speed_200);
             this.panel1.Controls.Add(this.Speed_150);
             this.panel1.Controls.Add(this.Speed_75);
@@ -381,6 +389,17 @@
             this.Speed_300.Text = "3";
             this.Speed_300.UseVisualStyleBackColor = true;
             this.Speed_300.Click += new System.EventHandler(this.Speed_300_Click);
+            // 
+            // EnabledCheckbox
+            // 
+            this.EnabledCheckbox.AutoSize = true;
+            this.EnabledCheckbox.Location = new System.Drawing.Point(412, 43);
+            this.EnabledCheckbox.Name = "EnabledCheckbox";
+            this.EnabledCheckbox.Size = new System.Drawing.Size(65, 17);
+            this.EnabledCheckbox.TabIndex = 7;
+            this.EnabledCheckbox.Text = "Enabled";
+            this.EnabledCheckbox.UseVisualStyleBackColor = true;
+            this.EnabledCheckbox.CheckedChanged += new System.EventHandler(this.EnabledCheckbox_CheckedChanged);
             // 
             // Speed_200
             // 
@@ -464,6 +483,51 @@
             this.tabPage2.Text = "Advanced";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.SliderControlFrequency);
+            this.tabPage3.Controls.Add(this.label9);
+            this.tabPage3.Controls.Add(this.ShowHideMySpeedWindow);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(504, 204);
+            this.tabPage3.TabIndex = 0;
+            this.tabPage3.Text = "Extra";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // SliderControlFrequency
+            // 
+            this.SliderControlFrequency.Location = new System.Drawing.Point(139, 38);
+            this.SliderControlFrequency.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.SliderControlFrequency.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.SliderControlFrequency.Name = "SliderControlFrequency";
+            this.SliderControlFrequency.Size = new System.Drawing.Size(67, 20);
+            this.SliderControlFrequency.TabIndex = 12;
+            this.SliderControlFrequency.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            0});
+            this.SliderControlFrequency.ValueChanged += new System.EventHandler(this.SliderControlFrequency_ValueChanged);
+            // 
+            // ShowHideMySpeedWindow
+            // 
+            this.ShowHideMySpeedWindow.Location = new System.Drawing.Point(3, 3);
+            this.ShowHideMySpeedWindow.Name = "ShowHideMySpeedWindow";
+            this.ShowHideMySpeedWindow.Size = new System.Drawing.Size(265, 23);
+            this.ShowHideMySpeedWindow.TabIndex = 0;
+            this.ShowHideMySpeedWindow.Text = "Move MySpeed Window Off-Screen";
+            this.ShowHideMySpeedWindow.UseVisualStyleBackColor = true;
+            this.ShowHideMySpeedWindow.Click += new System.EventHandler(this.ShowHideMySpeedWindow_Click);
+            // 
             // NotifyIcon
             // 
             this.NotifyIcon.ContextMenuStrip = this.NotifyIconContextMenu;
@@ -531,11 +595,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.Getter_Bytes)).EndInit();
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedTrackBar)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SliderControlFrequency)).EndInit();
             this.NotifyIconContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -586,6 +653,10 @@
         private System.Windows.Forms.CheckBox EnabledCheckbox;
         private System.Windows.Forms.Label StatusLabel;
         private System.Windows.Forms.Button AttachDetachButton;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.Button ShowHideMySpeedWindow;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.NumericUpDown SliderControlFrequency;
     }
 }
 

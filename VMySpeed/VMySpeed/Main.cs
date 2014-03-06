@@ -16,6 +16,8 @@ namespace VMySpeed
         {
             InitializeComponent();
             SpeedTrackBar.Value = Properties.Settings.Default.Speed;
+            SliderControlFrequency.Value = Properties.Settings.Default.SliderControlFrequency;
+            UpdateSpeed();
             UpdateWindowSize();
         }
 
@@ -76,7 +78,7 @@ namespace VMySpeed
             string bytesToSearchFor_string = Searcher_Value.Text;
             int[] bytesToSearchFor = bytesToSearchFor_string.Split(new[] { ';' }).Select(valStr => int.Parse(valStr)).ToArray();
 
-            int address = V.FindStartAddressOfByteSequence(process, bytesToSearchFor, 5345076 - 16); //7000000);
+            int address = V.FindStartAddressOfByteSequence(process, bytesToSearchFor, 0); //5345076 - 16); //7000000);
             Searcher_Location.Text = address.ToString();
         }
 
@@ -84,9 +86,11 @@ namespace VMySpeed
         void UpdateWindowSize()
         {
             if (tabControl1.SelectedIndex == 0)
-                this.Size = new Size(518, 180);
-            else
+                this.Size = new Size(518, 130);
+            else if (tabControl1.SelectedIndex == 1)
                 this.Size = new Size(518, 258);
+            else
+                this.Size = new Size(518, 125);
         }
 
         private void SpeedTrackBar_Scroll(object sender, EventArgs e)
@@ -109,6 +113,7 @@ namespace VMySpeed
             if (forceClose)
             {
                 Properties.Settings.Default.Speed = SpeedTrackBar.Value;
+                Properties.Settings.Default.SliderControlFrequency = (int)SliderControlFrequency.Value;
                 Properties.Settings.Default.Save();
                 return;
             }
@@ -127,12 +132,12 @@ namespace VMySpeed
 
         }
 
-        private void Speed_50_Click(object sender, EventArgs e) { SpeedTrackBar.Value = 50; BreakLock(); }
-        private void Speed_75_Click(object sender, EventArgs e) { SpeedTrackBar.Value = 75; BreakLock(); }
-        private void Speed_100_Click(object sender, EventArgs e) { SpeedTrackBar.Value = 100; BreakLock(); }
-        private void Speed_150_Click(object sender, EventArgs e) { SpeedTrackBar.Value = 150; BreakLock(); }
-        private void Speed_200_Click(object sender, EventArgs e) { SpeedTrackBar.Value = 200; BreakLock(); }
-        private void Speed_300_Click(object sender, EventArgs e) { SpeedTrackBar.Value = 300; BreakLock(); }
+        private void Speed_50_Click(object sender, EventArgs e) { ChangeSpeed(50); }
+        private void Speed_75_Click(object sender, EventArgs e) { ChangeSpeed(75); }
+        private void Speed_100_Click(object sender, EventArgs e) { ChangeSpeed(100); }
+        private void Speed_150_Click(object sender, EventArgs e) { ChangeSpeed(150); }
+        private void Speed_200_Click(object sender, EventArgs e) { ChangeSpeed(200); }
+        private void Speed_300_Click(object sender, EventArgs e) { ChangeSpeed(300); }
 
         private void SpeedTrackBar_ValueChanged(object sender, EventArgs e) { UpdateSpeed(); }
         int speedBase;
@@ -147,7 +152,10 @@ namespace VMySpeed
         private void EnabledCheckbox_CheckedChanged(object sender, EventArgs e)
         {
             if (EnabledCheckbox.Checked)
+            {
                 StartTimer();
+                BreakLock();
+            }
             else
                 StopTimer();
         }
@@ -159,24 +167,58 @@ namespace VMySpeed
         int cachedSpeedValueMemoryLocation = -1;
         private void SpeedApplierTimer_Tick(object sender, EventArgs e)
         {
-            byte[] bytesToWrite = { (byte)(speedBase / 10), 0, 0, 0 };
+            /*byte[] bytesToWrite = { (byte)(speedBase / 10), 0, 0, 0 };
 
             int bytesWritten_count;
             bool worked = V.WriteMemory(cachedProcess, cachedSpeedValueMemoryLocation, bytesToWrite, out bytesWritten_count);
-            //BreakLock();
+            //BreakLock();*/
+
+            IDictionary<IntPtr, string> windowTitlesByHandle = V.GetOpenWindows(true);
+            KeyValuePair<IntPtr, string> enounceWindow = windowTitlesByHandle.FirstOrDefault(pair=>pair.Value.StartsWith("Enounce MySpeed"));
+            if (enounceWindow.Value != null)
+            {
+                var slider = V.FindWindowEx(enounceWindow.Key, IntPtr.Zero, "msctls_trackbar32", "");
+                BreakLock();
+                V.SendMessage(slider, 0x405, new IntPtr(1), new IntPtr(speedBase / 10));
+                //V.SendMessage(slider, 0xA, new IntPtr(1), IntPtr.Zero);
+                /*if (speedBase < 1)
+                {
+                    V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(0));
+                    V.SendMessage(slider, 0x408, new IntPtr(1), new IntPtr(speedBase / 10));
+                }
+                else if (speedBase == 1)
+                {
+                    V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(0));
+                    V.SendMessage(slider, 0x408, new IntPtr(1), new IntPtr(50));
+                }
+                else
+                {
+                    V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(speedBase / 10));
+                    V.SendMessage(slider, 0x408, new IntPtr(1), new IntPtr(50));
+                }*/
+            }
+        }
+        void ChangeSpeed(int newSpeedBase)
+        {
+            SpeedTrackBar.Value = newSpeedBase;
+            if (!EnabledCheckbox.Checked)
+                return;
+            speedBase = newSpeedBase;
+            BreakLock();
         }
         void BreakLock()
         {
-            /*if (speedBase != 10) // if we shouldn't be at 1.0x
+            if (speedBase != 100) // if we shouldn't be at 1.0x
             {
-                IDictionary<IntPtr, string> windowTitlesByHandle = V.GetOpenWindows();
-                KeyValuePair<IntPtr, string> enounceWindow = windowTitlesByHandle.FirstOrDefault(pair=>pair.Value.StartsWith("Enounce MySpeed"));
-                if (enounceWindow.Value != null && enounceWindow.Value.Contains("1.0x")) // but it is
+                IDictionary<IntPtr, string> windowTitlesByHandle = V.GetOpenWindows(true);
+                KeyValuePair<IntPtr, string> mySpeedWindow = windowTitlesByHandle.FirstOrDefault(pair => pair.Value.StartsWith("Enounce MySpeed"));
+                if (mySpeedWindow.Value != null && mySpeedWindow.Value.Contains("1.0x")) // but it is
                 {
-                    var slider = V.FindWindowEx(enounceWindow.Key, IntPtr.Zero, "msctls_trackbar32", "");
+                    var slider = V.FindWindowEx(mySpeedWindow.Key, IntPtr.Zero, "msctls_trackbar32", "");
                     //V.SendMessage(slider, 0xA, new IntPtr(1), IntPtr.Zero);
-                    V.SendClick(V.WMessages.WM_LBUTTONDOWN, new Point(100, 5), slider);
-                    V.SendClick(V.WMessages.WM_LBUTTONUP, new Point(100, 5), slider);
+                    //V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(500));
+                    V.SendClick(V.WMessages.WM_LBUTTONDOWN, speedBase < 100 ? new Point(12, 5) : new Point(100, 5), slider);
+                    V.SendClick(V.WMessages.WM_LBUTTONUP, speedBase < 100 ? new Point(12, 5) : new Point(100, 5), slider);
 
                     //V.SendMessage_Special(slider, 0x200, IntPtr.Zero, V.MousePoint(10, 20));
                     //V.SendMessage(slider, V.MOUSEDOWN, IntPtr.Zero, IntPtr.Zero);
@@ -188,12 +230,7 @@ namespace VMySpeed
                     //V.SetForegroundWindow(Process.GetCurrentProcess().MainWindowHandle);
                     //Focus();
                 }
-            }*/
-        }
-
-        private void label9_Click(object sender, EventArgs e)
-        {
-
+            }
         }
 
         private void AttachButton_Click(object sender, EventArgs e)
@@ -238,5 +275,42 @@ namespace VMySpeed
             attached = false;
             AttachDetachButton.Text = "Attach";
         }
+
+        private void ShowHideMySpeedWindow_Click(object sender, EventArgs e)
+        {
+            IDictionary<IntPtr, string> windowTitlesByHandle = V.GetOpenWindows(true);
+            KeyValuePair<IntPtr, string> enounceWindow = windowTitlesByHandle.FirstOrDefault(pair=>pair.Value.StartsWith("Enounce MySpeed"));
+            if (enounceWindow.Value != null)
+            {
+                /*uint crKey;
+                byte bAlpha;
+                uint dwFlags;
+                V.GetLayeredWindowAttributes(enounceWindow.Key, out crKey, out bAlpha, out dwFlags);*/
+
+                V.RECT rct = new V.RECT();
+                V.GetWindowRect(enounceWindow.Key, ref rct);
+                if (rct.Left >= 5000) // if hidden
+                {
+                    V.SetWindowPos(enounceWindow.Key, 0, rct.Left - 10000, rct.Top, 0, 0, V.SWP_NOZORDER | V.SWP_NOSIZE); // | V.SWP_SHOWWINDOW);
+                    //V.SetWindowLong(Handle, V.GWL_EXSTYLE, V.GetWindowLong(Handle, V.GWL_EXSTYLE) ^ V.WS_EX_LAYERED);
+                    //V.SetLayeredWindowAttributes(Handle, 0, 255, V.LWA_ALPHA);
+                    ShowHideMySpeedWindow.Text = "Move MySpeed Window Off-Screen";
+                }
+                else
+                {;
+                    V.SetWindowPos(enounceWindow.Key, 0, 10000 + rct.Left, rct.Top, 0, 0, V.SWP_NOZORDER | V.SWP_NOSIZE); // | V.SWP_SHOWWINDOW);
+                    //V.SetWindowLong(Handle, V.GWL_EXSTYLE, V.GetWindowLong(Handle, V.GWL_EXSTYLE) ^ V.WS_EX_LAYERED);
+                    //V.SetLayeredWindowAttributes(Handle, 0, 0, V.LWA_ALPHA);
+                    ShowHideMySpeedWindow.Text = "Move MySpeed Window Back On-Screen";
+                }
+            }
+        }
+
+        private void label9_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SliderControlFrequency_ValueChanged(object sender, EventArgs e) { SpeedApplierTimer.Interval = (int)SliderControlFrequency.Value; }
     }
 }
