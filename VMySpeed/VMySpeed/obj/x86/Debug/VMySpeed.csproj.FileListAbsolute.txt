@@ -1,0 +1,7 @@
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\bin\Debug\VMySpeed.exe
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\bin\Debug\VMySpeed.pdb
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.Form1.resources
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.Properties.Resources.resources
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.csproj.GenerateResource.Cache
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.exe
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.pdb
