@@ -166,5 +166,17 @@ namespace VMySpeed.Properties {
                 this["StepUp_Key"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Enabled {
+            get {
+                return ((bool)(this["Enabled"]));
+            }
+            set {
+                this["Enabled"] = value;
+            }
+        }
     }
 }

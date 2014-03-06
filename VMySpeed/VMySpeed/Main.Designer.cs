@@ -30,35 +30,11 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            this.Setter_Set = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.Setter_Value = new System.Windows.Forms.TextBox();
-            this.Setter_Address = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.Searcher_Location = new System.Windows.Forms.TextBox();
-            this.Searcher_Value = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.Searcher_Search = new System.Windows.Forms.Button();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.Getter_Bytes = new System.Windows.Forms.NumericUpDown();
-            this.label8 = new System.Windows.Forms.Label();
-            this.Getter_Address = new System.Windows.Forms.TextBox();
-            this.Getter_Value = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.Getter_Get = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.ProcessName = new System.Windows.Forms.TextBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.label9 = new System.Windows.Forms.Label();
             this.TabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.AttachDetachButton = new System.Windows.Forms.Button();
             this.EnabledCheckbox = new System.Windows.Forms.CheckBox();
-            this.StatusLabel = new System.Windows.Forms.Label();
             this.SpeedTrackBar = new System.Windows.Forms.TrackBar();
             this.Speed_10 = new System.Windows.Forms.Button();
             this.Speed_5 = new System.Windows.Forms.Button();
@@ -67,7 +43,6 @@
             this.Speed_30 = new System.Windows.Forms.Button();
             this.Speed_20 = new System.Windows.Forms.Button();
             this.Speed_15 = new System.Windows.Forms.Button();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.StepUp_Key = new System.Windows.Forms.TextBox();
             this.label19 = new System.Windows.Forms.Label();
@@ -98,14 +73,9 @@
             this.Separator1 = new System.Windows.Forms.ToolStripSeparator();
             this.Exit = new System.Windows.Forms.ToolStripMenuItem();
             this.SpeedApplierTimer = new System.Windows.Forms.Timer(this.components);
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.groupBox3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Getter_Bytes)).BeginInit();
             this.TabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedTrackBar)).BeginInit();
-            this.tabPage2.SuspendLayout();
             this.tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedPreset3_Value)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedPreset2_Value)).BeginInit();
@@ -115,217 +85,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.ControlInterval)).BeginInit();
             this.NotifyIconContextMenu.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // Setter_Set
-            // 
-            this.Setter_Set.Location = new System.Drawing.Point(391, 14);
-            this.Setter_Set.Name = "Setter_Set";
-            this.Setter_Set.Size = new System.Drawing.Size(66, 23);
-            this.Setter_Set.TabIndex = 4;
-            this.Setter_Set.Text = "Set";
-            this.Setter_Set.UseVisualStyleBackColor = true;
-            this.Setter_Set.Click += new System.EventHandler(this.Setter_Set_Click);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.Setter_Value);
-            this.groupBox1.Controls.Add(this.Setter_Address);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.Setter_Set);
-            this.groupBox1.Location = new System.Drawing.Point(8, 94);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(463, 45);
-            this.groupBox1.TabIndex = 3;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Value Setter";
-            // 
-            // Setter_Value
-            // 
-            this.Setter_Value.Location = new System.Drawing.Point(265, 16);
-            this.Setter_Value.Name = "Setter_Value";
-            this.Setter_Value.Size = new System.Drawing.Size(120, 20);
-            this.Setter_Value.TabIndex = 3;
-            this.Setter_Value.Text = "30;0;0;0";
-            // 
-            // Setter_Address
-            // 
-            this.Setter_Address.Location = new System.Drawing.Point(58, 16);
-            this.Setter_Address.Name = "Setter_Address";
-            this.Setter_Address.Size = new System.Drawing.Size(158, 20);
-            this.Setter_Address.TabIndex = 1;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(222, 19);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(37, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Value:";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(48, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Address:";
-            // 
-            // groupBox2
-            // 
-            this.groupBox2.Controls.Add(this.Searcher_Location);
-            this.groupBox2.Controls.Add(this.Searcher_Value);
-            this.groupBox2.Controls.Add(this.label3);
-            this.groupBox2.Controls.Add(this.label4);
-            this.groupBox2.Controls.Add(this.Searcher_Search);
-            this.groupBox2.Location = new System.Drawing.Point(8, 145);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(463, 45);
-            this.groupBox2.TabIndex = 4;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Value Searcher";
-            // 
-            // Searcher_Location
-            // 
-            this.Searcher_Location.Location = new System.Drawing.Point(351, 16);
-            this.Searcher_Location.Name = "Searcher_Location";
-            this.Searcher_Location.Size = new System.Drawing.Size(105, 20);
-            this.Searcher_Location.TabIndex = 4;
-            // 
-            // Searcher_Value
-            // 
-            this.Searcher_Value.Location = new System.Drawing.Point(50, 16);
-            this.Searcher_Value.Name = "Searcher_Value";
-            this.Searcher_Value.Size = new System.Drawing.Size(166, 20);
-            this.Searcher_Value.TabIndex = 1;
-            this.Searcher_Value.Text = "30;0;0;0";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(297, 19);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(48, 13);
-            this.label3.TabIndex = 3;
-            this.label3.Text = "Address:";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(7, 19);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(37, 13);
-            this.label4.TabIndex = 0;
-            this.label4.Text = "Value:";
-            // 
-            // Searcher_Search
-            // 
-            this.Searcher_Search.Location = new System.Drawing.Point(225, 14);
-            this.Searcher_Search.Name = "Searcher_Search";
-            this.Searcher_Search.Size = new System.Drawing.Size(66, 23);
-            this.Searcher_Search.TabIndex = 2;
-            this.Searcher_Search.Text = "Search";
-            this.Searcher_Search.UseVisualStyleBackColor = true;
-            this.Searcher_Search.Click += new System.EventHandler(this.Searcher_Search_Click);
-            // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.Getter_Bytes);
-            this.groupBox3.Controls.Add(this.label8);
-            this.groupBox3.Controls.Add(this.Getter_Address);
-            this.groupBox3.Controls.Add(this.Getter_Value);
-            this.groupBox3.Controls.Add(this.label6);
-            this.groupBox3.Controls.Add(this.Getter_Get);
-            this.groupBox3.Controls.Add(this.label5);
-            this.groupBox3.Location = new System.Drawing.Point(8, 43);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(463, 45);
-            this.groupBox3.TabIndex = 2;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Value Getter";
-            // 
-            // Getter_Bytes
-            // 
-            this.Getter_Bytes.Location = new System.Drawing.Point(194, 17);
-            this.Getter_Bytes.Name = "Getter_Bytes";
-            this.Getter_Bytes.Size = new System.Drawing.Size(41, 20);
-            this.Getter_Bytes.TabIndex = 3;
-            this.Getter_Bytes.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(152, 19);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(36, 13);
-            this.label8.TabIndex = 2;
-            this.label8.Text = "Bytes:";
-            // 
-            // Getter_Address
-            // 
-            this.Getter_Address.Location = new System.Drawing.Point(58, 16);
-            this.Getter_Address.Name = "Getter_Address";
-            this.Getter_Address.Size = new System.Drawing.Size(88, 20);
-            this.Getter_Address.TabIndex = 1;
-            // 
-            // Getter_Value
-            // 
-            this.Getter_Value.Location = new System.Drawing.Point(340, 17);
-            this.Getter_Value.Name = "Getter_Value";
-            this.Getter_Value.Size = new System.Drawing.Size(116, 20);
-            this.Getter_Value.TabIndex = 6;
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(294, 19);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(37, 13);
-            this.label6.TabIndex = 5;
-            this.label6.Text = "Value:";
-            // 
-            // Getter_Get
-            // 
-            this.Getter_Get.Location = new System.Drawing.Point(241, 14);
-            this.Getter_Get.Name = "Getter_Get";
-            this.Getter_Get.Size = new System.Drawing.Size(45, 23);
-            this.Getter_Get.TabIndex = 4;
-            this.Getter_Get.Text = "Get";
-            this.Getter_Get.UseVisualStyleBackColor = true;
-            this.Getter_Get.Click += new System.EventHandler(this.Getter_Get_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 19);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(48, 13);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "Address:";
-            this.toolTip1.SetToolTip(this.label5, "Memory address. (in decimal)");
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(5, 16);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(79, 13);
-            this.label7.TabIndex = 0;
-            this.label7.Text = "Process Name:";
-            // 
-            // ProcessName
-            // 
-            this.ProcessName.Location = new System.Drawing.Point(90, 13);
-            this.ProcessName.Name = "ProcessName";
-            this.ProcessName.Size = new System.Drawing.Size(134, 20);
-            this.ProcessName.TabIndex = 1;
-            this.ProcessName.Text = "MySpeed";
             // 
             // label9
             // 
@@ -341,22 +100,19 @@
             // TabControl
             // 
             this.TabControl.Controls.Add(this.tabPage1);
-            this.TabControl.Controls.Add(this.tabPage2);
             this.TabControl.Controls.Add(this.tabPage3);
             this.TabControl.Controls.Add(this.tabPage4);
             this.TabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.TabControl.Location = new System.Drawing.Point(0, 0);
             this.TabControl.Name = "TabControl";
             this.TabControl.SelectedIndex = 0;
-            this.TabControl.Size = new System.Drawing.Size(487, 222);
+            this.TabControl.Size = new System.Drawing.Size(451, 135);
             this.TabControl.TabIndex = 0;
             this.TabControl.SelectedIndexChanged += new System.EventHandler(this.TabControl_SelectedIndexChanged);
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.AttachDetachButton);
             this.tabPage1.Controls.Add(this.EnabledCheckbox);
-            this.tabPage1.Controls.Add(this.StatusLabel);
             this.tabPage1.Controls.Add(this.SpeedTrackBar);
             this.tabPage1.Controls.Add(this.Speed_10);
             this.tabPage1.Controls.Add(this.Speed_5);
@@ -373,17 +129,6 @@
             this.tabPage1.Text = "Main";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
-            // AttachDetachButton
-            // 
-            this.AttachDetachButton.Location = new System.Drawing.Point(219, 62);
-            this.AttachDetachButton.Name = "AttachDetachButton";
-            this.AttachDetachButton.Size = new System.Drawing.Size(75, 23);
-            this.AttachDetachButton.TabIndex = 3;
-            this.AttachDetachButton.Text = "Attach";
-            this.AttachDetachButton.UseVisualStyleBackColor = true;
-            this.AttachDetachButton.Visible = false;
-            this.AttachDetachButton.Click += new System.EventHandler(this.AttachButton_Click);
-            // 
             // EnabledCheckbox
             // 
             this.EnabledCheckbox.AutoSize = true;
@@ -394,16 +139,6 @@
             this.EnabledCheckbox.Text = "Enabled";
             this.EnabledCheckbox.UseVisualStyleBackColor = true;
             this.EnabledCheckbox.CheckedChanged += new System.EventHandler(this.EnabledCheckbox_CheckedChanged);
-            // 
-            // StatusLabel
-            // 
-            this.StatusLabel.Location = new System.Drawing.Point(6, 62);
-            this.StatusLabel.Name = "StatusLabel";
-            this.StatusLabel.Size = new System.Drawing.Size(176, 23);
-            this.StatusLabel.TabIndex = 0;
-            this.StatusLabel.Text = "Status: Not Attached";
-            this.StatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.StatusLabel.Visible = false;
             // 
             // SpeedTrackBar
             // 
@@ -489,21 +224,6 @@
             this.Speed_15.UseVisualStyleBackColor = true;
             this.Speed_15.Click += new System.EventHandler(this.Speed_15_Click);
             // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.label7);
-            this.tabPage2.Controls.Add(this.ProcessName);
-            this.tabPage2.Controls.Add(this.groupBox1);
-            this.tabPage2.Controls.Add(this.groupBox2);
-            this.tabPage2.Controls.Add(this.groupBox3);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(479, 196);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "Memory";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.StepUp_Key);
@@ -527,7 +247,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(479, 196);
+            this.tabPage3.Size = new System.Drawing.Size(443, 109);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Hotkeys";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -878,7 +598,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(487, 222);
+            this.ClientSize = new System.Drawing.Size(451, 135);
             this.Controls.Add(this.TabControl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -891,19 +611,10 @@
             this.Text = "VMySpeed - 1.0x";
             this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Main_FormClosing);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.Getter_Bytes)).EndInit();
             this.TabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedTrackBar)).EndInit();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SpeedPreset3_Value)).EndInit();
@@ -920,32 +631,9 @@
 
         #endregion
 
-        private System.Windows.Forms.Button Setter_Set;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox Setter_Value;
-        private System.Windows.Forms.TextBox Setter_Address;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.TextBox Searcher_Location;
-        private System.Windows.Forms.TextBox Searcher_Value;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button Searcher_Search;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TextBox Getter_Address;
-        private System.Windows.Forms.TextBox Getter_Value;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Button Getter_Get;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox ProcessName;
-        private System.Windows.Forms.Label label8;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.NumericUpDown Getter_Bytes;
         private System.Windows.Forms.TabControl TabControl;
         private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TrackBar SpeedTrackBar;
         private System.Windows.Forms.Button Speed_10;
         private System.Windows.Forms.Button Speed_5;
@@ -959,8 +647,6 @@
         private System.Windows.Forms.ToolStripMenuItem Exit;
         private System.Windows.Forms.Timer SpeedApplierTimer;
         private System.Windows.Forms.CheckBox EnabledCheckbox;
-        private System.Windows.Forms.Label StatusLabel;
-        private System.Windows.Forms.Button AttachDetachButton;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.Button ShowHideMySpeedWindow;
         private System.Windows.Forms.Label label9;

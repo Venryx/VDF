@@ -38,5 +38,8 @@
     <Setting Name="StepUp_Key" Type="System.String" Scope="User">
       <Value Profile="(Default)">Ctrl+Alt+]</Value>
     </Setting>
+    <Setting Name="Enabled" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

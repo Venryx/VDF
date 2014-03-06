@@ -31,6 +31,7 @@ namespace VMySpeed
             StepSize.Value = Properties.Settings.Default.StepSize;
             StepDown_Key.Text = Properties.Settings.Default.StepDown_Key;
             StepUp_Key.Text = Properties.Settings.Default.StepUp_Key;
+            EnabledCheckbox.Checked = Properties.Settings.Default.Enabled;
             UpdateSpeed();
             UpdateWindowSize();
 
@@ -99,8 +100,6 @@ namespace VMySpeed
             if (TabControl.SelectedIndex == 0)
                 Size = new Size(307, 105);
             else if (TabControl.SelectedIndex == 1)
-                Size = new Size(493, 250);
-            else if (TabControl.SelectedIndex == 2)
                 Size = new Size(457, 163);
             else
                 Size = new Size(269, 137);
@@ -115,6 +114,7 @@ namespace VMySpeed
         {
             if (forceClose)
             {
+                StopApplyingSpeed();
                 Properties.Settings.Default.Speed = SpeedTrackBar.Value;
                 Properties.Settings.Default.ControlMode = ControlMode.SelectedIndex;
                 Properties.Settings.Default.ControlInterval = (int)ControlInterval.Value;
@@ -127,48 +127,13 @@ namespace VMySpeed
                 Properties.Settings.Default.StepSize = StepSize.Value;
                 Properties.Settings.Default.StepDown_Key = StepDown_Key.Text;
                 Properties.Settings.Default.StepUp_Key = StepUp_Key.Text;
+                Properties.Settings.Default.Enabled = EnabledCheckbox.Checked;
                 Properties.Settings.Default.Save();
                 return;
             }
 
             Hide();
             e.Cancel = true;
-        }
-
-        private void Getter_Get_Click(object sender, EventArgs e)
-        {
-            Process process = Process.GetProcessesByName(ProcessName.Text).FirstOrDefault();
-
-            int address = int.Parse(Getter_Address.Text);
-            int bytesToRead = (int)Getter_Bytes.Value;
-
-            int bytesRead_count;
-            byte[] bytesRead = V.ReadMemory(process, address, bytesToRead, out bytesRead_count);
-
-            Getter_Value.Text = String.Join(";", bytesRead);
-        }
-
-        private void Setter_Set_Click(object sender, EventArgs e)
-        {
-            Process process = Process.GetProcessesByName(ProcessName.Text).FirstOrDefault();
-
-            int address = int.Parse(Setter_Address.Text);
-            string bytesToWrite_string = Setter_Value.Text;
-            byte[] bytesToWrite = bytesToWrite_string.Split(new []{';'}).Select(valStr=>byte.Parse(valStr)).ToArray();
-
-            int bytesWritten_count;
-            bool worked = V.WriteMemory(process, address, bytesToWrite, out bytesWritten_count);
-        }
-
-        private void Searcher_Search_Click(object sender, EventArgs e)
-        {
-            Process process = Process.GetProcessesByName(ProcessName.Text).FirstOrDefault();
-
-            string bytesToSearchFor_string = Searcher_Value.Text;
-            int[] bytesToSearchFor = bytesToSearchFor_string.Split(new[] { ';' }).Select(valStr => int.Parse(valStr)).ToArray();
-
-            int address = V.FindStartAddressOfByteSequence(process, bytesToSearchFor, 0); //5345076 - 16); //7000000);
-            Searcher_Location.Text = address.ToString();
         }
 
         private void ShowWindow_Click(object sender, EventArgs e)
@@ -219,18 +184,9 @@ namespace VMySpeed
             SetMySpeedSliderRange(.3m, 5m); // reset range
             SetMySpeedSliderValue(1); // reset value
         }
-
-        bool attached = false;
-        Process cachedProcess = null;
-        int cachedSpeedValueMemoryLocation = -1;
+        
         private void SpeedApplierTimer_Tick(object sender, EventArgs e)
         {
-            /*byte[] bytesToWrite = { (byte)(speedBase / 10), 0, 0, 0 };
-
-            int bytesWritten_count;
-            bool worked = V.WriteMemory(cachedProcess, cachedSpeedValueMemoryLocation, bytesToWrite, out bytesWritten_count);
-            //BreakLock();*/
-
             ApplySpeed(speed);
         }
         void ApplySpeed(decimal speedToApply)
@@ -303,49 +259,6 @@ namespace VMySpeed
             }
         }
 
-        private void AttachButton_Click(object sender, EventArgs e)
-        {
-            if (attached)
-                Detach();
-            else
-                Attach();
-        }
-        void Attach()
-        {
-            cachedProcess = Process.GetProcessesByName("MySpeed").FirstOrDefault();
-            if (cachedProcess == null) // did not find process
-            {
-                StatusLabel.Text = "Status: Not Attached (error: couldn't find process)";
-                EnabledCheckbox.Checked = false;
-                StopTimer();
-                return;
-            }
-
-            string byteSequenceString = "32;0;67;0;111;0;110;0;116;0;114;0;97;0;115;0"; //"210;4;0;0;-1;0;0;0"; //"0;0;0;0;133;32;5;210;3;0;0;0;136;19;0;0";
-            int[] byteSequence = byteSequenceString.Split(new[] { ';' }).Select(valStr => int.Parse(valStr)).ToArray(); // use int[] to allow negatives
-            var addressOfMarker = V.FindStartAddressOfByteSequence(cachedProcess, byteSequence, 0, 0);
-            var addressOfFiles = V.FindStartAddressOfByteSequence(cachedProcess, new[] {/*70, 0, */105, 0, 108, 0, 101, 0, 115, 0}, addressOfMarker - (16 * 20));
-            if (addressOfFiles == -1)
-            {
-                StatusLabel.Text = "Status: Not Attached (error: couldn't find sequence)";
-                EnabledCheckbox.Checked = false;
-                return;
-            }
-
-            cachedSpeedValueMemoryLocation = addressOfFiles + (16 * 5) + 4; //addressOf255s - 20; //addressOfMarker - (16 * 6); //5345076 - 16) + byteSequence.Length;
-            StatusLabel.Text = "Status: Attached (" + cachedSpeedValueMemoryLocation + ")";
-            toolTip1.SetToolTip(StatusLabel, null);
-            attached = true;
-            AttachDetachButton.Text = "Detach";
-        }
-        void Detach()
-        {
-            StatusLabel.Text = "Status: Not Attached";
-            toolTip1.SetToolTip(StatusLabel, "");
-            attached = false;
-            AttachDetachButton.Text = "Attach";
-        }
-
         private void ShowHideMySpeedWindow_Click(object sender, EventArgs e)
         {
             IDictionary<IntPtr, string> windowTitlesByHandle = V.GetOpenWindows(true);
@@ -371,7 +284,7 @@ namespace VMySpeed
                     V.SetWindowPos(enounceWindow.Key, 0, 10000 + rct.Left, rct.Top, 0, 0, V.SWP_NOZORDER | V.SWP_NOSIZE); // | V.SWP_SHOWWINDOW);
                     //V.SetWindowLong(Handle, V.GWL_EXSTYLE, V.GetWindowLong(Handle, V.GWL_EXSTYLE) ^ V.WS_EX_LAYERED);
                     //V.SetLayeredWindowAttributes(Handle, 0, 0, V.LWA_ALPHA);
-                    ShowHideMySpeedWindow.Text = "Move MySpeed Window Back On-Screen";
+                    ShowHideMySpeedWindow.Text = "Move MySpeed Window Back";
                 }
             }
         }
