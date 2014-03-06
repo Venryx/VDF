@@ -6,3 +6,4 @@ C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySp
 C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.pdb
 C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.Main.resources
 C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\bin\Debug\VMySpeed.exe.config
+C:\Programming\Projects\Visual C#\VMySpeed\VMySpeed\VMySpeed\obj\x86\Debug\VMySpeed.csprojResolveAssemblyReference.cache
