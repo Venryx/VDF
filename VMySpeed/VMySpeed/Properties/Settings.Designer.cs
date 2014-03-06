@@ -37,13 +37,133 @@ namespace VMySpeed.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("10")]
-        public int SliderControlFrequency {
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int ControlMode {
             get {
-                return ((int)(this["SliderControlFrequency"]));
+                return ((int)(this["ControlMode"]));
             }
             set {
-                this["SliderControlFrequency"] = value;
+                this["ControlMode"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("10")]
+        public int ControlInterval {
+            get {
+                return ((int)(this["ControlInterval"]));
+            }
+            set {
+                this["ControlInterval"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.0")]
+        public decimal SpeedPreset1_Value {
+            get {
+                return ((decimal)(this["SpeedPreset1_Value"]));
+            }
+            set {
+                this["SpeedPreset1_Value"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ctrl+Alt+0")]
+        public string SpeedPreset1_Key {
+            get {
+                return ((string)(this["SpeedPreset1_Key"]));
+            }
+            set {
+                this["SpeedPreset1_Key"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1.5")]
+        public decimal SpeedPreset2_Value {
+            get {
+                return ((decimal)(this["SpeedPreset2_Value"]));
+            }
+            set {
+                this["SpeedPreset2_Value"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ctrl+Alt+-")]
+        public string SpeedPreset2_Key {
+            get {
+                return ((string)(this["SpeedPreset2_Key"]));
+            }
+            set {
+                this["SpeedPreset2_Key"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("2.0")]
+        public decimal SpeedPreset3_Value {
+            get {
+                return ((decimal)(this["SpeedPreset3_Value"]));
+            }
+            set {
+                this["SpeedPreset3_Value"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ctrl+Alt+=")]
+        public string SpeedPreset3_Key {
+            get {
+                return ((string)(this["SpeedPreset3_Key"]));
+            }
+            set {
+                this["SpeedPreset3_Key"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0.1")]
+        public decimal StepSize {
+            get {
+                return ((decimal)(this["StepSize"]));
+            }
+            set {
+                this["StepSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ctrl+Alt+[")]
+        public string StepDown_Key {
+            get {
+                return ((string)(this["StepDown_Key"]));
+            }
+            set {
+                this["StepDown_Key"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Ctrl+Alt+]")]
+        public string StepUp_Key {
+            get {
+                return ((string)(this["StepUp_Key"]));
+            }
+            set {
+                this["StepUp_Key"] = value;
             }
         }
     }

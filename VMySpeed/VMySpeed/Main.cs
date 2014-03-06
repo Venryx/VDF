@@ -16,34 +16,60 @@ namespace VMySpeed
         {
             InitializeComponent();
             SpeedTrackBar.Value = Properties.Settings.Default.Speed;
-            SliderControlFrequency.Value = Properties.Settings.Default.SliderControlFrequency;
+            ControlMode.SelectedIndex = Properties.Settings.Default.ControlMode;
+            ControlInterval.Value = Properties.Settings.Default.ControlInterval;
+            SpeedPreset1_Value.Value = Properties.Settings.Default.SpeedPreset1_Value;
+            SpeedPreset1_Key.Text = Properties.Settings.Default.SpeedPreset1_Key;
+            SpeedPreset2_Value.Value = Properties.Settings.Default.SpeedPreset2_Value;
+            SpeedPreset2_Key.Text = Properties.Settings.Default.SpeedPreset2_Key;
+            SpeedPreset3_Value.Value = Properties.Settings.Default.SpeedPreset3_Value;
+            SpeedPreset3_Key.Text = Properties.Settings.Default.SpeedPreset3_Key;
+            StepSize.Value = Properties.Settings.Default.StepSize;
+            StepDown_Key.Text = Properties.Settings.Default.StepDown_Key;
+            StepUp_Key.Text = Properties.Settings.Default.StepUp_Key;
             UpdateSpeed();
             UpdateWindowSize();
         }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e) { UpdateWindowSize(); }
+        void UpdateWindowSize()
         {
-            //V.StartTest();
+            if (TabControl.SelectedIndex == 0)
+                Size = new Size(307, 105);
+            else if (TabControl.SelectedIndex == 1)
+                Size = new Size(493, 250);
+            else if (TabControl.SelectedIndex == 2)
+                Size = new Size(457, 163);
+            else
+                Size = new Size(269, 137);
         }
-
-        private void label2_Click(object sender, EventArgs e)
+        bool forceClose;
+        private void Exit_Click(object sender, EventArgs e)
         {
-
+            forceClose = true;
+            Application.Exit();
         }
-
-        private void textBox3_TextChanged(object sender, EventArgs e)
+        void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (forceClose)
+            {
+                Properties.Settings.Default.Speed = SpeedTrackBar.Value;
+                Properties.Settings.Default.ControlMode = ControlMode.SelectedIndex;
+                Properties.Settings.Default.ControlInterval = (int)ControlInterval.Value;
+                Properties.Settings.Default.SpeedPreset1_Value = SpeedPreset1_Value.Value;
+                Properties.Settings.Default.SpeedPreset1_Key = SpeedPreset1_Key.Text;
+                Properties.Settings.Default.SpeedPreset2_Value = SpeedPreset2_Value.Value;
+                Properties.Settings.Default.SpeedPreset2_Key = SpeedPreset2_Key.Text;
+                Properties.Settings.Default.SpeedPreset3_Value = SpeedPreset3_Value.Value;
+                Properties.Settings.Default.SpeedPreset3_Key = SpeedPreset3_Key.Text;
+                Properties.Settings.Default.StepSize = StepSize.Value;
+                Properties.Settings.Default.StepDown_Key = StepDown_Key.Text;
+                Properties.Settings.Default.StepUp_Key = StepUp_Key.Text;
+                Properties.Settings.Default.Save();
+                return;
+            }
 
-        }
-
-        private void textBox5_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label6_Click(object sender, EventArgs e)
-        {
-
+            Hide();
+            e.Cancel = true;
         }
 
         private void Getter_Get_Click(object sender, EventArgs e)
@@ -82,62 +108,18 @@ namespace VMySpeed
             Searcher_Location.Text = address.ToString();
         }
 
-        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e) { UpdateWindowSize(); }
-        void UpdateWindowSize()
-        {
-            if (tabControl1.SelectedIndex == 0)
-                this.Size = new Size(518, 130);
-            else if (tabControl1.SelectedIndex == 1)
-                this.Size = new Size(518, 258);
-            else
-                this.Size = new Size(518, 125);
-        }
-
-        private void SpeedTrackBar_Scroll(object sender, EventArgs e)
-        {
-        }
-
         private void ShowWindow_Click(object sender, EventArgs e)
         {
             Show();
         }
-        bool forceClose;
-        private void Exit_Click(object sender, EventArgs e)
-        {
-            forceClose = true;
-            Application.Exit();
-        }
 
-        void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (forceClose)
-            {
-                Properties.Settings.Default.Speed = SpeedTrackBar.Value;
-                Properties.Settings.Default.SliderControlFrequency = (int)SliderControlFrequency.Value;
-                Properties.Settings.Default.Save();
-                return;
-            }
-
-            Hide();
-            e.Cancel = true;
-        }
-
-        private void Getter_Value_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Main_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Speed_50_Click(object sender, EventArgs e) { ChangeSpeed(50); }
-        private void Speed_75_Click(object sender, EventArgs e) { ChangeSpeed(75); }
-        private void Speed_100_Click(object sender, EventArgs e) { ChangeSpeed(100); }
-        private void Speed_150_Click(object sender, EventArgs e) { ChangeSpeed(150); }
-        private void Speed_200_Click(object sender, EventArgs e) { ChangeSpeed(200); }
-        private void Speed_300_Click(object sender, EventArgs e) { ChangeSpeed(300); }
+        void Speed_50_Click(object sender, EventArgs e) { ChangeSpeed(50); }
+        void Speed_100_Click(object sender, EventArgs e) { ChangeSpeed(100); }
+        void Speed_150_Click(object sender, EventArgs e) { ChangeSpeed(150); }
+        void Speed_200_Click(object sender, EventArgs e) { ChangeSpeed(200); }
+        void Speed_250_Click(object sender, EventArgs e) { ChangeSpeed(250); }
+        void Speed_300_Click(object sender, EventArgs e) { ChangeSpeed(300); }
+        void Speed_350_Click(object sender, EventArgs e) { ChangeSpeed(350); }
 
         private void SpeedTrackBar_ValueChanged(object sender, EventArgs e) { UpdateSpeed(); }
         int speedBase;
@@ -178,24 +160,18 @@ namespace VMySpeed
             if (enounceWindow.Value != null)
             {
                 var slider = V.FindWindowEx(enounceWindow.Key, IntPtr.Zero, "msctls_trackbar32", "");
-                BreakLock();
-                V.SendMessage(slider, 0x405, new IntPtr(1), new IntPtr(speedBase / 10));
-                //V.SendMessage(slider, 0xA, new IntPtr(1), IntPtr.Zero);
-                /*if (speedBase < 1)
+                if (ControlMode.SelectedIndex == 0)
                 {
-                    V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(0));
-                    V.SendMessage(slider, 0x408, new IntPtr(1), new IntPtr(speedBase / 10));
-                }
-                else if (speedBase == 1)
-                {
-                    V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(0));
-                    V.SendMessage(slider, 0x408, new IntPtr(1), new IntPtr(50));
+                    BreakLock();
+                    V.SendMessage(slider, 0x405, new IntPtr(1), new IntPtr(speedBase / 10));
                 }
                 else
                 {
-                    V.SendMessage(slider, 0x407, new IntPtr(1), new IntPtr(speedBase / 10));
-                    V.SendMessage(slider, 0x408, new IntPtr(1), new IntPtr(50));
-                }*/
+                    //V.SendMessage(slider, 0xA, new IntPtr(1), IntPtr.Zero);
+                    V.SendMessage(slider, 0x407, IntPtr.Zero, new IntPtr(speedBase / 10));
+                    V.SendMessage(slider, 0x408, IntPtr.Zero, new IntPtr(speedBase / 10));
+                    BreakLock();
+                }
             }
         }
         void ChangeSpeed(int newSpeedBase)
@@ -306,11 +282,6 @@ namespace VMySpeed
             }
         }
 
-        private void label9_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void SliderControlFrequency_ValueChanged(object sender, EventArgs e) { SpeedApplierTimer.Interval = (int)SliderControlFrequency.Value; }
+        private void SliderControlFrequency_ValueChanged(object sender, EventArgs e) { SpeedApplierTimer.Interval = (int)ControlInterval.Value; }
     }
 }
