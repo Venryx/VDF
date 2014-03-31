@@ -1,0 +1,25 @@
+id{}name{Root}children{#}
+	id{}name{#Types}children{#}
+		id{}name{Soils}children{#}
+			id{}name{Grass}duties{#}
+				<HoldSoil>texturePath{Grass.png}
+			id{}name{Dirt}duties{#}
+				<HoldSoil>texturePath{Dirt.png}
+		id{}name{Items}duties{#}children{#}
+			<Special1>color{White}brightness{.5}
+			#id{}name{Camera}duties{#}
+				<HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
+				<HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}
+				<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
+					<MoveSelfToInventory>
+					<RenderMesh>
+				<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
+					<MoveSelfToWorld>
+			id{}name{GardenHoe}duties{#}
+				<HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
+				<HoldMesh>vertexes{}
+				<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
+					<MoveSelfToInventory>
+					<RenderMesh>
+				<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
+					<MoveSelfToWorld>
