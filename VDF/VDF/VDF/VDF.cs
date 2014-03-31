@@ -58,7 +58,7 @@ static class VDF
 					else
 					{
 						builder.AppendFormat("{0}{{#}}", name);
-						indentedDataLineGroups.Add(ToVDF(propValue, false, indentDepth + 1)); // note; the only place indentDepth increases
+						indentedDataLineGroups.Add(ToVDF(propValue, false, indentDepth + 1)); // note; indent depth only increases for an object marked with "indentData:true"
 					}
 				}
 			}
@@ -107,7 +107,7 @@ static class VDF
 					else
 					{
 						builder.AppendFormat("{0}{{#}}", name);
-						indentedDataLineGroups.Add(ToVDF(propValue, false, indentDepth + 1)); // note; the only place indentDepth increases
+						indentedDataLineGroups.Add(ToVDF(propValue, false, indentDepth + 1)); // note; indent depth only increases for an object marked with "indentData:true"
 					}
 				}
 			}
