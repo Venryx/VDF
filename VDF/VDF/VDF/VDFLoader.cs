@@ -38,7 +38,9 @@ static class VDFLoader
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (token.type == TokenType.Data_PropName)
+				if (token.type == TokenType.Metadata_BaseValue)
+					objNode.metadata = token.text;
+				else if (token.type == TokenType.Data_PropName)
 				{
 					livePropName = token.text;
 					livePropValueNode = new VDFLoadNode();
