@@ -19,7 +19,7 @@ class VDFLoadNode
 static class VDFLoader
 {
 	static VDFLoader() { VDFExtensions.Init(); }
-	public static VDFLoadNode Populate(string vdfFile, int firstTextCharPos = 0)
+	public static VDFLoadNode ToVDFNode(string vdfFile, int firstTextCharPos = 0)
 	{
 		var objNode = new VDFLoadNode();
 
@@ -64,7 +64,7 @@ static class VDFLoader
 						poppedOutChildDataCount++;
 					}
 					else
-						objNode.solePrimitiveChild = token.text;
+						objNode.children.Add(token.text);
 				}
 			}
 
