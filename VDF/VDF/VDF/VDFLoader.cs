@@ -4,8 +4,6 @@ using System.Runtime.Serialization;
 
 class VDFLoadNode
 {
-	public string beforeChildren; // todo; break point
-	public string afterChildren;
 	public List<object> children = new List<object>();
 	public T ToType<T>()
 	{
@@ -42,15 +40,16 @@ static class VDFLoader
 			if (depth == 0)
 			{
 				if (token.type == TokenType.Data_PropName)
-					objNode.beforeChildren += token.text;
+					objNode.children.Add(token.text);
 				else if (token.type == TokenType.StartDataBracket)
 				{
-					objNode.beforeChildren += token.text; // "{"
-					depth++;
-					objNode.children.Add(ToVDFNode(vdfFile, parser.nextCharPos));
+					objNode.children.Add("{");
+					VDFLoadNode childNode = ToVDFNode(vdfFile, parser.nextCharPos);
+					if (childNode.children.Count > 0) // only add child, through this path (of creating child VDFLoadNode), if it has children of its own
+						objNode.children.Add(childNode);
 				}
 				else if (token.type == TokenType.EndDataBracket)
-					objNode.afterChildren += "}";
+					objNode.children.Add("}");
 				else if (token.type == TokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
@@ -60,6 +59,7 @@ static class VDFLoader
 				{
 					if (token.text == "#")
 					{
+						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
 						objNode.children.Add(ToVDFNode(vdfFile, FindPoppedOutChildDataFirstTextCharPos(vdfFile, objIndentDepth, parser.nextCharPos, poppedOutChildDataCount)));
 						poppedOutChildDataCount++;
 					}
