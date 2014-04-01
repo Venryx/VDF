@@ -57,8 +57,11 @@
     <Compile Include="Tests\Test1.cs" />
     <Compile Include="V.cs" />
     <Compile Include="VDF\VDFExtensions.cs" />
+    <Compile Include="VDF\VDFLoader.cs" />
     <Compile Include="VDF\VDFPropInfo.cs" />
     <Compile Include="VDF\VDF.cs" />
+    <Compile Include="VDF\VDFSaver.cs" />
+    <Compile Include="VDF\VDFTokenParser.cs" />
     <Compile Include="VDF\VDFTypeInfo.cs" />
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>

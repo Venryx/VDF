@@ -3,8 +3,13 @@ using System.Drawing;
 
 class VDFExtensions
 {
+	static bool initialized;
 	public static void Init()
 	{
+		if (initialized)
+			return;
+		initialized = true;
+
 		VDF.RegisterTypeExporter_Inline<Guid>(id=>""); //obj.ToString());
 		VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
 		VDF.RegisterTypeExporter_Inline<Color>(color=>color.Name);
