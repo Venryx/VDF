@@ -15,7 +15,6 @@ class VDFSaveNode
 	{
 		var builder = new StringBuilder();
 		foreach (object item in items)
-		{
 			if (item is VDFSaveNode)
 			{
 				if (!((VDFSaveNode)item).popOutToOwnLine)
@@ -23,13 +22,9 @@ class VDFSaveNode
 			}
 			else
 				builder.Append(item);
-		}
 		foreach (string propName in properties.Keys)
-		{
-			VDFSaveNode propValueNode = properties[propName];
-			if (!propValueNode.popOutToOwnLine)
-				builder.Append(propName + "{" + propValueNode.GetInLineItemText() + "}");
-		}
+			if (!properties[propName].popOutToOwnLine)
+				builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
 		return (isFirstItemOfNonFirstPopOutGroup ? "#" : "") + (isNonFirstItemOfArray && !popOutToOwnLine ? "|" : "") + (metadata != null ? "<" + metadata + ">" : "") + builder; // markers + metadata + data
 	}
 	public string GetPoppedOutItemText()
@@ -38,7 +33,6 @@ class VDFSaveNode
 		if (popOutToOwnLine)
 			lines.Add(GetInLineItemText());
 		foreach (object item in items)
-		{
 			if (item is VDFSaveNode)
 			{
 				string poppedOutText = ((VDFSaveNode)item).GetPoppedOutItemText();
@@ -46,7 +40,6 @@ class VDFSaveNode
 					foreach (string line in poppedOutText.Split(new[] { '\n' }))
 						lines.Add(line);
 			}
-		}
 		foreach (string propName in properties.Keys)
 		{
 			VDFSaveNode propValueNode = properties[propName];
