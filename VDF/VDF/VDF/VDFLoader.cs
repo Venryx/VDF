@@ -4,7 +4,9 @@ using System.Runtime.Serialization;
 
 class VDFLoadNode
 {
-	public List<object> children = new List<object>();
+	public string metadata;
+	public List<object> items = new List<object>();
+	public Dictionary<string, object> properties = new Dictionary<string, object>();
 	public T ToType<T>()
 	{
 		//var result = (T)Activator.CreateInstance(typeof(T));
@@ -17,17 +19,14 @@ class VDFLoadNode
 static class VDFLoader
 {
 	static VDFLoader() { VDFExtensions.Init(); }
-	public static VDFLoadNode ToVDFNode(string vdfFile, int firstTextCharPos = 0)
+	public static VDFLoadNode ToVDFLoadNode(string vdfFile, int firstTextCharPos = 0)
 	{
 		var objNode = new VDFLoadNode();
 
-		int objIndentDepth = 0;
-		for (int i = firstTextCharPos - 1; i > 0 && vdfFile[i] != '\n'; i--)
-			if (vdfFile[i] == '\t')
-				objIndentDepth++;
-
 		int depth = 0;
 		int poppedOutChildDataCount = 0;
+		string livePropName = null;
+		VDFLoadNode livePropValueNode = null;
 		var parser = new VDFTokenParser(vdfFile, firstTextCharPos);
 		Token token;
 		while ((token = parser.GetNextToken()) != null)
@@ -40,31 +39,36 @@ static class VDFLoader
 			if (depth == 0)
 			{
 				if (token.type == TokenType.Data_PropName)
-					objNode.children.Add(token.text);
-				else if (token.type == TokenType.StartDataBracket)
 				{
-					objNode.children.Add("{");
-					VDFLoadNode childNode = ToVDFNode(vdfFile, parser.nextCharPos);
-					if (childNode.children.Count > 0) // only add child, through this path (of creating child VDFLoadNode), if it has children of its own
-						objNode.children.Add(childNode);
+					livePropName = token.text;
+					livePropValueNode = new VDFLoadNode();
 				}
+				else if (token.type == TokenType.StartDataBracket)
+					livePropValueNode = ToVDFLoadNode(vdfFile, parser.nextCharPos);
 				else if (token.type == TokenType.EndDataBracket)
-					objNode.children.Add("}");
+				{
+					if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
+						objNode.properties.Add(livePropName, livePropValueNode);
+					livePropName = null;
+					livePropValueNode = null;
+				}
 				else if (token.type == TokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
 			else if (depth == 1)
 			{
-				if (token.type == TokenType.Data_Base)
+				if (token.type == TokenType.Data_BaseValue)
 				{
 					if (token.text == "#")
 					{
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
-						objNode.children.Add(ToVDFNode(vdfFile, FindPoppedOutChildDataFirstTextCharPos(vdfFile, objIndentDepth, parser.nextCharPos, poppedOutChildDataCount)));
-						poppedOutChildDataCount++;
+						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
+						foreach (int pos in poppedOutChildDataTextPositions)
+							livePropValueNode.items.Add(ToVDFLoadNode(vdfFile, pos));
+						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
 					}
 					else
-						objNode.children.Add(token.text);
+						livePropValueNode.items.Add(token.text);
 				}
 			}
 
@@ -75,9 +79,26 @@ static class VDFLoader
 		return objNode;
 	}
 
-	static int FindPoppedOutChildDataFirstTextCharPos(string vdfFile, int parentIndentDepth, int searchStartPos, int poppedOutChildDataIndex)
+	static int FindIndentDepthOfLineContainingCharPos(string vdfFile, int charPos)
 	{
-		int poppedOutChildDatasProcessed = 0;
+		int lineIndentDepth = 0;
+		for (int i = charPos - 1; i > 0 && vdfFile[i] != '\n'; i--)
+			if (vdfFile[i] == '\t')
+				lineIndentDepth++;
+		return lineIndentDepth;
+	}
+	static int FindNextLineBreakCharPos(string vdfFile, int searchStartPos)
+	{
+		for (int i = searchStartPos; i < vdfFile.Length; i++)
+			if (vdfFile[i] == '\n')
+				return i;
+		return -1;
+	}
+	static List<int> FindPoppedOutChildDataTextPositions(string vdfFile, int parentIndentDepth, int searchStartPos, int poppedOutChildDataIndex)
+	{
+		var result = new List<int>();
+
+		int poppedOutChildDatasReached = 0;
 		int indentsOnThisLine = 0;
 		for (int i = searchStartPos; i < vdfFile.Length; i++)
 		{
@@ -89,13 +110,25 @@ static class VDFLoader
 			else
 			{
 				if (indentsOnThisLine == parentIndentDepth + 1)
-					if (poppedOutChildDatasProcessed == poppedOutChildDataIndex)
-						return i;
+				{
+					if (poppedOutChildDatasReached == 0 || ch == '#')
+						poppedOutChildDatasReached++;
+					if (poppedOutChildDatasReached == poppedOutChildDataIndex + 1)
+						result.Add(i);
+					if (poppedOutChildDatasReached > poppedOutChildDataIndex + 1) // we just finished processing the given popped-out child-data, so break
+						break;
+
+					int nextLineBreakCharPos = FindNextLineBreakCharPos(vdfFile, i);
+					if (nextLineBreakCharPos != -1)
+						i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
 					else
-						poppedOutChildDatasProcessed++;
+						break; // last line, so break
+				}
+				else if (indentsOnThisLine <= parentIndentDepth) // we've reached a peer of the parent, so break
+					break;
 			}
 		}
 
-		return -1;
+		return result;
 	}
 }

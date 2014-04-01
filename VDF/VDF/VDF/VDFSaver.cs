@@ -23,7 +23,7 @@ class VDFSaveNode
 			else
 				builder.Append(child);
 		}
-		return (isFirstItemOfNonFirstPopOutGroup ? "#" : "") + (isNonFirstItemOfArray && !popOutToOwnLine ? "|" : "") + metadata + builder; // markers + metadata + data
+		return (isFirstItemOfNonFirstPopOutGroup ? "#" : "") + (isNonFirstItemOfArray && !popOutToOwnLine ? "|" : "") + (metadata != null ? "<" + metadata + ">" : "") + builder; // markers + metadata + data
 	}
 	public string GetPoppedOutItemText()
 	{
@@ -50,7 +50,7 @@ class VDFSaveNode
 static class VDFSaver
 {
 	static VDFSaver() { VDFExtensions.Init(); }
-	public static VDFSaveNode ToVDFNode(object obj)
+	public static VDFSaveNode ToVDFSaveNode(object obj)
 	{
 		var objNode = new VDFSaveNode();
 
@@ -68,11 +68,11 @@ static class VDFSaver
 			{
 				object item = objAsList[i];
 				bool typeDerivedFromDeclaredType = type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
-				VDFSaveNode itemValueNode = ToVDFNode(item);
+				VDFSaveNode itemValueNode = ToVDFSaveNode(item);
 				if (i > 0)
 					itemValueNode.isNonFirstItemOfArray = true;
 				if (typeDerivedFromDeclaredType)
-					itemValueNode.metadata += "<" + item.GetType().Name + ">";
+					itemValueNode.metadata = item.GetType().Name;
 				objNode.children.Add(itemValueNode);
 			}
 		}
@@ -96,11 +96,11 @@ static class VDFSaver
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					objNode.children.Add(name + "{#}");
-					VDFSaveNode propValueNode = ToVDFNode(propValue);
+					VDFSaveNode propValueNode = ToVDFSaveNode(propValue);
 					if (popOutGroupsAdded > 0)
 						((VDFSaveNode)propValueNode.children[0]).isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata = "<" + propValue.GetType().Name + ">";
+						propValueNode.metadata = propValue.GetType().Name;
 					foreach (object child in propValueNode.children)
 						if (child is VDFSaveNode)
 							((VDFSaveNode)child).popOutToOwnLine = true;
@@ -110,9 +110,9 @@ static class VDFSaver
 				else
 				{
 					objNode.children.Add(name + "{");
-					VDFSaveNode propValueNode = ToVDFNode(propValue);
+					VDFSaveNode propValueNode = ToVDFSaveNode(propValue);
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata = "<" + propValue.GetType().Name + ">";
+						propValueNode.metadata = propValue.GetType().Name;
 					objNode.children.Add(propValueNode);
 					objNode.children.Add("}");
 				}

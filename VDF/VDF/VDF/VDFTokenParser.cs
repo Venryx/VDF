@@ -5,11 +5,12 @@ enum TokenType
 	None,
 	Marker,
 	StartMetadataBracket,
-	Metadata_Base,
+	Metadata_BaseValue,
 	EndMetadataBracket,
 	Data_PropName,
 	StartDataBracket,
-	Data_Base,
+	ItemSeparator,
+	Data_BaseValue,
 	EndDataBracket,
 	LineBreak,
 	Indent
@@ -61,12 +62,14 @@ class VDFTokenParser
 					tokenType = TokenType.Indent;
 				else if (ch == '#' && lastChar.HasValue && lastChar == '\t')
 					tokenType = TokenType.Marker;
+				else if (ch == '|')
+					tokenType = TokenType.ItemSeparator;
 				else if (nextChar.HasValue && nextChar == '>')
-					tokenType = TokenType.Metadata_Base;
+					tokenType = TokenType.Metadata_BaseValue;
 				else if (nextChar.HasValue && nextChar == '{')
 					tokenType = TokenType.Data_PropName;
-				else if (nextChar.HasValue && nextChar == '}')
-					tokenType = TokenType.Data_Base;
+				else if (nextChar.HasValue && (nextChar == '}' || nextChar == '|'))
+					tokenType = TokenType.Data_BaseValue;
 			}
 		}
 		nextCharPos += tokenChars.Count;
