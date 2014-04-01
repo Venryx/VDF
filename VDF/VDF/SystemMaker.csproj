@@ -56,6 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\Test1.cs" />
     <Compile Include="V.cs" />
+    <Compile Include="VDF\VDFExtensions.cs" />
     <Compile Include="VDF\VDFPropInfo.cs" />
     <Compile Include="VDF\VDF.cs" />
     <Compile Include="VDF\VDFTypeInfo.cs" />

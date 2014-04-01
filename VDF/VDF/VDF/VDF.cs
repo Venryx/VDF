@@ -1,135 +1,140 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
+
+class VDFNode
+{
+	public string metadata;
+	public List<object> children = new List<object>();
+	public bool popOutToOwnLine;
+	public bool isFirstItemOfNonFirstPopOutGroup;
+	public bool isNonFirstItemOfArray;
+	public string GetInLineItemText()
+	{
+		var builder = new StringBuilder();
+		for (int i = 0; i < children.Count; i++)
+		{
+			var child = children[i];
+			if (child is VDFNode)
+			{
+				if (!((VDFNode)child).popOutToOwnLine)
+					builder.Append(((VDFNode)child).GetInLineItemText());
+			}
+			else
+				builder.Append(child);
+		}
+		return (isFirstItemOfNonFirstPopOutGroup ? "#" : "") + (isNonFirstItemOfArray && !popOutToOwnLine ? "|" : "") + metadata + builder;
+	}
+	public string GetPoppedOutItemText()
+	{
+		var lines = new List<string>();
+		if (popOutToOwnLine)
+			lines.Add(GetInLineItemText());
+		foreach (object child in children)
+			if (child is VDFNode)
+			{
+				var childAsNode = (VDFNode)child;
+				string poppedOutText = childAsNode.GetPoppedOutItemText();
+				if (poppedOutText.Length > 0)
+					foreach (string line in poppedOutText.Split(new[] { '\n' }))
+						lines.Add(line);
+			}
+		var builder = new StringBuilder();
+		for (int i = 0; i < lines.Count; i++)
+			builder.Append(i == 0 ? "" : "\n").Append(popOutToOwnLine ? "\t" : "").Append(lines[i]);
+		return builder.ToString();
+	}
+	public override string ToString() { return GetInLineItemText() + "\n" + GetPoppedOutItemText(); }
+}
 
 static class VDF
 {
 	static Dictionary<Type, Func<object, string>> typeExporters_inline = new Dictionary<Type, Func<object, string>>();
 	static Dictionary<Type, Func<string, object>> typeImporters_inline = new Dictionary<Type, Func<string, object>>();
-	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { typeExporters_inline[typeof(T)] = obj=>exporter((T)obj); }
-	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { typeImporters_inline[typeof(T)] = str=>importer(str); }
+	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { typeExporters_inline[typeof(T)] = obj => exporter((T)obj); }
+	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { typeImporters_inline[typeof(T)] = str => importer(str); }
+	static VDF() { VDFExtensions.Init(); }
 
-	public static string ToVDF(object obj, bool asInlineData = true, int indentDepth = 0)
+	public static string ToVDF(object obj) { return ToVDFNode(obj).ToString(); }
+	public static VDFNode ToVDFNode(object obj)
 	{
-		var builder = new StringBuilder();
-		var indentedDataLineGroups = new List<string>();
+		var objNode = new VDFNode();
 
 		var type = obj.GetType();
-		if (asInlineData)
+		if (typeExporters_inline.ContainsKey(type))
+			objNode.children.Add(typeExporters_inline[type](obj));
+		else if (type == typeof(float) || type == typeof(double))
+			objNode.children.Add(obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString());
+		else if (type.IsPrimitive || type == typeof(string))
+			objNode.children.Add(obj.ToString());
+		else if (obj is IList)
 		{
-			if (typeExporters_inline.ContainsKey(type))
-				builder.Append(typeExporters_inline[type](obj));
-			else if (type == typeof (float) || type == typeof (double))
-				builder.Append(obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj);
-			else if (type.IsPrimitive || type == typeof(string))
-				builder.Append(obj);
-			else if (obj is IList)
+			var objAsList = (IList)obj;
+			for (int i = 0; i < objAsList.Count; i++)
 			{
-				var objAsList = (IList)obj;
-				int index = 0;
-				foreach (object item in objAsList)
-				{
-					builder.Append(index == 0 ? "" : "|");
-					if (type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]) // if List item is of a type *derived* from the List's base type
-						builder.AppendFormat("<{0}>", item.GetType().Name);
-					builder.Append(ToVDF(item, true, indentDepth));
-					index++;
-				}
-			}
-			else
-			{
-				var typeInfo = VDFTypeInfo.Get(type);
-				foreach (string name in typeInfo.propInfoByName.Keys)
-				{
-					VDFPropInfo propInfo = typeInfo.propInfoByName[name];
-					bool include = typeInfo.props_includeL1;
-					include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
-					if (!include)
-						continue;
-
-					object propValue = propInfo.GetValue(obj);
-					if (propInfo.IsXIgnorableValue(propValue))
-						continue;
-
-					if (propInfo.inlineData)
-						builder.AppendFormat("{0}{{{1}}}", name, ToVDF(propValue, true, indentDepth));
-					else
-					{
-						builder.AppendFormat("{0}{{#}}", name);
-						indentedDataLineGroups.Add(ToVDF(propValue, false, indentDepth + 1)); // note; indent depth only increases for an object marked with "indentData:true"
-					}
-				}
+				object item = objAsList[i];
+				bool typeDerivedFromDeclaredType = type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
+				VDFNode itemValueNode = ToVDFNode(item);
+				if (i > 0)
+					itemValueNode.isNonFirstItemOfArray = true;
+				if (typeDerivedFromDeclaredType)
+					itemValueNode.metadata += "<" + item.GetType().Name + ">";
+				objNode.children.Add(itemValueNode);
 			}
 		}
 		else
 		{
-			var indentStringBuilder = new StringBuilder();
-			for (int i = 0; i < indentDepth; i++)
-				indentStringBuilder.Append("\t");
-
-			if (type == typeof (float) || type == typeof (double))
-				builder.Append(indentStringBuilder).Append(obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj);
-			else if (type.IsPrimitive || type == typeof(string))
-				builder.Append(indentStringBuilder).Append(obj);
-			else if (obj is IList)
+			var typeInfo = VDFTypeInfo.Get(type);
+			int popOutGroupsAdded = 0;
+			foreach (string name in typeInfo.propInfoByName.Keys)
 			{
-				var objAsList = (IList)obj;
-				int index = 0;
-				foreach (object item in objAsList)
+				VDFPropInfo propInfo = typeInfo.propInfoByName[name];
+				bool include = typeInfo.props_includeL1;
+				include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
+				if (!include)
+					continue;
+
+				object propValue = propInfo.GetValue(obj);
+				if (propInfo.IsXIgnorableValue(propValue))
+					continue;
+
+				bool typeDerivedFromDeclaredType = propValue.GetType() != propInfo.propType; // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
+				if (propInfo.popOutItemsToOwnLines)
 				{
-					builder.Append(index == 0 ? "" : "\n").Append(indentStringBuilder);
-					if (type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]) // if List item is of a type *derived* from the List's base type
-						builder.AppendFormat("<{0}>", item.GetType().Name);
-					builder.Append(ToVDF(item, true, indentDepth));
-					index++;
+					objNode.children.Add(name + "{#}");
+					VDFNode propValueNode = ToVDFNode(propValue);
+					if (popOutGroupsAdded > 0)
+						((VDFNode)propValueNode.children[0]).isFirstItemOfNonFirstPopOutGroup = true;
+					if (typeDerivedFromDeclaredType)
+						propValueNode.metadata = "<" + propValue.GetType().Name + ">";
+					foreach (object child in propValueNode.children)
+						if (child is VDFNode)
+							((VDFNode)child).popOutToOwnLine = true;
+					objNode.children.Add(propValueNode);
+					popOutGroupsAdded++;
 				}
-			}
-			else
-			{
-				var typeInfo = VDFTypeInfo.Get(type);
-				foreach (string name in typeInfo.propInfoByName.Keys)
+				else
 				{
-					VDFPropInfo propInfo = typeInfo.propInfoByName[name];
-					bool include = typeInfo.props_includeL1;
-					include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
-					if (!include)
-						continue;
-
-					object propValue = propInfo.GetValue(obj);
-					if (propInfo.IsXIgnorableValue(propValue))
-						continue;
-
-					builder.Append(name == typeInfo.propInfoByName.Keys.First() ? "" : "\n").Append(indentStringBuilder);
-					if (propInfo.inlineData)
-						builder.AppendFormat("{0}{{{1}}}", name, ToVDF(propValue, true, indentDepth));
-					else
-					{
-						builder.AppendFormat("{0}{{#}}", name);
-						indentedDataLineGroups.Add(ToVDF(propValue, false, indentDepth + 1)); // note; indent depth only increases for an object marked with "indentData:true"
-					}
+					objNode.children.Add(name + "{");
+					VDFNode propValueNode = ToVDFNode(propValue);
+					if (typeDerivedFromDeclaredType)
+						propValueNode.metadata = "<" + propValue.GetType().Name + ">";
+					objNode.children.Add(propValueNode);
+					objNode.children.Add("}");
 				}
 			}
 		}
 
-		foreach (string indentedDataLineGroup in indentedDataLineGroups)
-		{
-			string finalIndentedDataLineGroup = indentedDataLineGroup;
-			if (indentedDataLineGroup != indentedDataLineGroups[0]) // if not the first group, add a hash-char to mark our start
-			{
-				int firstNonTabCharIndex = -1;
-				for (int i = 0; i < indentedDataLineGroup.Length && firstNonTabCharIndex == -1; i++)
-					if (indentedDataLineGroup[i] != '\t')
-						firstNonTabCharIndex = i;
-				finalIndentedDataLineGroup = indentedDataLineGroup.Substring(0, firstNonTabCharIndex) + "#" + indentedDataLineGroup.Substring(firstNonTabCharIndex);
-			}
-			builder.Append("\n").Append(finalIndentedDataLineGroup); 
-		}
-		return builder.ToString();
+		return objNode;
 	}
+
 	public static T FromVDF<T>(string vdf)
 	{
-		return default(T);
+		//var result = (T)Activator.CreateInstance(typeof(T));
+		//var result = ((Func<T>)Expression.Lambda(typeof(Func<object>), Expression.New(typeof(T).GetConstructors()[0])).Compile())();
+		var result = (T)FormatterServices.GetUninitializedObject(typeof(T));
+		return result;
 	}
 }

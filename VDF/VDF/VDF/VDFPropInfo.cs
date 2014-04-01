@@ -8,12 +8,12 @@ using System.Reflection;
 public class VDFProp : Attribute
 {
 	public bool includeL2;
-	public bool inlineData;
+	public bool popOutItemsToOwnLines;
 	public bool ignoreEmptyValue;
-	public VDFProp(bool includeL2 = true, bool inlineData = true, bool ignoreEmptyValue = false)
+	public VDFProp(bool includeL2 = true, bool popOutItemsToOwnLines = false, bool ignoreEmptyValue = false)
 	{
 		this.includeL2 = includeL2;
-		this.inlineData = inlineData;
+		this.popOutItemsToOwnLines = popOutItemsToOwnLines;
 		this.ignoreEmptyValue = ignoreEmptyValue;
 	}
 }
@@ -33,7 +33,7 @@ public class VDFPropInfo
 			if (vdfPropAttribute != null)
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
-				propInfo.inlineData = vdfPropAttribute.inlineData;
+				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
 				propInfo.ignoreEmptyValue = vdfPropAttribute.ignoreEmptyValue;
 			}
 			cachedTypeInfo[field] = propInfo;
@@ -52,7 +52,7 @@ public class VDFPropInfo
 			if (vdfPropAttribute != null)
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
-				propInfo.inlineData = vdfPropAttribute.inlineData;
+				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
 				propInfo.ignoreEmptyValue = vdfPropAttribute.ignoreEmptyValue;
 			}
 			cachedTypeInfo[property] = propInfo;
@@ -61,13 +61,11 @@ public class VDFPropInfo
 	}
 
 	MemberInfo memberInfo;
-	Type propType;
+	public Type propType;
 	bool ignoreEmptyValue;
 	
 	public bool? includeL2;
-	public bool inlineData;
-
-	public VDFPropInfo() { inlineData = true; }
+	public bool popOutItemsToOwnLines;
 
 	public bool IsXIgnorableValue(object x)
 	{

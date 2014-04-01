@@ -4,23 +4,10 @@ using System.Drawing;
 
 static class Test1
 {
-	static Test1()
+	public static World CreateWorld()
 	{
-		VDF.RegisterTypeExporter_Inline<Guid>(id=>""); //obj.ToString());
-		VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
-		VDF.RegisterTypeExporter_Inline<Color>(color=>color.Name);
-		VDF.RegisterTypeImporter_Inline<Color>(str=>Color.FromName(str));
-		VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
-		VDF.RegisterTypeImporter_Inline<Vector3>(str=>
-		{
-			string[] parts = str.Split(new[] {','});
-			return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
-		});
-	}
-	public static VObject CreateTestPerson()
-	{
-		var root = new VObject("Root");
-		var types = root.AddChild(new VObject("#Types"));
+		var world = new World("Main");
+		var types = world.vObjectRoot.AddChild(new VObject("#Types"));
 
 		var soils = types.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
@@ -47,7 +34,19 @@ static class Test1
 		var holdDuties2B = (HoldDuties)gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
 		holdDuties2B.AddDuty(new MoveSelfToWorld());
 
-		return root;
+		return world;
+	}
+}
+
+class World
+{
+	public string name;
+	public VObject vObjectRoot;
+
+	public World(string name)
+	{
+		this.name = name;
+		vObjectRoot = new VObject("VObjectRoot");
 	}
 }
 
@@ -57,8 +56,8 @@ class VObject
 
 	public Guid id;
 	public string name;
-	[VDFProp(true, false, true)] public List<Duty> duties;
-	[VDFProp(true, false, true)] public List<VObject> children;
+	[VDFProp(true, true, true)] public List<Duty> duties;
+	[VDFProp(true, true, true)] public List<VObject> children;
 
 	public VObject(string name)
 	{
@@ -123,7 +122,7 @@ class HoldMesh : Duty
 class HoldDuties : Duty
 {
 	public string dutiesEnabledWhen;
-	[VDFProp(true, false, true)] public List<Duty> duties;
+	[VDFProp(true, true, true)] public List<Duty> duties;
 
 	public HoldDuties(string dutiesEnabledWhen)
 	{

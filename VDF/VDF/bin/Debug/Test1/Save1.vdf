@@ -1,4 +1,4 @@
-id{}name{Root}children{#}
+name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}
 	id{}name{#Types}children{#}
 		id{}name{Soils}children{#}
 			id{}name{Grass}duties{#}
