@@ -20,7 +20,15 @@ static class Test1
 		items.AddChild(new VObject("NameThat{NeedsEscaping}"));
 		var camera = items.AddChild(new VObject("Camera"));
 		camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5f, 28.9f, 2404.765f), new Vector3(3, 4, 1)));
-		camera.AddDuty(new HoldMesh(new List<Vector3> {new Vector3(9, 4, 2.5f), new Vector3(1, 8, 9.5435f), new Vector3(25, 15, 5)}));
+		camera.AddDuty(new HoldMesh(new List<Vector3>
+		{
+			new Vector3(9, 4, 2.5f), new Vector3(1, 8, 9.5435f), new Vector3(25, 15, 5)
+		}, new Dictionary<Vector3, Color>
+		{
+			{new Vector3(9, 4, 2.5f), Color.Black},
+			{new Vector3(1, 8, 9.5435f), Color.Gray},
+			{new Vector3(25, 15, 5), Color.White}
+		}));
 		var holdDuties1A = (HoldDuties)camera.AddDuty(new HoldDuties("SelfIsInWorld"));
 		holdDuties1A.AddDuty(new MoveSelfToInventory());
 		holdDuties1A.AddDuty(new RenderMesh());
@@ -28,7 +36,7 @@ static class Test1
 		holdDuties1B.AddDuty(new MoveSelfToWorld());
 		var gardenHoe = items.AddChild(new VObject("GardenHoe"));
 		gardenHoe.AddDuty(new HoldTransform());
-		gardenHoe.AddDuty(new HoldMesh(new List<Vector3>()));
+		gardenHoe.AddDuty(new HoldMesh(new List<Vector3>(), new Dictionary<Vector3, Color>()));
 		var holdDuties2A = (HoldDuties)gardenHoe.AddDuty(new HoldDuties("SelfIsInWorld"));
 		holdDuties2A.AddDuty(new MoveSelfToInventory());
 		holdDuties2A.AddDuty(new RenderMesh());
@@ -118,7 +126,12 @@ class HoldTransform : Duty
 class HoldMesh : Duty
 {
 	public List<Vector3> vertexes;
-	public HoldMesh(List<Vector3> vertexes) { this.vertexes = vertexes; }
+	public Dictionary<Vector3, Color> vertexColors; 
+	public HoldMesh(List<Vector3> vertexes, Dictionary<Vector3, Color> vertexColors)
+	{
+		this.vertexes = vertexes;
+		this.vertexColors = vertexColors;
+	}
 }
 class HoldDuties : Duty
 {

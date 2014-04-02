@@ -18,9 +18,19 @@ class VDFNode
 	public bool popOutToOwnLine;
 	public bool isFirstItemOfNonFirstPopOutGroup;
 	public bool isNonFirstItemOfArray;
+	public bool isKeyValuePairPseudoNode;
 	public string GetInLineItemText()
 	{
 		var builder = new StringBuilder();
+		if (isFirstItemOfNonFirstPopOutGroup)
+			builder.Append("#");
+		if (isNonFirstItemOfArray && !popOutToOwnLine)
+			builder.Append("|");
+		if (metadata != null)
+			builder.Append("<" + metadata + ">");
+		if (isKeyValuePairPseudoNode && !popOutToOwnLine)
+			builder.Append("{");
+
 		foreach (object item in items)
 			if (item is VDFNode)
 			{
@@ -32,7 +42,11 @@ class VDFNode
 		foreach (string propName in properties.Keys)
 			if (!properties[propName].popOutToOwnLine)
 				builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
-		return (isFirstItemOfNonFirstPopOutGroup ? "#" : "") + (isNonFirstItemOfArray && !popOutToOwnLine ? "|" : "") + (metadata != null ? "<" + metadata + ">" : "") + builder; // markers + metadata + data
+
+		if (isKeyValuePairPseudoNode && !popOutToOwnLine)
+			builder.Append("}");
+
+		return builder.ToString();
 	}
 	public string GetPoppedOutItemText()
 	{
@@ -112,6 +126,8 @@ class VDFNode
 				((Array)result).SetValue(ConvertRawValueToType(items[i], type.GetElementType()), i);
 			else if (result is IList)
 				((IList)result).Add(ConvertRawValueToType(items[i], type.GetGenericArguments()[0]));
+			else if (result is IDictionary) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
+				((IDictionary)result).Add(ConvertRawValueToType(((VDFNode)items[i]).items[0], type.GetGenericArguments()[0]), ConvertRawValueToType(((VDFNode)items[i]).items[1], type.GetGenericArguments()[1]));
 			else // must be primitive, with first item actually being this node's value
 				result = ConvertRawValueToType(items[i], type);
 		foreach (string propName in properties.Keys)

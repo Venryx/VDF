@@ -33,10 +33,15 @@ static class VDFLoader
 					livePropValueNode = ToVDFNode(vdfFile, parser.nextCharPos);
 				else if (token.type == TokenType.EndDataBracket)
 				{
-					//if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
-					objNode.properties.Add(livePropName, livePropValueNode);
-					livePropName = null;
-					livePropValueNode = null;
+					if (livePropName != null) // property of object
+					{
+						//if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
+						objNode.properties.Add(livePropName, livePropValueNode);
+						livePropName = null;
+						livePropValueNode = null;
+					}
+					else // must be key-value-pair-pseudo-object of a dictionary
+						objNode.items.Add(livePropValueNode);
 				}
 				else if (token.type == TokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;

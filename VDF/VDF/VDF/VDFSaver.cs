@@ -30,7 +30,32 @@ static class VDFSaver
 				objNode.items.Add(itemValueNode);
 			}
 		}
-		else
+		else if (obj is IDictionary)
+		{
+			var objAsDictionary = (IDictionary)obj;
+			foreach (object key in objAsDictionary.Keys)
+			{
+				object value = objAsDictionary[key];
+				var keyValuePairPseudoNode = new VDFNode();
+				keyValuePairPseudoNode.isKeyValuePairPseudoNode = true;
+
+				bool keyTypeDerivedFromDeclaredType = type.IsGenericType && key.GetType() != type.GetGenericArguments()[0]; // if key is of a type *derived* from the Dictionary's base key-type (i.e. we need to specify actual key-type)
+				VDFNode keyNode = ToVDFNode(key);
+				if (keyTypeDerivedFromDeclaredType)
+					keyNode.metadata = key.GetType().FullName;
+				keyValuePairPseudoNode.items.Add(keyNode);
+
+				bool valueTypeDerivedFromDeclaredType = type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
+				VDFNode valueNode = ToVDFNode(value);
+				valueNode.isNonFirstItemOfArray = true;
+				if (valueTypeDerivedFromDeclaredType)
+					valueNode.metadata = value.GetType().FullName;
+				keyValuePairPseudoNode.items.Add(valueNode);
+
+				objNode.items.Add(keyValuePairPseudoNode);
+			}
+		}
+		else // an object, with properties
 		{
 			var typeInfo = VDFTypeInfo.Get(type);
 			int popOutGroupsAdded = 0;
