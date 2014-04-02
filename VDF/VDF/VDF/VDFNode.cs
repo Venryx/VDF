@@ -58,7 +58,7 @@ class VDFNode
 			{
 				string poppedOutText = ((VDFNode)item).GetPoppedOutItemText();
 				if (poppedOutText.Length > 0)
-					foreach (string line in poppedOutText.Split(new[] { '\n' }))
+					foreach (string line in poppedOutText.Split(new[] {'\n'}))
 						lines.Add(line);
 			}
 		foreach (string propName in properties.Keys)
@@ -66,7 +66,7 @@ class VDFNode
 			VDFNode propValueNode = properties[propName];
 			string poppedOutText = propValueNode.GetPoppedOutItemText();
 			if (poppedOutText.Length > 0)
-				foreach (string line in poppedOutText.Split(new[] { '\n' }))
+				foreach (string line in poppedOutText.Split(new[] {'\n'}))
 					lines.Add(line);
 		}
 		var builder = new StringBuilder();

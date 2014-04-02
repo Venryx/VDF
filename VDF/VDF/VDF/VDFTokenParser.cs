@@ -3,18 +3,18 @@
 enum TokenType
 {
 	None,
-	Marker,
+	PoppedOutNodeMarker,
 	StartMetadataBracket,
 	Metadata_BaseValue,
 	EndMetadataBracket,
-	LiteralFlag,
+	//LiteralMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
 	Data_PropName,
 	StartDataBracket,
 	ItemSeparator,
 	Data_BaseValue,
 	EndDataBracket,
 	LineBreak,
-	Indent
+	//Indent // this is taken care of at a higher level by the VDFLoader class
 }
 class Token
 {
@@ -29,7 +29,7 @@ class Token
 class VDFTokenParser
 {
 	string vdf;
-	bool literalFlagOn;
+	bool inLiteralMarkers;
 	public int nextCharPos;
 	public VDFTokenParser(string vdf, int firstCharPos)
 	{
@@ -51,14 +51,14 @@ class VDFTokenParser
 
 			if (ch == '@' && nextChar.HasValue && nextChar == '@' && nextNextChar.HasValue && nextNextChar == '@') // special case; escape literals
 			{
-				literalFlagOn = !literalFlagOn;
-				i += 2; // skip to first char after literal-flag
-				if (!literalFlagOn) // if literal-block ended, return chars as Data_BaseValue token
+				inLiteralMarkers = !inLiteralMarkers;
+				i += 2; // skip to first char after literal-marker
+				if (!inLiteralMarkers) // if literal-block ended, return chars as Data_BaseValue token
 					tokenType = TokenType.Data_BaseValue;
 				continue;
 			}
 			tokenChars.Add(ch);
-			if (literalFlagOn) // don't do any token processing, (other than the literal-block-related stuff), until literal-flag is turned back off
+			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
 				continue;
 
 			if (ch == '<')
@@ -73,10 +73,10 @@ class VDFTokenParser
 			{
 				if (ch == '\n')
 					tokenType = TokenType.LineBreak;
-				else if (ch == '\t')
-					tokenType = TokenType.Indent;
+				//else if (ch == '\t')
+				//	tokenType = TokenType.Indent;
 				else if (ch == '#' && lastChar.HasValue && lastChar == '\t')
-					tokenType = TokenType.Marker;
+					tokenType = TokenType.PoppedOutNodeMarker;
 				else if (ch == '|')
 					tokenType = TokenType.ItemSeparator;
 				else if (nextChar.HasValue && nextChar == '>')
