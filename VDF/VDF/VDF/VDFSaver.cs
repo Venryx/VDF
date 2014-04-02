@@ -10,11 +10,11 @@ static class VDFSaver
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
-			objNode.items.Add(VDF.typeExporters_inline[type](obj));
-		else if (type == typeof(float) || type == typeof(double))
+			objNode.items.Add(VDF.typeExporters_inline[type](obj).Contains("}") ? "@@@" + VDF.typeExporters_inline[type](obj) + "@@@" : VDF.typeExporters_inline[type](obj));
+		else if (type == typeof (float) || type == typeof (double))
 			objNode.items.Add(obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString());
 		else if (type.IsPrimitive || type == typeof(string))
-			objNode.items.Add(obj.ToString());
+			objNode.items.Add(obj.ToString().Contains("}") ? "@@@" + obj + "@@@" : obj);
 		else if (obj is IList) // note; this saves arrays also
 		{
 			var objAsList = (IList)obj;
