@@ -18,7 +18,7 @@ static class Test1
 
 		var items = types.AddChild(new VObject("Items"));
 		items.AddDuty(new Special1(Color.White, .5f));
-		items.AddChild(new VObject("ProblemInThis{Name}"));
+		items.AddChild(new VObject("NameThat{NeedsEscaping}"));
 		var camera = items.AddChild(new VObject("Camera"));
 		camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5f, 28.9f, 2404.765f), new Vector3(3, 4, 1)));
 		camera.AddDuty(new HoldMesh(new List<Vector3> {new Vector3(9, 4, 2.5f), new Vector3(1, 8, 9.5435f), new Vector3(25, 15, 5)}));
