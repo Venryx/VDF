@@ -9,6 +9,6 @@ static class VDF
 	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { typeImporters_inline[typeof(T)] = str => importer(str); }
 	static VDF() { VDFExtensions.Init(); }
 
-	public static string ToVDF(object obj) { return VDFSaver.ToVDFSaveNode(obj).ToString(); }
-	public static T FromVDF<T>(string vdf) { return VDFLoader.ToVDFLoadNode(vdf).ToObject<T>(); }
+	public static string ToVDF(object obj) { return VDFSaver.ToVDFNode(obj).ToString(); }
+	public static T FromVDF<T>(string vdf) { return VDFLoader.ToVDFNode(vdf).ToObject<T>(); }
 }

@@ -1,67 +1,12 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-
-class VDFSaveNode
-{
-	public string metadata;
-	public List<object> items = new List<object>(); 
-	public Dictionary<string, VDFSaveNode> properties = new Dictionary<string, VDFSaveNode>();
-	public bool popOutToOwnLine;
-	public bool isFirstItemOfNonFirstPopOutGroup;
-	public bool isNonFirstItemOfArray;
-	public string GetInLineItemText()
-	{
-		var builder = new StringBuilder();
-		foreach (object item in items)
-			if (item is VDFSaveNode)
-			{
-				if (!((VDFSaveNode)item).popOutToOwnLine)
-					builder.Append(((VDFSaveNode)item).GetInLineItemText());
-			}
-			else
-				builder.Append(item);
-		foreach (string propName in properties.Keys)
-			if (!properties[propName].popOutToOwnLine)
-				builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
-		return (isFirstItemOfNonFirstPopOutGroup ? "#" : "") + (isNonFirstItemOfArray && !popOutToOwnLine ? "|" : "") + (metadata != null ? "<" + metadata + ">" : "") + builder; // markers + metadata + data
-	}
-	public string GetPoppedOutItemText()
-	{
-		var lines = new List<string>();
-		if (popOutToOwnLine)
-			lines.Add(GetInLineItemText());
-		foreach (object item in items)
-			if (item is VDFSaveNode)
-			{
-				string poppedOutText = ((VDFSaveNode)item).GetPoppedOutItemText();
-				if (poppedOutText.Length > 0)
-					foreach (string line in poppedOutText.Split(new[] { '\n' }))
-						lines.Add(line);
-			}
-		foreach (string propName in properties.Keys)
-		{
-			VDFSaveNode propValueNode = properties[propName];
-			string poppedOutText = propValueNode.GetPoppedOutItemText();
-			if (poppedOutText.Length > 0)
-				foreach (string line in poppedOutText.Split(new[] { '\n' }))
-					lines.Add(line);
-		}
-		var builder = new StringBuilder();
-		for (int i = 0; i < lines.Count; i++)
-			builder.Append(i == 0 ? "" : "\n").Append(popOutToOwnLine ? "\t" : "").Append(lines[i]); // line-breaks + indents + data
-		return builder.ToString();
-	}
-	public override string ToString() { return GetInLineItemText() + "\n" + GetPoppedOutItemText(); }
-}
 
 static class VDFSaver
 {
 	static VDFSaver() { VDFExtensions.Init(); }
-	public static VDFSaveNode ToVDFSaveNode(object obj)
+	public static VDFNode ToVDFNode(object obj)
 	{
-		var objNode = new VDFSaveNode();
+		var objNode = new VDFNode();
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
@@ -77,7 +22,7 @@ static class VDFSaver
 			{
 				object item = objAsList[i];
 				bool typeDerivedFromDeclaredType = type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
-				VDFSaveNode itemValueNode = ToVDFSaveNode(item);
+				VDFNode itemValueNode = ToVDFNode(item);
 				if (i > 0)
 					itemValueNode.isNonFirstItemOfArray = true;
 				if (typeDerivedFromDeclaredType)
@@ -104,21 +49,21 @@ static class VDFSaver
 				bool typeDerivedFromDeclaredType = propValue.GetType() != propInfo.propType; // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)
 				{
-					VDFSaveNode propValueNode = ToVDFSaveNode(propValue);
+					VDFNode propValueNode = ToVDFNode(propValue);
 					propValueNode.items.Add("#");
 					if (popOutGroupsAdded > 0)
-						((VDFSaveNode)propValueNode.items[0]).isFirstItemOfNonFirstPopOutGroup = true;
+						((VDFNode)propValueNode.items[0]).isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
 						propValueNode.metadata = propValue.GetType().FullName;
 					foreach (object propValueNodeItem in propValueNode.items)
-						if (propValueNodeItem is VDFSaveNode)
-							((VDFSaveNode)propValueNodeItem).popOutToOwnLine = true;
+						if (propValueNodeItem is VDFNode)
+							((VDFNode)propValueNodeItem).popOutToOwnLine = true;
 					objNode.properties.Add(propName, propValueNode);
 					popOutGroupsAdded++;
 				}
 				else
 				{
-					VDFSaveNode propValueNode = ToVDFSaveNode(propValue);
+					VDFNode propValueNode = ToVDFNode(propValue);
 					if (typeDerivedFromDeclaredType)
 						propValueNode.metadata = propValue.GetType().FullName;
 					objNode.properties.Add(propName, propValueNode);

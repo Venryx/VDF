@@ -58,6 +58,7 @@
     <Compile Include="V.cs" />
     <Compile Include="VDF\VDFExtensions.cs" />
     <Compile Include="VDF\VDFLoader.cs" />
+    <Compile Include="VDF\VDFNode.cs" />
     <Compile Include="VDF\VDFPropInfo.cs" />
     <Compile Include="VDF\VDF.cs" />
     <Compile Include="VDF\VDFSaver.cs" />

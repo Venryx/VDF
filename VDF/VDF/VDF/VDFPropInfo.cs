@@ -69,11 +69,8 @@ public class VDFPropInfo
 
 	public bool IsXIgnorableValue(object x)
 	{
-		if (ignoreEmptyValue)
-		{
-			if (x is IList && ((IList)x).Count == 0)
-				return true;
-		}
+		if (ignoreEmptyValue && x is IList && ((IList)x).Count == 0)
+			return true;
 		if (propType.IsValueType)
 			return x == Activator.CreateInstance(propType);
 		return x == null;

@@ -1,85 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
-
-class VDFLoadNode
-{
-	static object CreateNewInstanceOfType(Type type)
-	{
-		//return type.GetConstructors()[0].Invoke(null);
-		//return ((Func<object>)Expression.Lambda(typeof(Func<object>), Expression.New(emptyConstructor)).Compile())();
-		//return (T)Activator.CreateInstance(typeof(T));
-		//return FormatterServices.GetUninitializedObject(type);
-		ConstructorInfo emptyConstructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-		if (emptyConstructor != null)
-			return emptyConstructor.Invoke(null);
-		ConstructorInfo essentiallyEmptyConstructor = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(constr=>constr.GetParameters().All(param=>param.IsOptional)).FirstOrDefault(); // if all constructor arguments are optional
-		if (essentiallyEmptyConstructor != null)
-			return essentiallyEmptyConstructor.Invoke(Enumerable.Repeat(Type.Missing, essentiallyEmptyConstructor.GetParameters().Length).ToArray());
-		return FormatterServices.GetUninitializedObject(type);
-	}
-	static object ConvertRawValueToType(object rawValue, Type type)
-	{
-		object result;
-		if (rawValue is VDFLoadNode)
-			result = ((VDFLoadNode)rawValue).ToObject(type); // tell node to return itself as the correct type
-		else // must be a string
-		{
-			if (VDF.typeImporters_inline.ContainsKey(type))
-				result = VDF.typeImporters_inline[type]((string)rawValue);
-			else if (type.IsEnum)
-				result = Enum.Parse(type, (string)rawValue);
-			else // if no specific handler, try auto-converting string to the correct (primitive) type
-				result = Convert.ChangeType(rawValue, type);
-		}
-		return result;
-	}
-
-	public string metadata;
-	public List<object> items = new List<object>();
-	public Dictionary<string, object> properties = new Dictionary<string, object>();
-	public T ToObject<T>() { return (T)ToObject(typeof(T)); }
-	public object ToObject(Type baseType)
-	{
-		if (baseType == typeof(string))
-			return items[0]; // special case for properties of type 'string'; just return first item (there will always only be one, and it will always be a string)
-
-		Type type = baseType;
-		if (metadata != null)
-			type = Type.GetType(metadata);
-		var typeInfo = VDFTypeInfo.Get(type);
-		object result = CreateNewInstanceOfType(type);
-		for (int i = 0; i < items.Count; i++)
-			if (result is Array)
-				((Array)result).SetValue(ConvertRawValueToType(items[i], type.GetElementType()), i);
-			else if (result is IList)
-				((IList)result).Add(ConvertRawValueToType(items[i], type.GetGenericArguments()[0]));
-			else // must be primitive, with first item actually being this node's value
-				result = ConvertRawValueToType(items[i], type);
-		foreach (string propName in properties.Keys)
-		{
-			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-			propInfo.SetValue(result, ConvertRawValueToType(properties[propName], propInfo.propType));
-		}
-		return result;
-	}
-}
+﻿using System.Collections.Generic;
 
 static class VDFLoader
 {
 	static VDFLoader() { VDFExtensions.Init(); }
-	public static VDFLoadNode ToVDFLoadNode(string vdfFile, int firstTextCharPos = 0)
+	public static VDFNode ToVDFNode(string vdfFile, int firstObjTextCharPos = 0)
 	{
-		var objNode = new VDFLoadNode();
+		var objNode = new VDFNode();
 
 		int depth = 0;
 		int poppedOutChildDataCount = 0;
 		string livePropName = null;
-		VDFLoadNode livePropValueNode = null;
-		var parser = new VDFTokenParser(vdfFile, firstTextCharPos);
+		VDFNode livePropValueNode = null;
+		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
 		Token token;
 		while ((token = parser.GetNextToken()) != null)
 		{
@@ -95,10 +27,10 @@ static class VDFLoader
 				else if (token.type == TokenType.Data_PropName)
 				{
 					livePropName = token.text;
-					livePropValueNode = new VDFLoadNode();
+					livePropValueNode = new VDFNode();
 				}
 				else if (token.type == TokenType.StartDataBracket)
-					livePropValueNode = ToVDFLoadNode(vdfFile, parser.nextCharPos);
+					livePropValueNode = ToVDFNode(vdfFile, parser.nextCharPos);
 				else if (token.type == TokenType.EndDataBracket)
 				{
 					//if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
@@ -116,9 +48,9 @@ static class VDFLoader
 					if (token.text == "#")
 					{
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
-						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
+						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
 						foreach (int pos in poppedOutChildDataTextPositions)
-							livePropValueNode.items.Add(ToVDFLoadNode(vdfFile, pos));
+							livePropValueNode.items.Add(ToVDFNode(vdfFile, pos));
 						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
 					}
 					else
