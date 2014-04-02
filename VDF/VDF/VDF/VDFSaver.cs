@@ -70,7 +70,7 @@ static class VDFSaver
 			objNode.items.Add(obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString());
 		else if (type.IsPrimitive || type == typeof(string))
 			objNode.items.Add(obj.ToString());
-		else if (obj is IList)
+		else if (obj is IList) // note; this saves arrays also
 		{
 			var objAsList = (IList)obj;
 			for (int i = 0; i < objAsList.Count; i++)
@@ -81,7 +81,7 @@ static class VDFSaver
 				if (i > 0)
 					itemValueNode.isNonFirstItemOfArray = true;
 				if (typeDerivedFromDeclaredType)
-					itemValueNode.metadata = item.GetType().Name;
+					itemValueNode.metadata = item.GetType().FullName;
 				objNode.items.Add(itemValueNode);
 			}
 		}
@@ -89,9 +89,9 @@ static class VDFSaver
 		{
 			var typeInfo = VDFTypeInfo.Get(type);
 			int popOutGroupsAdded = 0;
-			foreach (string name in typeInfo.propInfoByName.Keys)
+			foreach (string propName in typeInfo.propInfoByName.Keys)
 			{
-				VDFPropInfo propInfo = typeInfo.propInfoByName[name];
+				VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
 				bool include = typeInfo.props_includeL1;
 				include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
 				if (!include)
@@ -109,19 +109,19 @@ static class VDFSaver
 					if (popOutGroupsAdded > 0)
 						((VDFSaveNode)propValueNode.items[0]).isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata = propValue.GetType().Name;
+						propValueNode.metadata = propValue.GetType().FullName;
 					foreach (object propValueNodeItem in propValueNode.items)
 						if (propValueNodeItem is VDFSaveNode)
 							((VDFSaveNode)propValueNodeItem).popOutToOwnLine = true;
-					objNode.properties.Add(name, propValueNode);
+					objNode.properties.Add(propName, propValueNode);
 					popOutGroupsAdded++;
 				}
 				else
 				{
 					VDFSaveNode propValueNode = ToVDFSaveNode(propValue);
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata = propValue.GetType().Name;
-					objNode.properties.Add(name, propValueNode);
+						propValueNode.metadata = propValue.GetType().FullName;
+					objNode.properties.Add(propName, propValueNode);
 				}
 			}
 		}

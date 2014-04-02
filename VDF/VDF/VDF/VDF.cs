@@ -10,5 +10,5 @@ static class VDF
 	static VDF() { VDFExtensions.Init(); }
 
 	public static string ToVDF(object obj) { return VDFSaver.ToVDFSaveNode(obj).ToString(); }
-	public static T FromVDF<T>(string vdf) { return VDFLoader.ToVDFLoadNode(vdf).ToType<T>(); }
+	public static T FromVDF<T>(string vdf) { return VDFLoader.ToVDFLoadNode(vdf).ToObject<T>(); }
 }

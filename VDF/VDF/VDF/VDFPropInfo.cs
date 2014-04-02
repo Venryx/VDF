@@ -84,4 +84,11 @@ public class VDFPropInfo
 			return ((FieldInfo)memberInfo).GetValue(objParent);
 		return ((PropertyInfo)memberInfo).GetValue(objParent, null);
 	}
+	public void SetValue(object objParent, object value)
+	{
+		if (memberInfo is FieldInfo)
+			((FieldInfo)memberInfo).SetValue(objParent, value);
+		else
+			((PropertyInfo)memberInfo).SetValue(objParent, value, null);
+	}
 }

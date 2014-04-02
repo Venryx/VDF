@@ -1,17 +1,69 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 class VDFLoadNode
 {
+	static object CreateNewInstanceOfType(Type type)
+	{
+		//return type.GetConstructors()[0].Invoke(null);
+		//return ((Func<object>)Expression.Lambda(typeof(Func<object>), Expression.New(emptyConstructor)).Compile())();
+		//return (T)Activator.CreateInstance(typeof(T));
+		//return FormatterServices.GetUninitializedObject(type);
+		ConstructorInfo emptyConstructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
+		if (emptyConstructor != null)
+			return emptyConstructor.Invoke(null);
+		ConstructorInfo essentiallyEmptyConstructor = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(constr=>constr.GetParameters().All(param=>param.IsOptional)).FirstOrDefault(); // if all constructor arguments are optional
+		if (essentiallyEmptyConstructor != null)
+			return essentiallyEmptyConstructor.Invoke(Enumerable.Repeat(Type.Missing, essentiallyEmptyConstructor.GetParameters().Length).ToArray());
+		return FormatterServices.GetUninitializedObject(type);
+	}
+	static object ConvertRawValueToType(object rawValue, Type type)
+	{
+		object result;
+		if (rawValue is VDFLoadNode)
+			result = ((VDFLoadNode)rawValue).ToObject(type); // tell node to return itself as the correct type
+		else // must be a string
+		{
+			if (VDF.typeImporters_inline.ContainsKey(type))
+				result = VDF.typeImporters_inline[type]((string)rawValue);
+			else if (type.IsEnum)
+				result = Enum.Parse(type, (string)rawValue);
+			else // if no specific handler, try auto-converting string to the correct (primitive) type
+				result = Convert.ChangeType(rawValue, type);
+		}
+		return result;
+	}
+
 	public string metadata;
 	public List<object> items = new List<object>();
 	public Dictionary<string, object> properties = new Dictionary<string, object>();
-	public T ToType<T>()
+	public T ToObject<T>() { return (T)ToObject(typeof(T)); }
+	public object ToObject(Type baseType)
 	{
-		//var result = (T)Activator.CreateInstance(typeof(T));
-		//var result = ((Func<T>)Expression.Lambda(typeof(Func<object>), Expression.New(typeof(T).GetConstructors()[0])).Compile())();
-		var result = (T)FormatterServices.GetUninitializedObject(typeof(T));
+		if (baseType == typeof(string))
+			return items[0]; // special case for properties of type 'string'; just return first item (there will always only be one, and it will always be a string)
+
+		Type type = baseType;
+		if (metadata != null)
+			type = Type.GetType(metadata);
+		var typeInfo = VDFTypeInfo.Get(type);
+		object result = CreateNewInstanceOfType(type);
+		for (int i = 0; i < items.Count; i++)
+			if (result is Array)
+				((Array)result).SetValue(ConvertRawValueToType(items[i], type.GetElementType()), i);
+			else if (result is IList)
+				((IList)result).Add(ConvertRawValueToType(items[i], type.GetGenericArguments()[0]));
+			else // must be primitive, with first item actually being this node's value
+				result = ConvertRawValueToType(items[i], type);
+		foreach (string propName in properties.Keys)
+		{
+			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
+			propInfo.SetValue(result, ConvertRawValueToType(properties[propName], propInfo.propType));
+		}
 		return result;
 	}
 }
@@ -49,8 +101,8 @@ static class VDFLoader
 					livePropValueNode = ToVDFLoadNode(vdfFile, parser.nextCharPos);
 				else if (token.type == TokenType.EndDataBracket)
 				{
-					if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
-						objNode.properties.Add(livePropName, livePropValueNode);
+					//if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
+					objNode.properties.Add(livePropName, livePropValueNode);
 					livePropName = null;
 					livePropValueNode = null;
 				}
