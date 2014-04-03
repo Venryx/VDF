@@ -25,7 +25,7 @@ public class VDFPropInfo
 	{
 		if (!cachedTypeInfo.ContainsKey(field))
 		{
-			var vdfPropAttribute = (VDFProp)field.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault();
+			var vdfPropAttribute = (VDF.propVDFPropOverrides.ContainsKey(field) ? VDF.propVDFPropOverrides[field] : null) ?? (VDFProp)field.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault();
 
 			var propInfo = new VDFPropInfo();
 			propInfo.memberInfo = field;
@@ -44,7 +44,7 @@ public class VDFPropInfo
 	{
 		if (!cachedTypeInfo.ContainsKey(property))
 		{
-			var vdfPropAttribute = (VDFProp)property.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault();
+			var vdfPropAttribute = (VDF.propVDFPropOverrides.ContainsKey(property) ? VDF.propVDFPropOverrides[property] : null) ?? (VDFProp)property.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault();
 
 			var propInfo = new VDFPropInfo();
 			propInfo.memberInfo = property;

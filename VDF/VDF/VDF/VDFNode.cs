@@ -114,7 +114,7 @@ class VDFNode
 	public object ToObject(Type baseType)
 	{
 		if (baseType == typeof(string))
-			return items[0]; // special case for properties of type 'string'; just return first item (there will always only be one, and it will always be a string)
+			return (string)items[0] == "null" ? null : items[0]; // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
 
 		Type type = baseType;
 		if (metadata != null)
