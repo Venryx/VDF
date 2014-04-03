@@ -14,6 +14,6 @@ static class VDF
 	public static void RegisterPropVDFPropOverride(MemberInfo prop, VDFProp vdfProp) { propVDFPropOverrides[prop] = vdfProp; }
 	static VDF() { VDFExtensions.Init(); }
 
-	public static string ToVDF(object obj) { return VDFSaver.ToVDFNode(obj).ToString(); }
-	public static T FromVDF<T>(string vdf) { return VDFLoader.ToVDFNode(vdf).ToObject<T>(); }
+	public static string Serialize(object obj) { return VDFSaver.ToVDFNode(obj).ToString(); }
+	public static T Deserialize<T>(string vdf) { return VDFLoader.ToVDFNode(vdf).ToObject<T>(); }
 }

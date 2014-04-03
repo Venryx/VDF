@@ -25,7 +25,7 @@ namespace SystemMaker
 			var testWorld = Test1.CreateWorld();
 			
 			// serialize it, and save it to file
-			string vdf = VDF.ToVDF(testWorld);
+			string vdf = VDF.Serialize(testWorld);
 			var file = new FileInfo(SavePath.Text);
 			if (!file.Directory.Exists)
 				file.Directory.Create();
@@ -37,10 +37,10 @@ namespace SystemMaker
 			// load from file
 			var file = new FileInfo(LoadPath.Text);
 			string vdf = File.ReadAllText(file.FullName);
-			var testWorld = VDF.FromVDF<World>(vdf);
+			var testWorld = VDF.Deserialize<World>(vdf);
 
 			// reserialize it, and save it to second file, to check data
-			string vdf2 = VDF.ToVDF(testWorld);
+			string vdf2 = VDF.Serialize(testWorld);
 			var file2 = new FileInfo(LoadPath.Text.Split(new []{'.'})[0] + "_Resaved.vdf");
 			if (!file2.Directory.Exists)
 				file2.Directory.Create();
