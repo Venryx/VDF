@@ -36,7 +36,7 @@ public class VDFTypeInfo
 
 	public VDFTypeInfo()
 	{
-		props_includeL1 = true; // note; may want to have this default to false
+		props_includeL1 = false; // by default, use an opt-in approach
 		propInfoByName = new Dictionary<string, VDFPropInfo>();
 	}
 }

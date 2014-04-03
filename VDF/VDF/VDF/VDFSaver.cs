@@ -75,9 +75,9 @@ static class VDFSaver
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					VDFNode propValueNode = ToVDFNode(propValue);
-					propValueNode.items.Add("#");
-					if (popOutGroupsAdded > 0)
-						((VDFNode)propValueNode.items[0]).isFirstItemOfNonFirstPopOutGroup = true;
+					propValueNode.items.Insert(0, "#"); // add in-line marker, indicating that items are popped-out
+					if (popOutGroupsAdded > 0 && propValueNode.items.Count > 1)
+						((VDFNode)propValueNode.items[1]).isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
 						propValueNode.metadata = propValue.GetType().FullName;
 					foreach (object propValueNodeItem in propValueNode.items)

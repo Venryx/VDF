@@ -74,7 +74,11 @@ class VDFNode
 			builder.Append(i == 0 ? "" : "\n").Append(popOutToOwnLine ? "\t" : "").Append(lines[i]); // line-breaks + indents + data
 		return builder.ToString();
 	}
-	public override string ToString() { return GetInLineItemText() + "\n" + GetPoppedOutItemText(); }
+	public override string ToString()
+	{
+		string poppedOutItemText = GetPoppedOutItemText();
+		return GetInLineItemText() + (poppedOutItemText.Length > 0 ? "\n" + poppedOutItemText : "");
+	}
 
 	// loading
 	// ==================

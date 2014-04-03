@@ -60,8 +60,8 @@ static class Test1
 
 class World
 {
-	public string name;
-	public VObject vObjectRoot;
+	[VDFProp] public string name;
+	[VDFProp] public VObject vObjectRoot;
 
 	public World(string name)
 	{
@@ -72,10 +72,10 @@ class World
 
 class VObject
 {
-	[VDFProp(false)] public VObject parent;
+	public VObject parent;
 
-	public Guid id;
-	public string name;
+	[VDFProp] public Guid id;
+	[VDFProp] public string name;
 	[VDFProp(true, true, true)] public List<Duty> duties;
 	[VDFProp(true, true, true)] public List<VObject> children;
 
@@ -109,13 +109,13 @@ class VObject
 class Duty {}
 class HoldSoil : Duty
 {
-	public string texturePath;
+	[VDFProp] public string texturePath;
 	public HoldSoil(string texturePath) { this.texturePath = texturePath; }
 }
 class Special1 : Duty
 {
-	public Color color;
-	public float brightness;
+	[VDFProp] public Color color;
+	[VDFProp] public float brightness;
 	public Special1(Color color, float brightness)
 	{
 		this.color = color;
@@ -124,9 +124,9 @@ class Special1 : Duty
 }
 class HoldTransform : Duty
 {
-	public Vector3 position;
-	public Vector3 rotation;
-	public Vector3 scale;
+	[VDFProp] public Vector3 position;
+	[VDFProp] public Vector3 rotation;
+	[VDFProp] public Vector3 scale;
 	public HoldTransform(Vector3 position = default(Vector3), Vector3 rotation = default(Vector3), Vector3 scale = default(Vector3))
 	{
 		this.position = position;
@@ -136,8 +136,8 @@ class HoldTransform : Duty
 }
 class HoldMesh : Duty
 {
-	public List<Vector3> vertexes;
-	public Dictionary<Vector3, Color> vertexColors; 
+	[VDFProp] public List<Vector3> vertexes;
+	[VDFProp] public Dictionary<Vector3, Color> vertexColors;
 	public HoldMesh(List<Vector3> vertexes, Dictionary<Vector3, Color> vertexColors)
 	{
 		this.vertexes = vertexes;
@@ -146,12 +146,12 @@ class HoldMesh : Duty
 }
 class HoldDuties : Duty
 {
-	public string dutiesEnabledWhen;
+	[VDFProp] public string dutiesEnabledWhen;
 	[VDFProp(true, true, true)] public List<Duty> duties;
 
 	public HoldDuties(string dutiesEnabledWhen)
 	{
-		this.dutiesEnabledWhen = dutiesEnabledWhen; 
+		this.dutiesEnabledWhen = dutiesEnabledWhen;
 		duties = new List<Duty>();
 	}
 
@@ -166,6 +166,7 @@ class MoveSelfToInventory : Duty {}
 class RenderMesh : Duty {}
 class MoveSelfToWorld : Duty {}
 
+[VDFType(true)]
 struct Vector3
 {
 	public float x;
