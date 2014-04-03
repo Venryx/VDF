@@ -29,7 +29,6 @@ public class VDFPropInfo
 
 			var propInfo = new VDFPropInfo();
 			propInfo.memberInfo = field;
-			propInfo.propType = field.FieldType;
 			if (vdfPropAttribute != null)
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
@@ -48,7 +47,6 @@ public class VDFPropInfo
 
 			var propInfo = new VDFPropInfo();
 			propInfo.memberInfo = property;
-			propInfo.propType = property.PropertyType;
 			if (vdfPropAttribute != null)
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
@@ -60,19 +58,19 @@ public class VDFPropInfo
 		return cachedTypeInfo[property];
 	}
 
-	MemberInfo memberInfo;
-	public Type propType;
 	bool ignoreEmptyValue;
-	
+
+	public MemberInfo memberInfo;
 	public bool? includeL2;
 	public bool popOutItemsToOwnLines;
 
+	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
 	public bool IsXIgnorableValue(object x)
 	{
 		if (ignoreEmptyValue && x is IList && ((IList)x).Count == 0)
 			return true;
-		if (propType.IsValueType)
-			return x == Activator.CreateInstance(propType);
+		if (GetPropType().IsValueType)
+			return x == Activator.CreateInstance(GetPropType());
 		return x == null;
 	}
 	public object GetValue(object objParent)

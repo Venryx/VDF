@@ -127,7 +127,7 @@ class VDFNode
 		foreach (string propName in properties.Keys)
 		{
 			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-			propInfo.SetValue(result, ConvertRawValueToType(properties[propName], propInfo.propType));
+			propInfo.SetValue(result, ConvertRawValueToType(properties[propName], propInfo.GetPropType()));
 		}
 		return result;
 	}

@@ -1,9 +1,26 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+class VDFSaveOptions
+{
+	public List<MemberInfo> includePropsL3;
+	public List<MemberInfo> excludePropsL4;
+	public List<MemberInfo> includePropsL5;
+
+	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null)
+	{
+		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
+		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
+		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
+	}
+}
 
 static class VDFSaver
 {
-	public static VDFNode ToVDFNode(object obj)
+	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions = null)
 	{
 		var objNode = new VDFNode();
 
@@ -21,7 +38,7 @@ static class VDFSaver
 			{
 				object item = objAsList[i];
 				bool typeDerivedFromDeclaredType = type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
-				VDFNode itemValueNode = ToVDFNode(item);
+				VDFNode itemValueNode = ToVDFNode(item, saveOptions);
 				if (i > 0)
 					itemValueNode.isNonFirstItemOfArray = true;
 				if (typeDerivedFromDeclaredType)
@@ -39,13 +56,13 @@ static class VDFSaver
 				keyValuePairPseudoNode.isKeyValuePairPseudoNode = true;
 
 				bool keyTypeDerivedFromDeclaredType = type.IsGenericType && key.GetType() != type.GetGenericArguments()[0]; // if key is of a type *derived* from the Dictionary's base key-type (i.e. we need to specify actual key-type)
-				VDFNode keyNode = ToVDFNode(key);
+				VDFNode keyNode = ToVDFNode(key, saveOptions);
 				if (keyTypeDerivedFromDeclaredType)
 					keyNode.metadata = key.GetType().FullName;
 				keyValuePairPseudoNode.items.Add(keyNode);
 
 				bool valueTypeDerivedFromDeclaredType = type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
-				VDFNode valueNode = ToVDFNode(value);
+				VDFNode valueNode = ToVDFNode(value, saveOptions);
 				valueNode.isNonFirstItemOfArray = true;
 				if (valueTypeDerivedFromDeclaredType)
 					valueNode.metadata = value.GetType().FullName;
@@ -63,6 +80,9 @@ static class VDFSaver
 				VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
 				bool include = typeInfo.props_includeL1;
 				include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
+				include = saveOptions != null && (saveOptions.includePropsL3.Contains(propInfo.memberInfo) || saveOptions.includePropsL3.Contains(VDF.AnyMember)) ? true : include;
+				include = saveOptions != null && (saveOptions.excludePropsL4.Contains(propInfo.memberInfo) || saveOptions.excludePropsL4.Contains(VDF.AnyMember)) ? false : include;
+				include = saveOptions != null && (saveOptions.includePropsL5.Contains(propInfo.memberInfo) || saveOptions.includePropsL5.Contains(VDF.AnyMember)) ? true : include;
 				if (!include)
 					continue;
 
@@ -70,10 +90,10 @@ static class VDFSaver
 				if (propInfo.IsXIgnorableValue(propValue))
 					continue;
 
-				bool typeDerivedFromDeclaredType = propValue.GetType() != propInfo.propType; // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
+				bool typeDerivedFromDeclaredType = propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)
 				{
-					VDFNode propValueNode = ToVDFNode(propValue);
+					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
 					propValueNode.items.Insert(0, "#"); // add in-line marker, indicating that items are popped-out
 					if (popOutGroupsAdded > 0 && propValueNode.items.Count > 1)
 						((VDFNode)propValueNode.items[1]).isFirstItemOfNonFirstPopOutGroup = true;
@@ -87,7 +107,7 @@ static class VDFSaver
 				}
 				else
 				{
-					VDFNode propValueNode = ToVDFNode(propValue);
+					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
 					if (typeDerivedFromDeclaredType)
 						propValueNode.metadata = propValue.GetType().FullName;
 					objNode.properties.Add(propName, propValueNode);

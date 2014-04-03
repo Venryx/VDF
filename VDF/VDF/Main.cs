@@ -26,7 +26,7 @@ namespace SystemMaker
 			var testWorld = Test1.CreateWorld();
 			
 			// serialize it, and save it to file
-			string vdf = VDF.Serialize(testWorld);
+			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new []{typeof(VObject).GetMember("id")[0]}));
 			var file = new FileInfo(SavePath.Text);
 			if (!file.Directory.Exists)
 				file.Directory.Create();
@@ -41,7 +41,7 @@ namespace SystemMaker
 			var testWorld = VDF.Deserialize<World>(vdf);
 
 			// reserialize it, and save it to second file, to check data
-			string vdf2 = VDF.Serialize(testWorld);
+			string vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(new[] { typeof(VObject).GetMember("id")[0] }));
 			var file2 = new FileInfo(LoadPath.Text.Split(new []{'.'})[0] + "_Resaved.vdf");
 			if (!file2.Directory.Exists)
 				file2.Directory.Create();

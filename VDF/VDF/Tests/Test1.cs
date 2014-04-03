@@ -63,7 +63,7 @@ class VObject
 {
 	public VObject parent;
 
-	[VDFProp] public Guid id;
+	/*[VDFProp]*/ public Guid id; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call
 	[VDFProp] public string name;
 	[VDFProp(true, true, true)] public List<Duty> duties;
 	[VDFProp(true, true, true)] public List<VObject> children;
