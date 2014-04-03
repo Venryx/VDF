@@ -8,6 +8,7 @@ namespace SystemMaker
 	{
 		static Main()
 		{
+			VDFExtensions.Init(); // call this first, so we can overwrite ones, if we need to
 			VDF.RegisterTypeExporter_Inline<Guid>(id => ""); //id.ToString());
 			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
 			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
