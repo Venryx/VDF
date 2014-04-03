@@ -4,6 +4,17 @@ using System.Drawing;
 
 static class Test1
 {
+	static Test1()
+	{
+		VDF.RegisterTypeExporter_Inline<Guid>(id=>""); //id.ToString());
+		VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
+		VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
+		VDF.RegisterTypeImporter_Inline<Vector3>(str=>
+		{
+			string[] parts = str.Split(new[] {','});
+			return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
+		});
+	}
 	public static World CreateWorld()
 	{
 		var world = new World("Main");

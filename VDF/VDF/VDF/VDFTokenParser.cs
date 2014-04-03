@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-enum TokenType
+enum VDFTokenType
 {
 	None,
 	PoppedOutNodeMarker,
@@ -16,11 +16,11 @@ enum TokenType
 	LineBreak,
 	//Indent // this is taken care of at a higher level by the VDFLoader class
 }
-class Token
+class VDFToken
 {
-	public TokenType type;
+	public VDFTokenType type;
 	public string text;
-	public Token(TokenType type, string text)
+	public VDFToken(VDFTokenType type, string text)
 	{
 		this.type = type;
 		this.text = text;
@@ -37,12 +37,12 @@ class VDFTokenParser
 		nextCharPos = firstCharPos;
 	}
 
-	public Token GetNextToken()
+	public VDFToken GetNextToken()
 	{
-		var tokenType = TokenType.None;
+		var tokenType = VDFTokenType.None;
 		var tokenChars = new List<char>();
 		int i = nextCharPos;
-		for (; i < vdf.Length && tokenType == TokenType.None; i++)
+		for (; i < vdf.Length && tokenType == VDFTokenType.None; i++)
 		{
 			char? lastChar = i > 0 ? vdf[i - 1] : (char?)null;
 			char ch = vdf[i];
@@ -54,7 +54,7 @@ class VDFTokenParser
 				inLiteralMarkers = !inLiteralMarkers;
 				i += 2; // skip to first char after literal-marker
 				if (!inLiteralMarkers) // if literal-block ended, return chars as Data_BaseValue token
-					tokenType = TokenType.Data_BaseValue;
+					tokenType = VDFTokenType.Data_BaseValue;
 				continue;
 			}
 			tokenChars.Add(ch);
@@ -62,33 +62,33 @@ class VDFTokenParser
 				continue;
 
 			if (ch == '<')
-				tokenType = TokenType.StartMetadataBracket;
+				tokenType = VDFTokenType.StartMetadataBracket;
 			else if (ch == '>')
-				tokenType = TokenType.EndMetadataBracket;
+				tokenType = VDFTokenType.EndMetadataBracket;
 			else if (ch == '{')
-				tokenType = TokenType.StartDataBracket;
+				tokenType = VDFTokenType.StartDataBracket;
 			else if (ch == '}')
-				tokenType = TokenType.EndDataBracket;
+				tokenType = VDFTokenType.EndDataBracket;
 			else // non-bracket char
 			{
 				if (ch == '\n')
-					tokenType = TokenType.LineBreak;
+					tokenType = VDFTokenType.LineBreak;
 				//else if (ch == '\t')
-				//	tokenType = TokenType.Indent;
+				//	tokenType = VDFTokenType.Indent;
 				else if (ch == '#' && lastChar.HasValue && lastChar == '\t')
-					tokenType = TokenType.PoppedOutNodeMarker;
+					tokenType = VDFTokenType.PoppedOutNodeMarker;
 				else if (ch == '|')
-					tokenType = TokenType.ItemSeparator;
+					tokenType = VDFTokenType.ItemSeparator;
 				else if (nextChar.HasValue && nextChar == '>')
-					tokenType = TokenType.Metadata_BaseValue;
+					tokenType = VDFTokenType.Metadata_BaseValue;
 				else if (nextChar.HasValue && nextChar == '{')
-					tokenType = TokenType.Data_PropName;
+					tokenType = VDFTokenType.Data_PropName;
 				else if (nextChar.HasValue && (nextChar == '}' || nextChar == '|')) // if normal char, and we're at end of normal-segment
-					tokenType = TokenType.Data_BaseValue;
+					tokenType = VDFTokenType.Data_BaseValue;
 			}
 		}
 		nextCharPos = i;
 
-		return tokenType != TokenType.None ? new Token(tokenType, new string(tokenChars.ToArray())) : null;
+		return tokenType != VDFTokenType.None ? new VDFToken(tokenType, new string(tokenChars.ToArray())) : null;
 	}
 }

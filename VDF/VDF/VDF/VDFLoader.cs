@@ -12,26 +12,26 @@ static class VDFLoader
 		string livePropName = null;
 		VDFNode livePropValueNode = null;
 		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
-		Token token;
-		while ((token = parser.GetNextToken()) != null)
+		VDFToken vdfToken;
+		while ((vdfToken = parser.GetNextToken()) != null)
 		{
-			if (token.type == TokenType.EndDataBracket)
+			if (vdfToken.type == VDFTokenType.EndDataBracket)
 				depth--;
 
 			if (depth < 0)
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (token.type == TokenType.Metadata_BaseValue)
-					objNode.metadata = token.text;
-				else if (token.type == TokenType.Data_PropName)
+				if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
+					objNode.metadata = vdfToken.text;
+				else if (vdfToken.type == VDFTokenType.Data_PropName)
 				{
-					livePropName = token.text;
+					livePropName = vdfToken.text;
 					livePropValueNode = new VDFNode();
 				}
-				else if (token.type == TokenType.StartDataBracket)
+				else if (vdfToken.type == VDFTokenType.StartDataBracket)
 					livePropValueNode = ToVDFNode(vdfFile, parser.nextCharPos);
-				else if (token.type == TokenType.EndDataBracket)
+				else if (vdfToken.type == VDFTokenType.EndDataBracket)
 				{
 					if (livePropName != null) // property of object
 					{
@@ -43,14 +43,14 @@ static class VDFLoader
 					else // must be key-value-pair-pseudo-object of a dictionary
 						objNode.items.Add(livePropValueNode);
 				}
-				else if (token.type == TokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
+				else if (vdfToken.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
 			else if (depth == 1)
 			{
-				if (token.type == TokenType.Data_BaseValue)
+				if (vdfToken.type == VDFTokenType.Data_BaseValue)
 				{
-					if (token.text == "#")
+					if (vdfToken.text == "#")
 					{
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
 						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
@@ -59,11 +59,11 @@ static class VDFLoader
 						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
 					}
 					else
-						livePropValueNode.items.Add(token.text);
+						livePropValueNode.items.Add(vdfToken.text);
 				}
 			}
 
-			if (token.type == TokenType.StartDataBracket)
+			if (vdfToken.type == VDFTokenType.StartDataBracket)
 				depth++;
 		}
 
