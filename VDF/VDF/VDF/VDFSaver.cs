@@ -3,7 +3,6 @@ using System.Collections;
 
 static class VDFSaver
 {
-	static VDFSaver() { VDFExtensions.Init(); }
 	public static VDFNode ToVDFNode(object obj)
 	{
 		var objNode = new VDFNode();

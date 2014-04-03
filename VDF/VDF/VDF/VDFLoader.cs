@@ -2,7 +2,6 @@
 
 static class VDFLoader
 {
-	static VDFLoader() { VDFExtensions.Init(); }
 	public static VDFNode ToVDFNode(string vdfFile, int firstObjTextCharPos = 0)
 	{
 		var objNode = new VDFNode();
