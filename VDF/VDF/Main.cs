@@ -1,10 +1,23 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Windows.Forms;
 
 namespace SystemMaker
 {
 	public partial class Main : Form
 	{
+		static Main()
+		{
+			VDF.RegisterTypeExporter_Inline<Guid>(id => ""); //id.ToString());
+			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
+			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
+			VDF.RegisterTypeImporter_Inline<Vector3>(str =>
+			{
+				string[] parts = str.Split(new[] { ',' });
+				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
+			});
+		}
+
 		public Main() { InitializeComponent(); }
 
 		private void Save_Click(object sender, System.EventArgs e)

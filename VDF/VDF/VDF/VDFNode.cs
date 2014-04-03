@@ -85,17 +85,9 @@ class VDFNode
 
 	static object CreateNewInstanceOfType(Type type)
 	{
-		//return type.GetConstructors()[0].Invoke(null);
-		//return ((Func<object>)Expression.Lambda(typeof(Func<object>), Expression.New(emptyConstructor)).Compile())();
-		//return (T)Activator.CreateInstance(typeof(T));
-		//return FormatterServices.GetUninitializedObject(type);
-		ConstructorInfo emptyConstructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-		if (emptyConstructor != null)
-			return emptyConstructor.Invoke(null);
-		ConstructorInfo essentiallyEmptyConstructor = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).Where(constr => constr.GetParameters().All(param => param.IsOptional)).FirstOrDefault(); // if all constructor arguments are optional
-		if (essentiallyEmptyConstructor != null)
-			return essentiallyEmptyConstructor.Invoke(Enumerable.Repeat(Type.Missing, essentiallyEmptyConstructor.GetParameters().Length).ToArray());
-		return FormatterServices.GetUninitializedObject(type);
+		if (typeof(IList).IsAssignableFrom(type) || typeof(IDictionary).IsAssignableFrom(type)) // special cases, which require that we call the constructor
+			return Activator.CreateInstance(type, true);
+		return FormatterServices.GetUninitializedObject(type); // preferred (for simplicity/consistency's sake): create an instance of the type, completely uninitialized 
 	}
 	static object ConvertRawValueToType(object rawValue, Type type)
 	{
