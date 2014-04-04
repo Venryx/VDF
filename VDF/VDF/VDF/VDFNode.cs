@@ -6,7 +6,7 @@ using System.Text;
 
 class VDFNode
 {
-	public Type metadata_type;
+	public string metadata_type;
 	public string baseValue;
 	public List<VDFNode> items = new List<VDFNode>(); // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
 	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>();
@@ -31,7 +31,7 @@ class VDFNode
 		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isArrayItem_array)
 			builder.Append("{");
 		if (metadata_type != null)
-			builder.Append("<" + (isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + VDF.TypeToRealTypeName(metadata_type).Replace(" ", "") + ">" : VDF.TypeToRealTypeName(metadata_type).Replace(" ", "")) + ">");
+			builder.Append("<" + (isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
 
 		builder.Append(baseValue);
 		foreach (VDFNode item in items)
@@ -90,7 +90,7 @@ class VDFNode
 	{
 		object result;
 		if (rawValue is VDFNode && ((VDFNode)rawValue).baseValue == null)
-			result = ((VDFNode)rawValue).ToObject(((VDFNode)rawValue).metadata_type ?? declaredType); // tell node to return itself as the correct type
+			result = ((VDFNode)rawValue).ToObject(VDF.GetTypeByBasicName(((VDFNode)rawValue).metadata_type) ?? declaredType); // tell node to return itself as the correct type
 		else // base-value must be a string (todo; update the 'items' var to only accept VDFNodes now)
 		{
 			if (VDF.typeImporters_inline.ContainsKey(declaredType))
@@ -109,7 +109,7 @@ class VDFNode
 		if (declaredType == typeof(string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
 			return items[0].baseValue == "null" ? null : items[0].baseValue;
 
-		Type type = metadata_type ?? declaredType;
+		Type type = VDF.GetTypeByBasicName(metadata_type) ?? declaredType;
 		var typeInfo = VDFTypeInfo.Get(type);
 
 		object result = CreateNewInstanceOfType(type);

@@ -59,7 +59,7 @@ class World
 	{
 		this.name = name;
 		vObjectRoot = new VObject("VObjectRoot");
-		listOfStringLists = new List<List<string>> { new List<string> { "1A", "1B", "1C" }, new List<string> { "2A", "2B", "2C" }, new List<string> { "3A", "3B", "3C" } };
+		listOfStringLists = new List<List<string>> {new List<string> {"1A", "1B", "1C"}, new List<string> {"2A", "2B", "2C"}, new List<string> {"3A", "3B", "3C"}};
 	}
 }
 

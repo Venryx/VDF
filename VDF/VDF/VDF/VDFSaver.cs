@@ -9,14 +9,18 @@ class VDFSaveOptions
 	public List<MemberInfo> includePropsL3;
 	public List<MemberInfo> excludePropsL4;
 	public List<MemberInfo> includePropsL5;
+	public Dictionary<Type, string> typeAliases;
 	public bool saveTypesForAllObjects;
+	public bool alwaysUseFullTypeNames;
 
-	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, bool saveTypesForAllObjects = false)
+	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<Type, string> typeAliases = null, bool saveTypesForAllObjects = false, bool alwaysUseFullTypeNames = false)
 	{
 		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
 		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
 		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
+		this.typeAliases = typeAliases ?? new Dictionary<Type, string>();
 		this.saveTypesForAllObjects = saveTypesForAllObjects;
+		this.alwaysUseFullTypeNames = alwaysUseFullTypeNames;
 	}
 }
 
@@ -28,7 +32,7 @@ static class VDFSaver
 
 		// if we're adding types for all objects, just do it here (no need to compare actual type with base type)
 		if (saveOptions.saveTypesForAllObjects)
-			objNode.metadata_type = obj.GetType();
+			objNode.metadata_type = VDF.GetBasicNameOfType(obj.GetType(), saveOptions);
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
@@ -51,7 +55,7 @@ static class VDFSaver
 				if (i > 0)
 					itemValueNode.isArrayItem_nonFirst = true;
 				if (typeDerivedFromDeclaredType)
-					itemValueNode.metadata_type = item.GetType();
+					itemValueNode.metadata_type = VDF.GetBasicNameOfType(item.GetType(), saveOptions);
 				objNode.items.Add(itemValueNode);
 			}
 		}
@@ -68,14 +72,14 @@ static class VDFSaver
 				bool keyTypeDerivedFromDeclaredType = type.IsGenericType && key.GetType() != type.GetGenericArguments()[0]; // if key is of a type *derived* from the Dictionary's base key-type (i.e. we need to specify actual key-type)
 				VDFNode keyNode = ToVDFNode(key, saveOptions);
 				if (keyTypeDerivedFromDeclaredType)
-					keyNode.metadata_type = key.GetType();
+					keyNode.metadata_type = VDF.GetBasicNameOfType(key.GetType(), saveOptions);
 				keyValuePairPseudoNode.items.Add(keyNode);
 
 				bool valueTypeDerivedFromDeclaredType = type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
 				VDFNode valueNode = ToVDFNode(value, saveOptions);
 				valueNode.isArrayItem_nonFirst = true;
 				if (valueTypeDerivedFromDeclaredType)
-					valueNode.metadata_type = value.GetType();
+					valueNode.metadata_type = VDF.GetBasicNameOfType(value.GetType(), saveOptions);
 				keyValuePairPseudoNode.items.Add(valueNode);
 
 				objNode.items.Add(keyValuePairPseudoNode);
@@ -109,7 +113,7 @@ static class VDFSaver
 					if (popOutGroupsAdded > 0 && propValueNode.items.Count > 1)
 						propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata_type = propValue.GetType();
+						propValueNode.metadata_type = VDF.GetBasicNameOfType(propValue.GetType(), saveOptions);
 					foreach (VDFNode propValueNodeItem in propValueNode.items)
 						if (propValueNodeItem.baseValue != "#")
 							propValueNodeItem.popOutToOwnLine = true;
@@ -121,7 +125,7 @@ static class VDFSaver
 					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
 					propValueNode.isNamedPropertyValue = true;
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata_type = propValue.GetType();
+						propValueNode.metadata_type = VDF.GetBasicNameOfType(propValue.GetType(), saveOptions);
 					objNode.properties.Add(propName, propValueNode);
 				}
 			}

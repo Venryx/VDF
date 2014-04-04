@@ -12,7 +12,7 @@ static class VDFLoader
 		int poppedOutChildDataCount = 0;
 		string livePropName = null;
 		VDFNode livePropValueNode = null;
-		Type lastMetadata_type = null;
+		string lastMetadata_type = null;
 		var lastMetadataStartToken = VDFTokenType.None;
 
 		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
@@ -30,11 +30,11 @@ static class VDFLoader
 					lastMetadataStartToken = vdfToken.type;
 				else if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
 				{
-					var type = VDF.GetTypeByRealName(vdfToken.text.Replace("[", "<").Replace("]", ">")); //Type.GetType(vdfToken.text);
+					var type = VDF.GetTypeByBasicName(vdfToken.text); //Type.GetType(vdfToken.text);
 					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.SpecialMetadataStart || (!typeof(IList).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))))
-						objNode.metadata_type = type;
+						objNode.metadata_type = vdfToken.text;
 					else // if we're supposed to be finding these tokens as nodes, to fill list-obj
-						lastMetadata_type = VDF.GetTypeByRealName(vdfToken.text.Replace("[", "<").Replace("]", ">")); //Type.GetType(vdfToken.text);
+						lastMetadata_type = vdfToken.text; //Type.GetType(vdfToken.text);
 				}
 				else if (vdfToken.type == VDFTokenType.Data_PropName)
 				{
@@ -61,7 +61,7 @@ static class VDFLoader
 			else if (depth == 1)
 			{
 				if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
-					lastMetadata_type = VDF.GetTypeByRealName(vdfToken.text.Replace("[", "<").Replace("]", ">")); //Type.GetType(vdfToken.text);
+					lastMetadata_type = vdfToken.text; //Type.GetType(vdfToken.text);
 				else if (vdfToken.type == VDFTokenType.Data_BaseValue)
 				{
 					if (vdfToken.text == "#")
