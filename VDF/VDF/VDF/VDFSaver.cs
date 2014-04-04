@@ -1,20 +1,27 @@
 ﻿using System;
+using System.CodeDom;
+using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using Microsoft.CSharp;
 
 class VDFSaveOptions
 {
 	public List<MemberInfo> includePropsL3;
 	public List<MemberInfo> excludePropsL4;
 	public List<MemberInfo> includePropsL5;
+	public bool saveTypesForAllObjects;
 
-	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null)
+	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, bool saveTypesForAllObjects = false)
 	{
 		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
 		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
 		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
+		this.saveTypesForAllObjects = saveTypesForAllObjects;
 	}
 }
 
@@ -23,6 +30,9 @@ static class VDFSaver
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions = null)
 	{
 		var objNode = new VDFNode();
+
+		if (saveOptions.saveTypesForAllObjects) // if we're adding types for all objects, just do it here (no need to compare actual type with base type)
+			objNode.metadata = VDF.TypeToRealTypeName(obj.GetType());
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
@@ -39,8 +49,10 @@ static class VDFSaver
 				object item = objAsList[i];
 				bool typeDerivedFromDeclaredType = type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
 				VDFNode itemValueNode = ToVDFNode(item, saveOptions);
+				if (item is IList) // if array item is itself an array
+					itemValueNode.isArrayItem_array = true;
 				if (i > 0)
-					itemValueNode.isNonFirstItemOfArray = true;
+					itemValueNode.isArrayItem_nonFirst = true;
 				if (typeDerivedFromDeclaredType)
 					itemValueNode.metadata = item.GetType().FullName;
 				objNode.items.Add(itemValueNode);
@@ -63,7 +75,7 @@ static class VDFSaver
 
 				bool valueTypeDerivedFromDeclaredType = type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
 				VDFNode valueNode = ToVDFNode(value, saveOptions);
-				valueNode.isNonFirstItemOfArray = true;
+				valueNode.isArrayItem_nonFirst = true;
 				if (valueTypeDerivedFromDeclaredType)
 					valueNode.metadata = value.GetType().FullName;
 				keyValuePairPseudoNode.items.Add(valueNode);

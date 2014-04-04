@@ -26,7 +26,7 @@ namespace SystemMaker
 			var testWorld = Test1.CreateWorld();
 			
 			// serialize it, and save it to file
-			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new []{typeof(VObject).GetMember("id")[0]}));
+			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new []{typeof(VObject).GetMember("id")[0]}, null, null, true));
 			var file = new FileInfo(SavePath.Text);
 			if (!file.Directory.Exists)
 				file.Directory.Create();

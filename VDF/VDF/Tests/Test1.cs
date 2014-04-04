@@ -7,15 +7,14 @@ static class Test1
 	public static World CreateWorld()
 	{
 		var world = new World("Main");
-		var types = world.vObjectRoot.AddChild(new VObject("#Types"));
 
-		var soils = types.AddChild(new VObject("Soils"));
+		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
 		grass.AddDuty(new HoldSoil("Grass.png"));
 		var dirt = soils.AddChild(new VObject("Dirt"));
 		dirt.AddDuty(new HoldSoil("Dirt.png"));
 
-		var items = types.AddChild(new VObject("Items"));
+		var items = world.vObjectRoot.AddChild(new VObject("Items"));
 		items.AddDuty(new Special1(Color.White, .5f));
 		items.AddChild(new VObject("NameThat{NeedsEscaping}"));
 		var camera = items.AddChild(new VObject("Camera"));
@@ -49,13 +48,18 @@ static class Test1
 
 class World
 {
-	[VDFProp] public string name;
-	[VDFProp] public VObject vObjectRoot;
+	[VDFProp]
+	public string name;
+	[VDFProp]
+	public VObject vObjectRoot;
+	[VDFProp]
+	public List<List<string>> listOfStringLists;
 
 	public World(string name)
 	{
 		this.name = name;
 		vObjectRoot = new VObject("VObjectRoot");
+		listOfStringLists = new List<List<string>> { new List<string> { "1A", "1B", "1C" }, new List<string> { "2A", "2B", "2C" }, new List<string> { "3A", "3B", "3C" } };
 	}
 }
 
@@ -63,10 +67,14 @@ class VObject
 {
 	public VObject parent;
 
-	/*[VDFProp]*/ public Guid id; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call
-	[VDFProp] public string name;
-	[VDFProp(true, true, true)] public List<Duty> duties;
-	[VDFProp(true, true, true)] public List<VObject> children;
+	/*[VDFProp]*/
+	public Guid id; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call
+	[VDFProp]
+	public string name;
+	[VDFProp(true, true, true)]
+	public List<Duty> duties;
+	[VDFProp(true, true, true)]
+	public List<VObject> children;
 
 	public VObject(string name)
 	{
@@ -95,16 +103,19 @@ class VObject
 	}
 }
 
-class Duty {}
+class Duty { }
 class HoldSoil : Duty
 {
-	[VDFProp] public string texturePath;
+	[VDFProp]
+	public string texturePath;
 	public HoldSoil(string texturePath) { this.texturePath = texturePath; }
 }
 class Special1 : Duty
 {
-	[VDFProp] public Color color;
-	[VDFProp] public float brightness;
+	[VDFProp]
+	public Color color;
+	[VDFProp]
+	public float brightness;
 	public Special1(Color color, float brightness)
 	{
 		this.color = color;
@@ -113,9 +124,12 @@ class Special1 : Duty
 }
 class HoldTransform : Duty
 {
-	[VDFProp] public Vector3 position;
-	[VDFProp] public Vector3 rotation;
-	[VDFProp] public Vector3 scale;
+	[VDFProp]
+	public Vector3 position;
+	[VDFProp]
+	public Vector3 rotation;
+	[VDFProp]
+	public Vector3 scale;
 	public HoldTransform(Vector3 position = default(Vector3), Vector3 rotation = default(Vector3), Vector3 scale = default(Vector3))
 	{
 		this.position = position;
@@ -125,8 +139,10 @@ class HoldTransform : Duty
 }
 class HoldMesh : Duty
 {
-	[VDFProp] public List<Vector3> vertexes;
-	[VDFProp] public Dictionary<Vector3, Color> vertexColors;
+	[VDFProp]
+	public List<Vector3> vertexes;
+	[VDFProp]
+	public Dictionary<Vector3, Color> vertexColors;
 	public HoldMesh(List<Vector3> vertexes, Dictionary<Vector3, Color> vertexColors)
 	{
 		this.vertexes = vertexes;
@@ -135,8 +151,10 @@ class HoldMesh : Duty
 }
 class HoldDuties : Duty
 {
-	[VDFProp] public string dutiesEnabledWhen;
-	[VDFProp(true, true, true)] public List<Duty> duties;
+	[VDFProp]
+	public string dutiesEnabledWhen;
+	[VDFProp(true, true, true)]
+	public List<Duty> duties;
 
 	public HoldDuties(string dutiesEnabledWhen)
 	{
@@ -151,9 +169,9 @@ class HoldDuties : Duty
 	}
 	public void RemoveDuty(Duty duty) { duties.Remove(duty); }
 }
-class MoveSelfToInventory : Duty {}
-class RenderMesh : Duty {}
-class MoveSelfToWorld : Duty {}
+class MoveSelfToInventory : Duty { }
+class RenderMesh : Duty { }
+class MoveSelfToWorld : Duty { }
 
 [VDFType(true)]
 struct Vector3

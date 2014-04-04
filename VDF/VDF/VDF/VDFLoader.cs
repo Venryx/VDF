@@ -21,7 +21,7 @@ static class VDFLoader
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
+				if (vdfToken.type == VDFTokenType.Metadata_BaseValue) //&& objNode.metadata == null // todo; break point
 					objNode.metadata = vdfToken.text;
 				else if (vdfToken.type == VDFTokenType.Data_PropName)
 				{
