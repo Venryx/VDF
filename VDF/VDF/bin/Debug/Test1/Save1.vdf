@@ -1,25 +1,25 @@
-<World>name{<string>Main}vObjectRoot{<VObject>id{<System.Guid>}name{<string>VObjectRoot}children{<System.Collections.Generic.List[VObject]>#}}listOfStringLists{<System.Collections.Generic.List[System.Collections.Generic.List[string]]><System.Collections.Generic.List[string]>{<string>1A|<string>1B|<string>1C}|<System.Collections.Generic.List[string]>{<string>2A|<string>2B|<string>2C}|<System.Collections.Generic.List[string]>{<string>3A|<string>3B|<string>3C}}
-	<VObject>id{<System.Guid>}name{<string>Soils}children{<System.Collections.Generic.List[VObject]>#}
-		<VObject>id{<System.Guid>}name{<string>Grass}duties{<System.Collections.Generic.List[Duty]>#}
-			<HoldSoil>texturePath{<string>Grass.png}
-		<VObject>id{<System.Guid>}name{<string>Dirt}duties{<System.Collections.Generic.List[Duty]>#}
-			<HoldSoil>texturePath{<string>Dirt.png}
-	<VObject>id{<System.Guid>}name{<string>Items}duties{<System.Collections.Generic.List[Duty]>#}children{<System.Collections.Generic.List[VObject]>#}
-		<Special1>color{<System.Drawing.Color>White}brightness{<float>.5}
-		#<VObject>id{<System.Guid>}name{<string>@@@NameThat{NeedsEscaping}@@@}
-		<VObject>id{<System.Guid>}name{<string>Camera}duties{<System.Collections.Generic.List[Duty]>#}
-			<HoldTransform>position{<Vector3>1,9,2}rotation{<Vector3>25.5,28.9,2404.765}scale{<Vector3>3,4,1}
-			<HoldMesh>vertexes{<System.Collections.Generic.List[Vector3]><Vector3>9,4,2.5|<Vector3>1,8,9.5435|<Vector3>25,15,5}vertexColors{<System.Collections.Generic.Dictionary[Vector3, System.Drawing.Color]>{<Vector3>9,4,2.5|<System.Drawing.Color>Black}{<Vector3>1,8,9.5435|<System.Drawing.Color>Gray}{<Vector3>25,15,5|<System.Drawing.Color>White}}
-			<HoldDuties>dutiesEnabledWhen{<string>SelfIsInWorld}duties{<System.Collections.Generic.List[Duty]>#}
+name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}listOfStringLists{{1A|1B|1C}|{2A|2B|2C}|{3A|3B|3C}}
+	id{}name{Soils}children{#}
+		id{}name{Grass}duties{#}
+			<HoldSoil>texturePath{Grass.png}
+		id{}name{Dirt}duties{#}
+			<HoldSoil>texturePath{Dirt.png}
+	id{}name{Items}duties{#}children{#}
+		<Special1>color{White}brightness{.5}
+		#id{}name{@@@NameThat{NeedsEscaping}@@@}
+		id{}name{Camera}duties{#}
+			<HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
+			<HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}vertexColors{{9,4,2.5|Black}{1,8,9.5435|Gray}{25,15,5|White}}
+			<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
 				<MoveSelfToInventory>
 				<RenderMesh>
-			<HoldDuties>dutiesEnabledWhen{<string>!SelfIsInWorld}duties{<System.Collections.Generic.List[Duty]>#}
+			<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
 				<MoveSelfToWorld>
-		<VObject>id{<System.Guid>}name{<string>GardenHoe}duties{<System.Collections.Generic.List[Duty]>#}
-			<HoldTransform>position{<Vector3>0,0,0}rotation{<Vector3>0,0,0}scale{<Vector3>0,0,0}
-			<HoldMesh>vertexes{<System.Collections.Generic.List[Vector3]>}vertexColors{<System.Collections.Generic.Dictionary[Vector3, System.Drawing.Color]>}
-			<HoldDuties>dutiesEnabledWhen{<string>SelfIsInWorld}duties{<System.Collections.Generic.List[Duty]>#}
+		id{}name{GardenHoe}duties{#}
+			<HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
+			<HoldMesh>vertexes{}vertexColors{}
+			<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
 				<MoveSelfToInventory>
 				<RenderMesh>
-			<HoldDuties>dutiesEnabledWhen{<string>!SelfIsInWorld}duties{<System.Collections.Generic.List[Duty]>#}
+			<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
 				<MoveSelfToWorld>

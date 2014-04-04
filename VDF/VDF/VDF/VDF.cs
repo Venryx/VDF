@@ -83,13 +83,14 @@ static class VDF
 				char ch = realName[i];
 				if (ch == '>')
 					depth--;
-				if (depth == 0 && (ch == ',' || ch == '>'))
+
+				if ((depth == 0 && ch == '>') || (depth == 1 && ch == ','))
 					genericArgumentTypes.Add(GetTypeByRealName(realName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)))); // get generic-parameter type, by sending its parsed real-name back into this method
-				if (ch == '<')
-				{
+				if ((depth == 0 && ch == '<') || (depth == 1 && ch == ','))
 					lastStartBracketPos = i;
+
+				if (ch == '<')
 					depth++;
-				}
 			}
 			return rootType.MakeGenericType(genericArgumentTypes.ToArray());
 		}

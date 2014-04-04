@@ -21,19 +21,19 @@ namespace SystemMaker
 
 		public Main() { InitializeComponent(); }
 
-		private void Save_Click(object sender, System.EventArgs e)
+		private void Save_Click(object sender, EventArgs e)
 		{
 			var testWorld = Test1.CreateWorld();
 			
 			// serialize it, and save it to file
-			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new []{typeof(VObject).GetMember("id")[0]}, null, null, true));
+			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new []{typeof(VObject).GetMember("id")[0]})); //, null, null, true));
 			var file = new FileInfo(SavePath.Text);
 			if (!file.Directory.Exists)
 				file.Directory.Create();
 			File.WriteAllText(file.FullName, vdf);
 		}
 
-		private void Load_Click(object sender, System.EventArgs e)
+		private void Load_Click(object sender, EventArgs e)
 		{
 			// load from file
 			var file = new FileInfo(LoadPath.Text);

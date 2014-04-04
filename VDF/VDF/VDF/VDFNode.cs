@@ -1,20 +1,21 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
 class VDFNode
 {
-	public string metadata;
-	public List<object> items = new List<object>();
+	public Type metadata_type;
+	public string baseValue;
+	public List<VDFNode> items = new List<VDFNode>(); // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
 	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>();
 	
 	// saving
 	// ==================
 
+	public bool isNamedPropertyValue;
+	public bool isListOrDictionary;
 	public bool popOutToOwnLine;
 	public bool isFirstItemOfNonFirstPopOutGroup;
 	public bool isArrayItem_array;
@@ -27,19 +28,15 @@ class VDFNode
 			builder.Append("#");
 		if (isArrayItem_nonFirst && !popOutToOwnLine)
 			builder.Append("|");
-		if (metadata != null)
-			builder.Append("<" + metadata + ">");
 		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isArrayItem_array)
 			builder.Append("{");
+		if (metadata_type != null)
+			builder.Append("<" + (isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + VDF.TypeToRealTypeName(metadata_type).Replace(" ", "") + ">" : VDF.TypeToRealTypeName(metadata_type).Replace(" ", "")) + ">");
 
-		foreach (object item in items)
-			if (item is VDFNode)
-			{
-				if (!((VDFNode)item).popOutToOwnLine)
-					builder.Append(((VDFNode)item).GetInLineItemText());
-			}
-			else
-				builder.Append(item);
+		builder.Append(baseValue);
+		foreach (VDFNode item in items)
+			if (!item.popOutToOwnLine)
+				builder.Append(item.GetInLineItemText());
 		foreach (string propName in properties.Keys)
 			if (!properties[propName].popOutToOwnLine)
 				builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
@@ -54,14 +51,13 @@ class VDFNode
 		var lines = new List<string>();
 		if (popOutToOwnLine)
 			lines.Add(GetInLineItemText());
-		foreach (object item in items)
-			if (item is VDFNode)
-			{
-				string poppedOutText = ((VDFNode)item).GetPoppedOutItemText();
-				if (poppedOutText.Length > 0)
-					foreach (string line in poppedOutText.Split(new[] {'\n'}))
-						lines.Add(line);
-			}
+		foreach (VDFNode item in items)
+		{
+			string poppedOutText = item.GetPoppedOutItemText();
+			if (poppedOutText.Length > 0)
+				foreach (string line in poppedOutText.Split(new[] {'\n'}))
+					lines.Add(line);
+		}
 		foreach (string propName in properties.Keys)
 		{
 			VDFNode propValueNode = properties[propName];
@@ -93,16 +89,16 @@ class VDFNode
 	static object ConvertRawValueToCorrectType(object rawValue, Type declaredType)
 	{
 		object result;
-		if (rawValue is VDFNode)
-			result = ((VDFNode)rawValue).ToObject(((VDFNode)rawValue).metadata != null ? VDF.GetTypeByRealName(((VDFNode)rawValue).metadata.Replace("[", "<").Replace("]", ">")) : declaredType); // tell node to return itself as the correct type
-		else // must be a string
+		if (rawValue is VDFNode && ((VDFNode)rawValue).baseValue == null)
+			result = ((VDFNode)rawValue).ToObject(((VDFNode)rawValue).metadata_type ?? declaredType); // tell node to return itself as the correct type
+		else // base-value must be a string (todo; update the 'items' var to only accept VDFNodes now)
 		{
 			if (VDF.typeImporters_inline.ContainsKey(declaredType))
-				result = VDF.typeImporters_inline[declaredType]((string)rawValue);
+				result = VDF.typeImporters_inline[declaredType](((VDFNode)rawValue).baseValue); //(string)rawValue);
 			else if (declaredType.IsEnum)
-				result = Enum.Parse(declaredType, (string)rawValue);
+				result = Enum.Parse(declaredType, ((VDFNode)rawValue).baseValue);
 			else // if no specific handler, try auto-converting string to the correct (primitive) type
-				result = Convert.ChangeType(rawValue, declaredType);
+				result = Convert.ChangeType(((VDFNode)rawValue).baseValue, declaredType);
 		}
 		return result;
 	}
@@ -110,13 +106,12 @@ class VDFNode
 	public T ToObject<T>() { return (T)ToObject(typeof(T)); }
 	public object ToObject(Type declaredType)
 	{
-		if (declaredType == typeof(string))
-			return (string)items[0] == "null" ? null : items[0]; // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
+		if (declaredType == typeof(string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
+			return items[0].baseValue == "null" ? null : items[0].baseValue;
 
-		Type type = declaredType;
-		if (metadata != null)
-			type = VDF.GetTypeByRealName(metadata.Replace("[", "<").Replace("]", ">")); //Type.GetType(metadata);
+		Type type = metadata_type ?? declaredType;
 		var typeInfo = VDFTypeInfo.Get(type);
+
 		object result = CreateNewInstanceOfType(type);
 		for (int i = 0; i < items.Count; i++)
 			if (result is Array)
@@ -124,14 +119,15 @@ class VDFNode
 			else if (result is IList)
 				((IList)result).Add(ConvertRawValueToCorrectType(items[i], type.GetGenericArguments()[0]));
 			else if (result is IDictionary) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				((IDictionary)result).Add(ConvertRawValueToCorrectType(((VDFNode)items[i]).items[0], type.GetGenericArguments()[0]), ConvertRawValueToCorrectType(((VDFNode)items[i]).items[1], type.GetGenericArguments()[1]));
-			else // must be primitive, with first item actually being this node's value
+				((IDictionary)result).Add(ConvertRawValueToCorrectType(items[i].items[0], type.GetGenericArguments()[0]), ConvertRawValueToCorrectType(items[i].items[1], type.GetGenericArguments()[1]));
+			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
 				result = ConvertRawValueToCorrectType(items[i], type);
 		foreach (string propName in properties.Keys)
 		{
 			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
 			propInfo.SetValue(result, ConvertRawValueToCorrectType(properties[propName], propInfo.GetPropType()));
 		}
+
 		return result;
 	}
 }

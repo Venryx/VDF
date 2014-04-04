@@ -4,6 +4,8 @@ enum VDFTokenType
 {
 	None,
 	PoppedOutNodeMarker,
+	SpecialMetadataStart,
+	SpecialMetadataEnd,
 	StartMetadataBracket,
 	Metadata_BaseValue,
 	EndMetadataBracket,
@@ -62,9 +64,25 @@ class VDFTokenParser
 				continue;
 
 			if (ch == '<')
-				tokenType = VDFTokenType.StartMetadataBracket;
+			{
+				if (nextChar == '<')
+				{
+					tokenType = VDFTokenType.SpecialMetadataStart;
+					i++;
+				}
+				else
+					tokenType = VDFTokenType.StartMetadataBracket;
+			}
 			else if (ch == '>')
-				tokenType = VDFTokenType.EndMetadataBracket;
+			{
+				if (nextChar == '>')
+				{
+					tokenType = VDFTokenType.SpecialMetadataEnd;
+					i++;
+				}
+				else
+					tokenType = VDFTokenType.EndMetadataBracket;
+			}
 			else if (ch == '{')
 				tokenType = VDFTokenType.StartDataBracket;
 			else if (ch == '}')
@@ -73,8 +91,8 @@ class VDFTokenParser
 			{
 				if (ch == '\n')
 					tokenType = VDFTokenType.LineBreak;
-				//else if (ch == '\t')
-				//	tokenType = VDFTokenType.Indent;
+					//else if (ch == '\t')
+					//	tokenType = VDFTokenType.Indent;
 				else if (ch == '#' && lastChar.HasValue && lastChar == '\t')
 					tokenType = VDFTokenType.PoppedOutNodeMarker;
 				else if (ch == '|')
