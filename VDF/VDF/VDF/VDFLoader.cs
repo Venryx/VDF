@@ -2,10 +2,25 @@
 using System.Collections;
 using System.Collections.Generic;
 
+class VDFLoadOptions
+{
+	public Dictionary<string, string> namespaceAliasesByName;
+	public Dictionary<Type, string> typeAliasesByType;
+
+	public VDFLoadOptions(Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	{
+		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
+		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
+	}
+}
+
 static class VDFLoader
 {
-	public static VDFNode ToVDFNode(string vdfFile, int firstObjTextCharPos = 0)
+	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0)
 	{
+		if (loadOptions == null)
+			loadOptions = new VDFLoadOptions();
+
 		var objNode = new VDFNode();
 
 		int depth = 0;
@@ -30,7 +45,7 @@ static class VDFLoader
 					lastMetadataStartToken = vdfToken.type;
 				else if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
 				{
-					var type = VDF.GetTypeByBasicName(vdfToken.text); //Type.GetType(vdfToken.text);
+					var type = VDF.GetTypeByVName(vdfToken.text, loadOptions); //Type.GetType(vdfToken.text);
 					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.SpecialMetadataStart || (!typeof(IList).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))))
 						objNode.metadata_type = vdfToken.text;
 					else // if we're supposed to be finding these tokens as nodes, to fill list-obj
@@ -42,7 +57,7 @@ static class VDFLoader
 					livePropValueNode = new VDFNode();
 				}
 				else if (vdfToken.type == VDFTokenType.StartDataBracket)
-					livePropValueNode = ToVDFNode(vdfFile, parser.nextCharPos);
+					livePropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos);
 				else if (vdfToken.type == VDFTokenType.EndDataBracket)
 				{
 					if (livePropName != null) // property of object
@@ -69,7 +84,7 @@ static class VDFLoader
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
 						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
 						foreach (int pos in poppedOutChildDataTextPositions)
-							livePropValueNode.items.Add(ToVDFNode(vdfFile, pos));
+							livePropValueNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos));
 						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
 					}
 					else

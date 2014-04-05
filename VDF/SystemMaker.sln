@@ -2,21 +2,53 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemMaker", "VDF\SystemMaker.csproj", "{F454B327-F492-44EE-A332-7D83D5346D81}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDFTests", "VDFTests\VDFTests.csproj", "{AA127A4F-88BE-4DF6-903C-5748F0845215}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCFF51E8-9426-49EF-AF02-7D1BBE62F8F6}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		SystemMaker.vsmdi = SystemMaker.vsmdi
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(CodealikeProperties) = postSolution
-		SolutionGuid = b94c500b-1d41-4f81-8541-6431074cca7c
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = SystemMaker.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F454B327-F492-44EE-A332-7D83D5346D81}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{F454B327-F492-44EE-A332-7D83D5346D81}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{F454B327-F492-44EE-A332-7D83D5346D81}.Debug|Mixed Platforms.Build.0 = Debug|x86
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Debug|x86.ActiveCfg = Debug|x86
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Debug|x86.Build.0 = Debug|x86
+		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|Any CPU.ActiveCfg = Release|x86
+		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|Mixed Platforms.Build.0 = Release|x86
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|x86.ActiveCfg = Release|x86
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|x86.Build.0 = Release|x86
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(CodealikeProperties) = postSolution
+		SolutionGuid = b94c500b-1d41-4f81-8541-6431074cca7c
 	EndGlobalSection
 EndGlobal

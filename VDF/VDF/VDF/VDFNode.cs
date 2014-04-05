@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Runtime.Serialization;
 using System.Text;
 
@@ -86,11 +87,11 @@ class VDFNode
 			return Activator.CreateInstance(type, true);
 		return FormatterServices.GetUninitializedObject(type); // preferred (for simplicity/consistency's sake): create an instance of the type, completely uninitialized 
 	}
-	static object ConvertRawValueToCorrectType(object rawValue, Type declaredType)
+	static object ConvertRawValueToCorrectType(object rawValue, Type declaredType, VDFLoadOptions loadOptions)
 	{
 		object result;
 		if (rawValue is VDFNode && ((VDFNode)rawValue).baseValue == null)
-			result = ((VDFNode)rawValue).ToObject(VDF.GetTypeByBasicName(((VDFNode)rawValue).metadata_type) ?? declaredType); // tell node to return itself as the correct type
+			result = ((VDFNode)rawValue).ToObject(((VDFNode)rawValue).metadata_type != null ? VDF.GetTypeByVName(((VDFNode)rawValue).metadata_type, loadOptions) : declaredType, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string (todo; update the 'items' var to only accept VDFNodes now)
 		{
 			if (VDF.typeImporters_inline.ContainsKey(declaredType))
@@ -103,29 +104,29 @@ class VDFNode
 		return result;
 	}
 
-	public T ToObject<T>() { return (T)ToObject(typeof(T)); }
-	public object ToObject(Type declaredType)
+	public T ToObject<T>(VDFLoadOptions loadOptions = null) { return (T)ToObject(typeof(T), loadOptions); }
+	public object ToObject(Type declaredType, VDFLoadOptions loadOptions = null)
 	{
 		if (declaredType == typeof(string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
 			return items[0].baseValue == "null" ? null : items[0].baseValue;
 
-		Type type = VDF.GetTypeByBasicName(metadata_type) ?? declaredType;
+		Type type = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
 		var typeInfo = VDFTypeInfo.Get(type);
 
 		object result = CreateNewInstanceOfType(type);
 		for (int i = 0; i < items.Count; i++)
 			if (result is Array)
-				((Array)result).SetValue(ConvertRawValueToCorrectType(items[i], type.GetElementType()), i);
+				((Array)result).SetValue(ConvertRawValueToCorrectType(items[i], type.GetElementType(), loadOptions), i);
 			else if (result is IList)
-				((IList)result).Add(ConvertRawValueToCorrectType(items[i], type.GetGenericArguments()[0]));
+				((IList)result).Add(ConvertRawValueToCorrectType(items[i], type.GetGenericArguments()[0], loadOptions));
 			else if (result is IDictionary) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				((IDictionary)result).Add(ConvertRawValueToCorrectType(items[i].items[0], type.GetGenericArguments()[0]), ConvertRawValueToCorrectType(items[i].items[1], type.GetGenericArguments()[1]));
+				((IDictionary)result).Add(ConvertRawValueToCorrectType(items[i].items[0], type.GetGenericArguments()[0], loadOptions), ConvertRawValueToCorrectType(items[i].items[1], type.GetGenericArguments()[1], loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
-				result = ConvertRawValueToCorrectType(items[i], type);
+				result = ConvertRawValueToCorrectType(items[i], type, loadOptions);
 		foreach (string propName in properties.Keys)
 		{
 			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-			propInfo.SetValue(result, ConvertRawValueToCorrectType(properties[propName], propInfo.GetPropType()));
+			propInfo.SetValue(result, ConvertRawValueToCorrectType(properties[propName], propInfo.GetPropType(), loadOptions));
 		}
 
 		return result;
