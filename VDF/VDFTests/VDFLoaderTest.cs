@@ -42,12 +42,12 @@ namespace VDFTests
 		[ClassInitialize]
 		public static void MyClassInitialize(TestContext testContext)
 		{
-			VDF.RegisterTypeExporter_Inline<Guid>(id => ""); //id.ToString());
-			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
-			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
-			VDF.RegisterTypeImporter_Inline<Vector3>(str =>
+			VDF.RegisterTypeExporter_Inline<Guid>(id=>""); //id.ToString());
+			VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
+			VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
+			VDF.RegisterTypeImporter_Inline<Vector3>(str=>
 			{
-				string[] parts = str.Split(new[] { ',' });
+				string[] parts = str.Split(new[] {','});
 				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
 			});
 		}
@@ -69,12 +69,12 @@ namespace VDFTests
 		[ClassInitialize]
 		public static void MyClassInitialize(TestContext testContext)
 		{
-			VDF.RegisterTypeExporter_Inline<Guid>(id => ""); //id.ToString());
-			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
-			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
-			VDF.RegisterTypeImporter_Inline<Vector3>(str =>
+			VDF.RegisterTypeExporter_Inline<Guid>(id=>""); //id.ToString());
+			VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
+			VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
+			VDF.RegisterTypeImporter_Inline<Vector3>(str=>
 			{
-				string[] parts = str.Split(new[] { ',' });
+				string[] parts = str.Split(new[] {','});
 				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
 			});
 		}
@@ -82,7 +82,7 @@ namespace VDFTests
 		[TestMethod]
 		public void SpeedTest()
 		{
-			World a = VDF.Deserialize<World>(@"<World>name{<string>Main}vObjectRoot{<VObject>id{<Guid>}name{<string>VObjectRoot}children{<<List[VObject]>>#}}listOfStringLists{<<List[List[string]]>>{<<List[string]>><string>1A|<string>1B|<string>1C}|{<<List[string]>><string>2A|<string>2B|<string>2C}|{<<List[string]>><string>3A|<string>3B|<string>3C}}
+			var a = VDF.Deserialize<World>(@"<World>name{<string>Main}vObjectRoot{<VObject>id{<Guid>}name{<string>VObjectRoot}children{<<List[VObject]>>#}}listOfStringLists{<<List[List[string]]>>{<<List[string]>><string>1A|<string>1B|<string>1C}|{<<List[string]>><string>2A|<string>2B|<string>2C}|{<<List[string]>><string>3A|<string>3B|<string>3C}}
 	<VObject>id{<Guid>}name{<string>Soils}children{<<List[VObject]>>#}
 		<VObject>id{<Guid>}name{<string>Grass}duties{<<List[Duty]>>#}
 			<HoldSoil>texturePath{<string>Grass.png}
