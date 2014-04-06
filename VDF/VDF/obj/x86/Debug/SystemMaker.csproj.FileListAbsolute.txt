@@ -15,3 +15,5 @@ C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Debug\SystemMaker.Main.res
 C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
 C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Debug\SystemMaker.csproj.GenerateResource.Cache
 C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Debug\SystemMaker.csprojResolveAssemblyReference.cache
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\bin\Debug\xunit.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\bin\Debug\xunit.xml

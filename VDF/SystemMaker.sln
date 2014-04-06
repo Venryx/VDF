@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SystemMaker", "VDF\SystemMaker.csproj", "{F454B327-F492-44EE-A332-7D83D5346D81}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDF", "VDF\VDF.csproj", "{F454B327-F492-44EE-A332-7D83D5346D81}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCFF51E8-9426-49EF-AF02-7D1BBE62F8F6}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDFTests", "VDFTests\VDFTests.csproj", "{AA127A4F-88BE-4DF6-903C-5748F0845215}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDFTests", "VDFTests\VDFTests.csproj", "{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
@@ -34,16 +34,16 @@ Global
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|Mixed Platforms.Build.0 = Release|x86
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|x86.ActiveCfg = Release|x86
 		{F454B327-F492-44EE-A332-7D83D5346D81}.Release|x86.Build.0 = Release|x86
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{AA127A4F-88BE-4DF6-903C-5748F0845215}.Release|x86.ActiveCfg = Release|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
