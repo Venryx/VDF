@@ -99,19 +99,19 @@ class VDFTokenParser
 				else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
 				{
 					tokenType = VDFTokenType.InLineComment;
-					i += nextNextChar == '\n' ? 2 : (nextNextChar == '\r' ? 3 : 0); // skip to first char of next line (if line ends right after comment marker)
+					i = FindNextLineBreakCharPos(vdf, i + 2); // since rest of line is comment, skip to first char of next line
 				}
 				//else if (ch == '\t')
 				//	tokenType = VDFTokenType.Indent;
-				else if (ch == '#' && lastChar.HasValue && lastChar == '\t')
+				else if (ch == '#' && lastChar == '\t')
 					tokenType = VDFTokenType.PoppedOutNodeMarker;
 				else if (ch == '|')
 					tokenType = VDFTokenType.ItemSeparator;
-				else if (nextChar.HasValue && nextChar == '>')
+				else if (nextChar == '>')
 					tokenType = VDFTokenType.Metadata_BaseValue;
-				else if (nextChar.HasValue && nextChar == '{')
+				else if (nextChar == '{')
 					tokenType = VDFTokenType.Data_PropName;
-				else if (nextChar.HasValue && (nextChar == '}' || nextChar == '|')) // if normal char, and we're at end of normal-segment
+				else if (nextChar == '}' || nextChar == '|' || nextChar == null) // if normal char, and we're at end of normal-segment // todo; break point
 					tokenType = VDFTokenType.Data_BaseValue;
 			}
 		}
@@ -120,5 +120,13 @@ class VDFTokenParser
 		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, new string(tokenChars.ToArray())) : null;
 		tokens.Add(token);
 		return token;
+	}
+
+	static int FindNextLineBreakCharPos(string vdfFile, int searchStartPos)
+	{
+		for (int i = searchStartPos; i < vdfFile.Length; i++)
+			if (vdfFile[i] == '\n')
+				return i;
+		return -1;
 	}
 }

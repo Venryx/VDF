@@ -1,11 +1,7 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using Microsoft.CSharp;
 
 static class VDF
 {
@@ -18,13 +14,11 @@ static class VDF
 	public static MemberInfo AnyMember = typeof(VDF).GetMember("AnyMember")[0];
 	public static List<MemberInfo> AllMembers = new List<MemberInfo> {AnyMember};
 
-	static CSharpCodeProvider codeProvider;
 	static Dictionary<string, Type> builtInTypesByAlias;
 	static Dictionary<Type, string> builtInTypeAliasesByType;
 	
 	static VDF()
 	{
-		codeProvider = new CSharpCodeProvider();
 		builtInTypesByAlias = new Dictionary<string, Type>
 		{
 			{"byte", typeof(Byte)}, {"sbyte", typeof(SByte)}, {"short", typeof(Int16)}, {"ushort", typeof(UInt16)},

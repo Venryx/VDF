@@ -3,18 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDF", "VDF\VDF.csproj", "{F454B327-F492-44EE-A332-7D83D5346D81}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCFF51E8-9426-49EF-AF02-7D1BBE62F8F6}"
-	ProjectSection(SolutionItems) = preProject
-		Local.testsettings = Local.testsettings
-		SystemMaker.vsmdi = SystemMaker.vsmdi
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDFTests", "VDFTests\VDFTests.csproj", "{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}"
 EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = SystemMaker.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms

@@ -36,7 +36,7 @@ static class VDFLoader
 		{
 			VDFToken token = parser.tokens.Last();
 			if (token.type == VDFTokenType.EndDataBracket)
-				depth--;
+				depth--; 
 
 			if (depth < 0)
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
@@ -51,6 +51,19 @@ static class VDFLoader
 						objNode.metadata_type = token.text;
 					else // if we're supposed to be finding these tokens as nodes, to fill list-obj
 						lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
+				}
+				else if (token.type == VDFTokenType.Data_BaseValue)
+				{
+					if (token.text == "#")
+					{
+						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
+						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
+						foreach (int pos in poppedOutChildDataTextPositions)
+							objNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos));
+						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
+					}
+					else
+						objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
 				}
 				else if (token.type == VDFTokenType.Data_PropName)
 				{
@@ -74,25 +87,6 @@ static class VDFLoader
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
-			else if (depth == 1)
-			{
-				if (token.type == VDFTokenType.Metadata_BaseValue)
-					lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
-				else if (token.type == VDFTokenType.Data_BaseValue)
-				{
-					if (token.text == "#")
-					{
-						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
-						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
-						foreach (int pos in poppedOutChildDataTextPositions)
-							livePropValueNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos));
-						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
-					}
-					else
-						livePropValueNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
-				}
-			}
-
 			if (token.type == VDFTokenType.StartDataBracket)
 				depth++;
 		}
