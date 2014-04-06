@@ -16,6 +16,7 @@ enum VDFTokenType
 	Data_BaseValue,
 	EndDataBracket,
 	LineBreak,
+	InLineComment,
 	//Indent // this is taken care of at a higher level by the VDFLoader class
 }
 class VDFToken
@@ -31,18 +32,22 @@ class VDFToken
 class VDFTokenParser
 {
 	string vdf;
-	bool inLiteralMarkers;
 	public int nextCharPos;
+	public List<VDFToken> tokens; 
 	public VDFTokenParser(string vdf, int firstCharPos)
 	{
 		this.vdf = vdf;
 		nextCharPos = firstCharPos;
+		tokens = new List<VDFToken>();
 	}
 
 	public VDFToken GetNextToken()
 	{
 		var tokenType = VDFTokenType.None;
 		var tokenChars = new List<char>();
+
+		bool inLiteralMarkers = false;
+
 		int i = nextCharPos;
 		for (; i < vdf.Length && tokenType == VDFTokenType.None; i++)
 		{
@@ -91,8 +96,13 @@ class VDFTokenParser
 			{
 				if (ch == '\n')
 					tokenType = VDFTokenType.LineBreak;
-					//else if (ch == '\t')
-					//	tokenType = VDFTokenType.Indent;
+				else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
+				{
+					tokenType = VDFTokenType.InLineComment;
+					i += nextNextChar == '\n' ? 2 : (nextNextChar == '\r' ? 3 : 0); // skip to first char of next line (if line ends right after comment marker)
+				}
+				//else if (ch == '\t')
+				//	tokenType = VDFTokenType.Indent;
 				else if (ch == '#' && lastChar.HasValue && lastChar == '\t')
 					tokenType = VDFTokenType.PoppedOutNodeMarker;
 				else if (ch == '|')
@@ -107,6 +117,8 @@ class VDFTokenParser
 		}
 		nextCharPos = i;
 
-		return tokenType != VDFTokenType.None ? new VDFToken(tokenType, new string(tokenChars.ToArray())) : null;
+		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, new string(tokenChars.ToArray())) : null;
+		tokens.Add(token);
+		return token;
 	}
 }

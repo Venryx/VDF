@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 class VDFLoadOptions
 {
@@ -31,34 +32,34 @@ static class VDFLoader
 		var lastMetadataStartToken = VDFTokenType.None;
 
 		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
-		VDFToken vdfToken;
-		while ((vdfToken = parser.GetNextToken()) != null)
+		while (parser.GetNextToken() != null)
 		{
-			if (vdfToken.type == VDFTokenType.EndDataBracket)
+			VDFToken token = parser.tokens.Last();
+			if (token.type == VDFTokenType.EndDataBracket)
 				depth--;
 
 			if (depth < 0)
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (vdfToken.type == VDFTokenType.StartMetadataBracket || vdfToken.type == VDFTokenType.SpecialMetadataStart)
-					lastMetadataStartToken = vdfToken.type;
-				else if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
+				if (token.type == VDFTokenType.StartMetadataBracket || token.type == VDFTokenType.SpecialMetadataStart)
+					lastMetadataStartToken = token.type;
+				else if (token.type == VDFTokenType.Metadata_BaseValue)
 				{
-					var type = VDF.GetTypeByVName(vdfToken.text, loadOptions); //Type.GetType(vdfToken.text);
+					var type = VDF.GetTypeByVName(token.text, loadOptions); //Type.GetType(vdfToken.text);
 					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.SpecialMetadataStart || (!typeof(IList).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))))
-						objNode.metadata_type = vdfToken.text;
+						objNode.metadata_type = token.text;
 					else // if we're supposed to be finding these tokens as nodes, to fill list-obj
-						lastMetadata_type = vdfToken.text; //Type.GetType(vdfToken.text);
+						lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
 				}
-				else if (vdfToken.type == VDFTokenType.Data_PropName)
+				else if (token.type == VDFTokenType.Data_PropName)
 				{
-					livePropName = vdfToken.text;
+					livePropName = token.text;
 					livePropValueNode = new VDFNode();
 				}
-				else if (vdfToken.type == VDFTokenType.StartDataBracket)
+				else if (token.type == VDFTokenType.StartDataBracket)
 					livePropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos);
-				else if (vdfToken.type == VDFTokenType.EndDataBracket)
+				else if (token.type == VDFTokenType.EndDataBracket)
 				{
 					if (livePropName != null) // property of object
 					{
@@ -70,16 +71,16 @@ static class VDFLoader
 					else // must be key-value-pair-pseudo-object of a dictionary
 						objNode.items.Add(livePropValueNode);
 				}
-				else if (vdfToken.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
+				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
 			else if (depth == 1)
 			{
-				if (vdfToken.type == VDFTokenType.Metadata_BaseValue)
-					lastMetadata_type = vdfToken.text; //Type.GetType(vdfToken.text);
-				else if (vdfToken.type == VDFTokenType.Data_BaseValue)
+				if (token.type == VDFTokenType.Metadata_BaseValue)
+					lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
+				else if (token.type == VDFTokenType.Data_BaseValue)
 				{
-					if (vdfToken.text == "#")
+					if (token.text == "#")
 					{
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
 						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
@@ -88,11 +89,11 @@ static class VDFLoader
 						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
 					}
 					else
-						livePropValueNode.items.Add(new VDFNode {baseValue = vdfToken.text, metadata_type = lastMetadata_type});
+						livePropValueNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
 				}
 			}
 
-			if (vdfToken.type == VDFTokenType.StartDataBracket)
+			if (token.type == VDFTokenType.StartDataBracket)
 				depth++;
 		}
 
