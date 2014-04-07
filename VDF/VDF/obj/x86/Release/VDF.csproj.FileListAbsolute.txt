@@ -1,0 +1,8 @@
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\bin\Release\SystemMaker.exe.config
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\bin\Release\SystemMaker.exe
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\bin\Release\SystemMaker.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.Main.resources
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.Properties.Resources.resources
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\VDF.csproj.GenerateResource.Cache
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.exe
+C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.pdb

@@ -1,10 +1,12 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDF", "VDF\VDF.csproj", "{F454B327-F492-44EE-A332-7D83D5346D81}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS", "VDF\CS.csproj", "{F454B327-F492-44EE-A332-7D83D5346D81}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BCFF51E8-9426-49EF-AF02-7D1BBE62F8F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VDFTests", "VDFTests\VDFTests.csproj", "{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CS_Tests", "VDFTests\CS_Tests.csproj", "{7877F19D-B0C7-4E47-8F2F-E8BDDD2B8690}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
