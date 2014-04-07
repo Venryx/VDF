@@ -111,7 +111,7 @@ class VDFTokenParser
 					tokenType = VDFTokenType.Metadata_BaseValue;
 				else if (nextChar == '{')
 					tokenType = VDFTokenType.Data_PropName;
-				else if (nextChar == '}' || nextChar == '|' || nextChar == null) // if normal char, and we're at end of normal-segment // todo; break point
+				else if (nextChar == '}' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment // todo; break point
 					tokenType = VDFTokenType.Data_BaseValue;
 			}
 		}

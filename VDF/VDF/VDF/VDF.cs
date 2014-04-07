@@ -52,7 +52,10 @@ static class VDF
 	}
 	static Type GetTypeByVNameRoot(string vNameRoot, int genericsParams, VDFLoadOptions loadOptions)
 	{
-		var result = Type.GetType(vNameRoot);
+		if (loadOptions.typeAliasesByType.Values.Contains(vNameRoot))
+			return loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == vNameRoot).Key;
+
+		var result = Type.GetType(vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		if (result != null)
 			return result;
 		var namespaceAlias = vNameRoot.Contains(".") ? vNameRoot.Substring(0, vNameRoot.LastIndexOf(".")) : null;

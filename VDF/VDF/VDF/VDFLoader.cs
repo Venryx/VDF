@@ -7,6 +7,7 @@ class VDFLoadOptions
 {
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
+	//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
 	public VDFLoadOptions(Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
@@ -19,6 +20,7 @@ static class VDFLoader
 {
 	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0)
 	{
+		vdfFile = vdfFile.Replace("\r\n", "\n");
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
 
