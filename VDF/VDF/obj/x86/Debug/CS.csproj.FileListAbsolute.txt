@@ -1,3 +1,0 @@
-C:\Programming\Projects\Visual C#\VDF\VDF\VDF\bin\Debug\SystemMaker.exe.config
-C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Debug\SystemMaker.exe
-C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Debug\SystemMaker.pdb

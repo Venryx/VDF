@@ -1,0 +1,3 @@
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDF_Tests.csprojResolveAssemblyReference.cache
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.pdb

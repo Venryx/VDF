@@ -1,0 +1,3 @@
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\x86\Debug\VDF.csprojResolveAssemblyReference.cache
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
