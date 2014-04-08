@@ -19,11 +19,9 @@
   <ItemGroup>
     <Content Include="index.html" />
     <Content Include="Libraries\QUnit 1.14.0.js" />
-    <Content Include="Main.css" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="Main.ts" />
     <TypeScriptCompile Include="Scripts\typings\qunit\qunit.d.ts" />
   </ItemGroup>
   <ItemGroup>

@@ -12,7 +12,6 @@
             return _this.span.innerHTML = new Date().toUTCString();
         }, 500);
     };
-
     Greeter.prototype.stop = function () {
         clearTimeout(this.timerToken);
     };
