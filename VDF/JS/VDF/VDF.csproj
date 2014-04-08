@@ -40,7 +40,7 @@
     <Content Include="Demo\CSS\JQueryUIContextMenu.css" />
     <Content Include="Demo\CSS\JQueryUIMenuBar.css" />
     <Content Include="Demo\CSS\JQueryUI_Overrides.css" />
-    <Content Include="Demo\Packages\General\ClassExtensions.js" />
+    <TypeScriptCompile Include="Demo\Packages\General\ClassExtensions.ts" />
     <Content Include="Demo\Packages\JQueryFancyTree\Core.js" />
     <Content Include="Demo\Packages\JQueryFancyTree\DND.js" />
     <Content Include="Demo\Packages\JQueryFancyTree\Lion\Core.css" />
@@ -152,6 +152,7 @@
     <Content Include="Demo\Packages\V\VMessageBox.js" />
     <TypeScriptCompile Include="Demo\Packages\V\VTabView.ts" />
     <Content Include="Demo\Tests\Test1.html" />
+    <Content Include="index.html" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>

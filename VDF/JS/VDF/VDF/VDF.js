@@ -11,4 +11,3 @@
     }
     VDF.Serialize = Serialize;
 })(VDF || (VDF = {}));
-//# sourceMappingURL=VDF.js.map
