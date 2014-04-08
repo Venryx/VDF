@@ -1,10 +1,6 @@
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\VDFTests.dll
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\VDFTests.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\SystemMaker.exe
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\SystemMaker.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\FluentAssertions.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\FluentAssertions.xml
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\bin\Debug\xunit.xml
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\obj\Debug\VDFTests.csprojResolveAssemblyReference.cache
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\obj\Debug\VDFTests.dll
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\obj\Debug\VDFTests.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\bin\VDFTests.dll.config
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\bin\VDFTests.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\bin\VDFTests.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.csprojResolveAssemblyReference.cache
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.pdb

@@ -1,1 +1,0 @@
-C:\Programming\Projects\Visual C#\VDF\VDF\VDFTests\obj\Release\VDFTests.csprojResolveAssemblyReference.cache
