@@ -1,4 +1,9 @@
-$.prototype.VTabView = function()
+interface JQuery
+{
+	VTabView();
+}
+
+$.fn.VTabView = function()
 {
 	var root = $(this);
 	var buttonHolder = $(root.children()[0]);

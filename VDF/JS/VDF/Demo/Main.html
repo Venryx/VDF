@@ -1,0 +1,82 @@
+﻿<head>
+	<title>VDF Demo</title>
+
+	<!-- css -->
+	<link rel='stylesheet' type='text/css' href='CSS/Core.css' />
+	<!-- js -->
+	<script src="Packages/JQuery/JQuery1.9.1.js"></script>
+	<!--<script src="Demo/Packages/JQuery/JQueryContextMenu.js"></script>-->
+	<script src="Packages/JQuery/JQueryResize.js"></script>
+	<script src="Packages/JQuery/JQueryNodeListener.js"></script>
+	<script src="Packages/JQuery/JQueryOthers.js"></script>
+	<script src="Packages/JQueryUI/JQueryUI1.10.3.js"></script>
+	<script src="Packages/V/V.js"></script>
+	<script src="Packages/V/VDebug.js"></script>
+	<script src="Packages/V/VTabView.js"></script>
+	<script src="Packages/V/VMessageBox.js"></script>
+	<script src="Packages/V/VFileBrowser.js"></script>
+	<script src="../VDF/VDF.js"></script>
+	<script src="../VDF/VDFExtensions.js"></script>
+	<script src="../VDF/VDFTypeInfo.js"></script>
+	<script src="../VDF/VDFNode.js"></script>
+	<script src="../VDF/VDFSaver.js"></script>
+	<script src="../VDF/VDFLoader.js"></script>
+	<script src="../VDF/VDFTokenParser.js"></script>
+	<script src="Main.js"></script>
+</head>
+
+<body>
+	<style>
+	#tabs > ul:first-child > div
+	{
+		display: inline-block;
+	}
+	#tabs > div > div { display: none; }
+	#tabs > div > div.active { display: block; }
+	</style>
+	<div id="tabs">
+		<ul>
+			<div class="button">OutputATarget</div>
+			<div class="button">OutputA</div>
+			<div class="button">OutputB</div>
+		</ul>
+		<div>
+			<div class="active">
+				<textarea id="saveTarget" style="width: 100%; height: 200;">name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}
+	id{}name{#Types}children{#}
+		id{}name{Soils}children{#}
+			id{}name{Grass}duties{#}
+				<HoldSoil>texturePath{Grass.png}
+			id{}name{Dirt}duties{#}
+				<HoldSoil>texturePath{Dirt.png}
+		id{}name{Items}duties{#}children{#}
+			<Special1>color{White}brightness{.5}
+			#id{}name{@@@NameThat{NeedsEscaping}@@@}
+			id{}name{Camera}duties{#}
+				<HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
+				<HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}vertexColors{{9,4,2.5|Black}{1,8,9.5435|Gray}{25,15,5|White}}
+				<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
+					<MoveSelfToInventory>
+					<RenderMesh>
+				<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
+					<MoveSelfToWorld>
+			id{}name{GardenHoe}duties{#}
+				<HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
+				<HoldMesh>vertexes{}vertexColors{}
+				<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
+					<MoveSelfToInventory>
+					<RenderMesh>
+				<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
+					<MoveSelfToWorld></textarea>
+			</div>
+			<div>
+				<input id="makeOutputA" type="button" value="Save TestWorld1 as OutputA:"></input>
+				<textarea id="outputA" style="width: 100%; height: 200;"></textarea>
+			</div>
+			<div>
+				<input id="makeOutputB" type="button" value="Load OutputA, then Save as OutputB:"></input>
+				<textarea id="outputB" style="width: 100%; height: 200;"></textarea>
+			</div>
+		</div>
+	</div>
+</body>
