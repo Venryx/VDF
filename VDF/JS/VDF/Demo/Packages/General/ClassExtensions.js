@@ -210,4 +210,10 @@ Array.AddProtoFunction_Inline = function first(matchFunc) {
     }; }
     return this.filter(matchFunc)[0];
 };
+Array.AddProtoFunction_Inline = function insert(index, obj) {
+    //for (var i = this.length - 1; i >= index; i--) // shift each item that will be over us, up one
+    //	this[i + 1] = this[i];
+    //this[index] = obj; // place the item into the now-available slot
+    this.splice(index, 0, obj);
+};
 //# sourceMappingURL=ClassExtensions.js.map

@@ -9,40 +9,42 @@ var Test1;
     function CreateWorld() {
         var world = new World("Main");
 
-        var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
+        /*var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
         var grass = soils.AddChild(new VObject("Grass"));
         grass.AddDuty(new HoldSoil("Grass.png"));
         var dirt = soils.AddChild(new VObject("Dirt"));
         dirt.AddDuty(new HoldSoil("Dirt.png"));
-
+        
         var items = world.vObjectRoot.AddChild(new VObject("Items"));
-        items.AddDuty(new Special1(3 /* White */, .5));
+        items.AddDuty(new Special1(Color.White, .5));
         items.AddChild(new VObject("NameThat{NeedsEscaping}"));
         var camera = items.AddChild(new VObject("Camera"));
         camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5, 28.9, 2404.765), new Vector3(3, 4, 1)));
-        camera.AddDuty(new HoldMesh([
-            new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)
-        ], (function () {
-            var newMap = new Map();
-            newMap.set(new Vector3(9, 4, 2.5), 5 /* Black */);
-            newMap.set(new Vector3(1, 8, 9.5435), 4 /* Gray */);
-            newMap.set(new Vector3(25, 15, 5), 3 /* White */);
-            return newMap;
+        camera.AddDuty(new HoldMesh(
+        [
+        new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)
+        ],
+        (() =>
+        {
+        var newMap = new Map<Vector3, Color>();
+        newMap.set(new Vector3(9, 4, 2.5), Color.Black);
+        newMap.set(new Vector3(1, 8, 9.5435), Color.Gray);
+        newMap.set(new Vector3(25, 15, 5), Color.White);
+        return newMap;
         })()));
-        var holdDuties1A = camera.AddDuty(new HoldDuties("SelfIsInWorld"));
+        var holdDuties1A = <HoldDuties>camera.AddDuty(new HoldDuties("SelfIsInWorld"));
         holdDuties1A.AddDuty(new MoveSelfToInventory());
         holdDuties1A.AddDuty(new RenderMesh());
-        var holdDuties1B = camera.AddDuty(new HoldDuties("!SelfIsInWorld"));
+        var holdDuties1B = <HoldDuties>camera.AddDuty(new HoldDuties("!SelfIsInWorld"));
         holdDuties1B.AddDuty(new MoveSelfToWorld());
         var gardenHoe = items.AddChild(new VObject("GardenHoe"));
         gardenHoe.AddDuty(new HoldTransform());
-        gardenHoe.AddDuty(new HoldMesh([], new Map()));
-        var holdDuties2A = gardenHoe.AddDuty(new HoldDuties("SelfIsInWorld"));
+        gardenHoe.AddDuty(new HoldMesh([], new Map<Vector3, Color>()));
+        var holdDuties2A = <HoldDuties>gardenHoe.AddDuty(new HoldDuties("SelfIsInWorld"));
         holdDuties2A.AddDuty(new MoveSelfToInventory());
         holdDuties2A.AddDuty(new RenderMesh());
-        var holdDuties2B = gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
-        holdDuties2B.AddDuty(new MoveSelfToWorld());
-
+        var holdDuties2B = <HoldDuties>gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
+        holdDuties2B.AddDuty(new MoveSelfToWorld());*/
         return world;
     }
     Test1.CreateWorld = CreateWorld;

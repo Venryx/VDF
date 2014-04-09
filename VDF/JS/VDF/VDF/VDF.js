@@ -1,13 +1,20 @@
 ﻿var VDF;
 (function (VDF) {
-    /*$("head").append($("<script src=\"../VDF/VDFExtensions.js\">"));
-    $("head").append($("<script src=\"../VDF/VDFTypeInfo.js\">"));
-    $("head").append($("<script src=\"../VDF/VDFNode.js\">"));
-    $("head").append($("<script src=\"../VDF/VDFSaver.js\">"));
-    $("head").append($("<script src=\"../VDF/VDFLoader.js\">"));
-    $("head").append($("<script src=\"../VDF/VDFTokenParser.js\">"));*/
+    function LoadJSFile(path) {
+        var script = document.createElement('script');
+        script.setAttribute("src", path);
+        $("head")[0].appendChild(script);
+    }
+    LoadJSFile("../VDF/VDFExtensions.js");
+    LoadJSFile("../VDF/VDFTypeInfo.js");
+    LoadJSFile("../VDF/VDFNode.js");
+    LoadJSFile("../VDF/VDFSaver.js");
+    LoadJSFile("../VDF/VDFLoader.js");
+    LoadJSFile("../VDF/VDFTokenParser.js");
+
     function Serialize(obj, saveOptions) {
-        return "TestResult";
+        return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
     }
     VDF.Serialize = Serialize;
 })(VDF || (VDF = {}));
+//# sourceMappingURL=VDF.js.map

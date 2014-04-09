@@ -4,7 +4,7 @@
 	{
 		var world = new World("Main");
 
-		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
+		/*var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
 		grass.AddDuty(new HoldSoil("Grass.png"));
 		var dirt = soils.AddChild(new VObject("Dirt"));
@@ -19,7 +19,7 @@
 		[
 			new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)
 		],
-		(function ()
+		(() =>
 		{
 			var newMap = new Map<Vector3, Color>();
 			newMap.set(new Vector3(9, 4, 2.5), Color.Black);
@@ -39,7 +39,7 @@
 		holdDuties2A.AddDuty(new MoveSelfToInventory());
 		holdDuties2A.AddDuty(new RenderMesh());
 		var holdDuties2B = <HoldDuties>gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
-		holdDuties2B.AddDuty(new MoveSelfToWorld());
+		holdDuties2B.AddDuty(new MoveSelfToWorld());*/
 
 		return world;
 	}

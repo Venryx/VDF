@@ -122,6 +122,6 @@ static class VDF
 		return result;
 	}
 
-	public static string Serialize(object obj, VDFSaveOptions options = null) { return VDFSaver.ToVDFNode(obj, options).ToString(); }
-	public static T Deserialize<T>(string vdf, VDFLoadOptions options = null) { return VDFLoader.ToVDFNode(vdf, options).ToObject<T>(options); }
+	public static string Serialize(object obj, VDFSaveOptions saveOptions = null) { return VDFSaver.ToVDFNode(obj, saveOptions).ToString(); }
+	public static T Deserialize<T>(string vdf, VDFLoadOptions loadOptions = null) { return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject<T>(loadOptions); }
 }
