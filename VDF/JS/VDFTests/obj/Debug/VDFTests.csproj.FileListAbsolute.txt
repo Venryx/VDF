@@ -1,6 +1,0 @@
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\bin\VDFTests.dll.config
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\bin\VDFTests.dll
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\bin\VDFTests.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.csprojResolveAssemblyReference.cache
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.dll
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDFTests\obj\Debug\VDFTests.pdb
