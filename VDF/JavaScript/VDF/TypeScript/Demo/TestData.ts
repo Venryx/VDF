@@ -4,7 +4,7 @@
 	{
 		var world = new World("Main");
 
-		/*var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
+		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
 		grass.AddDuty(new HoldSoil("Grass.png"));
 		var dirt = soils.AddChild(new VObject("Dirt"));
@@ -39,7 +39,7 @@
 		holdDuties2A.AddDuty(new MoveSelfToInventory());
 		holdDuties2A.AddDuty(new RenderMesh());
 		var holdDuties2B = <HoldDuties>gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
-		holdDuties2B.AddDuty(new MoveSelfToWorld());*/
+		holdDuties2B.AddDuty(new MoveSelfToWorld());
 
 		return world;
 	}
@@ -47,24 +47,32 @@
 
 class World
 {
-	public name: string;
-	public vObjectRoot: VObject;
-	public listOfStringLists: Array<Array<string>>;
+	name: string;
+	vObjectRoot: VObject;
+	listOfStringLists: Array<Array<string>>;
 
-	constructor(name:string)
+	constructor(name: string)
 	{
 		this.name = name;
 		this.vObjectRoot = new VObject("VObjectRoot");
 		this.listOfStringLists = [["1A", "1B", "1C"], ["2A", "2B", "2C"], ["3A", "3B", "3C"]];
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("name", new VDFPropInfo("String", true));
+		typeInfo.SetPropInfo("vObjectRoot", new VDFPropInfo("VObject", true));
+		typeInfo.SetPropInfo("listOfStringLists", new VDFPropInfo("Array[Array[string]]", true)); // todo; fix [within-array-items array-items]-not-knowing-their-declared-type issue.
+		this.SetTypeInfo(typeInfo);
 	}
 }
 
 class VObject
 {
-	public id: number; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call
-	public name: string;
-	public duties: Array<Duty>;
-	public children: Array<VObject>;
+	parent: VObject;
+
+	id: number; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call; todo
+	name: string;
+	duties: Array<Duty>;
+	children: Array<VObject>;
 
 	constructor(name: string)
 	{
@@ -72,6 +80,12 @@ class VObject
 		this.name = name;
 		this.duties = [];
 		this.children = [];
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("name", new VDFPropInfo("String", true));
+		typeInfo.SetPropInfo("duties", new VDFPropInfo("Array[Duty]", true, true, true));
+		typeInfo.SetPropInfo("children", new VDFPropInfo("Array[VObject]", true, true, true));
+		this.SetTypeInfo(typeInfo);
 	}
 
 	AddDuty(duty: Duty):Duty
@@ -80,73 +94,100 @@ class VObject
 		return duty;
 	}
 	RemoveDuty(duty: Duty) { this.duties.remove(duty); }
-	public AddChild(child: VObject): VObject
+	AddChild(child: VObject): VObject
 	{
 		this.children.push(child);
+		child.parent = this;
 		return child;
 	}
 	RemoveChild(child: VObject)
 	{
 		this.children.remove(child);
+		child.parent = null;
 	}
 }
 
 class Duty {}
 class HoldSoil extends Duty
 {
-	public texturePath: string;
+	texturePath: string;
 	constructor(texturePath: string)
 	{
 		super();
 		this.texturePath = texturePath;
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("texturePath", new VDFPropInfo("String", true));
+		this.SetTypeInfo(typeInfo);
 	}
 }
 enum Color { Red, Green, Blue, White, Gray, Black }
 class Special1 extends Duty
 {
-	public color: Color;
-	public brightness: number;
+	color: Color;
+	brightness: number;
 	constructor(color: Color, brightness: number)
 	{
 		super();
 		this.color = color;
 		this.brightness = brightness;
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("color", new VDFPropInfo("Color", true));
+		typeInfo.SetPropInfo("brightness", new VDFPropInfo("Number", true));
+		this.SetTypeInfo(typeInfo);
 	}
 }
 class HoldTransform extends Duty
 {
-	public position: Vector3;
-	public rotation: Vector3;
-	public scale: Vector3;
+	position: Vector3;
+	rotation: Vector3;
+	scale: Vector3;
 	constructor(position?: Vector3, rotation?: Vector3, scale?: Vector3)
 	{
 		super();
 		this.position = position;
 		this.rotation = rotation;
 		this.scale = scale;
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("position", new VDFPropInfo("Vector3", true));
+		typeInfo.SetPropInfo("rotation", new VDFPropInfo("Vector3", true));
+		typeInfo.SetPropInfo("scale", new VDFPropInfo("Vector3", true));
+		this.SetTypeInfo(typeInfo);
 	}
 }
 class HoldMesh extends Duty
 {
-	public vertexes: Array<Vector3>;
-	public vertexColors: Map<Vector3, Color>;
+	vertexes: Array<Vector3>;
+	vertexColors: Map<Vector3, Color>;
 	constructor(vertexes: Array<Vector3>, vertexColors: Map<Vector3, Color>)
 	{
 		super();
 		this.vertexes = vertexes;
 		this.vertexColors = vertexColors;
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("vertexes", new VDFPropInfo("Array[Vector3]", true));
+		typeInfo.SetPropInfo("vertexColors", new VDFPropInfo("VMap[Vector3, Color]", true));
+		this.SetTypeInfo(typeInfo);
 	}
 }
 class HoldDuties extends Duty
 {
-	public dutiesEnabledWhen: string;
-	public duties: Array<Duty>;
+	dutiesEnabledWhen: string;
+	duties: Array<Duty>;
 
 	constructor(dutiesEnabledWhen: string)
 	{
 		super();
 		this.dutiesEnabledWhen = dutiesEnabledWhen;
 		this.duties = [];
+
+		var typeInfo = new VDFTypeInfo();
+		typeInfo.SetPropInfo("dutiesEnabledWhen", new VDFPropInfo("String", true));
+		typeInfo.SetPropInfo("duties", new VDFPropInfo("Array[Duty]", true, true, true));
+		this.SetTypeInfo(typeInfo);
 	}
 
 	AddDuty(duty: Duty): Duty
@@ -162,13 +203,19 @@ class MoveSelfToWorld extends Duty {}
 
 class Vector3
 {
-	public x: number;
-	public y: number;
-	public z: number;
+	x: number;
+	y: number;
+	z: number;
 	constructor(x: number, y: number, z: number)
 	{
 		this.x = x;
 		this.y = y;
 		this.z = z;
+
+		var typeInfo = new VDFTypeInfo(true);
+		typeInfo.SetPropInfo("x", new VDFPropInfo("Number"));
+		typeInfo.SetPropInfo("y", new VDFPropInfo("Number"));
+		typeInfo.SetPropInfo("z", new VDFPropInfo("Number"));
+		this.SetTypeInfo(typeInfo);
 	}
 }

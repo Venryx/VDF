@@ -39,11 +39,14 @@ static class VDFSaver
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
-			objNode.items.Add(new VDFNode{baseValue = VDF.typeExporters_inline[type](obj).Contains("}") ? "@@@" + VDF.typeExporters_inline[type](obj) + "@@@" : VDF.typeExporters_inline[type](obj)});
-		else if (type == typeof(float) || type == typeof(double))
-			objNode.items.Add(new VDFNode{baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString()});
-		else if (type.IsPrimitive || type == typeof(string))
-			objNode.items.Add(new VDFNode{baseValue = obj.ToString().Contains("}") ? "@@@" + obj + "@@@" : obj.ToString()});
+		{
+			string str = VDF.typeExporters_inline[type](obj);
+			objNode.items.Add(new VDFNode{baseValue = str.Contains("}") ? "@@@" + str + "@@@" : str});
+		}
+		else if (type == typeof (float) || type == typeof (double))
+			objNode.items.Add(new VDFNode {baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString()});
+		else if (type.IsPrimitive || type == typeof (string))
+			objNode.items.Add(new VDFNode {baseValue = obj.ToString().Contains("}") ? "@@@" + obj + "@@@" : obj.ToString()});
 		else if (obj is IList) // note; this saves arrays also
 		{
 			objNode.isListOrDictionary = true;
@@ -112,7 +115,7 @@ static class VDFSaver
 				{
 					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
 					propValueNode.isNamedPropertyValue = true;
-					propValueNode.items.Insert(0, new VDFNode{baseValue = "#"}); // add in-line marker, indicating that items are popped-out
+					propValueNode.items.Insert(0, new VDFNode {baseValue = "#"}); // add in-line marker, indicating that items are popped-out
 					if (popOutGroupsAdded > 0 && propValueNode.items.Count > 1)
 						propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)

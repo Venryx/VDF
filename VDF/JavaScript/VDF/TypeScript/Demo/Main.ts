@@ -21,6 +21,13 @@
 	// startup
 	// ==================
 	
+	VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);
+	VDF.RegisterTypeImporter_Inline("Vector3", str =>
+	{
+		var parts: string[] = str.split(',');
+		return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
+	});
+
 	$(() =>
 	{
 		var urlVars:any = GetUrlVars(window.location.href);

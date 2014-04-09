@@ -147,7 +147,7 @@ class HoldDuties : Duty
 		this.dutiesEnabledWhen = dutiesEnabledWhen;
 		duties = new List<Duty>();
 	}
-
+	
 	public Duty AddDuty(Duty duty)
 	{
 		duties.Add(duty);

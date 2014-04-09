@@ -1,4 +1,4 @@
-// Object: base
+﻿// Object: base
 // ==================
 
 // the below lets you do stuff like this: Array.AddProtoFunction_Inline = function AddX(value) { this.push(value); }); [].AddX("newItem");
@@ -216,3 +216,4 @@ Array.AddProtoFunction_Inline = function insert(index, obj) {
     //this[index] = obj; // place the item into the now-available slot
     this.splice(index, 0, obj);
 };
+//# sourceMappingURL=ClassExtensions.js.map

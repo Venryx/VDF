@@ -44,8 +44,6 @@
     <Content Include="JavaScript\Demo\Main.html">
       <BrowseToURL>~/JavaScript/Demo/Main.html</BrowseToURL>
     </Content>
-    <Content Include="JavaScript\Demo\Main.js" />
-    <Content Include="JavaScript\Demo\Packages\General\ClassExtensions.js" />
     <Content Include="JavaScript\Demo\Packages\JQueryFancyTree\Core.js" />
     <Content Include="JavaScript\Demo\Packages\JQueryFancyTree\DND.js" />
     <Content Include="JavaScript\Demo\Packages\JQueryFancyTree\Lion\Core.css" />
@@ -155,18 +153,7 @@
     <Content Include="JavaScript\Demo\Packages\V\VDebug.js" />
     <Content Include="JavaScript\Demo\Packages\V\VFileBrowser.js" />
     <Content Include="JavaScript\Demo\Packages\V\VMessageBox.js" />
-    <Content Include="JavaScript\Demo\Packages\V\VTabView.js" />
-    <Content Include="JavaScript\Demo\TestData.js" />
     <Content Include="JavaScript\Demo\Tests\Test1.html" />
-    <Content Include="JavaScript\JavaScript\Main.html" />
-    <Content Include="JavaScript\JavaScript\Packages\QUnit 1.14.0.js" />
-    <Content Include="JavaScript\VDF\VDF.js" />
-    <Content Include="JavaScript\VDF\VDFExtensions.js" />
-    <Content Include="JavaScript\VDF\VDFLoader.js" />
-    <Content Include="JavaScript\VDF\VDFNode.js" />
-    <Content Include="JavaScript\VDF\VDFSaver.js" />
-    <Content Include="JavaScript\VDF\VDFTokenParser.js" />
-    <Content Include="JavaScript\VDF\VDFTypeInfo.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -196,9 +183,7 @@
     <Content Include="JavaScript\Demo\CSS\Fonts\WeblySleek UI\Semibold.ttf.meta" />
     <Content Include="JavaScript\Demo\CSS\Fonts\WeblySleek UI\SemiboldItalic.ttf" />
     <Content Include="JavaScript\Demo\CSS\Fonts\WeblySleek UI\SemiboldItalic.ttf.meta" />
-    <Content Include="JavaScript\Demo\Packages\General\ClassExtensions.js.map" />
     <Content Include="JavaScript\Demo\Packages\JQueryUI\Content\README.md" />
-    <Content Include="JavaScript\Demo\Packages\V\VTabView.js.map" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -239,14 +224,14 @@
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptOutDir>C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\JavaScript</TypeScriptOutDir>
+    <TypeScriptOutDir>C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\JavaScript</TypeScriptOutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptTarget>ES5</TypeScriptTarget>
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
     <TypeScriptSourceMap>false</TypeScriptSourceMap>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptOutDir>C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\JavaScript</TypeScriptOutDir>
+    <TypeScriptOutDir>C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\JavaScript</TypeScriptOutDir>
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
 </Project>

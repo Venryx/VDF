@@ -3,25 +3,25 @@
 
 interface Object
 {
-	AddItem(name, x, forceAdd?):any;
-	AddProtoItem(name, x, forceAdd?):any;
-	AddFunction(value, forceAdd?):any;
-	AddProtoFunction(value, forceAdd?):any;
+	AddItem(name: string, x, forceAdd?): any;
+	AddProtoItem(name: string, x, forceAdd?): any;
+	AddFunction(value, forceAdd?): any;
+	AddProtoFunction(value, forceAdd?): any;
 
-	AddSetter(name, x, forceAdd?):any;
-	AddProtoSetter(name, x, forceAdd?):any;
-	AddSetterFunction(value, forceAdd?):any;
-	AddProtoSetterFunction(value, forceAdd?):any;
+	AddSetter(name: string, x, forceAdd?): any;
+	AddProtoSetter(name: string, x, forceAdd?): any;
+	AddSetterFunction(value, forceAdd?): any;
+	AddProtoSetterFunction(value, forceAdd?): any;
 
-	AddProtoFunction_Inline:any; // prop with a setter
-	AddProtoSetterFunction_Inline:any; // prop with a setter
+	AddProtoFunction_Inline: any; // prop with a setter
+	AddProtoSetterFunction_Inline: any; // prop with a setter
 }
 
 // the below lets you do stuff like this: Array.AddProtoFunction_Inline = function AddX(value) { this.push(value); }); [].AddX("newItem");
 Object.defineProperty(Object.prototype, "AddItem", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
 {
 	enumerable: false,
-	value: function(name, x, forceAdd?)
+	value: function(name: string, x, forceAdd?)
 	{
 		if (this[name] && forceAdd)
 			delete this[name];
@@ -33,13 +33,13 @@ Object.defineProperty(Object.prototype, "AddItem", // 'silent' is implied, as fu
 			});
 	}
 });
-Object.prototype.AddItem("AddProtoItem", function (name, x, forceAdd?) { this.prototype.AddItem(name, x, forceAdd); });
+Object.prototype.AddItem("AddProtoItem", function (name: string, x, forceAdd?) { this.prototype.AddItem(name, x, forceAdd); });
 function GetFunctionName(func) { return func.name != null ? func.name : func.toString().match(/^function\s*([^\s(]+)/)[1];}
 Object.AddProtoItem("AddFunction", function (value, forceAdd?) { this.AddItem(GetFunctionName(value), value, forceAdd); });
 Object.AddProtoItem("AddProtoFunction", function (value, forceAdd?) { this.AddProtoItem(GetFunctionName(value), value, forceAdd); });
 
 // the below lets you do stuff like this: Array.AddProtoSetterFunction(function AddX(value) { this.push(value); }); [].AddX = "newItem";
-Object.AddProtoFunction(function AddSetter(name, x, forceAdd?) // 'silent' is implied, as functions added should, by default, not be 'enumerable'
+Object.AddProtoFunction(function AddSetter(name: string, x, forceAdd?) // 'silent' is implied, as functions added should, by default, not be 'enumerable'
 {
 	if (this[name] && forceAdd)
 		delete this[name];
@@ -50,7 +50,7 @@ Object.AddProtoFunction(function AddSetter(name, x, forceAdd?) // 'silent' is im
 			set: x
 		});
 });
-Object.AddProtoFunction(function AddProtoSetter(name, x, forceAdd?) { this.prototype.AddSetter(name, x, forceAdd); });
+Object.AddProtoFunction(function AddProtoSetter(name: string, x, forceAdd?) { this.prototype.AddSetter(name, x, forceAdd); });
 Object.AddProtoFunction(function AddSetterFunction(x, forceAdd?) { this.AddSetter(GetFunctionName(x), x, forceAdd); });
 Object.AddProtoFunction(function AddProtoSetterFunction(x, forceAdd?) { this.AddProtoSetter(GetFunctionName(x), x, forceAdd); });
 

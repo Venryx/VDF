@@ -3,7 +3,7 @@
 	metadata_type: string;
 	baseValue: string;
 	items: Array<VDFNode> = []; // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
-	properties: Map<string, VDFNode> = new Map<String, VDFNode>();
+	properties: Map<string, VDFNode> = new Map<string, VDFNode>();
 
 	constructor(baseValue?: string)
 	{

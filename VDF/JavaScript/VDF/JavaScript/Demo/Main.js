@@ -18,6 +18,14 @@
 
     // startup
     // ==================
+    VDF.RegisterTypeExporter_Inline("Vector3", function (point) {
+        return point.x + "," + point.y + "," + point.z;
+    });
+    VDF.RegisterTypeImporter_Inline("Vector3", function (str) {
+        var parts = str.split(',');
+        return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
+    });
+
     $(function () {
         var urlVars = GetUrlVars(window.location.href);
         if (urlVars.activeTab != null)
@@ -60,3 +68,4 @@ var StringBuilder = (function () {
     };
     return StringBuilder;
 })();
+//# sourceMappingURL=Main.js.map
