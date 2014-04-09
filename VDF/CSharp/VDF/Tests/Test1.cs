@@ -36,11 +36,6 @@ static class Test1
 		var gardenHoe = items.AddChild(new VObject("GardenHoe"));
 		gardenHoe.AddDuty(new HoldTransform());
 		gardenHoe.AddDuty(new HoldMesh(new List<Vector3>(), new Dictionary<Vector3, Color>()));
-		var holdDuties2A = (HoldDuties)gardenHoe.AddDuty(new HoldDuties("SelfIsInWorld"));
-		holdDuties2A.AddDuty(new MoveSelfToInventory());
-		holdDuties2A.AddDuty(new RenderMesh());
-		var holdDuties2B = (HoldDuties)gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
-		holdDuties2B.AddDuty(new MoveSelfToWorld());
 
 		return world;
 	}

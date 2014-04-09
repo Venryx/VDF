@@ -35,11 +35,6 @@
 		var gardenHoe = items.AddChild(new VObject("GardenHoe"));
 		gardenHoe.AddDuty(new HoldTransform());
 		gardenHoe.AddDuty(new HoldMesh([], new Map<Vector3, Color>()));
-		var holdDuties2A = <HoldDuties>gardenHoe.AddDuty(new HoldDuties("SelfIsInWorld"));
-		holdDuties2A.AddDuty(new MoveSelfToInventory());
-		holdDuties2A.AddDuty(new RenderMesh());
-		var holdDuties2B = <HoldDuties>gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
-		holdDuties2B.AddDuty(new MoveSelfToWorld());
 
 		return world;
 	}
@@ -146,9 +141,9 @@ class HoldTransform extends Duty
 	constructor(position?: Vector3, rotation?: Vector3, scale?: Vector3)
 	{
 		super();
-		this.position = position;
-		this.rotation = rotation;
-		this.scale = scale;
+		this.position = position || new Vector3(0, 0, 0);
+		this.rotation = rotation || new Vector3(0, 0, 0);
+		this.scale = scale || new Vector3(0, 0, 0);
 
 		var typeInfo = new VDFTypeInfo();
 		typeInfo.SetPropInfo("position", new VDFPropInfo("Vector3", true));

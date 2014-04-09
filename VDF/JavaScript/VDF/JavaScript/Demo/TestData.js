@@ -37,11 +37,6 @@ var Test1;
         var gardenHoe = items.AddChild(new VObject("GardenHoe"));
         gardenHoe.AddDuty(new HoldTransform());
         gardenHoe.AddDuty(new HoldMesh([], new Map()));
-        var holdDuties2A = gardenHoe.AddDuty(new HoldDuties("SelfIsInWorld"));
-        holdDuties2A.AddDuty(new MoveSelfToInventory());
-        holdDuties2A.AddDuty(new RenderMesh());
-        var holdDuties2B = gardenHoe.AddDuty(new HoldDuties("!SelfIsInWorld"));
-        holdDuties2B.AddDuty(new MoveSelfToWorld());
 
         return world;
     }
@@ -139,9 +134,9 @@ var HoldTransform = (function (_super) {
     __extends(HoldTransform, _super);
     function HoldTransform(position, rotation, scale) {
         _super.call(this);
-        this.position = position;
-        this.rotation = rotation;
-        this.scale = scale;
+        this.position = position || new Vector3(0, 0, 0);
+        this.rotation = rotation || new Vector3(0, 0, 0);
+        this.scale = scale || new Vector3(0, 0, 0);
 
         var typeInfo = new VDFTypeInfo();
         typeInfo.SetPropInfo("position", new VDFPropInfo("Vector3", true));
