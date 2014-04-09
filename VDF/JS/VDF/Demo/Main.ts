@@ -32,9 +32,7 @@
 
 		$("#makeOutputA").click((event, ui) =>
 		{
-			var testWorld =
-			{
-			};
+			var testWorld = Test1.CreateWorld();
 
 			// serialize it, and save it to file
 			var vdf:string = VDF.Serialize(testWorld, new VDFSaveOptions()); //, null, null, namespaceAliasesByName, typeAliasesByType, true));

@@ -157,6 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Demo\Main.ts" />
+    <TypeScriptCompile Include="Demo\TestData.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="VDF\VDF.ts" />
     <TypeScriptCompile Include="VDF\VDFExtensions.ts" />

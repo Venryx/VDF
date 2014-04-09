@@ -48,12 +48,9 @@ static class Test1
 
 class World
 {
-	[VDFProp]
-	public string name;
-	[VDFProp]
-	public VObject vObjectRoot;
-	[VDFProp]
-	public List<List<string>> listOfStringLists;
+	[VDFProp] public string name;
+	[VDFProp] public VObject vObjectRoot;
+	[VDFProp] public List<List<string>> listOfStringLists;
 
 	public World(string name)
 	{
@@ -69,12 +66,9 @@ class VObject
 
 	/*[VDFProp]*/
 	public Guid id; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call
-	[VDFProp]
-	public string name;
-	[VDFProp(true, true, true)]
-	public List<Duty> duties;
-	[VDFProp(true, true, true)]
-	public List<VObject> children;
+	[VDFProp] public string name;
+	[VDFProp(true, true, true)] public List<Duty> duties;
+	[VDFProp(true, true, true)] public List<VObject> children;
 
 	public VObject(string name)
 	{
@@ -103,19 +97,18 @@ class VObject
 	}
 }
 
-class Duty { }
+class Duty
+{
+}
 class HoldSoil : Duty
 {
-	[VDFProp]
-	public string texturePath;
+	[VDFProp] public string texturePath;
 	public HoldSoil(string texturePath) { this.texturePath = texturePath; }
 }
 class Special1 : Duty
 {
-	[VDFProp]
-	public Color color;
-	[VDFProp]
-	public float brightness;
+	[VDFProp] public Color color;
+	[VDFProp] public float brightness;
 	public Special1(Color color, float brightness)
 	{
 		this.color = color;
@@ -124,12 +117,9 @@ class Special1 : Duty
 }
 class HoldTransform : Duty
 {
-	[VDFProp]
-	public Vector3 position;
-	[VDFProp]
-	public Vector3 rotation;
-	[VDFProp]
-	public Vector3 scale;
+	[VDFProp] public Vector3 position;
+	[VDFProp] public Vector3 rotation;
+	[VDFProp] public Vector3 scale;
 	public HoldTransform(Vector3 position = default(Vector3), Vector3 rotation = default(Vector3), Vector3 scale = default(Vector3))
 	{
 		this.position = position;
@@ -139,10 +129,8 @@ class HoldTransform : Duty
 }
 class HoldMesh : Duty
 {
-	[VDFProp]
-	public List<Vector3> vertexes;
-	[VDFProp]
-	public Dictionary<Vector3, Color> vertexColors;
+	[VDFProp] public List<Vector3> vertexes;
+	[VDFProp] public Dictionary<Vector3, Color> vertexColors;
 	public HoldMesh(List<Vector3> vertexes, Dictionary<Vector3, Color> vertexColors)
 	{
 		this.vertexes = vertexes;
@@ -151,10 +139,8 @@ class HoldMesh : Duty
 }
 class HoldDuties : Duty
 {
-	[VDFProp]
-	public string dutiesEnabledWhen;
-	[VDFProp(true, true, true)]
-	public List<Duty> duties;
+	[VDFProp] public string dutiesEnabledWhen;
+	[VDFProp(true, true, true)] public List<Duty> duties;
 
 	public HoldDuties(string dutiesEnabledWhen)
 	{
@@ -169,12 +155,11 @@ class HoldDuties : Duty
 	}
 	public void RemoveDuty(Duty duty) { duties.Remove(duty); }
 }
-class MoveSelfToInventory : Duty { }
-class RenderMesh : Duty { }
-class MoveSelfToWorld : Duty { }
+class MoveSelfToInventory : Duty {}
+class RenderMesh : Duty {}
+class MoveSelfToWorld : Duty {}
 
-[VDFType(true)]
-struct Vector3
+[VDFType(true)] struct Vector3
 {
 	public float x;
 	public float y;

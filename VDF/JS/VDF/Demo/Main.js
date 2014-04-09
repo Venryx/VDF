@@ -27,7 +27,7 @@
         $("#tabs").VTabView();
 
         $("#makeOutputA").click(function (event, ui) {
-            var testWorld = {};
+            var testWorld = Test1.CreateWorld();
 
             // serialize it, and save it to file
             var vdf = VDF.Serialize(testWorld, new VDFSaveOptions());
