@@ -27,6 +27,8 @@
 		var parts: string[] = str.split(',');
 		return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
 	});
+	VDF.RegisterTypeExporter_Inline("Guid", id => ""); //id.ToString());
+	VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
 
 	$(() =>
 	{

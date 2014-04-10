@@ -25,6 +25,12 @@
         var parts = str.split(',');
         return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
     });
+    VDF.RegisterTypeExporter_Inline("Guid", function (id) {
+        return "";
+    }); //id.ToString());
+    VDF.RegisterTypeImporter_Inline("Guid", function (str) {
+        return new Guid(str);
+    });
 
     $(function () {
         var urlVars = GetUrlVars(window.location.href);

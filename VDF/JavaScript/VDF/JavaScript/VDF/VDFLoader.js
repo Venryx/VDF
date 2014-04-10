@@ -9,3 +9,4 @@ var VDFLoader = (function () {
     }
     return VDFLoader;
 })();
+//# sourceMappingURL=VDFLoader.js.map

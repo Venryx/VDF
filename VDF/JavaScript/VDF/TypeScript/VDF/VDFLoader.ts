@@ -1,7 +1,3 @@
-﻿class VDFLoadOptions
-{
-}
+﻿class VDFLoadOptions {}
 
-class VDFLoader
-{
-}
+class VDFLoader {}

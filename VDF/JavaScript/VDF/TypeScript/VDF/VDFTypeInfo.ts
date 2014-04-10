@@ -14,13 +14,13 @@
 
 class VDFPropInfo
 {
-	propType: string;
+	propVTypeName: string;
 	includeL2: boolean;
 	popOutItemsToOwnLines: boolean;
 	ignoreEmptyValue: boolean;
 	constructor(propType: string, includeL2?: boolean, popOutItemsToOwnLines?: boolean, ignoreEmptyValue?: boolean)
 	{
-		this.propType = propType;
+		this.propVTypeName = propType;
 		this.includeL2 = includeL2;
 		this.popOutItemsToOwnLines = popOutItemsToOwnLines;
 		this.ignoreEmptyValue = ignoreEmptyValue;
@@ -28,7 +28,7 @@ class VDFPropInfo
 
 	IsXIgnorableValue(x: any)
 	{
-		if (this.ignoreEmptyValue && x.GetTypeName() == "Array" && x.length == 0)
+		if (this.ignoreEmptyValue && VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
 			return true;
 		if (x === false || x === 0) // if equal to type's default value
 			return true;

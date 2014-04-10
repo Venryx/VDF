@@ -1,6 +1,4 @@
-﻿class VDFSaveOptions
-{
-}
+﻿class VDFSaveOptions {}
 
 class VDFSaver
 {
@@ -8,55 +6,67 @@ class VDFSaver
 	{
 		if (saveOptions == null)
 			saveOptions = new VDFSaveOptions();
-		
+
+		var objVTypeName = VDF.GetVTypeNameOfObject(obj);
 		var objNode = new VDFNode();
-		if (VDF.typeExporters_inline[obj.GetTypeName()])
+		if (VDF.typeExporters_inline[objVTypeName])
 		{
-			var str = VDF.typeExporters_inline[obj.GetTypeName()](obj);
+			var str = VDF.typeExporters_inline[objVTypeName](obj);
 			objNode.items.push(new VDFNode(str.contains("}") ? "@@@" + str + "@@@" : str));
 		}
-		else if (obj.GetTypeName() == "Number" && obj.toString().contains(".")) // float/double
+		else if (objVTypeName == "float" && obj.toString().contains(".")) // float/double
 			objNode.items.push(new VDFNode(obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString()));
-		else if (obj.GetTypeName() == "Number" || obj.GetTypeName() == "String")
+		else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
 			objNode.items.push(new VDFNode(obj.toString().contains("}") ? "@@@" + obj + "@@@" : obj.toString()));
-		else if (obj.GetTypeName() == "Array")
+		else if (objVTypeName.startsWith("List["))
 		{
 			objNode.isListOrDictionary = true;
-			var objAsList = <Array<any>>obj;
+			var objAsList = <List<any>>obj;
 			for (var i = 0; i < objAsList.length; i++)
 			{
 				var item = objAsList[i];
-				var typeDerivedFromDeclaredType: boolean = !obj.GetTypeName().contains(item.GetTypeName()); // if value's type is *derived* from array's declared item-type; todo
+				if (eval("window['" + objAsList.itemType + "'] && " + objAsList.itemType + "['_IsEnum'] === 0")) // special case; if enum
+					item = new EnumValue(objAsList.itemType, item);
+
+				var itemVTypeName = VDF.GetVTypeNameOfObject(item);
+				var typeDerivedFromDeclaredType: boolean = itemVTypeName != objAsList.itemType; // if value's type is *derived* from list's declared item-type
 				var itemValueNode: VDFNode = VDFSaver.ToVDFNode(item, saveOptions);
-				if (item.GetTypeName() == "Array") // if array item is itself an array
-					itemValueNode.isArrayItem_array = true;
+				if (itemVTypeName.startsWith("List[")) // if list item is itself a list
+					itemValueNode.isListItem_list = true;
 				if (i > 0)
-					itemValueNode.isArrayItem_nonFirst = true;
+					itemValueNode.isListItem_nonFirst = true;
 				if (typeDerivedFromDeclaredType)
-					itemValueNode.metadata_type = VDF.GetVNameOfType(item.GetTypeName(), saveOptions);
+					itemValueNode.metadata_type = itemVTypeName;
 				objNode.items.push(itemValueNode);
 			}
 		}
-		else if (obj.GetTypeName() == "Map")
+		else if (objVTypeName.startsWith("Dictionary["))
 		{
 			objNode.isListOrDictionary = true;
-			var objAsDictionary = <Map<any, any>>obj;
-			objAsDictionary.forEach((value: any, key: any, map: Map<any, any>) =>
+			var objAsDictionary = <Dictionary<any, any>>obj;
+			objAsDictionary.forEach((value: any, key: any, dictionary: Dictionary<any, any>) =>
 			{
+				if (eval("window['" + objAsDictionary.keyType + "'] && " + objAsDictionary.keyType + "['_IsEnum'] === 0")) // special case; if enum
+					key = new EnumValue(objAsDictionary.keyType, key);
+				if (eval("window['" + objAsDictionary.valueType + "'] && " + objAsDictionary.valueType + "['_IsEnum'] === 0")) // special case; if enum
+					value = new EnumValue(objAsDictionary.valueType, value);
+
 				var keyValuePairPseudoNode = new VDFNode();
 				keyValuePairPseudoNode.isKeyValuePairPseudoNode = true;
 
-				var keyTypeDerivedFromDeclaredType: boolean = !obj.GetTypeName().contains(key.GetTypeName() + ","); // if key's type is *derived* from map's declared key-type; todo
-				var keyNode: VDFNode = VDFSaver.ToVDFNode(key, saveOptions);
+				var keyVTypeName = VDF.GetVTypeNameOfObject(key);
+				var keyTypeDerivedFromDeclaredType: boolean = keyVTypeName != objAsDictionary.keyType; // if key's type is *derived* from map's declared key-type
+				var keyNode: VDFNode = VDFSaver.ToVDFNode(key);
 				if (keyTypeDerivedFromDeclaredType)
-					keyNode.metadata_type = VDF.GetVNameOfType(key.GetTypeName(), saveOptions);
+					keyNode.metadata_type = keyVTypeName;
 				keyValuePairPseudoNode.items.push(keyNode);
 
-				var valueTypeDerivedFromDeclaredType: boolean = !obj.GetTypeName().contains(key.GetTypeName()); // if value's type is *derived* from map's declared value-type; todo
-				var valueNode: VDFNode = VDFSaver.ToVDFNode(value, saveOptions);
-				valueNode.isArrayItem_nonFirst = true;
+				var valueVTypeName = VDF.GetVTypeNameOfObject(value);
+				var valueTypeDerivedFromDeclaredType: boolean = valueVTypeName != objAsDictionary.valueType; // if value's type is *derived* from map's declared value-type
+				var valueNode: VDFNode = VDFSaver.ToVDFNode(value);
+				valueNode.isListItem_nonFirst = true;
 				if (valueTypeDerivedFromDeclaredType)
-					valueNode.metadata_type = VDF.GetVNameOfType(value.GetTypeName(), saveOptions);
+					valueNode.metadata_type = valueVTypeName;
 				keyValuePairPseudoNode.items.push(valueNode);
 
 				objNode.items.push(keyValuePairPseudoNode);
@@ -78,11 +88,13 @@ class VDFSaver
 					continue;
 
 				var propValue = obj[propName];
+				if (eval("window['" + propInfo.propVTypeName + "'] && " + propInfo.propVTypeName + "['_IsEnum'] === 0")) // special case; if enum
+					propValue = new EnumValue(propInfo.propVTypeName, propValue);
 				if (propInfo.IsXIgnorableValue(propValue))
 					continue;
-
-				var propType = propValue.GetTypeName();
-				var typeDerivedFromDeclaredType: boolean = propType != propInfo.propType && propType != "Array" && propType != "Map"; // if value's type is *derived* from prop's declared type; note; assumes arrays/maps are of declared type
+				
+				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
+				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					var propValueNode: VDFNode = VDFSaver.ToVDFNode(propValue, saveOptions);
@@ -91,7 +103,7 @@ class VDFSaver
 					if (popOutGroupsAdded > 0 && propValueNode.items.length > 1)
 						propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata_type = VDF.GetVNameOfType(propType, saveOptions);
+						propValueNode.metadata_type = propVTypeName;
 					for (var key in propValueNode.items)
 						if (propValueNode.items[key].baseValue != "#")
 							propValueNode.items[key].popOutToOwnLine = true;
@@ -103,7 +115,7 @@ class VDFSaver
 					var propValueNode: VDFNode = VDFSaver.ToVDFNode(propValue, saveOptions);
 					propValueNode.isNamedPropertyValue = true;
 					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata_type = VDF.GetVNameOfType(propType, saveOptions);
+						propValueNode.metadata_type = propVTypeName;
 					objNode.properties[propName] = propValueNode;
 				}
 			}

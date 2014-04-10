@@ -193,16 +193,16 @@ String.AddProtoFunction_Inline = function splice(index, removeCount, insert) { r
 
 interface Array<T>
 {
-	contains(str);
-	last();
+	contains(obj: T): boolean;
+	last(): T;
 	pushAll(array);
-	indexes();
-	strings();
-	remove(obj);
-	filter(matchFunc);
+	indexes(): number[];
+	strings(): string[];
+	remove(obj: T);
+	//filter(matchFunc): T[];
 	clear();
-	first(matchFunc?);
-	insert(index: number, obj);
+	first(matchFunc?): T;
+	insert(index: number, obj: T);
 }
 
 Array.AddProtoFunction_Inline = function contains(str) { return this.indexOf(str) != -1; };
@@ -236,14 +236,14 @@ Array.AddProtoFunction_Inline = function remove(obj)
 		if(this[i] === obj)
 			return this.splice(i, 1);
 };
-Array.AddProtoFunction_Inline = function filter(matchFunc)
+/*Array.AddProtoFunction_Inline = function filter(matchFunc)
 {
 	var result = [];
 	for (var i in this.indexes())
 		if (matchFunc.call(this[i], this[i])) // call, having the item be "this", as well as the first argument
 			result.push(this[i]);
 	return result;
-};
+};*/
 Array.AddProtoFunction_Inline = function clear()
 {
 	while (this.length > 0)

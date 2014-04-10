@@ -16,19 +16,11 @@ var Test1;
         dirt.AddDuty(new HoldSoil("Dirt.png"));
 
         var items = world.vObjectRoot.AddChild(new VObject("Items"));
-        items.AddDuty(new Special1(3 /* White */, .5));
+        items.AddDuty(new Special1(4 /* White */, .5));
         items.AddChild(new VObject("NameThat{NeedsEscaping}"));
         var camera = items.AddChild(new VObject("Camera"));
         camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5, 28.9, 2404.765), new Vector3(3, 4, 1)));
-        camera.AddDuty(new HoldMesh([
-            new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)
-        ], (function () {
-            var newMap = new Map();
-            newMap.set(new Vector3(9, 4, 2.5), 5 /* Black */);
-            newMap.set(new Vector3(1, 8, 9.5435), 4 /* Gray */);
-            newMap.set(new Vector3(25, 15, 5), 3 /* White */);
-            return newMap;
-        })()));
+        camera.AddDuty(new HoldMesh(new_List("Vector3", new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)), new_Dictionary("Vector3", "Color", [new Vector3(9, 4, 2.5), 6 /* Black */], [new Vector3(1, 8, 9.5435), 5 /* Gray */], [new Vector3(25, 15, 5), 4 /* White */])));
         var holdDuties1A = camera.AddDuty(new HoldDuties("SelfIsInWorld"));
         holdDuties1A.AddDuty(new MoveSelfToInventory());
         holdDuties1A.AddDuty(new RenderMesh());
@@ -36,7 +28,7 @@ var Test1;
         holdDuties1B.AddDuty(new MoveSelfToWorld());
         var gardenHoe = items.AddChild(new VObject("GardenHoe"));
         gardenHoe.AddDuty(new HoldTransform());
-        gardenHoe.AddDuty(new HoldMesh([], new Map()));
+        gardenHoe.AddDuty(new HoldMesh(new_List("Vector3"), new_Dictionary("Vector3", "Color")));
 
         return world;
     }
@@ -47,12 +39,11 @@ var World = (function () {
     function World(name) {
         this.name = name;
         this.vObjectRoot = new VObject("VObjectRoot");
-        this.listOfStringLists = [["1A", "1B", "1C"], ["2A", "2B", "2C"], ["3A", "3B", "3C"]];
-
+        this.listOfStringLists = new_List("List[string]", new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C"));
         var typeInfo = new VDFTypeInfo();
-        typeInfo.SetPropInfo("name", new VDFPropInfo("String", true));
+        typeInfo.SetPropInfo("name", new VDFPropInfo("string", true));
         typeInfo.SetPropInfo("vObjectRoot", new VDFPropInfo("VObject", true));
-        typeInfo.SetPropInfo("listOfStringLists", new VDFPropInfo("Array[Array[string]]", true)); // todo; fix [within-array-items array-items]-not-knowing-their-declared-type issue.
+        typeInfo.SetPropInfo("listOfStringLists", new VDFPropInfo("List[List[string]]", true));
         this.SetTypeInfo(typeInfo);
     }
     return World;
@@ -60,15 +51,16 @@ var World = (function () {
 
 var VObject = (function () {
     function VObject(name) {
-        this.id = parseInt((Math.random() * 1000).toString());
+        this.id = new Guid();
         this.name = name;
-        this.duties = [];
-        this.children = [];
+        this.duties = new_List("Duty");
+        this.children = new_List("VObject");
 
         var typeInfo = new VDFTypeInfo();
-        typeInfo.SetPropInfo("name", new VDFPropInfo("String", true));
-        typeInfo.SetPropInfo("duties", new VDFPropInfo("Array[Duty]", true, true, true));
-        typeInfo.SetPropInfo("children", new VDFPropInfo("Array[VObject]", true, true, true));
+        typeInfo.SetPropInfo("id", new VDFPropInfo("Guid", true)); // todo; rather than marking this here manually, have it marked by the at-runtime system described above
+        typeInfo.SetPropInfo("name", new VDFPropInfo("string", true));
+        typeInfo.SetPropInfo("duties", new VDFPropInfo("List[Duty]", true, true, true));
+        typeInfo.SetPropInfo("children", new VDFPropInfo("List[VObject]", true, true, true));
         this.SetTypeInfo(typeInfo);
     }
     VObject.prototype.AddDuty = function (duty) {
@@ -102,19 +94,20 @@ var HoldSoil = (function (_super) {
         this.texturePath = texturePath;
 
         var typeInfo = new VDFTypeInfo();
-        typeInfo.SetPropInfo("texturePath", new VDFPropInfo("String", true));
+        typeInfo.SetPropInfo("texturePath", new VDFPropInfo("string", true));
         this.SetTypeInfo(typeInfo);
     }
     return HoldSoil;
 })(Duty);
 var Color;
 (function (Color) {
-    Color[Color["Red"] = 0] = "Red";
-    Color[Color["Green"] = 1] = "Green";
-    Color[Color["Blue"] = 2] = "Blue";
-    Color[Color["White"] = 3] = "White";
-    Color[Color["Gray"] = 4] = "Gray";
-    Color[Color["Black"] = 5] = "Black";
+    Color[Color["_IsEnum"] = 0] = "_IsEnum";
+    Color[Color["Red"] = 1] = "Red";
+    Color[Color["Green"] = 2] = "Green";
+    Color[Color["Blue"] = 3] = "Blue";
+    Color[Color["White"] = 4] = "White";
+    Color[Color["Gray"] = 5] = "Gray";
+    Color[Color["Black"] = 6] = "Black";
 })(Color || (Color = {}));
 var Special1 = (function (_super) {
     __extends(Special1, _super);
@@ -125,7 +118,7 @@ var Special1 = (function (_super) {
 
         var typeInfo = new VDFTypeInfo();
         typeInfo.SetPropInfo("color", new VDFPropInfo("Color", true));
-        typeInfo.SetPropInfo("brightness", new VDFPropInfo("Number", true));
+        typeInfo.SetPropInfo("brightness", new VDFPropInfo("float", true));
         this.SetTypeInfo(typeInfo);
     }
     return Special1;
@@ -154,8 +147,8 @@ var HoldMesh = (function (_super) {
         this.vertexColors = vertexColors;
 
         var typeInfo = new VDFTypeInfo();
-        typeInfo.SetPropInfo("vertexes", new VDFPropInfo("Array[Vector3]", true));
-        typeInfo.SetPropInfo("vertexColors", new VDFPropInfo("VMap[Vector3, Color]", true));
+        typeInfo.SetPropInfo("vertexes", new VDFPropInfo("List[Vector3]", true));
+        typeInfo.SetPropInfo("vertexColors", new VDFPropInfo("Dictionary[Vector3,Color]", true));
         this.SetTypeInfo(typeInfo);
     }
     return HoldMesh;
@@ -165,11 +158,11 @@ var HoldDuties = (function (_super) {
     function HoldDuties(dutiesEnabledWhen) {
         _super.call(this);
         this.dutiesEnabledWhen = dutiesEnabledWhen;
-        this.duties = [];
+        this.duties = new_List("Duty");
 
         var typeInfo = new VDFTypeInfo();
-        typeInfo.SetPropInfo("dutiesEnabledWhen", new VDFPropInfo("String", true));
-        typeInfo.SetPropInfo("duties", new VDFPropInfo("Array[Duty]", true, true, true));
+        typeInfo.SetPropInfo("dutiesEnabledWhen", new VDFPropInfo("string", true));
+        typeInfo.SetPropInfo("duties", new VDFPropInfo("List[Duty]", true, true, true));
         this.SetTypeInfo(typeInfo);
     }
     HoldDuties.prototype.AddDuty = function (duty) {
@@ -210,11 +203,15 @@ var Vector3 = (function () {
         this.z = z;
 
         var typeInfo = new VDFTypeInfo(true);
-        typeInfo.SetPropInfo("x", new VDFPropInfo("Number"));
-        typeInfo.SetPropInfo("y", new VDFPropInfo("Number"));
-        typeInfo.SetPropInfo("z", new VDFPropInfo("Number"));
         this.SetTypeInfo(typeInfo);
     }
     return Vector3;
+})();
+
+var Guid = (function () {
+    function Guid(dataString) {
+        this.dataString = dataString || (Math.random() * 1000).toString();
+    }
+    return Guid;
 })();
 //# sourceMappingURL=TestData.js.map

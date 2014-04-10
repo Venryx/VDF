@@ -1,4 +1,4 @@
-﻿// Object: base
+// Object: base
 // ==================
 
 // the below lets you do stuff like this: Array.AddProtoFunction_Inline = function AddX(value) { this.push(value); }); [].AddX("newItem");
@@ -193,13 +193,15 @@ Array.AddProtoFunction_Inline = function remove(obj) {
         if (this[i] === obj)
             return this.splice(i, 1);
 };
-Array.AddProtoFunction_Inline = function filter(matchFunc) {
-    var result = [];
-    for (var i in this.indexes())
-        if (matchFunc.call(this[i], this[i]))
-            result.push(this[i]);
-    return result;
-};
+
+/*Array.AddProtoFunction_Inline = function filter(matchFunc)
+{
+var result = [];
+for (var i in this.indexes())
+if (matchFunc.call(this[i], this[i])) // call, having the item be "this", as well as the first argument
+result.push(this[i]);
+return result;
+};*/
 Array.AddProtoFunction_Inline = function clear() {
     while (this.length > 0)
         this.pop();

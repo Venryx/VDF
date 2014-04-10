@@ -11,47 +11,59 @@ var VDFSaver = (function () {
         if (saveOptions == null)
             saveOptions = new VDFSaveOptions();
 
+        var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
-        if (VDF.typeExporters_inline[obj.GetTypeName()]) {
-            var str = VDF.typeExporters_inline[obj.GetTypeName()](obj);
+        if (VDF.typeExporters_inline[objVTypeName]) {
+            var str = VDF.typeExporters_inline[objVTypeName](obj);
             objNode.items.push(new VDFNode(str.contains("}") ? "@@@" + str + "@@@" : str));
-        } else if (obj.GetTypeName() == "Number" && obj.toString().contains("."))
+        } else if (objVTypeName == "float" && obj.toString().contains("."))
             objNode.items.push(new VDFNode(obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString()));
-        else if (obj.GetTypeName() == "Number" || obj.GetTypeName() == "String")
+        else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
             objNode.items.push(new VDFNode(obj.toString().contains("}") ? "@@@" + obj + "@@@" : obj.toString()));
-        else if (obj.GetTypeName() == "Array") {
+        else if (objVTypeName.startsWith("List[")) {
             objNode.isListOrDictionary = true;
             var objAsList = obj;
             for (var i = 0; i < objAsList.length; i++) {
                 var item = objAsList[i];
-                var typeDerivedFromDeclaredType = !obj.GetTypeName().contains(item.GetTypeName());
+                if (eval("window['" + objAsList.itemType + "'] && " + objAsList.itemType + "['_IsEnum'] === 0"))
+                    item = new EnumValue(objAsList.itemType, item);
+
+                var itemVTypeName = VDF.GetVTypeNameOfObject(item);
+                var typeDerivedFromDeclaredType = itemVTypeName != objAsList.itemType;
                 var itemValueNode = VDFSaver.ToVDFNode(item, saveOptions);
-                if (item.GetTypeName() == "Array")
-                    itemValueNode.isArrayItem_array = true;
+                if (itemVTypeName.startsWith("List["))
+                    itemValueNode.isListItem_list = true;
                 if (i > 0)
-                    itemValueNode.isArrayItem_nonFirst = true;
+                    itemValueNode.isListItem_nonFirst = true;
                 if (typeDerivedFromDeclaredType)
-                    itemValueNode.metadata_type = VDF.GetVNameOfType(item.GetTypeName(), saveOptions);
+                    itemValueNode.metadata_type = itemVTypeName;
                 objNode.items.push(itemValueNode);
             }
-        } else if (obj.GetTypeName() == "Map") {
+        } else if (objVTypeName.startsWith("Dictionary[")) {
             objNode.isListOrDictionary = true;
             var objAsDictionary = obj;
-            objAsDictionary.forEach(function (value, key, map) {
+            objAsDictionary.forEach(function (value, key, dictionary) {
+                if (eval("window['" + objAsDictionary.keyType + "'] && " + objAsDictionary.keyType + "['_IsEnum'] === 0"))
+                    key = new EnumValue(objAsDictionary.keyType, key);
+                if (eval("window['" + objAsDictionary.valueType + "'] && " + objAsDictionary.valueType + "['_IsEnum'] === 0"))
+                    value = new EnumValue(objAsDictionary.valueType, value);
+
                 var keyValuePairPseudoNode = new VDFNode();
                 keyValuePairPseudoNode.isKeyValuePairPseudoNode = true;
 
-                var keyTypeDerivedFromDeclaredType = !obj.GetTypeName().contains(key.GetTypeName() + ",");
-                var keyNode = VDFSaver.ToVDFNode(key, saveOptions);
+                var keyVTypeName = VDF.GetVTypeNameOfObject(key);
+                var keyTypeDerivedFromDeclaredType = keyVTypeName != objAsDictionary.keyType;
+                var keyNode = VDFSaver.ToVDFNode(key);
                 if (keyTypeDerivedFromDeclaredType)
-                    keyNode.metadata_type = VDF.GetVNameOfType(key.GetTypeName(), saveOptions);
+                    keyNode.metadata_type = keyVTypeName;
                 keyValuePairPseudoNode.items.push(keyNode);
 
-                var valueTypeDerivedFromDeclaredType = !obj.GetTypeName().contains(key.GetTypeName());
-                var valueNode = VDFSaver.ToVDFNode(value, saveOptions);
-                valueNode.isArrayItem_nonFirst = true;
+                var valueVTypeName = VDF.GetVTypeNameOfObject(value);
+                var valueTypeDerivedFromDeclaredType = valueVTypeName != objAsDictionary.valueType;
+                var valueNode = VDFSaver.ToVDFNode(value);
+                valueNode.isListItem_nonFirst = true;
                 if (valueTypeDerivedFromDeclaredType)
-                    valueNode.metadata_type = VDF.GetVNameOfType(value.GetTypeName(), saveOptions);
+                    valueNode.metadata_type = valueVTypeName;
                 keyValuePairPseudoNode.items.push(valueNode);
 
                 objNode.items.push(keyValuePairPseudoNode);
@@ -70,11 +82,13 @@ var VDFSaver = (function () {
                     continue;
 
                 var propValue = obj[propName];
+                if (eval("window['" + propInfo.propVTypeName + "'] && " + propInfo.propVTypeName + "['_IsEnum'] === 0"))
+                    propValue = new EnumValue(propInfo.propVTypeName, propValue);
                 if (propInfo.IsXIgnorableValue(propValue))
                     continue;
 
-                var propType = propValue.GetTypeName();
-                var typeDerivedFromDeclaredType = propType != propInfo.propType && propType != "Array" && propType != "Map";
+                var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
+                var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName;
                 if (propInfo.popOutItemsToOwnLines) {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     propValueNode.isNamedPropertyValue = true;
@@ -82,7 +96,7 @@ var VDFSaver = (function () {
                     if (popOutGroupsAdded > 0 && propValueNode.items.length > 1)
                         propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
                     if (typeDerivedFromDeclaredType)
-                        propValueNode.metadata_type = VDF.GetVNameOfType(propType, saveOptions);
+                        propValueNode.metadata_type = propVTypeName;
                     for (var key in propValueNode.items)
                         if (propValueNode.items[key].baseValue != "#")
                             propValueNode.items[key].popOutToOwnLine = true;
@@ -92,7 +106,7 @@ var VDFSaver = (function () {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     propValueNode.isNamedPropertyValue = true;
                     if (typeDerivedFromDeclaredType)
-                        propValueNode.metadata_type = VDF.GetVNameOfType(propType, saveOptions);
+                        propValueNode.metadata_type = propVTypeName;
                     objNode.properties[propName] = propValueNode;
                 }
             }

@@ -19,17 +19,17 @@ class VDFNode
 	public bool isListOrDictionary;
 	public bool popOutToOwnLine;
 	public bool isFirstItemOfNonFirstPopOutGroup;
-	public bool isArrayItem_array;
-	public bool isArrayItem_nonFirst;
+	public bool isListItem_list;
+	public bool isListItem_nonFirst;
 	public bool isKeyValuePairPseudoNode;
 	public string GetInLineItemText()
 	{
 		var builder = new StringBuilder();
 		if (isFirstItemOfNonFirstPopOutGroup)
 			builder.Append("#");
-		if (isArrayItem_nonFirst && !popOutToOwnLine)
+		if (isListItem_nonFirst && !popOutToOwnLine)
 			builder.Append("|");
-		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isArrayItem_array)
+		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isListItem_list)
 			builder.Append("{");
 		if (metadata_type != null)
 			builder.Append("<" + (isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
@@ -42,7 +42,7 @@ class VDFNode
 			if (!properties[propName].popOutToOwnLine)
 				builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
 
-		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isArrayItem_array)
+		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isListItem_list)
 			builder.Append("}");
 
 		return builder.ToString();

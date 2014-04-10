@@ -17,17 +17,17 @@
 	isListOrDictionary: boolean;
 	popOutToOwnLine: boolean;
 	isFirstItemOfNonFirstPopOutGroup: boolean;
-	isArrayItem_array: boolean;
-	isArrayItem_nonFirst: boolean;
+	isListItem_list: boolean;
+	isListItem_nonFirst: boolean;
 	isKeyValuePairPseudoNode: boolean;
 	GetInLineItemText(): string
 	{
 		var builder = new StringBuilder();
 		if (this.isFirstItemOfNonFirstPopOutGroup)
 			builder.Append("#");
-		if (this.isArrayItem_nonFirst && !this.popOutToOwnLine)
+		if (this.isListItem_nonFirst && !this.popOutToOwnLine)
 			builder.Append("|");
-		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isArrayItem_array)
+		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
 			builder.Append("{");
 		if (this.metadata_type != null)
 			builder.Append("<" + (this.isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + this.metadata_type.replace(/ /g, "") + ">" : this.metadata_type.replace(/ /g, "")) + ">");
@@ -40,7 +40,7 @@
 			if (!this.properties[propName].popOutToOwnLine)
 				builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 
-		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isArrayItem_array)
+		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
 			builder.Append("}");
 
 		return builder.ToString();
