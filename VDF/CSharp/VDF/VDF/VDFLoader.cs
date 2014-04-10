@@ -39,19 +39,19 @@ static class VDFLoader
 		while (parser.GetNextToken() != null)
 		{
 			VDFToken token = parser.tokens.Last();
-			if (token.type == VDFTokenType.EndDataBracket)
+			if (token.type == VDFTokenType.DataEndMarker)
 				depth--; 
 
 			if (depth < 0)
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (token.type == VDFTokenType.StartMetadataBracket || token.type == VDFTokenType.SpecialMetadataStart)
+				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)
 					lastMetadataStartToken = token.type;
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
 				{
 					var type = VDF.GetTypeByVName(token.text, loadOptions); //Type.GetType(vdfToken.text);
-					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.SpecialMetadataStart || (!typeof(IList).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))))
+					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.SpecialMetadataStartMarker || (!typeof(IList).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))))
 						objNode.metadata_type = token.text;
 					else // if we're supposed to be finding these tokens as nodes, to fill list-obj
 						lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
@@ -74,9 +74,9 @@ static class VDFLoader
 					livePropName = token.text;
 					livePropValueNode = new VDFNode();
 				}
-				else if (token.type == VDFTokenType.StartDataBracket)
+				else if (token.type == VDFTokenType.DataStartMarker)
 					livePropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, ref poppedOutPropValueCount);
-				else if (token.type == VDFTokenType.EndDataBracket)
+				else if (token.type == VDFTokenType.DataEndMarker)
 				{
 					if (livePropName != null) // property of object
 					{
@@ -91,7 +91,7 @@ static class VDFLoader
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
-			if (token.type == VDFTokenType.StartDataBracket)
+			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
 		}
 

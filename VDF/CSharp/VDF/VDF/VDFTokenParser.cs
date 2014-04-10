@@ -7,17 +7,17 @@ enum VDFTokenType
 {
 	None,
 	PoppedOutNodeMarker,
-	SpecialMetadataStart,
-	SpecialMetadataEnd,
-	StartMetadataBracket,
+	SpecialMetadataStartMarker,
+	SpecialMetadataEndMarker,
+	MetadataStartMarker,
 	Metadata_BaseValue,
-	EndMetadataBracket,
+	MetadataEndMarker,
 	//LiteralMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
 	Data_PropName,
-	StartDataBracket,
+	DataStartMarker,
 	ItemSeparator,
 	Data_BaseValue,
-	EndDataBracket,
+	DataEndMarker,
 	LineBreak,
 	InLineComment,
 	//Indent // this is taken care of at a higher level by the VDFLoader class
@@ -76,26 +76,26 @@ class VDFTokenParser
 			{
 				if (nextChar == '<')
 				{
-					tokenType = VDFTokenType.SpecialMetadataStart;
+					tokenType = VDFTokenType.SpecialMetadataStartMarker;
 					i++;
 				}
 				else
-					tokenType = VDFTokenType.StartMetadataBracket;
+					tokenType = VDFTokenType.MetadataStartMarker;
 			}
 			else if (ch == '>')
 			{
 				if (nextChar == '>')
 				{
-					tokenType = VDFTokenType.SpecialMetadataEnd;
+					tokenType = VDFTokenType.SpecialMetadataEndMarker;
 					i++;
 				}
 				else
-					tokenType = VDFTokenType.EndMetadataBracket;
+					tokenType = VDFTokenType.MetadataEndMarker;
 			}
 			else if (ch == '{')
-				tokenType = VDFTokenType.StartDataBracket;
+				tokenType = VDFTokenType.DataStartMarker;
 			else if (ch == '}')
-				tokenType = VDFTokenType.EndDataBracket;
+				tokenType = VDFTokenType.DataEndMarker;
 			else // non-bracket char
 			{
 				if (ch == '\n')
@@ -115,7 +115,7 @@ class VDFTokenParser
 					tokenType = VDFTokenType.Metadata_BaseValue;
 				else if (nextChar == '{')
 					tokenType = VDFTokenType.Data_PropName;
-				else if (nextChar == '}' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment // todo; break point
+				else if (nextChar == '}' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
 					tokenType = VDFTokenType.Data_BaseValue;
 			}
 		}
