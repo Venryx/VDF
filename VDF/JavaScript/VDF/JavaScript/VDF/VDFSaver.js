@@ -13,13 +13,12 @@ var VDFSaver = (function () {
 
         var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
-        if (VDF.typeExporters_inline[objVTypeName]) {
-            var str = VDF.typeExporters_inline[objVTypeName](obj);
-            objNode.items.push(new VDFNode(str.contains("}") ? "@@@" + str + "@@@" : str));
-        } else if (objVTypeName == "float" && obj.toString().contains("."))
+        if (VDF.typeExporters_inline[objVTypeName])
+            objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj))));
+        else if (objVTypeName == "float" && obj.toString().contains("."))
             objNode.items.push(new VDFNode(obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString()));
         else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
-            objNode.items.push(new VDFNode(obj.toString().contains("}") ? "@@@" + obj + "@@@" : obj.toString()));
+            objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(obj.toString())));
         else if (objVTypeName.startsWith("List[")) {
             objNode.isListOrDictionary = true;
             var objAsList = obj;
@@ -113,6 +112,17 @@ var VDFSaver = (function () {
         }
 
         return objNode;
+    };
+
+    VDFSaver.RawDataStringToFinalized = function (dataStr) {
+        var result = dataStr;
+        if (dataStr.contains("}")) {
+            if (dataStr.endsWith("@") || dataStr.endsWith("|"))
+                result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "|@@";
+            else
+                result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "@@";
+        }
+        return result;
     };
     return VDFSaver;
 })();

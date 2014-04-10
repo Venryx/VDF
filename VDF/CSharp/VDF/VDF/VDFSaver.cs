@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 class VDFSaveOptions
 {
@@ -39,14 +40,11 @@ static class VDFSaver
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
-		{
-			string str = VDF.typeExporters_inline[type](obj);
-			objNode.items.Add(new VDFNode{baseValue = str.Contains("}") ? "@@@" + str + "@@@" : str});
-		}
-		else if (type == typeof (float) || type == typeof (double))
+			objNode.items.Add(new VDFNode { baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj)) });
+		else if (type == typeof(float) || type == typeof(double))
 			objNode.items.Add(new VDFNode {baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString()});
-		else if (type.IsPrimitive || type == typeof (string))
-			objNode.items.Add(new VDFNode {baseValue = obj.ToString().Contains("}") ? "@@@" + obj + "@@@" : obj.ToString()});
+		else if (type.IsPrimitive || type == typeof(string))
+			objNode.items.Add(new VDFNode { baseValue = RawDataStringToFinalized(obj.ToString()) });
 		else if (obj is IList) // note; this saves arrays also
 		{
 			objNode.isListOrDictionary = true;
@@ -138,5 +136,18 @@ static class VDFSaver
 		}
 
 		return objNode;
+	}
+
+	static string RawDataStringToFinalized(string rawDataStr)
+	{
+		string result = rawDataStr;
+		if (rawDataStr.Contains("}"))
+		{
+			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
+				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "|@@";
+			else
+				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "@@";
+		}
+		return result;
 	}
 }

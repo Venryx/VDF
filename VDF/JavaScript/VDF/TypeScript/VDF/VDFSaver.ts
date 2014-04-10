@@ -10,14 +10,11 @@ class VDFSaver
 		var objVTypeName = VDF.GetVTypeNameOfObject(obj);
 		var objNode = new VDFNode();
 		if (VDF.typeExporters_inline[objVTypeName])
-		{
-			var str = VDF.typeExporters_inline[objVTypeName](obj);
-			objNode.items.push(new VDFNode(str.contains("}") ? "@@@" + str + "@@@" : str));
-		}
+			objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj))));
 		else if (objVTypeName == "float" && obj.toString().contains(".")) // float/double
 			objNode.items.push(new VDFNode(obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString()));
 		else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
-			objNode.items.push(new VDFNode(obj.toString().contains("}") ? "@@@" + obj + "@@@" : obj.toString()));
+			objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(obj.toString())));
 		else if (objVTypeName.startsWith("List["))
 		{
 			objNode.isListOrDictionary = true;
@@ -122,5 +119,18 @@ class VDFSaver
 		}
 
 		return objNode;
+	}
+
+	private static RawDataStringToFinalized(dataStr: string): string
+	{
+		var result: string = dataStr;
+		if (dataStr.contains("}"))
+		{
+			if (dataStr.endsWith("@") || dataStr.endsWith("|"))
+				result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "|@@";
+			else
+				result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "@@";
+		}
+		return result;
 	}
 }

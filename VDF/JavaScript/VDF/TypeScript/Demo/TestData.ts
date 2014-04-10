@@ -12,7 +12,7 @@
 
 		var items = world.vObjectRoot.AddChild(new VObject("Items"));
 		items.AddDuty(new Special1(Color.White, .5));
-		items.AddChild(new VObject("NameThat{NeedsEscaping}"));
+		items.AddChild(new VObject("NameThat{NeedsEscaping@gmail.com}"));
 		var camera = items.AddChild(new VObject("Camera"));
 		camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5, 28.9, 2404.765), new Vector3(3, 4, 1)));
 		camera.AddDuty(new HoldMesh

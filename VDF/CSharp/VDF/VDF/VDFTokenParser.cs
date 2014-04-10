@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
 enum VDFTokenType
 {
@@ -44,7 +47,7 @@ class VDFTokenParser
 	public VDFToken GetNextToken()
 	{
 		var tokenType = VDFTokenType.None;
-		var tokenChars = new List<char>();
+		var tokenTextBuilder = new StringBuilder();
 
 		bool inLiteralMarkers = false;
 
@@ -56,15 +59,16 @@ class VDFTokenParser
 			char? nextChar = i < vdf.Length - 1 ? vdf[i + 1] : (char?)null;
 			char? nextNextChar = i < vdf.Length - 2 ? vdf[i + 2] : (char?)null;
 
-			if (ch == '@' && nextChar.HasValue && nextChar == '@' && nextNextChar.HasValue && nextNextChar == '@') // special case; escape literals
+			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n')) // special case; escape literals
 			{
+				tokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
 				inLiteralMarkers = !inLiteralMarkers;
-				i += 2; // skip to first char after literal-marker
+				i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker
 				if (!inLiteralMarkers) // if literal-block ended, return chars as Data_BaseValue token
 					tokenType = VDFTokenType.Data_BaseValue;
 				continue;
 			}
-			tokenChars.Add(ch);
+			tokenTextBuilder.Append(ch);
 			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
 				continue;
 
@@ -117,7 +121,7 @@ class VDFTokenParser
 		}
 		nextCharPos = i;
 
-		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, new string(tokenChars.ToArray())) : null;
+		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, tokenTextBuilder.ToString()) : null;
 		tokens.Add(token);
 		return token;
 	}
@@ -128,5 +132,17 @@ class VDFTokenParser
 			if (vdfFile[i] == '\n')
 				return i;
 		return -1;
+	}
+
+	static string FinalizedDataStringToRaw(string finalizedDataStr)
+	{
+		string result = finalizedDataStr;
+		if (finalizedDataStr.Contains("}"))
+		{
+			if ((result[result.Length - 2] == '@' || result[result.Length - 2] == '|') && result.EndsWith("|"))
+				result = result.Substring(0, result.Length - 1); // chop of last char, as it was just added by the serializer for separation
+			result = new Regex("@@@(?=\n|}|$)").Replace(result, "@@"); // remove extra '@' char added to all troublesome (before-end-of-line-or-end-bracket-or-end-of-string) two-at-signs char-segments
+		}
+		return result;
 	}
 }

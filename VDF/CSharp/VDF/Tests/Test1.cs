@@ -16,7 +16,7 @@ static class Test1
 
 		var items = world.vObjectRoot.AddChild(new VObject("Items"));
 		items.AddDuty(new Special1(Color.White, .5f));
-		items.AddChild(new VObject("NameThat{NeedsEscaping}"));
+		items.AddChild(new VObject("NameThat{NeedsEscaping@gmail.com}"));
 		var camera = items.AddChild(new VObject("Camera"));
 		camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5f, 28.9f, 2404.765f), new Vector3(3, 4, 1)));
 		camera.AddDuty(new HoldMesh(new List<Vector3>

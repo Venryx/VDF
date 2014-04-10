@@ -76,8 +76,18 @@ namespace VDFTests
 		}
 		[Fact] void VDFNode_Level1_Literal()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("string{@@@Prop value string that {needs escaping}.@@@}");
+			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@}");
 			a.properties["string"].items[0].baseValue.Should().Be("Prop value string that {needs escaping}.");
+		}
+		[Fact] void VDFNode_Level1_TroublesomeLiteral1()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@@|@@}");
+			a.properties["string"].items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
+		}
+		[Fact] void VDFNode_Level1_TroublesomeLiteral2()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
+			a.properties["string"].items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
 		}
 		[Fact] void VDFNode_Level1_PoppedOutNodes()
 		{
@@ -103,6 +113,18 @@ namespace VDFTests
 			a.items[0].items[1].baseValue.Should().Be("1value");
 			a.items[1].items[0].baseValue.Should().Be("2key");
 			a.items[1].items[1].baseValue.Should().Be("2value");
+		}
+		[Fact] void VDFNode_Level1_PoppedOutItemGroups() // each 'group' is actually just the value-data of one of the parent's properties
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"names{#}ages{#}
+	Dan
+	Bob
+	#10
+	20");
+			a.properties["names"].items[0].items[0].baseValue.Should().Be("Dan");
+			a.properties["names"].items[1].items[0].baseValue.Should().Be("Bob");
+			a.properties["ages"].items[0].items[0].baseValue.Should().Be("10");
+			a.properties["ages"].items[1].items[0].baseValue.Should().Be("20");
 		}
 	}
 }

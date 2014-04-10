@@ -17,7 +17,7 @@ var Test1;
 
         var items = world.vObjectRoot.AddChild(new VObject("Items"));
         items.AddDuty(new Special1(4 /* White */, .5));
-        items.AddChild(new VObject("NameThat{NeedsEscaping}"));
+        items.AddChild(new VObject("NameThat{NeedsEscaping@gmail.com}"));
         var camera = items.AddChild(new VObject("Camera"));
         camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5, 28.9, 2404.765), new Vector3(3, 4, 1)));
         camera.AddDuty(new HoldMesh(new_List("Vector3", new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)), new_Dictionary("Vector3", "Color", [new Vector3(9, 4, 2.5), 6 /* Black */], [new Vector3(1, 8, 9.5435), 5 /* Gray */], [new Vector3(25, 15, 5), 4 /* White */])));

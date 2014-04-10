@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 class VDFLoadOptions
 {
@@ -18,7 +19,8 @@ class VDFLoadOptions
 
 static class VDFLoader
 {
-	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0)
+	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0) { int temp = 0; return ToVDFNode(vdfFile, loadOptions, firstObjTextCharPos, ref temp); }
+	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, int firstObjTextCharPos, ref int parentPoppedOutPropValueCount)
 	{
 		vdfFile = vdfFile.Replace("\r\n", "\n");
 		if (loadOptions == null)
@@ -27,7 +29,7 @@ static class VDFLoader
 		var objNode = new VDFNode();
 
 		int depth = 0;
-		int poppedOutChildDataCount = 0;
+		int poppedOutPropValueCount = 0;
 		string livePropName = null;
 		VDFNode livePropValueNode = null;
 		string lastMetadata_type = null;
@@ -59,10 +61,10 @@ static class VDFLoader
 					if (token.text == "#")
 					{
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
-						List<int> poppedOutChildDataTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, poppedOutChildDataCount);
-						foreach (int pos in poppedOutChildDataTextPositions)
-							objNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos));
-						poppedOutChildDataCount += poppedOutChildDataTextPositions.Count;
+						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentPoppedOutPropValueCount);
+						foreach (int pos in poppedOutPropValueItemTextPositions)
+							objNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos, ref poppedOutPropValueCount));
+						parentPoppedOutPropValueCount++;
 					}
 					else
 						objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
@@ -73,7 +75,7 @@ static class VDFLoader
 					livePropValueNode = new VDFNode();
 				}
 				else if (token.type == VDFTokenType.StartDataBracket)
-					livePropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos);
+					livePropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, ref poppedOutPropValueCount);
 				else if (token.type == VDFTokenType.EndDataBracket)
 				{
 					if (livePropName != null) // property of object
