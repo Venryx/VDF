@@ -85,7 +85,7 @@ class VDFSaver
 					continue;
 
 				var propValue = obj[propName];
-				if (eval("window['" + propInfo.propVTypeName + "'] && " + propInfo.propVTypeName + "['_IsEnum'] === 0")) // special case; if enum
+				if (EnumValue.IsEnum(propInfo.propVTypeName)) // special case; if enum
 					propValue = new EnumValue(propInfo.propVTypeName, propValue);
 				if (propInfo.IsXIgnorableValue(propValue))
 					continue;

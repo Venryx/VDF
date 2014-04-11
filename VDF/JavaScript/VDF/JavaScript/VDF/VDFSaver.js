@@ -81,7 +81,7 @@ var VDFSaver = (function () {
                     continue;
 
                 var propValue = obj[propName];
-                if (eval("window['" + propInfo.propVTypeName + "'] && " + propInfo.propVTypeName + "['_IsEnum'] === 0"))
+                if (EnumValue.IsEnum(propInfo.propVTypeName))
                     propValue = new EnumValue(propInfo.propVTypeName, propValue);
                 if (propInfo.IsXIgnorableValue(propValue))
                     continue;

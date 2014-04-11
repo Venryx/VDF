@@ -1,8 +1,9 @@
 ﻿var VDFNode = (function () {
-    function VDFNode(baseValue) {
+    function VDFNode(baseValue, metadata_type) {
         this.items = [];
         this.properties = new Map();
         this.baseValue = baseValue;
+        this.metadata_type = metadata_type;
     }
     VDFNode.prototype.GetInLineItemText = function () {
         var builder = new StringBuilder();
@@ -60,6 +61,50 @@
     VDFNode.prototype.ToString = function () {
         var poppedOutItemText = this.GetPoppedOutItemText();
         return this.GetInLineItemText() + (poppedOutItemText.length > 0 ? "\n" + poppedOutItemText : "");
+    };
+
+    // loading
+    // ==================
+    VDFNode.CreateNewInstanceOfType = function (type) {
+        // todo; get this to handle List and Dictionary types
+        return eval("new " + type + "()");
+    };
+    VDFNode.ConvertRawValueToCorrectType = function (rawValue, declaredType, loadOptions) {
+        var result;
+        if (rawValue.GetTypeName() == "VDFNode" && rawValue.baseValue == null)
+            result = rawValue.ToObject(rawValue.metadata_type || declaredType, loadOptions); // tell node to return itself as the correct type
+        else {
+            if (VDF.typeImporters_inline[declaredType])
+                result = VDF.typeImporters_inline[declaredType](rawValue.baseValue); //(string)rawValue);
+            else if (EnumValue.IsEnum(declaredType))
+                result = EnumValue.GetEnumStringForIntValue(declaredType, parseInt(rawValue.baseValue));
+            else
+                result = rawValue.baseValue; // todo
+        }
+        return result;
+    };
+
+    VDFNode.prototype.ToObject = function (declaredType, loadOptions) {
+        if (declaredType == "string")
+            return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
+
+        var type = this.metadata_type || declaredType;
+        var typeInfo = null;
+
+        var result = VDFNode.CreateNewInstanceOfType(type);
+        for (var i = 0; i < this.items.length; i++)
+            if (type.startsWith("List["))
+                result[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeInfo.itemType, loadOptions);
+            else if (type.startsWith("Dictionary["))
+                result.set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeInfo.keyType, loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeInfo.valueType, loadOptions));
+            else
+                result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
+        for (var propName in this.properties) {
+            var propInfo = null;
+            result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], propInfo.propVTypeName, loadOptions);
+        }
+
+        return result;
     };
     return VDFNode;
 })();

@@ -48,14 +48,23 @@
             $("#outputA").html(vdf);
         });
         $("#makeOutputB").click(function (event, ui) {
+            // load from output-a textbox
+            var vdf = $("#outputA").html();
+            var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
+
+            // reserialize it, and save it to second file, to check data
+            var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions());
+            $("#outputB").html(vdf2);
         });
     });
 })(Main || (Main = {}));
 
 var StringBuilder = (function () {
-    function StringBuilder() {
+    function StringBuilder(startData) {
         this.data = [];
         this.counter = 0;
+        if (startData)
+            this.data.push(startData);
     }
     StringBuilder.prototype.Append = function (str) {
         this.data[this.counter++] = str;

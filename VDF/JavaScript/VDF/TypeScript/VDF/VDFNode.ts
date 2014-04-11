@@ -5,9 +5,10 @@
 	items: Array<VDFNode> = []; // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
 	properties: Map<string, VDFNode> = new Map<string, VDFNode>();
 
-	constructor(baseValue?: string)
+	constructor(baseValue?: string, metadata_type?: string)
 	{
 		this.baseValue = baseValue;
+		this.metadata_type = metadata_type;
 	}
 
 	// saving
@@ -87,48 +88,50 @@
 	// loading
 	// ==================
 	
-	/*static object ConvertRawValueToCorrectType(object rawValue, Type declaredType, VDFLoadOptions loadOptions)
+	static CreateNewInstanceOfType(type: string)
 	{
-		object result;
-		if (rawValue is VDFNode && ((VDFNode)rawValue).baseValue == null)
-			result = ((VDFNode)rawValue).ToObject(((VDFNode) rawValue).metadata_type != null ? VDF.GetTypeByVName(((VDFNode) rawValue).metadata_type, loadOptions) : declaredType, loadOptions); // tell node to return itself as the correct type
+		// todo; get this to handle List and Dictionary types
+		return eval("new " + type + "()");
+	}
+	static ConvertRawValueToCorrectType(rawValue: any, declaredType: string, loadOptions: VDFLoadOptions): any
+	{
+		var result;
+		if (rawValue.GetTypeName() == "VDFNode" && (<VDFNode>rawValue).baseValue == null)
+			result = (<VDFNode>rawValue).ToObject((<VDFNode>rawValue).metadata_type || declaredType, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string (todo; update the 'items' var to only accept VDFNodes now)
 		{
-			if (VDF.typeImporters_inline.ContainsKey(declaredType))
-				result = VDF.typeImporters_inline[declaredType](((VDFNode) rawValue).baseValue); //(string)rawValue);
-				else if (declaredType.IsEnum)
-				result = Enum.Parse(declaredType, ((VDFNode) rawValue).baseValue);
-				else // if no specific handler, try auto-converting string to the correct (primitive) type
-			result = Convert.ChangeType(((VDFNode) rawValue).baseValue, declaredType);
+			if (VDF.typeImporters_inline[declaredType])
+				result = VDF.typeImporters_inline[declaredType]((<VDFNode>rawValue).baseValue); //(string)rawValue);
+			else if (EnumValue.IsEnum(declaredType))
+				result = EnumValue.GetEnumStringForIntValue(declaredType, parseInt((<VDFNode>rawValue).baseValue));
+			else // if no specific handler, try auto-converting string to the correct (primitive) type
+				result = (<VDFNode>rawValue).baseValue; // todo
 		}
 		return result;
 	}
 
-	public T ToObject<T>(VDFLoadOptions loadOptions = null) { return (T) ToObject(typeof (T), loadOptions); }
-	public object ToObject(Type declaredType, VDFLoadOptions loadOptions = null)
+	public ToObject(declaredType: string, loadOptions?: VDFLoadOptions)
 	{
-		if (declaredType == typeof (string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
-			return items[0].baseValue == "null" ? null : items[0].baseValue;
+		if (declaredType == "string") // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
+			return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
 
-		Type type = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
-		var typeInfo = VDFTypeInfo.Get(type);
+		var type = this.metadata_type || declaredType;
+		var typeInfo = null; // todo
 
-		object result = CreateNewInstanceOfType(type);
-		for (int i = 0; i < items.Count; i++)
-			if (result is Array)
-				((Array)result).SetValue(ConvertRawValueToCorrectType(items[i], type.GetElementType(), loadOptions), i);
-			else if (result is IList)
-				((IList)result).Add(ConvertRawValueToCorrectType(items[i], type.GetGenericArguments()[0], loadOptions));
-			else if (result is IDictionary) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				((IDictionary)result).Add(ConvertRawValueToCorrectType(items[i].items[0], type.GetGenericArguments()[0], loadOptions), ConvertRawValueToCorrectType(items[i].items[1], type.GetGenericArguments()[1], loadOptions));
+		var result = VDFNode.CreateNewInstanceOfType(type);
+		for (var i = 0; i < this.items.length; i++)
+			if (type.startsWith("List["))
+				(<List<any>>result)[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeInfo.itemType, loadOptions);
+			else if (type.startsWith("Dictionary[")) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
+				(<Dictionary<any, any>>result).set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeInfo.keyType, loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeInfo.valueType, loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
-				result = ConvertRawValueToCorrectType(items[i], type, loadOptions);
-		foreach(string propName in properties.Keys)
+				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
+		for (var propName in this.properties)
 		{
-			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-			propInfo.SetValue(result, ConvertRawValueToCorrectType(properties[propName], propInfo.GetPropType(), loadOptions));
+			var propInfo: VDFPropInfo = null; // todo
+			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], propInfo.propVTypeName, loadOptions);
 		}
 
 		return result;
-	}*/
+	}
 }
