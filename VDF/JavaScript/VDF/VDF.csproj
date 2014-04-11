@@ -154,12 +154,17 @@
     <Content Include="JavaScript\Demo\Packages\V\VFileBrowser.js" />
     <Content Include="JavaScript\Demo\Packages\V\VMessageBox.js" />
     <Content Include="JavaScript\Demo\Tests\Test1.html" />
+    <Content Include="JavaScript\Tests\Packages\QUnit 1.14.0.js" />
+    <Content Include="JavaScript\Tests\Test1.js" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="TypeScript\Demo\Main.ts" />
     <TypeScriptCompile Include="TypeScript\Demo\TestData.ts" />
     <TypeScriptCompile Include="TypeScript\Demo\Declarations\jquery.d.ts" />
+    <TypeScriptCompile Include="TypeScript\Tests\Declarations\qunit.d.ts" />
+    <TypeScriptCompile Include="TypeScript\Tests\Loading.ts" />
+    <TypeScriptCompile Include="TypeScript\Tests\Saving.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDF.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDFExtensions.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDFLoader.ts" />

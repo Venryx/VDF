@@ -10,3 +10,4 @@ $.fn.VTabView = function () {
         $(boxHolder.children()[$(this).index()]).addClass("active");
     });
 };
+//# sourceMappingURL=VTabView.js.map
