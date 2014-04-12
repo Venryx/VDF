@@ -13,7 +13,7 @@ var Loading = (function () {
         this.initialized = true;
         Object.AddProtoFunction_Inline = function Should() {
             return { obj: this, Be: function (value, message) {
-                    equal(this, value, message);
+                    equal(this.obj, value, message);
                 } };
         };
         VDF.RegisterTypeExporter_Inline("Guid", function (id) {
