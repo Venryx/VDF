@@ -6,7 +6,7 @@ name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}listOfStringLists{{1A|1B|
 			<HoldSoil>texturePath{Dirt.png}
 	id{}name{Items}duties{#}children{#}
 		<Special1>color{White}brightness{.5}
-		#id{}name{@@NameThat{NeedsEscaping@gmail.com}@@|@@}
+		#id{}name{@@NameThat{NeedsEscaping@gmail.com}@@}
 		id{}name{Camera}duties{#}
 			<HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
 			<HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}vertexColors{{9,4,2.5|Black}{1,8,9.5435|Gray}{25,15,5|White}}

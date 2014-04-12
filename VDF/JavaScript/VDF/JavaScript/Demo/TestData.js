@@ -8,6 +8,7 @@ var Test1;
 (function (Test1) {
     function CreateWorld() {
         var world = new World("Main");
+        world.listOfStringLists.pushAll([new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C")]);
 
         var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
         var grass = soils.AddChild(new VObject("Grass"));
@@ -39,9 +40,13 @@ var World = (function () {
     function World(name) {
         this.name = name;
         this.vObjectRoot = new VObject("VObjectRoot");
-        this.listOfStringLists = new_List("List[string]", new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C"));
+        this.listOfStringLists = new_List("List[string]");
     }
-    World.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["name", new VDFPropInfo("string", true)], ["vObjectRoot", new VDFPropInfo("VObject", true)], ["listOfStringLists", new VDFPropInfo("List[List[string]]", true)]));
+    World.typeInfo = new VDFTypeInfo(false, {
+        name: new VDFPropInfo("string", true),
+        vObjectRoot: new VDFPropInfo("VObject", true),
+        listOfStringLists: new VDFPropInfo("List[List[string]]", true)
+    });
     return World;
 })();
 
@@ -68,7 +73,12 @@ var VObject = (function () {
         this.children.remove(child);
         child.parent = null;
     };
-    VObject.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["id", new VDFPropInfo("Guid", true)], ["name", new VDFPropInfo("string", true)], ["duties", new VDFPropInfo("List[Duty]", true, true, true)], ["children", new VDFPropInfo("List[VObject]", true, true, true)]));
+    VObject.typeInfo = new VDFTypeInfo(false, {
+        id: new VDFPropInfo("Guid", true),
+        name: new VDFPropInfo("string", true),
+        duties: new VDFPropInfo("List[Duty]", true, true, true),
+        children: new VDFPropInfo("List[VObject]", true, true, true)
+    });
     return VObject;
 })();
 
@@ -83,7 +93,7 @@ var HoldSoil = (function (_super) {
         _super.call(this);
         this.texturePath = texturePath;
     }
-    HoldSoil.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["texturePath", new VDFPropInfo("string", true)]));
+    HoldSoil.typeInfo = new VDFTypeInfo(false, { texturePath: new VDFPropInfo("string", true) });
     return HoldSoil;
 })(Duty);
 var Color;
@@ -103,7 +113,10 @@ var Special1 = (function (_super) {
         this.color = color;
         this.brightness = brightness;
     }
-    Special1.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["color", new VDFPropInfo("Color", true)], ["brightness", new VDFPropInfo("float", true)]));
+    Special1.typeInfo = new VDFTypeInfo(false, {
+        color: new VDFPropInfo("Color", true),
+        brightness: new VDFPropInfo("float", true)
+    });
     return Special1;
 })(Duty);
 var HoldTransform = (function (_super) {
@@ -114,7 +127,11 @@ var HoldTransform = (function (_super) {
         this.rotation = rotation || new Vector3(0, 0, 0);
         this.scale = scale || new Vector3(0, 0, 0);
     }
-    HoldTransform.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["position", new VDFPropInfo("Vector3", true)], ["rotation", new VDFPropInfo("Vector3", true)], ["scale", new VDFPropInfo("Vector3", true)]));
+    HoldTransform.typeInfo = new VDFTypeInfo(false, {
+        position: new VDFPropInfo("Vector3", true),
+        rotation: new VDFPropInfo("Vector3", true),
+        scale: new VDFPropInfo("Vector3", true)
+    });
     return HoldTransform;
 })(Duty);
 var HoldMesh = (function (_super) {
@@ -124,7 +141,10 @@ var HoldMesh = (function (_super) {
         this.vertexes = vertexes;
         this.vertexColors = vertexColors;
     }
-    HoldMesh.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["vertexes", new VDFPropInfo("List[Vector3]", true)], ["vertexColors", new VDFPropInfo("Dictionary[Vector3,Color]", true)]));
+    HoldMesh.typeInfo = new VDFTypeInfo(false, {
+        vertexes: new VDFPropInfo("List[Vector3]", true),
+        vertexColors: new VDFPropInfo("Dictionary[Vector3,Color]", true)
+    });
     return HoldMesh;
 })(Duty);
 var HoldDuties = (function (_super) {
@@ -141,7 +161,10 @@ var HoldDuties = (function (_super) {
     HoldDuties.prototype.RemoveDuty = function (duty) {
         this.duties.remove(duty);
     };
-    HoldDuties.typeInfo = new VDFTypeInfo(false, new_Dictionary(null, null, ["dutiesEnabledWhen", new VDFPropInfo("string", true)], ["duties", new VDFPropInfo("List[Duty]", true, true, true)]));
+    HoldDuties.typeInfo = new VDFTypeInfo(false, {
+        dutiesEnabledWhen: new VDFPropInfo("string", true),
+        duties: new VDFPropInfo("List[Duty]", true, true, true)
+    });
     return HoldDuties;
 })(Duty);
 

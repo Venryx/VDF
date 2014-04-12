@@ -73,17 +73,20 @@ var EnumValue = (function () {
         this.realVTypeName = enumTypeName;
 
         //this.intValue = intValue;
-        this.stringValue = eval(enumTypeName + "[" + intValue + "]");
+        this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
     }
     EnumValue.prototype.toString = function () {
         return this.stringValue;
     };
 
-    EnumValue.IsEnum = function (objName) {
-        return eval("window['" + objName + "'] && " + objName + "['_IsEnum'] === 0");
+    EnumValue.IsEnum = function (typeName) {
+        return eval("window['" + typeName + "'] && " + typeName + "['_IsEnum'] === 0");
+    };
+    EnumValue.GetEnumIntForStringValue = function (enumTypeName, stringValue) {
+        return eval(enumTypeName + "[\"" + stringValue + "\"]");
     };
     EnumValue.GetEnumStringForIntValue = function (enumTypeName, intValue) {
-        return new EnumValue(enumTypeName, intValue).toString();
+        return eval(enumTypeName + "[" + intValue + "]");
     };
     return EnumValue;
 })();

@@ -77,7 +77,7 @@ var VDFSaver = (function () {
                 if (typeof obj[propName] == "function")
                     continue;
 
-                var propInfo = typeInfo.propInfoByPropName.get(propName) || new VDFPropInfo(null);
+                var propInfo = typeInfo.propInfoByPropName[propName] || new VDFPropInfo(null);
                 var include = typeInfo.props_includeL1;
                 include = propInfo.includeL2 != null ? propInfo.includeL2 : include;
                 if (!include)

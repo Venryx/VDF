@@ -2,7 +2,7 @@
 
 class VDFLoader
 {
-	static ToVDFNode(vdfFile: string, loadOptions?: VDFLoadOptions, firstObjTextCharPos?: number, refData?: {parentPoppedOutPropValueCount: number}): VDFNode
+	static ToVDFNode(vdfFile: string, loadOptions?: VDFLoadOptions, firstObjTextCharPos: number = 0, parentSharedData?: {poppedOutPropValueCount: number}): VDFNode
 	{
 		vdfFile = vdfFile.replace(/\r\n/g, "\n");
 		if (!loadOptions)
@@ -11,7 +11,7 @@ class VDFLoader
 		var objNode = new VDFNode();
 
 		var depth = 0;
-		var poppedOutPropValueCount = 0;
+		var sharedData = {poppedOutPropValueCount: 0};
 		var livePropName: string = null;
 		var livePropValueNode: VDFNode = null;
 		var lastMetadata_type: string = null;
@@ -42,10 +42,10 @@ class VDFLoader
 					if (token.text == "#")
 					{
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
-						var poppedOutPropValueItemTextPositions: Array<number> = VDFLoader.FindPoppedOutChildDataTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, refData.parentPoppedOutPropValueCount);
+						var poppedOutPropValueItemTextPositions: Array<number> = VDFLoader.FindPoppedOutChildDataTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
 						for (var key in poppedOutPropValueItemTextPositions)
-							objNode.items.push(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], {parentPoppedOutPropValueCount: poppedOutPropValueCount}));
-						refData.parentPoppedOutPropValueCount++;
+							objNode.items.push(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], sharedData));
+						parentSharedData.poppedOutPropValueCount++;
 					}
 					else
 						objNode.items.push(new VDFNode(token.text, lastMetadata_type));
@@ -56,7 +56,7 @@ class VDFLoader
 					livePropValueNode = new VDFNode();
 				}
 				else if (token.type == VDFTokenType.DataStartMarker)
-					livePropValueNode = VDFLoader.ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, {parentPoppedOutPropValueCount: poppedOutPropValueCount});
+					livePropValueNode = VDFLoader.ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, sharedData);
 				else if (token.type == VDFTokenType.DataEndMarker)
 				{
 					if (livePropName != null) // property of object

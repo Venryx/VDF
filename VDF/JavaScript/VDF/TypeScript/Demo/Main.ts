@@ -50,7 +50,7 @@
 		$("#makeOutputB").click((event, ui) =>
 		{
 			// load from output-a textbox
-			var vdf = $("#outputA").html();
+			var vdf = decodeURIComponent($("#outputA").html()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 			var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
 
 			// reserialize it, and save it to second file, to check data

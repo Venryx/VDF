@@ -7,6 +7,7 @@ static class Test1
 	public static World CreateWorld()
 	{
 		var world = new World("Main");
+		world.listOfStringLists.AddRange(new List<List<string>> { new List<string> { "1A", "1B", "1C" }, new List<string> { "2A", "2B", "2C" }, new List<string> { "3A", "3B", "3C" } });
 
 		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
@@ -51,7 +52,7 @@ class World
 	{
 		this.name = name;
 		vObjectRoot = new VObject("VObjectRoot");
-		listOfStringLists = new List<List<string>> {new List<string> {"1A", "1B", "1C"}, new List<string> {"2A", "2B", "2C"}, new List<string> {"3A", "3B", "3C"}};
+		listOfStringLists = new List<List<string>>();
 	}
 }
 

@@ -81,12 +81,13 @@ class EnumValue
 	{
 		this.realVTypeName = enumTypeName;
 		//this.intValue = intValue;
-		this.stringValue = eval(enumTypeName + "[" + intValue + "]");
+		this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
 	}
 	toString() { return this.stringValue; }
 
-	static IsEnum(objName: string): boolean { return eval("window['" + objName + "'] && " + objName + "['_IsEnum'] === 0"); }
-	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return new EnumValue(enumTypeName, intValue).toString(); }
+	static IsEnum(typeName: string): boolean { return eval("window['" + typeName + "'] && " + typeName + "['_IsEnum'] === 0"); }
+	static GetEnumIntForStringValue(enumTypeName: string, stringValue: string) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); }
+	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 
 interface List<T> extends Array<T>

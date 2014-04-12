@@ -80,7 +80,7 @@ class VDFSaver
 				if (typeof obj[propName] == "function")
 					continue;
 
-				var propInfo: VDFPropInfo = typeInfo.propInfoByPropName.get(propName) || new VDFPropInfo(null);
+				var propInfo: VDFPropInfo = typeInfo.propInfoByPropName[propName] || new VDFPropInfo(null);
 				var include = typeInfo.props_includeL1;
 				include = propInfo.includeL2 != null ? propInfo.includeL2 : include;
 				if (!include)

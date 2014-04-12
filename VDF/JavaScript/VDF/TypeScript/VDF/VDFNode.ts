@@ -88,15 +88,34 @@
 	// loading
 	// ==================
 	
+	static GetGenericParametersOfTypeName(typeName: string): string[]
+	{
+		var genericArgumentTypes = new Array<string>();
+		var depth = 0;
+		var lastStartBracketPos = -1;
+		for (var i = 0; i < typeName.length; i++)
+		{
+			var ch = typeName[i];
+			if (ch == ']')
+				depth--;
+			if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
+				genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
+			if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
+				lastStartBracketPos = i;
+			if (ch == '[')
+				depth++;
+		}
+		return genericArgumentTypes;
+	}
 	static CreateNewInstanceOfType(typeName: string)
 	{
+		if (["bool", "float", "string"].contains(typeName) || EnumValue.IsEnum(typeName)) // no need to "instantiate" primitives and enums (we create them straight-forwardly later on)
+			return null;
+		var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
 		if (typeName.startsWith("List["))
-			return eval("new_List(" + typeName.match(/\[(.+)\]/)[1] + ")");
+			return eval("new_List(\"" + genericParameters[0] + "\")");
 		if (typeName.startsWith("Dictionary["))
-		{
-			var parts = typeName.match(/\[(.+?),(.+?)\]/); // todo; have this support generic-parameters which are themselves generic-types
-			return eval("new_Dictionary(" + parts[1] + "," + parts[2] + ")");
-		}
+			return eval("new_Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
 		return eval("new " + typeName + "()");
 	}
 	static ConvertRawValueToCorrectType(rawValue: any, declaredTypeName: string, loadOptions: VDFLoadOptions): any
@@ -109,9 +128,9 @@
 			if (VDF.typeImporters_inline[declaredTypeName])
 				result = VDF.typeImporters_inline[declaredTypeName]((<VDFNode>rawValue).baseValue); //(string)rawValue);
 			else if (EnumValue.IsEnum(declaredTypeName))
-				result = EnumValue.GetEnumStringForIntValue(declaredTypeName, parseInt((<VDFNode>rawValue).baseValue));
+				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, (<VDFNode>rawValue).baseValue);
 			else // if no specific handler, try auto-converting string to the correct (primitive) type
-				result = (<VDFNode>rawValue).baseValue; // todo
+				result = declaredTypeName == "float" ? parseFloat((<VDFNode>rawValue).baseValue) : (<VDFNode>rawValue).baseValue;
 		}
 		return result;
 	}
@@ -122,14 +141,15 @@
 			return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
 
 		var type = this.metadata_type || declaredTypeName;
-		var typeInfo = window[declaredTypeName].typeInfo;
+		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);
+		var typeInfo = (window[declaredTypeName] || {}).typeInfo;
 
 		var result = VDFNode.CreateNewInstanceOfType(type);
 		for (var i = 0; i < this.items.length; i++)
 			if (type.startsWith("List["))
-				(<List<any>>result)[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeInfo.itemType, loadOptions);
+				(<List<any>>result)[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
 			else if (type.startsWith("Dictionary[")) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				(<Dictionary<any, any>>result).set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeInfo.keyType, loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeInfo.valueType, loadOptions));
+				(<Dictionary<any, any>>result).set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
 				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
 		for (var propName in this.properties)

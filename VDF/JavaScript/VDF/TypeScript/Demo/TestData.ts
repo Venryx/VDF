@@ -3,6 +3,7 @@
 	export function CreateWorld(): World
 	{
 		var world = new World("Main");
+		world.listOfStringLists.pushAll([new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C")]);
 
 		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
@@ -35,10 +36,12 @@
 
 class World
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["name", new VDFPropInfo("string", true)],
-	["vObjectRoot", new VDFPropInfo("VObject", true)],
-	["listOfStringLists", new VDFPropInfo("List[List[string]]", true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		name: new VDFPropInfo("string", true),
+		vObjectRoot: new VDFPropInfo("VObject", true),
+		listOfStringLists: new VDFPropInfo("List[List[string]]", true)
+	});
 
 	name: string;
 	vObjectRoot: VObject;
@@ -48,17 +51,19 @@ class World
 	{
 		this.name = name;
 		this.vObjectRoot = new VObject("VObjectRoot");
-		this.listOfStringLists = new_List("List[string]", new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C"));
+		this.listOfStringLists = new_List<List<string>>("List[string]");
 	}
 }
 
 class VObject
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["id", new VDFPropInfo("Guid", true)], // todo; rather than marking this here manually, have it marked by the at-runtime system described above
-	["name", new VDFPropInfo("string", true)],
-	["duties", new VDFPropInfo("List[Duty]", true, true, true)],
-	["children", new VDFPropInfo("List[VObject]", true, true, true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, 
+	{
+		id: new VDFPropInfo("Guid", true), // todo; rather than marking this here manually, have it marked by the at-runtime system described above
+		name: new VDFPropInfo("string", true),
+		duties: new VDFPropInfo("List[Duty]", true, true, true),
+		children: new VDFPropInfo("List[VObject]", true, true, true)
+	});
 
 	parent: VObject;
 
@@ -97,8 +102,7 @@ class VObject
 class Duty {}
 class HoldSoil extends Duty
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["texturePath", new VDFPropInfo("string", true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, { texturePath: new VDFPropInfo("string", true) });
 
 	texturePath: string;
 	constructor(texturePath: string)
@@ -110,9 +114,11 @@ class HoldSoil extends Duty
 enum Color { _IsEnum, Red, Green, Blue, White, Gray, Black }
 class Special1 extends Duty
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["color", new VDFPropInfo("Color", true)],
-	["brightness", new VDFPropInfo("float", true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		color: new VDFPropInfo("Color", true),
+		brightness: new VDFPropInfo("float", true)
+	});
 
 	color: Color;
 	brightness: number;
@@ -125,10 +131,12 @@ class Special1 extends Duty
 }
 class HoldTransform extends Duty
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["position", new VDFPropInfo("Vector3", true)],
-	["rotation", new VDFPropInfo("Vector3", true)],
-	["scale", new VDFPropInfo("Vector3", true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		position: new VDFPropInfo("Vector3", true),
+		rotation: new VDFPropInfo("Vector3", true),
+		scale: new VDFPropInfo("Vector3", true)
+	});
 
 	position: Vector3;
 	rotation: Vector3;
@@ -143,9 +151,11 @@ class HoldTransform extends Duty
 }
 class HoldMesh extends Duty
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["vertexes", new VDFPropInfo("List[Vector3]", true)],
-	["vertexColors", new VDFPropInfo("Dictionary[Vector3,Color]", true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		vertexes: new VDFPropInfo("List[Vector3]", true),
+		vertexColors: new VDFPropInfo("Dictionary[Vector3,Color]", true)
+	});
 
 	vertexes: List<Vector3>;
 	vertexColors: Dictionary<Vector3, Color>;
@@ -158,9 +168,11 @@ class HoldMesh extends Duty
 }
 class HoldDuties extends Duty
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
-	["dutiesEnabledWhen", new VDFPropInfo("string", true)],
-	["duties", new VDFPropInfo("List[Duty]", true, true, true)]));
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		dutiesEnabledWhen: new VDFPropInfo("string", true),
+		duties: new VDFPropInfo("List[Duty]", true, true, true)
+	});
 
 	dutiesEnabledWhen: string;
 	duties: List<Duty>;

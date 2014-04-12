@@ -65,13 +65,31 @@
 
     // loading
     // ==================
-    VDFNode.CreateNewInstanceOfType = function (typeName) {
-        if (typeName.startsWith("List["))
-            return eval("new_List(" + typeName.match(/\[(.+)\]/)[1] + ")");
-        if (typeName.startsWith("Dictionary[")) {
-            var parts = typeName.match(/\[(.+?),(.+?)\]/);
-            return eval("new_Dictionary(" + parts[1] + "," + parts[2] + ")");
+    VDFNode.GetGenericParametersOfTypeName = function (typeName) {
+        var genericArgumentTypes = new Array();
+        var depth = 0;
+        var lastStartBracketPos = -1;
+        for (var i = 0; i < typeName.length; i++) {
+            var ch = typeName[i];
+            if (ch == ']')
+                depth--;
+            if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
+                genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
+            if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
+                lastStartBracketPos = i;
+            if (ch == '[')
+                depth++;
         }
+        return genericArgumentTypes;
+    };
+    VDFNode.CreateNewInstanceOfType = function (typeName) {
+        if (["bool", "float", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
+            return null;
+        var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
+        if (typeName.startsWith("List["))
+            return eval("new_List(\"" + genericParameters[0] + "\")");
+        if (typeName.startsWith("Dictionary["))
+            return eval("new_Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
         return eval("new " + typeName + "()");
     };
     VDFNode.ConvertRawValueToCorrectType = function (rawValue, declaredTypeName, loadOptions) {
@@ -82,9 +100,9 @@
             if (VDF.typeImporters_inline[declaredTypeName])
                 result = VDF.typeImporters_inline[declaredTypeName](rawValue.baseValue); //(string)rawValue);
             else if (EnumValue.IsEnum(declaredTypeName))
-                result = EnumValue.GetEnumStringForIntValue(declaredTypeName, parseInt(rawValue.baseValue));
+                result = EnumValue.GetEnumIntForStringValue(declaredTypeName, rawValue.baseValue);
             else
-                result = rawValue.baseValue; // todo
+                result = declaredTypeName == "float" ? parseFloat(rawValue.baseValue) : rawValue.baseValue;
         }
         return result;
     };
@@ -94,14 +112,15 @@
             return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
 
         var type = this.metadata_type || declaredTypeName;
-        var typeInfo = window[declaredTypeName].typeInfo;
+        var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);
+        var typeInfo = (window[declaredTypeName] || {}).typeInfo;
 
         var result = VDFNode.CreateNewInstanceOfType(type);
         for (var i = 0; i < this.items.length; i++)
             if (type.startsWith("List["))
-                result[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeInfo.itemType, loadOptions);
+                result[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
             else if (type.startsWith("Dictionary["))
-                result.set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeInfo.keyType, loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeInfo.valueType, loadOptions));
+                result.set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
             else
                 result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
         for (var propName in this.properties) {

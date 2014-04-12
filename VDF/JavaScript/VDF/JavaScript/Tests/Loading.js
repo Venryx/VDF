@@ -39,7 +39,7 @@ var Loading = (function () {
         });
         test("VDFNode_Level0_BaseValue", function (assert) {
             var a = VDFLoader.ToVDFNode("Root string.");
-            a.baseValue.Should().Be(null); // base-values should only ever be at one level
+            ok(a.baseValue == null); // base-values should only ever be at one level
             a.items[0].baseValue.Should().Be("Root string.");
         });
         test("VDFNode_Level0_Metadata_Type", function (assert) {
@@ -54,8 +54,8 @@ var Loading = (function () {
         test("VDFNode_Level0_ArrayMetadata1", function (assert) {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions());
             a.metadata_type.Should().Be("SpecialList[int]");
-            a.items[0].metadata_type.Should().Be(null);
-            a.items[1].metadata_type.Should().Be(null);
+            ok(a.items[0].metadata_type == null);
+            ok(a.items[1].metadata_type == null);
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>><int>1|<int>2", new VDFLoadOptions());

@@ -7,7 +7,8 @@
 var VDFLoader = (function () {
     function VDFLoader() {
     }
-    VDFLoader.ToVDFNode = function (vdfFile, loadOptions, firstObjTextCharPos, refData) {
+    VDFLoader.ToVDFNode = function (vdfFile, loadOptions, firstObjTextCharPos, parentSharedData) {
+        if (typeof firstObjTextCharPos === "undefined") { firstObjTextCharPos = 0; }
         vdfFile = vdfFile.replace(/\r\n/g, "\n");
         if (!loadOptions)
             loadOptions = new VDFLoadOptions();
@@ -15,7 +16,7 @@ var VDFLoader = (function () {
         var objNode = new VDFNode();
 
         var depth = 0;
-        var poppedOutPropValueCount = 0;
+        var sharedData = { poppedOutPropValueCount: 0 };
         var livePropName = null;
         var livePropValueNode = null;
         var lastMetadata_type = null;
@@ -40,17 +41,17 @@ var VDFLoader = (function () {
                 } else if (token.type == 10 /* Data_BaseValue */) {
                     if (token.text == "#") {
                         //objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
-                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildDataTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, refData.parentPoppedOutPropValueCount);
+                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildDataTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
                         for (var key in poppedOutPropValueItemTextPositions)
-                            objNode.items.push(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], { parentPoppedOutPropValueCount: poppedOutPropValueCount }));
-                        refData.parentPoppedOutPropValueCount++;
+                            objNode.items.push(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], sharedData));
+                        parentSharedData.poppedOutPropValueCount++;
                     } else
                         objNode.items.push(new VDFNode(token.text, lastMetadata_type));
                 } else if (token.type == 7 /* Data_PropName */) {
                     livePropName = token.text;
                     livePropValueNode = new VDFNode();
                 } else if (token.type == 8 /* DataStartMarker */)
-                    livePropValueNode = VDFLoader.ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, { parentPoppedOutPropValueCount: poppedOutPropValueCount });
+                    livePropValueNode = VDFLoader.ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, sharedData);
                 else if (token.type == 11 /* DataEndMarker */) {
                     if (livePropName != null) {
                         //if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)

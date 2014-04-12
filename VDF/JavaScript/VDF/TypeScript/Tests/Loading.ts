@@ -35,7 +35,7 @@ class Loading
 		test("VDFNode_Level0_BaseValue", (assert?: QUnitAssert) =>
 		{
 			var a = VDFLoader.ToVDFNode("Root string.");
-			a.baseValue.Should().Be(null); // base-values should only ever be at one level
+			ok(a.baseValue == null); // base-values should only ever be at one level
 			a.items[0].baseValue.Should().Be("Root string.");
 		});
 		test("VDFNode_Level0_Metadata_Type", (assert?: QUnitAssert) =>
@@ -53,8 +53,8 @@ class Loading
 		{
 			var a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions()); // todo
 			a.metadata_type.Should().Be("SpecialList[int]");
-			a.items[0].metadata_type.Should().Be(null);
-			a.items[1].metadata_type.Should().Be(null);
+			ok(a.items[0].metadata_type == null);
+			ok(a.items[1].metadata_type == null);
 		});
 		test("VDFNode_Level0_ArrayMetadata2", (assert?: QUnitAssert) =>
 		{
