@@ -65,31 +65,36 @@
 
     // loading
     // ==================
-    VDFNode.CreateNewInstanceOfType = function (type) {
-        // todo; get this to handle List and Dictionary types
-        return eval("new " + type + "()");
+    VDFNode.CreateNewInstanceOfType = function (typeName) {
+        if (typeName.startsWith("List["))
+            return eval("new_List(" + typeName.match(/\[(.+)\]/)[1] + ")");
+        if (typeName.startsWith("Dictionary[")) {
+            var parts = typeName.match(/\[(.+?),(.+?)\]/);
+            return eval("new_Dictionary(" + parts[1] + "," + parts[2] + ")");
+        }
+        return eval("new " + typeName + "()");
     };
-    VDFNode.ConvertRawValueToCorrectType = function (rawValue, declaredType, loadOptions) {
+    VDFNode.ConvertRawValueToCorrectType = function (rawValue, declaredTypeName, loadOptions) {
         var result;
         if (rawValue.GetTypeName() == "VDFNode" && rawValue.baseValue == null)
-            result = rawValue.ToObject(rawValue.metadata_type || declaredType, loadOptions); // tell node to return itself as the correct type
+            result = rawValue.ToObject(rawValue.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
         else {
-            if (VDF.typeImporters_inline[declaredType])
-                result = VDF.typeImporters_inline[declaredType](rawValue.baseValue); //(string)rawValue);
-            else if (EnumValue.IsEnum(declaredType))
-                result = EnumValue.GetEnumStringForIntValue(declaredType, parseInt(rawValue.baseValue));
+            if (VDF.typeImporters_inline[declaredTypeName])
+                result = VDF.typeImporters_inline[declaredTypeName](rawValue.baseValue); //(string)rawValue);
+            else if (EnumValue.IsEnum(declaredTypeName))
+                result = EnumValue.GetEnumStringForIntValue(declaredTypeName, parseInt(rawValue.baseValue));
             else
                 result = rawValue.baseValue; // todo
         }
         return result;
     };
 
-    VDFNode.prototype.ToObject = function (declaredType, loadOptions) {
-        if (declaredType == "string")
+    VDFNode.prototype.ToObject = function (declaredTypeName, loadOptions) {
+        if (declaredTypeName == "string")
             return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
 
-        var type = this.metadata_type || declaredType;
-        var typeInfo = null;
+        var type = this.metadata_type || declaredTypeName;
+        var typeInfo = window[declaredTypeName].typeInfo;
 
         var result = VDFNode.CreateNewInstanceOfType(type);
         for (var i = 0; i < this.items.length; i++)
@@ -100,7 +105,7 @@
             else
                 result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
         for (var propName in this.properties) {
-            var propInfo = null;
+            var propInfo = typeInfo.propInfoByPropName[propName];
             result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], propInfo.propVTypeName, loadOptions);
         }
 

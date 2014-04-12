@@ -1,8 +1,9 @@
-﻿window["oldTest"] = test;
-window["test"] = function (title, testFunc) {
-    Loading.Init();
-    window["oldTest"](title, testFunc);
-};
+﻿/*window["oldTest"] = test;
+window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // overwrite/wrap actual test func
+{
+Loading.Init();
+window["oldTest"](title, testFunc);
+}*/
 var Loading = (function () {
     function Loading() {
     }
@@ -12,7 +13,7 @@ var Loading = (function () {
         this.initialized = true;
         Object.AddProtoFunction_Inline = function Should() {
             return { obj: this, Be: function (value, message) {
-                    ok(this == value, message);
+                    equal(this, value, message);
                 } };
         };
         VDF.RegisterTypeExporter_Inline("Guid", function (id) {
@@ -30,7 +31,7 @@ var Loading = (function () {
         });
     };
 
-    Loading.prototype.UnitTestHolder = function () {
+    Loading.RunTests = function () {
         test("VDFNode_Level0_Comment", function (assert) {
             var a = VDFLoader.ToVDFNode("// comment\n\
 			Root string.");

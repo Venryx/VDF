@@ -1,4 +1,4 @@
-﻿interface Object { GetTypeName(): string; SetTypeInfo(x: any); }
+﻿interface Object { GetTypeName(): string; GetType(): string; }
 module VDF_SetUp
 {
 	function LoadJSFile(path: string)
@@ -13,32 +13,27 @@ module VDF_SetUp
 	LoadJSFile("../VDF/VDFSaver.js");
 	LoadJSFile("../VDF/VDFLoader.js");
 	LoadJSFile("../VDF/VDFTokenParser.js");
-
-	// the below let's you add type-info easily (e.g. "obj.SetTypeInfo(new VDFTypeInfo());"), and without that type-info being enumerated as a field/property
-	Object.defineProperty(Object.prototype, "SetTypeInfo", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
+	
+	Object.defineProperty(Object.prototype, "GetTypeName", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
 	{
 		enumerable: false,
-		value: function (x)
-		{
-			if (this["typeInfo"])
-				delete this["typeInfo"];
-			if (!this["typeInfo"]) // if item doesn't exist yet
-				Object.defineProperty(this, "typeInfo",
-				{
-					enumerable: false,
-					value: x
-				});
+		value: function () {
+			var results = this["constructor"].toString().match(/function (.{1,})\(/);
+			return (results && results.length > 1) ? results[1] : "";
 		}
 	});
-	Object.defineProperty(Object.prototype, "GetTypeName", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
+	Object.defineProperty(Object.prototype, "GetType", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
 	{
 		enumerable: false,
 		value: function()
 		{
 			var results = this["constructor"].toString().match(/function (.{1,})\(/);
-			return (results && results.length > 1) ? results[1] : "";
+			return window[(results && results.length > 1) ? results[1] : ""];
 		}
 	});
+
+	if (window["OnVDFReady"])
+		window["OnVDFReady"]();
 }
 
 class VDF
@@ -110,13 +105,23 @@ interface Dictionary<K, V> extends Map<K, V>
 {
 	keyType: string;
 	valueType: string;
+	keys: any[];
 }
-function new_Dictionary<K, V>(keyType: string, valueType: string, ...keyValuePairs: Array<Array<any>>): Dictionary<K, V>
+function new_Dictionary<K, V>(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>): Dictionary<K, V>
 {
 	var result: any = new Map<K, V>();
 	result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
 	result.keyType = keyType;
 	result.valueType = valueType;
+
+	result.keys = [];
+	result.set = (key: K, value: V) =>
+	{
+		if (!result.keys.contains(key))
+			result.keys.push(key);
+		Map.prototype.set.call(result, key, value);
+	};
+
 	if (keyValuePairs)
 		for (var i = 0; i < keyValuePairs.length; i++)
 			result.set(keyValuePairs[i][0], keyValuePairs[i][1]);

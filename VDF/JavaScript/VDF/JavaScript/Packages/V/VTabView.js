@@ -1,4 +1,4 @@
-$.fn.VTabView = function () {
+﻿$.fn.VTabView = function () {
     var root = $(this);
     var buttonHolder = $(root.children()[0]);
     var boxHolder = $(root.children()[1]);

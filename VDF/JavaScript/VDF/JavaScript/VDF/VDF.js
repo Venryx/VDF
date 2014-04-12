@@ -12,19 +12,6 @@
     LoadJSFile("../VDF/VDFLoader.js");
     LoadJSFile("../VDF/VDFTokenParser.js");
 
-    // the below let's you add type-info easily (e.g. "obj.SetTypeInfo(new VDFTypeInfo());"), and without that type-info being enumerated as a field/property
-    Object.defineProperty(Object.prototype, "SetTypeInfo", {
-        enumerable: false,
-        value: function (x) {
-            if (this["typeInfo"])
-                delete this["typeInfo"];
-            if (!this["typeInfo"])
-                Object.defineProperty(this, "typeInfo", {
-                    enumerable: false,
-                    value: x
-                });
-        }
-    });
     Object.defineProperty(Object.prototype, "GetTypeName", {
         enumerable: false,
         value: function () {
@@ -32,6 +19,16 @@
             return (results && results.length > 1) ? results[1] : "";
         }
     });
+    Object.defineProperty(Object.prototype, "GetType", {
+        enumerable: false,
+        value: function () {
+            var results = this["constructor"].toString().match(/function (.{1,})\(/);
+            return window[(results && results.length > 1) ? results[1] : ""];
+        }
+    });
+
+    if (window["OnVDFReady"])
+        window["OnVDFReady"]();
 })(VDF_SetUp || (VDF_SetUp = {}));
 
 var VDF = (function () {
@@ -111,6 +108,14 @@ function new_Dictionary(keyType, valueType) {
     result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
     result.keyType = keyType;
     result.valueType = valueType;
+
+    result.keys = [];
+    result.set = function (key, value) {
+        if (!result.keys.contains(key))
+            result.keys.push(key);
+        Map.prototype.set.call(result, key, value);
+    };
+
     if (keyValuePairs)
         for (var i = 0; i < keyValuePairs.length; i++)
             result.set(keyValuePairs[i][0], keyValuePairs[i][1]);

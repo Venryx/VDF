@@ -88,35 +88,41 @@
 	// loading
 	// ==================
 	
-	static CreateNewInstanceOfType(type: string)
+	static CreateNewInstanceOfType(typeName: string)
 	{
-		// todo; get this to handle List and Dictionary types
-		return eval("new " + type + "()");
+		if (typeName.startsWith("List["))
+			return eval("new_List(" + typeName.match(/\[(.+)\]/)[1] + ")");
+		if (typeName.startsWith("Dictionary["))
+		{
+			var parts = typeName.match(/\[(.+?),(.+?)\]/); // todo; have this support generic-parameters which are themselves generic-types
+			return eval("new_Dictionary(" + parts[1] + "," + parts[2] + ")");
+		}
+		return eval("new " + typeName + "()");
 	}
-	static ConvertRawValueToCorrectType(rawValue: any, declaredType: string, loadOptions: VDFLoadOptions): any
+	static ConvertRawValueToCorrectType(rawValue: any, declaredTypeName: string, loadOptions: VDFLoadOptions): any
 	{
 		var result;
 		if (rawValue.GetTypeName() == "VDFNode" && (<VDFNode>rawValue).baseValue == null)
-			result = (<VDFNode>rawValue).ToObject((<VDFNode>rawValue).metadata_type || declaredType, loadOptions); // tell node to return itself as the correct type
+			result = (<VDFNode>rawValue).ToObject((<VDFNode>rawValue).metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string (todo; update the 'items' var to only accept VDFNodes now)
 		{
-			if (VDF.typeImporters_inline[declaredType])
-				result = VDF.typeImporters_inline[declaredType]((<VDFNode>rawValue).baseValue); //(string)rawValue);
-			else if (EnumValue.IsEnum(declaredType))
-				result = EnumValue.GetEnumStringForIntValue(declaredType, parseInt((<VDFNode>rawValue).baseValue));
+			if (VDF.typeImporters_inline[declaredTypeName])
+				result = VDF.typeImporters_inline[declaredTypeName]((<VDFNode>rawValue).baseValue); //(string)rawValue);
+			else if (EnumValue.IsEnum(declaredTypeName))
+				result = EnumValue.GetEnumStringForIntValue(declaredTypeName, parseInt((<VDFNode>rawValue).baseValue));
 			else // if no specific handler, try auto-converting string to the correct (primitive) type
 				result = (<VDFNode>rawValue).baseValue; // todo
 		}
 		return result;
 	}
 
-	public ToObject(declaredType: string, loadOptions?: VDFLoadOptions)
+	public ToObject(declaredTypeName: string, loadOptions?: VDFLoadOptions)
 	{
-		if (declaredType == "string") // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
+		if (declaredTypeName == "string") // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
 			return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
 
-		var type = this.metadata_type || declaredType;
-		var typeInfo = null; // todo
+		var type = this.metadata_type || declaredTypeName;
+		var typeInfo = window[declaredTypeName].typeInfo;
 
 		var result = VDFNode.CreateNewInstanceOfType(type);
 		for (var i = 0; i < this.items.length; i++)
@@ -128,7 +134,7 @@
 				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
 		for (var propName in this.properties)
 		{
-			var propInfo: VDFPropInfo = null; // todo
+			var propInfo: VDFPropInfo = typeInfo.propInfoByPropName[propName];
 			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], propInfo.propVTypeName, loadOptions);
 		}
 

@@ -1,10 +1,10 @@
 ﻿interface Object { Should(): { obj: any; Be(value, message?: string); } }
-window["oldTest"] = test;
+/*window["oldTest"] = test;
 window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // overwrite/wrap actual test func
 {
 	Loading.Init();
 	window["oldTest"](title, testFunc);
-}
+}*/
 class Loading
 {
 	static initialized: boolean;
@@ -13,7 +13,7 @@ class Loading
 		if (this.initialized)
 			return;
 		this.initialized = true;
-		Object.AddProtoFunction_Inline = function Should() { return { obj: this, Be: function (value, message?: string) { ok(this == value, message); } }; }
+		Object.AddProtoFunction_Inline = function Should() { return { obj: this, Be: function (value, message?: string) { equal(this, value, message); } }; }
 		VDF.RegisterTypeExporter_Inline("Guid", id => id.ToString());
 		VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
 		VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);
@@ -24,7 +24,7 @@ class Loading
 		});
 	}
 
-	UnitTestHolder()
+	static RunTests()
 	{
 		test("VDFNode_Level0_Comment", (assert?: QUnitAssert) =>
 		{

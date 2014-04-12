@@ -1,8 +1,9 @@
-﻿window["oldTest"] = test;
-window["test"] = function (title, testFunc) {
-    Saving.Init();
-    window["oldTest"](title, testFunc);
-};
+﻿/*window["oldTest"] = test;
+window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // overwrite/wrap actual test func
+{
+Saving.Init();
+window["oldTest"](title, testFunc);
+}*/
 var Saving = (function () {
     function Saving() {
     }
@@ -12,7 +13,7 @@ var Saving = (function () {
         this.initialized = true;
         Object.AddProtoFunction_Inline = function Should() {
             return { obj: this, Be: function (value, message) {
-                    ok(this == value, message);
+                    equal(this.obj, value, message);
                 } };
         };
         VDF.RegisterTypeExporter_Inline("Guid", function (id) {
@@ -30,7 +31,7 @@ var Saving = (function () {
         });
     };
 
-    Saving.prototype.UnitTestHolder = function () {
+    Saving.RunTests = function () {
         test("VDFNode_Level0_BaseValue", function (assert) {
             var a = new VDFNode();
             a.baseValue = "Root string.";

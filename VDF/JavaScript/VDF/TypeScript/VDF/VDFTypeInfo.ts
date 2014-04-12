@@ -1,10 +1,11 @@
 ﻿class VDFTypeInfo
 {
 	props_includeL1: boolean;
-	propInfoByPropName: Map<string, VDFPropInfo> = new Map<string, VDFPropInfo>();
-	constructor(props_includeL1?: boolean)
+	propInfoByPropName: Dictionary<string, VDFPropInfo>;
+	constructor(props_includeL1?: boolean, propInfoByPropName?: Dictionary<string, VDFPropInfo>)
 	{
 		this.props_includeL1 = props_includeL1;
+		this.propInfoByPropName = propInfoByPropName || new_Dictionary<string, VDFPropInfo>();
 	}
 	SetPropInfo(propName: string, propInfo: VDFPropInfo)
 	{

@@ -41,7 +41,9 @@ var VDFSaver = (function () {
         } else if (objVTypeName.startsWith("Dictionary[")) {
             objNode.isListOrDictionary = true;
             var objAsDictionary = obj;
-            objAsDictionary.forEach(function (value, key, dictionary) {
+            for (var i in objAsDictionary.keys) {
+                var key = objAsDictionary.keys[i];
+                var value = objAsDictionary.get(key);
                 if (eval("window['" + objAsDictionary.keyType + "'] && " + objAsDictionary.keyType + "['_IsEnum'] === 0"))
                     key = new EnumValue(objAsDictionary.keyType, key);
                 if (eval("window['" + objAsDictionary.valueType + "'] && " + objAsDictionary.valueType + "['_IsEnum'] === 0"))
@@ -66,9 +68,10 @@ var VDFSaver = (function () {
                 keyValuePairPseudoNode.items.push(valueNode);
 
                 objNode.items.push(keyValuePairPseudoNode);
-            });
+            }
+            ;
         } else if (typeof obj == "object") {
-            var typeInfo = obj["typeInfo"] || new VDFTypeInfo();
+            var typeInfo = obj.GetType()["typeInfo"] || new VDFTypeInfo();
             var popOutGroupsAdded = 0;
             for (var propName in obj) {
                 if (typeof obj[propName] == "function")

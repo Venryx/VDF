@@ -35,6 +35,11 @@
 
 class World
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["name", new VDFPropInfo("string", true)],
+	["vObjectRoot", new VDFPropInfo("VObject", true)],
+	["listOfStringLists", new VDFPropInfo("List[List[string]]", true)]));
+
 	name: string;
 	vObjectRoot: VObject;
 	listOfStringLists: List<List<string>>;
@@ -44,16 +49,17 @@ class World
 		this.name = name;
 		this.vObjectRoot = new VObject("VObjectRoot");
 		this.listOfStringLists = new_List("List[string]", new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C"));
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("name", new VDFPropInfo("string", true));
-		typeInfo.SetPropInfo("vObjectRoot", new VDFPropInfo("VObject", true));
-		typeInfo.SetPropInfo("listOfStringLists", new VDFPropInfo("List[List[string]]", true));
-		this.SetTypeInfo(typeInfo);
 	}
 }
 
 class VObject
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["id", new VDFPropInfo("Guid", true)], // todo; rather than marking this here manually, have it marked by the at-runtime system described above
+	["name", new VDFPropInfo("string", true)],
+	["duties", new VDFPropInfo("List[Duty]", true, true, true)],
+	["children", new VDFPropInfo("List[VObject]", true, true, true)]));
+
 	parent: VObject;
 
 	id: Guid; // note; this prop is not marked to be included here, but ends up being added anyway, by being marked in the VDFSaveOptions object of the VDF.Serialize method call; todo; implement this system, as in C# version
@@ -67,13 +73,6 @@ class VObject
 		this.name = name;
 		this.duties = new_List("Duty");
 		this.children = new_List<VObject>("VObject");
-
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("id", new VDFPropInfo("Guid", true)); // todo; rather than marking this here manually, have it marked by the at-runtime system described above
-		typeInfo.SetPropInfo("name", new VDFPropInfo("string", true));
-		typeInfo.SetPropInfo("duties", new VDFPropInfo("List[Duty]", true, true, true));
-		typeInfo.SetPropInfo("children", new VDFPropInfo("List[VObject]", true, true, true));
-		this.SetTypeInfo(typeInfo);
 	}
 
 	AddDuty(duty: Duty):Duty
@@ -98,20 +97,23 @@ class VObject
 class Duty {}
 class HoldSoil extends Duty
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["texturePath", new VDFPropInfo("string", true)]));
+
 	texturePath: string;
 	constructor(texturePath: string)
 	{
 		super();
 		this.texturePath = texturePath;
-
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("texturePath", new VDFPropInfo("string", true));
-		this.SetTypeInfo(typeInfo);
 	}
 }
 enum Color { _IsEnum, Red, Green, Blue, White, Gray, Black }
 class Special1 extends Duty
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["color", new VDFPropInfo("Color", true)],
+	["brightness", new VDFPropInfo("float", true)]));
+
 	color: Color;
 	brightness: number;
 	constructor(color: Color, brightness: number)
@@ -119,15 +121,15 @@ class Special1 extends Duty
 		super();
 		this.color = color;
 		this.brightness = brightness;
-
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("color", new VDFPropInfo("Color", true));
-		typeInfo.SetPropInfo("brightness", new VDFPropInfo("float", true));
-		this.SetTypeInfo(typeInfo);
 	}
 }
 class HoldTransform extends Duty
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["position", new VDFPropInfo("Vector3", true)],
+	["rotation", new VDFPropInfo("Vector3", true)],
+	["scale", new VDFPropInfo("Vector3", true)]));
+
 	position: Vector3;
 	rotation: Vector3;
 	scale: Vector3;
@@ -137,16 +139,14 @@ class HoldTransform extends Duty
 		this.position = position || new Vector3(0, 0, 0);
 		this.rotation = rotation || new Vector3(0, 0, 0);
 		this.scale = scale || new Vector3(0, 0, 0);
-
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("position", new VDFPropInfo("Vector3", true));
-		typeInfo.SetPropInfo("rotation", new VDFPropInfo("Vector3", true));
-		typeInfo.SetPropInfo("scale", new VDFPropInfo("Vector3", true));
-		this.SetTypeInfo(typeInfo);
 	}
 }
 class HoldMesh extends Duty
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["vertexes", new VDFPropInfo("List[Vector3]", true)],
+	["vertexColors", new VDFPropInfo("Dictionary[Vector3,Color]", true)]));
+
 	vertexes: List<Vector3>;
 	vertexColors: Dictionary<Vector3, Color>;
 	constructor(vertexes: List<Vector3>, vertexColors: Dictionary<Vector3, Color>)
@@ -154,15 +154,14 @@ class HoldMesh extends Duty
 		super();
 		this.vertexes = vertexes;
 		this.vertexColors = vertexColors;
-
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("vertexes", new VDFPropInfo("List[Vector3]", true));
-		typeInfo.SetPropInfo("vertexColors", new VDFPropInfo("Dictionary[Vector3,Color]", true));
-		this.SetTypeInfo(typeInfo);
 	}
 }
 class HoldDuties extends Duty
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, new_Dictionary<string, VDFPropInfo>(null, null,
+	["dutiesEnabledWhen", new VDFPropInfo("string", true)],
+	["duties", new VDFPropInfo("List[Duty]", true, true, true)]));
+
 	dutiesEnabledWhen: string;
 	duties: List<Duty>;
 
@@ -171,11 +170,6 @@ class HoldDuties extends Duty
 		super();
 		this.dutiesEnabledWhen = dutiesEnabledWhen;
 		this.duties = new_List("Duty");
-
-		var typeInfo = new VDFTypeInfo();
-		typeInfo.SetPropInfo("dutiesEnabledWhen", new VDFPropInfo("string", true));
-		typeInfo.SetPropInfo("duties", new VDFPropInfo("List[Duty]", true, true, true));
-		this.SetTypeInfo(typeInfo);
 	}
 
 	AddDuty(duty: Duty): Duty
@@ -185,12 +179,15 @@ class HoldDuties extends Duty
 	}
 	RemoveDuty(duty: Duty) { this.duties.remove(duty); }
 }
+
 class MoveSelfToInventory extends Duty {}
 class RenderMesh extends Duty {}
 class MoveSelfToWorld extends Duty {}
 
 class Vector3
 {
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(true);
+
 	x: number;
 	y: number;
 	z: number;
@@ -199,9 +196,6 @@ class Vector3
 		this.x = x;
 		this.y = y;
 		this.z = z;
-
-		var typeInfo = new VDFTypeInfo(true);
-		this.SetTypeInfo(typeInfo);
 	}
 }
 

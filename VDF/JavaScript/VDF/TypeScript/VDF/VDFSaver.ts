@@ -41,8 +41,10 @@ class VDFSaver
 		{
 			objNode.isListOrDictionary = true;
 			var objAsDictionary = <Dictionary<any, any>>obj;
-			objAsDictionary.forEach((value: any, key: any, dictionary: Dictionary<any, any>) =>
+			for (var i in objAsDictionary.keys)
 			{
+				var key = objAsDictionary.keys[i];
+				var value = objAsDictionary.get(key);
 				if (eval("window['" + objAsDictionary.keyType + "'] && " + objAsDictionary.keyType + "['_IsEnum'] === 0")) // special case; if enum
 					key = new EnumValue(objAsDictionary.keyType, key);
 				if (eval("window['" + objAsDictionary.valueType + "'] && " + objAsDictionary.valueType + "['_IsEnum'] === 0")) // special case; if enum
@@ -67,11 +69,11 @@ class VDFSaver
 				keyValuePairPseudoNode.items.push(valueNode);
 
 				objNode.items.push(keyValuePairPseudoNode);
-			});
+			};
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
 		{
-			var typeInfo = obj["typeInfo"] || new VDFTypeInfo(); // if not specified, use default values
+			var typeInfo = obj.GetType()["typeInfo"] || new VDFTypeInfo(); // if not specified, use default values
 			var popOutGroupsAdded = 0;
 			for (var propName in obj)
 			{

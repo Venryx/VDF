@@ -1,0 +1,33 @@
+﻿<head>
+    <link rel="stylesheet" href="../Packages/General/QUnit 1.14.0.css">
+    <script src="../Packages/General/ClassExtensions.js"></script>
+    <script src="../Packages/General/QUnit 1.14.0.js"></script>
+    <script src="../Packages/JQuery/JQuery1.9.1.js"></script>
+    <script src="../Packages/V/V.js"></script>
+    <script src="../VDF/VDF.js"></script>
+    <script src="Saving.js"></script>
+    <script src="Loading.js"></script>
+    <script>
+    $(function()
+    {
+        $("#runSavingTests").click(function()
+        {
+            Saving.Init();
+            Saving.RunTests();
+        });
+        $("#runLoadingTests").click(function()
+        {
+            Loading.Init();
+            Loading.RunTests();
+        });
+    });
+    </script>
+</head>
+<body>
+    <input id="runSavingTests" type="button" value="Run Saving Tests"/>
+    <input id="runLoadingTests" type="button" value="Run Loading Tests"/>
+    <div>
+        <div id="qunit"></div>
+        <div id="qunit-fixture"></div>
+    </div>
+</body>
