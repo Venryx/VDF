@@ -123,10 +123,8 @@
                 result.set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
             else
                 result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
-        for (var propName in this.properties) {
-            var propInfo = typeInfo.propInfoByPropName[propName];
-            result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], propInfo.propVTypeName, loadOptions);
-        }
+        for (var propName in this.properties)
+            result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
 
         return result;
     };

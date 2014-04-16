@@ -153,10 +153,7 @@
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
 				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
 		for (var propName in this.properties)
-		{
-			var propInfo: VDFPropInfo = typeInfo.propInfoByPropName[propName];
-			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], propInfo.propVTypeName, loadOptions);
-		}
+			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
 
 		return result;
 	}
