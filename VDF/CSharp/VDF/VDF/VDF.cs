@@ -119,9 +119,9 @@ static class VDF
 
 		var rootType = type.IsGenericType ? Type.GetType(type.FullName.Substring(0, type.FullName.IndexOf("["))) : type;
 		if (type.IsGenericType && saveOptions.typeAliasesByType.ContainsKey(rootType))
-			return saveOptions.typeAliasesByType[rootType] + "[" + String.Join(",", type.GetGenericArguments().Select(type2 => GetVNameOfType(type2, saveOptions))) + "]";
+			return saveOptions.typeAliasesByType[rootType] + "[" + String.Join(",", type.GetGenericArguments().Select(type2 => GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
 
-		string result = type.IsGenericType ? type.FullName.Substring(0, type.FullName.IndexOf("`")) + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions))) + "]" : type.FullName;
+		string result = type.IsGenericType ? type.FullName.Substring(0, type.FullName.IndexOf("`")) + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions)).ToArray()) + "]" : type.FullName;
 		foreach (KeyValuePair<string, string> pair in saveOptions.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
 			if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'['})[0].Contains("."))
 				result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
