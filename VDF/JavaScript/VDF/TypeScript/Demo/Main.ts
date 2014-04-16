@@ -45,17 +45,17 @@
 
 			// serialize it, and save it to file
 			var vdf = VDF.Serialize(testWorld, new VDFSaveOptions()); //, null, null, namespaceAliasesByName, typeAliasesByType, true));
-			$("#outputA").html(vdf);
+			$("#outputA").val(vdf);
 		});
 		$("#makeOutputB").click((event, ui) =>
 		{
 			// load from output-a textbox
-			var vdf = decodeURIComponent($("#outputA").html()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+			var vdf = decodeURIComponent($("#outputA").val()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
 			var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
 
 			// reserialize it, and save it to second file, to check data
 			var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions()); //, null, null, namespaceAliasesByName, typeAliasesByType, true));
-			$("#outputB").html(vdf2);
+			$("#outputB").val(vdf2);
 		});
 	});
 }
