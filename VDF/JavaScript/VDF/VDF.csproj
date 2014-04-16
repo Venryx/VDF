@@ -167,7 +167,6 @@
     <TypeScriptCompile Include="TypeScript\Tests\Loading.ts" />
     <TypeScriptCompile Include="TypeScript\Tests\Saving.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDF.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDFExtensions.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDFLoader.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDFNode.ts" />
     <TypeScriptCompile Include="TypeScript\VDF\VDFSaver.ts" />

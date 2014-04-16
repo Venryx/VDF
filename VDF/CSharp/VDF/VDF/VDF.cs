@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 
@@ -29,7 +30,12 @@ static class VDF
 		builtInTypeAliasesByType = new Dictionary<Type, string>();
 		foreach (KeyValuePair<string, Type> pair in builtInTypesByAlias)
 			builtInTypeAliasesByType.Add(pair.Value, pair.Key);
-		VDFExtensions.Init();
+
+		// initialize exporters/importers for some common types
+		VDF.RegisterTypeExporter_Inline<Color>(color => color.Name);
+		VDF.RegisterTypeImporter_Inline<Color>(str => Color.FromName(str));
+		VDF.RegisterTypeExporter_Inline<Guid>(id => id.ToString());
+		VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
 	}
 	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { typeExporters_inline[typeof(T)] = obj => exporter((T)obj); }
 	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { typeImporters_inline[typeof(T)] = str => importer(str); }

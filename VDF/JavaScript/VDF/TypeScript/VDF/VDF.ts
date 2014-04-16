@@ -7,7 +7,6 @@ module VDF_SetUp
 		script.setAttribute("src", path);
 		document.getElementsByTagName("head")[0].appendChild(script);
 	}
-	LoadJSFile("../VDF/VDFExtensions.js");
 	LoadJSFile("../VDF/VDFTypeInfo.js");
 	LoadJSFile("../VDF/VDFNode.js");
 	LoadJSFile("../VDF/VDFSaver.js");
