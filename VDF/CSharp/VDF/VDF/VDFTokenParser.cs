@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-enum VDFTokenType
+public enum VDFTokenType
 {
 	None,
 	PoppedOutNodeMarker,
@@ -22,7 +22,7 @@ enum VDFTokenType
 	InLineComment,
 	//Indent // this is taken care of at a higher level by the VDFLoader class
 }
-class VDFToken
+public class VDFToken
 {
 	public VDFTokenType type;
 	public string text;
@@ -32,11 +32,11 @@ class VDFToken
 		this.text = text;
 	}
 }
-class VDFTokenParser
+public class VDFTokenParser
 {
 	string vdf;
 	public int nextCharPos;
-	public List<VDFToken> tokens; 
+	public List<VDFToken> tokens;
 	public VDFTokenParser(string vdf, int firstCharPos)
 	{
 		this.vdf = vdf;
@@ -73,7 +73,6 @@ class VDFTokenParser
 				continue;
 
 			if (ch == '<')
-			{
 				if (nextChar == '<')
 				{
 					tokenType = VDFTokenType.SpecialMetadataStartMarker;
@@ -81,9 +80,7 @@ class VDFTokenParser
 				}
 				else
 					tokenType = VDFTokenType.MetadataStartMarker;
-			}
 			else if (ch == '>')
-			{
 				if (nextChar == '>')
 				{
 					tokenType = VDFTokenType.SpecialMetadataEndMarker;
@@ -91,13 +88,11 @@ class VDFTokenParser
 				}
 				else
 					tokenType = VDFTokenType.MetadataEndMarker;
-			}
 			else if (ch == '{')
 				tokenType = VDFTokenType.DataStartMarker;
 			else if (ch == '}')
 				tokenType = VDFTokenType.DataEndMarker;
 			else // non-bracket char
-			{
 				if (ch == '\n')
 					tokenType = VDFTokenType.LineBreak;
 				else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
@@ -117,7 +112,6 @@ class VDFTokenParser
 					tokenType = VDFTokenType.Data_PropName;
 				else if (nextChar == '}' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
 					tokenType = VDFTokenType.Data_BaseValue;
-			}
 		}
 		nextCharPos = i;
 

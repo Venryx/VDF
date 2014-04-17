@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
-class VDFNode
+public class VDFNode
 {
 	public string metadata_type;
 	public string baseValue;
