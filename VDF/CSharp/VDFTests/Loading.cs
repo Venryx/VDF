@@ -19,7 +19,7 @@ namespace VDFTests
 				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
 			});
 		}
-
+		
 		[Fact] void VDFNode_Level0_Comment()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@"// comment
@@ -97,6 +97,12 @@ namespace VDFTests
 ");
 			a.properties["names"].items[0].items[0].baseValue.Should().Be("Dan");
 			a.properties["names"].items[1].items[0].baseValue.Should().Be("Bob");
+		}
+		[Fact] void VDFNode_Level1_ArrayItems_Empty()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("|");
+			a.items[0].items[0].baseValue.Should().Be("");
+			a.items[1].items[0].baseValue.Should().Be("");
 		}
 		[Fact] void VDFNode_Level1_ArrayItemsInArrayItems()
 		{

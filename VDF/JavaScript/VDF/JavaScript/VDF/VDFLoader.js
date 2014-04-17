@@ -24,6 +24,7 @@ var VDFLoader = (function () {
 
         var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
         while (parser.GetNextToken() != null) {
+            var lastToken = parser.tokens.length > 1 ? parser.tokens[parser.tokens.length - 2] : null;
             var token = parser.tokens.last();
             if (token.type == 11 /* DataEndMarker */)
                 depth--;
@@ -31,6 +32,17 @@ var VDFLoader = (function () {
             if (depth < 0)
                 break;
             if (depth == 0) {
+                if (((lastToken == null || lastToken.type == 9 /* ItemSeparator */) && token.type == 9 /* ItemSeparator */)) {
+                    var newNode = new VDFNode(null, lastMetadata_type);
+                    newNode.items.push(new VDFNode(""));
+                    objNode.items.push(newNode);
+                    if (parser.nextCharPos >= vdfFile.length) {
+                        var newNode2 = new VDFNode(null, lastMetadata_type);
+                        newNode2.items.push(new VDFNode(""));
+                        objNode.items.push(newNode2);
+                    }
+                }
+
                 if (token.type == 4 /* MetadataStartMarker */ || token.type == 2 /* SpecialMetadataStartMarker */)
                     lastMetadataStartToken = token.type;
                 else if (token.type == 5 /* Metadata_BaseValue */) {

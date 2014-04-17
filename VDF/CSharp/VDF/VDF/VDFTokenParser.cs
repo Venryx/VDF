@@ -105,8 +105,8 @@ class VDFTokenParser
 					tokenType = VDFTokenType.InLineComment;
 					i = FindNextLineBreakCharPos(vdf, i + 2); // since rest of line is comment, skip to first char of next line
 				}
-				//else if (ch == '\t')
-				//	tokenType = VDFTokenType.Indent;
+					//else if (ch == '\t')
+					//	tokenType = VDFTokenType.Indent;
 				else if (ch == '#' && lastChar == '\t')
 					tokenType = VDFTokenType.PoppedOutNodeMarker;
 				else if (ch == '|')
