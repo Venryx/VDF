@@ -1,7 +1,7 @@
 ﻿var VDFNode = (function () {
     function VDFNode(baseValue, metadata_type) {
         this.items = [];
-        this.properties = new_Dictionary();
+        this.properties = new Dictionary();
         this.baseValue = baseValue;
         this.metadata_type = metadata_type;
     }
@@ -57,8 +57,8 @@
             }
         }
         var builder = new StringBuilder();
-        for (var i = 0; i < lines.length; i++)
-            builder.Append(i == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i]); // line-breaks + indents + data
+        for (var i2 = 0; i2 < lines.length; i2++)
+            builder.Append(i2 == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i2]); // line-breaks + indents + data
         return builder.ToString();
     };
     VDFNode.prototype.ToString = function () {
@@ -90,9 +90,9 @@
             return null;
         var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
         if (typeName.startsWith("List["))
-            return eval("new_List(\"" + genericParameters[0] + "\")");
+            return eval("new List(\"" + genericParameters[0] + "\")");
         if (typeName.startsWith("Dictionary["))
-            return eval("new_Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
+            return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
         return eval("new " + typeName + "()");
     };
     VDFNode.ConvertRawValueToCorrectType = function (rawValue, declaredTypeName, loadOptions) {

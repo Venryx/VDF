@@ -3,7 +3,7 @@
 	metadata_type: string;
 	baseValue: string;
 	items: Array<VDFNode> = []; // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
-	properties: Dictionary<string, VDFNode> = new_Dictionary<string, VDFNode>();
+	properties: Dictionary<string, VDFNode> = new Dictionary<string, VDFNode>();
 
 	constructor(baseValue?: string, metadata_type?: string)
 	{
@@ -79,8 +79,8 @@
 			}
 		}
 		var builder = new StringBuilder();
-		for (var i = 0; i < lines.length; i++)
-			builder.Append(i == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i]); // line-breaks + indents + data
+		for (var i2 = 0; i2 < lines.length; i2++)
+			builder.Append(i2 == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i2]); // line-breaks + indents + data
 		return builder.ToString();
 	}
 	ToString(): string
@@ -117,9 +117,9 @@
 			return null;
 		var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
 		if (typeName.startsWith("List["))
-			return eval("new_List(\"" + genericParameters[0] + "\")");
+			return eval("new List(\"" + genericParameters[0] + "\")");
 		if (typeName.startsWith("Dictionary["))
-			return eval("new_Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
+			return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
 		return eval("new " + typeName + "()");
 	}
 	static ConvertRawValueToCorrectType(rawValue: any, declaredTypeName: string, loadOptions: VDFLoadOptions): any

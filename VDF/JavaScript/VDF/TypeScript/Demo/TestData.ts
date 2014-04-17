@@ -3,7 +3,7 @@
 	export function CreateWorld(): World
 	{
 		var world = new World("Main");
-		world.listOfStringLists.pushAll([new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C")]);
+		world.listOfStringLists.pushAll([new List("string", "1A", "1B", "1C"), new List("string", "2A", "2B", "2C"), new List("string", "3A", "3B", "3C")]);
 
 		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
@@ -18,8 +18,8 @@
 		camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5, 28.9, 2404.765), new Vector3(3, 4, 1)));
 		camera.AddDuty(new HoldMesh
 		(
-			new_List("Vector3", new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)),
-			new_Dictionary<Vector3, Color>("Vector3", "Color", [new Vector3(9, 4, 2.5), Color.Black], [new Vector3(1, 8, 9.5435), Color.Gray], [new Vector3(25, 15, 5), Color.White]
+			new List("Vector3", new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)),
+			new Dictionary<Vector3, Color>("Vector3", "Color", [new Vector3(9, 4, 2.5), Color.Black], [new Vector3(1, 8, 9.5435), Color.Gray], [new Vector3(25, 15, 5), Color.White]
 		)));
 		var holdDuties1A = <HoldDuties>camera.AddDuty(new HoldDuties("SelfIsInWorld"));
 		holdDuties1A.AddDuty(new MoveSelfToInventory());
@@ -28,7 +28,7 @@
 		holdDuties1B.AddDuty(new MoveSelfToWorld());
 		var gardenHoe = items.AddChild(new VObject("GardenHoe"));
 		gardenHoe.AddDuty(new HoldTransform());
-		gardenHoe.AddDuty(new HoldMesh(new_List<Vector3>("Vector3"), new_Dictionary<Vector3, Color>("Vector3", "Color")));
+		gardenHoe.AddDuty(new HoldMesh(new List<Vector3>("Vector3"), new Dictionary<Vector3, Color>("Vector3", "Color")));
 
 		return world;
 	}
@@ -51,7 +51,7 @@ class World
 	{
 		this.name = name;
 		this.vObjectRoot = new VObject("VObjectRoot");
-		this.listOfStringLists = new_List<List<string>>("List[string]");
+		this.listOfStringLists = new List<List<string>>("List[string]");
 	}
 }
 
@@ -76,8 +76,8 @@ class VObject
 	{
 		this.id = new Guid();
 		this.name = name;
-		this.duties = new_List("Duty");
-		this.children = new_List<VObject>("VObject");
+		this.duties = new List("Duty");
+		this.children = new List<VObject>("VObject");
 	}
 
 	AddDuty(duty: Duty):Duty
@@ -181,7 +181,7 @@ class HoldDuties extends Duty
 	{
 		super();
 		this.dutiesEnabledWhen = dutiesEnabledWhen;
-		this.duties = new_List("Duty");
+		this.duties = new List("Duty");
 	}
 
 	AddDuty(duty: Duty): Duty

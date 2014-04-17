@@ -8,7 +8,7 @@ var Test1;
 (function (Test1) {
     function CreateWorld() {
         var world = new World("Main");
-        world.listOfStringLists.pushAll([new_List("string", "1A", "1B", "1C"), new_List("string", "2A", "2B", "2C"), new_List("string", "3A", "3B", "3C")]);
+        world.listOfStringLists.pushAll([new List("string", "1A", "1B", "1C"), new List("string", "2A", "2B", "2C"), new List("string", "3A", "3B", "3C")]);
 
         var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
         var grass = soils.AddChild(new VObject("Grass"));
@@ -21,7 +21,7 @@ var Test1;
         items.AddChild(new VObject("NameThat{NeedsEscaping@gmail.com}"));
         var camera = items.AddChild(new VObject("Camera"));
         camera.AddDuty(new HoldTransform(new Vector3(1, 9, 2), new Vector3(25.5, 28.9, 2404.765), new Vector3(3, 4, 1)));
-        camera.AddDuty(new HoldMesh(new_List("Vector3", new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)), new_Dictionary("Vector3", "Color", [new Vector3(9, 4, 2.5), 6 /* Black */], [new Vector3(1, 8, 9.5435), 5 /* Gray */], [new Vector3(25, 15, 5), 4 /* White */])));
+        camera.AddDuty(new HoldMesh(new List("Vector3", new Vector3(9, 4, 2.5), new Vector3(1, 8, 9.5435), new Vector3(25, 15, 5)), new Dictionary("Vector3", "Color", [new Vector3(9, 4, 2.5), 6 /* Black */], [new Vector3(1, 8, 9.5435), 5 /* Gray */], [new Vector3(25, 15, 5), 4 /* White */])));
         var holdDuties1A = camera.AddDuty(new HoldDuties("SelfIsInWorld"));
         holdDuties1A.AddDuty(new MoveSelfToInventory());
         holdDuties1A.AddDuty(new RenderMesh());
@@ -29,7 +29,7 @@ var Test1;
         holdDuties1B.AddDuty(new MoveSelfToWorld());
         var gardenHoe = items.AddChild(new VObject("GardenHoe"));
         gardenHoe.AddDuty(new HoldTransform());
-        gardenHoe.AddDuty(new HoldMesh(new_List("Vector3"), new_Dictionary("Vector3", "Color")));
+        gardenHoe.AddDuty(new HoldMesh(new List("Vector3"), new Dictionary("Vector3", "Color")));
 
         return world;
     }
@@ -40,7 +40,7 @@ var World = (function () {
     function World(name) {
         this.name = name;
         this.vObjectRoot = new VObject("VObjectRoot");
-        this.listOfStringLists = new_List("List[string]");
+        this.listOfStringLists = new List("List[string]");
     }
     World.typeInfo = new VDFTypeInfo(false, {
         name: new VDFPropInfo("string", true),
@@ -54,8 +54,8 @@ var VObject = (function () {
     function VObject(name) {
         this.id = new Guid();
         this.name = name;
-        this.duties = new_List("Duty");
-        this.children = new_List("VObject");
+        this.duties = new List("Duty");
+        this.children = new List("VObject");
     }
     VObject.prototype.AddDuty = function (duty) {
         this.duties.push(duty);
@@ -152,7 +152,7 @@ var HoldDuties = (function (_super) {
     function HoldDuties(dutiesEnabledWhen) {
         _super.call(this);
         this.dutiesEnabledWhen = dutiesEnabledWhen;
-        this.duties = new_List("Duty");
+        this.duties = new List("Duty");
     }
     HoldDuties.prototype.AddDuty = function (duty) {
         this.duties.push(duty);

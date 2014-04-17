@@ -51,6 +51,7 @@ class VDF
 
 	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string
 	{
+		var a = VDFSaver.ToVDFNode(obj, saveOptions);
 		return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
 	}
 	static Deserialize<T>(vdf: string, realVTypeName: string, loadOptions?: VDFLoadOptions): string
@@ -92,55 +93,66 @@ class EnumValue
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 
-interface List<T> extends Array<T>
+class List<T>
 {
+	private innerArray: any[];
 	itemType: string;
-}
-function new_List<T>(itemType: string, ...items: T[]): List<T>
-{
-	var result: any = items || [];
-	result.AddItem("realVTypeName", "List[" + itemType + "]");
-	result.itemType = itemType;
-	return result;
-}
+	length: any; // prop with a getter (added below)
+	constructor(itemType: string, ...items: T[])
+	{
+		this.innerArray = [];
+		this.pushAll(items);
+		this.AddItem("realVTypeName", "List[" + itemType + "]");
+		this.itemType = itemType;
+	}
 
-interface Dictionary<K, V> extends Map<K, V>
+	modifyInnerListWithCall(func, args: any[])
+	{
+		for (var i = 0; i < this.innerArray.length; i++)
+			delete this[i];
+		func.apply(this.innerArray, args);
+		for (var i = 0; i < this.innerArray.length; i++) // copy all inner-array items as our own
+			this[i] = this.innerArray[i];
+	}
+	push(...args) { this.modifyInnerListWithCall(Array.prototype.push, args); }
+	pushAll(...args) { this.modifyInnerListWithCall(Array.prototype.pushAll, args); }
+	pop(...args) { this.modifyInnerListWithCall(Array.prototype.pop, args); }
+	insert(...args) { this.modifyInnerListWithCall(Array.prototype.insert, args); }
+	remove(...args) { this.modifyInnerListWithCall(Array.prototype.remove, args); }
+	splice(...args) { this.modifyInnerListWithCall(Array.prototype.splice, args); }
+}
+List.prototype.AddGetter_Inline = function length()
+{
+	//return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
+	var highestIndex = -1;
+	for (var propName in this)
+		if (parseInt(propName) == propName && parseInt(propName) > highestIndex) // if integer key
+			highestIndex = parseInt(propName);
+	return highestIndex + 1;
+};
+
+class Dictionary<K, V>
 {
 	keyType: string;
 	valueType: string;
-	keys: any[];
-}
-function new_Dictionary<K, V>(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>): Dictionary<K, V>
-{
-	var mapTypeAvailable = window["Map"];
-
-	var result: any = mapTypeAvailable ? new Map<K, V>() : {}; // try to use 'Map' type, but fallback to basic object (which only accepts strings as keys) otherwise
-	result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
-	result.keyType = keyType;
-	result.valueType = valueType;
-
-	result.keys = [];
-	result.get = (key: K) =>
+	keys: any[] = [];
+	values: any[] = [];
+	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
-		if (mapTypeAvailable)
-			return Map.prototype.get.call(result, key);
-		return result[key];
-	};
-	result.set = (key: K, value: V) =>
-	{
-		if (!result.keys.contains(key))
-			result.keys.push(key);
-		if (mapTypeAvailable)
-			Map.prototype.set.call(result, key, value);
-		else
-			result[key] = value;
-	};
+		this.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
+		this.keyType = keyType;
+		this.valueType = valueType;
 
-	if (keyValuePairs)
-		for (var i = 0; i < keyValuePairs.length; i++)
-			if (mapTypeAvailable)
-				result.set(keyValuePairs[i][0], keyValuePairs[i][1]);
-			else
-				result[keyValuePairs[i][0]] = keyValuePairs[i][1];
-	return result;
+		if (keyValuePairs)
+			for (var i = 0; i < keyValuePairs.length; i++)
+				this.set(keyValuePairs[i][0], keyValuePairs[i][1]);
+	}
+
+	get(key: K) { return this.values[this.keys.indexOf(key)]; }
+	set(key: K, value: V)
+	{
+		if (!this.keys.contains(key))
+			this.keys.push(key);
+		this.values[this.keys.indexOf(key)] = value;
+	}
 }

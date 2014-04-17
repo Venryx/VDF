@@ -43,6 +43,7 @@ var VDF = (function () {
     };
 
     VDF.Serialize = function (obj, saveOptions) {
+        var a = VDFSaver.ToVDFNode(obj, saveOptions);
         return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
     };
     VDF.Deserialize = function (vdf, realVTypeName, loadOptions) {
@@ -104,50 +105,101 @@ var EnumValue = (function () {
     return EnumValue;
 })();
 
-function new_List(itemType) {
-    var items = [];
-    for (var _i = 0; _i < (arguments.length - 1); _i++) {
-        items[_i] = arguments[_i + 1];
+var List = (function () {
+    function List(itemType) {
+        var items = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            items[_i] = arguments[_i + 1];
+        }
+        this.innerArray = [];
+        this.pushAll(items);
+        this.AddItem("realVTypeName", "List[" + itemType + "]");
+        this.itemType = itemType;
     }
-    var result = items || [];
-    result.AddItem("realVTypeName", "List[" + itemType + "]");
-    result.itemType = itemType;
-    return result;
-}
+    List.prototype.modifyInnerListWithCall = function (func, args) {
+        for (var i = 0; i < this.innerArray.length; i++)
+            delete this[i];
+        func.apply(this.innerArray, args);
+        for (var i = 0; i < this.innerArray.length; i++)
+            this[i] = this.innerArray[i];
+    };
+    List.prototype.push = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        this.modifyInnerListWithCall(Array.prototype.push, args);
+    };
+    List.prototype.pushAll = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        this.modifyInnerListWithCall(Array.prototype.pushAll, args);
+    };
+    List.prototype.pop = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        this.modifyInnerListWithCall(Array.prototype.pop, args);
+    };
+    List.prototype.insert = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        this.modifyInnerListWithCall(Array.prototype.insert, args);
+    };
+    List.prototype.remove = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        this.modifyInnerListWithCall(Array.prototype.remove, args);
+    };
+    List.prototype.splice = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        this.modifyInnerListWithCall(Array.prototype.splice, args);
+    };
+    return List;
+})();
+List.prototype.AddGetter_Inline = function length() {
+    //return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
+    var highestIndex = -1;
+    for (var propName in this)
+        if (parseInt(propName) == propName && parseInt(propName) > highestIndex)
+            highestIndex = parseInt(propName);
+    return highestIndex + 1;
+};
 
-function new_Dictionary(keyType, valueType) {
-    var keyValuePairs = [];
-    for (var _i = 0; _i < (arguments.length - 2); _i++) {
-        keyValuePairs[_i] = arguments[_i + 2];
+var Dictionary = (function () {
+    function Dictionary(keyType, valueType) {
+        var keyValuePairs = [];
+        for (var _i = 0; _i < (arguments.length - 2); _i++) {
+            keyValuePairs[_i] = arguments[_i + 2];
+        }
+        this.keys = [];
+        this.values = [];
+        this.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
+        this.keyType = keyType;
+        this.valueType = valueType;
+
+        if (keyValuePairs)
+            for (var i = 0; i < keyValuePairs.length; i++)
+                this.set(keyValuePairs[i][0], keyValuePairs[i][1]);
     }
-    var mapTypeAvailable = window["Map"];
-
-    var result = mapTypeAvailable ? new Map() : {};
-    result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
-    result.keyType = keyType;
-    result.valueType = valueType;
-
-    result.keys = [];
-    result.get = function (key) {
-        if (mapTypeAvailable)
-            return Map.prototype.get.call(result, key);
-        return result[key];
+    Dictionary.prototype.get = function (key) {
+        return this.values[this.keys.indexOf(key)];
     };
-    result.set = function (key, value) {
-        if (!result.keys.contains(key))
-            result.keys.push(key);
-        if (mapTypeAvailable)
-            Map.prototype.set.call(result, key, value);
-        else
-            result[key] = value;
+    Dictionary.prototype.set = function (key, value) {
+        if (!this.keys.contains(key))
+            this.keys.push(key);
+        this.values[this.keys.indexOf(key)] = value;
     };
-
-    if (keyValuePairs)
-        for (var i = 0; i < keyValuePairs.length; i++)
-            if (mapTypeAvailable)
-                result.set(keyValuePairs[i][0], keyValuePairs[i][1]);
-            else
-                result[keyValuePairs[i][0]] = keyValuePairs[i][1];
-    return result;
-}
+    return Dictionary;
+})();
 //# sourceMappingURL=VDF.js.map

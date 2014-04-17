@@ -11,7 +11,7 @@ var Saving = (function () {
         if (this.initialized)
             return;
         this.initialized = true;
-        Object.AddProtoFunction_Inline = function Should() {
+        Object.prototype.AddFunction_Inline = function Should() {
             return { obj: this, Be: function (value, message) {
                     equal(this.obj, value, message);
                 } };
