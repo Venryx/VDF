@@ -1,18 +1,6 @@
 ﻿interface Object { GetTypeName(): string; GetType(): string; }
 module VDF_SetUp
 {
-	function LoadJSFile(path: string)
-	{
-		var script = document.createElement('script');
-		script.setAttribute("src", path);
-		document.getElementsByTagName("head")[0].appendChild(script);
-	}
-	LoadJSFile("../VDF/VDFTypeInfo.js");
-	LoadJSFile("../VDF/VDFNode.js");
-	LoadJSFile("../VDF/VDFSaver.js");
-	LoadJSFile("../VDF/VDFLoader.js");
-	LoadJSFile("../VDF/VDFTokenParser.js");
-	
 	Object.defineProperty(Object.prototype, "GetTypeName", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
 	{
 		enumerable: false,
@@ -69,6 +57,21 @@ class VDF
 	{
 		return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions);
 	}
+}
+
+class StringBuilder
+{
+	public data: Array<string> = [];
+	public counter: number = 0;
+	constructor(startData?: string)
+	{
+		if (startData)
+			this.data.push(startData);
+	}
+	Append(str) { this.data[this.counter++] = str; return this; } // adds string str to the StringBuilder
+	Remove(i, j) { this.data.splice(i, j || 1); return this; } // removes j elements starting at i, or 1 if j is omitted
+	Insert(i, str) { this.data.splice(i, 0, str); return this; } // inserts string str at i
+	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
 }
 
 class EnumValue

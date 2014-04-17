@@ -1,16 +1,5 @@
 ﻿var VDF_SetUp;
 (function (VDF_SetUp) {
-    function LoadJSFile(path) {
-        var script = document.createElement('script');
-        script.setAttribute("src", path);
-        document.getElementsByTagName("head")[0].appendChild(script);
-    }
-    LoadJSFile("../VDF/VDFTypeInfo.js");
-    LoadJSFile("../VDF/VDFNode.js");
-    LoadJSFile("../VDF/VDFSaver.js");
-    LoadJSFile("../VDF/VDFLoader.js");
-    LoadJSFile("../VDF/VDFTokenParser.js");
-
     Object.defineProperty(Object.prototype, "GetTypeName", {
         enumerable: false,
         value: function () {
@@ -65,6 +54,59 @@ var VDF = (function () {
     VDF.AnyMember = "#AnyMember";
     VDF.AllMembers = ["#AnyMember"];
     return VDF;
+})();
+
+var VDFTypeInfo = (function () {
+    function VDFTypeInfo(props_includeL1, propInfoByPropName) {
+        this.props_includeL1 = props_includeL1;
+        this.propInfoByPropName = propInfoByPropName || {};
+    }
+    VDFTypeInfo.prototype.SetPropInfo = function (propName, propInfo) {
+        this.propInfoByPropName[propName] = propInfo;
+    };
+    return VDFTypeInfo;
+})();
+
+var VDFPropInfo = (function () {
+    function VDFPropInfo(propType, includeL2, popOutItemsToOwnLines, ignoreEmptyValue) {
+        this.propVTypeName = propType;
+        this.includeL2 = includeL2;
+        this.popOutItemsToOwnLines = popOutItemsToOwnLines;
+        this.ignoreEmptyValue = ignoreEmptyValue;
+    }
+    VDFPropInfo.prototype.IsXIgnorableValue = function (x) {
+        if (this.ignoreEmptyValue && VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
+            return true;
+        if (x === false || x === 0)
+            return true;
+        return x == null;
+    };
+    return VDFPropInfo;
+})();
+
+var StringBuilder = (function () {
+    function StringBuilder(startData) {
+        this.data = [];
+        this.counter = 0;
+        if (startData)
+            this.data.push(startData);
+    }
+    StringBuilder.prototype.Append = function (str) {
+        this.data[this.counter++] = str;
+        return this;
+    };
+    StringBuilder.prototype.Remove = function (i, j) {
+        this.data.splice(i, j || 1);
+        return this;
+    };
+    StringBuilder.prototype.Insert = function (i, str) {
+        this.data.splice(i, 0, str);
+        return this;
+    };
+    StringBuilder.prototype.ToString = function (joinerString) {
+        return this.data.join(joinerString || "");
+    };
+    return StringBuilder;
 })();
 
 var EnumValue = (function () {
