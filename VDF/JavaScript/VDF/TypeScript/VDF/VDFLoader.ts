@@ -30,11 +30,9 @@ class VDFLoader
 			if (depth == 0)
 			{
 				if ((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator) // special case; if there's an empty area where our value data should be
-				{
 					objNode.items.push(new VDFNode("", lastMetadata_type));
-					if (parser.nextCharPos >= vdfFile.length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n') // if this is last char, add a second item
-						objNode.items.push(new VDFNode(""));
-				}
+				if (token.type == VDFTokenType.ItemSeparator && (parser.nextCharPos >= vdfFile.length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n'))
+					objNode.items.push(new VDFNode(""));
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)
 					lastMetadataStartToken = token.type;

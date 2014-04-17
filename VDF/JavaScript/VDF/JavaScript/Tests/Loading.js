@@ -109,7 +109,14 @@ var Loading = (function () {
             a.items[1].items[0].baseValue.Should().Be("2A");
             a.items[1].items[1].baseValue.Should().Be("2B");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems_Empty", function (assert) {
+        test("VDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty", function (assert) {
+            var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
+            a.items[0].items[0].baseValue.Should().Be("1A");
+            a.items[0].items[1].baseValue.Should().Be("");
+            a.items[1].items[0].baseValue.Should().Be("2A");
+            a.items[1].items[1].baseValue.Should().Be("");
+        });
+        test("VDFNode_Level1_ArrayItemsInArrayItems_BothEmpty", function (assert) {
             var a = VDFLoader.ToVDFNode("{|}|{|}");
             a.items[0].items[0].baseValue.Should().Be("");
             a.items[0].items[1].baseValue.Should().Be("");

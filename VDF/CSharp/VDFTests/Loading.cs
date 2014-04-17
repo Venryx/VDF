@@ -112,7 +112,15 @@ namespace VDFTests
 			a.items[1].items[0].baseValue.Should().Be("2A");
 			a.items[1].items[1].baseValue.Should().Be("2B");
 		}
-		[Fact] void VDFNode_Level1_ArrayItemsInArrayItems_Empty()
+		[Fact] void VDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
+			a.items[0].items[0].baseValue.Should().Be("1A");
+			a.items[0].items[1].baseValue.Should().Be("");
+			a.items[1].items[0].baseValue.Should().Be("2A");
+			a.items[1].items[1].baseValue.Should().Be("");
+		}
+		[Fact] void VDFNode_Level1_ArrayItemsInArrayItems_BothEmpty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{|}|{|}");
 			a.items[0].items[0].baseValue.Should().Be("");

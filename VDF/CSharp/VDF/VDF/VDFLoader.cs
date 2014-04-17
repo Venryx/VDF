@@ -48,11 +48,9 @@ static class VDFLoader
 			if (depth == 0)
 			{
 				if ((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator) // special case; if there's an empty area where our value data should be
-				{
 					objNode.items.Add(new VDFNode {baseValue = "", metadata_type = lastMetadata_type});
-					if (parser.nextCharPos >= vdfFile.Length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n') // if this is last char, add a second item
+				if (token.type == VDFTokenType.ItemSeparator && (parser.nextCharPos >= vdfFile.Length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n'))
 						objNode.items.Add(new VDFNode { baseValue = "" });
-				}
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)
 					lastMetadataStartToken = token.type;
