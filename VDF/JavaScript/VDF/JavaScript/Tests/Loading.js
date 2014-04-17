@@ -51,6 +51,11 @@ var Loading = (function () {
             a.items[0].baseValue.Should().Be("Root string 1.");
             a.items[1].baseValue.Should().Be("Root string 2.");
         });
+        test("VDFNode_Level0_ArrayItems_Empty", function (assert) {
+            var a = VDFLoader.ToVDFNode("|");
+            a.items[0].baseValue.Should().Be("");
+            a.items[1].baseValue.Should().Be("");
+        });
         test("VDFNode_Level0_ArrayMetadata1", function (assert) {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions());
             a.metadata_type.Should().Be("SpecialList[int]");
@@ -97,17 +102,19 @@ var Loading = (function () {
             a.properties.get("names").items[0].items[0].baseValue.Should().Be("Dan");
             a.properties.get("names").items[1].items[0].baseValue.Should().Be("Bob");
         });
-        test("VDFNode_Level1_ArrayItems_Empty", function (assert) {
-            var a = VDFLoader.ToVDFNode("|");
-            a.items[0].items[0].baseValue.Should().Be("");
-            a.items[1].items[0].baseValue.Should().Be("");
-        });
         test("VDFNode_Level1_ArrayItemsInArrayItems", function (assert) {
             var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}");
             a.items[0].items[0].baseValue.Should().Be("1A");
             a.items[0].items[1].baseValue.Should().Be("1B");
             a.items[1].items[0].baseValue.Should().Be("2A");
             a.items[1].items[1].baseValue.Should().Be("2B");
+        });
+        test("VDFNode_Level1_ArrayItemsInArrayItems_Empty", function (assert) {
+            var a = VDFLoader.ToVDFNode("{|}|{|}");
+            a.items[0].items[0].baseValue.Should().Be("");
+            a.items[0].items[1].baseValue.Should().Be("");
+            a.items[1].items[0].baseValue.Should().Be("");
+            a.items[1].items[1].baseValue.Should().Be("");
         });
         test("VDFNode_Level1_DictionaryItemsInDictionaryItems", function (assert) {
             var a = VDFLoader.ToVDFNode("{1key|1value}{2key|2value}");

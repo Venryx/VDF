@@ -32,15 +32,10 @@ var VDFLoader = (function () {
             if (depth < 0)
                 break;
             if (depth == 0) {
-                if (((lastToken == null || lastToken.type == 9 /* ItemSeparator */) && token.type == 9 /* ItemSeparator */)) {
-                    var newNode = new VDFNode(null, lastMetadata_type);
-                    newNode.items.push(new VDFNode(""));
-                    objNode.items.push(newNode);
-                    if (parser.nextCharPos >= vdfFile.length) {
-                        var newNode2 = new VDFNode(null, lastMetadata_type);
-                        newNode2.items.push(new VDFNode(""));
-                        objNode.items.push(newNode2);
-                    }
+                if ((lastToken == null || lastToken.type == 9 /* ItemSeparator */) && token.type == 9 /* ItemSeparator */) {
+                    objNode.items.push(new VDFNode("", lastMetadata_type));
+                    if (parser.nextCharPos >= vdfFile.length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n')
+                        objNode.items.push(new VDFNode(""));
                 }
 
                 if (token.type == 4 /* MetadataStartMarker */ || token.type == 2 /* SpecialMetadataStartMarker */)

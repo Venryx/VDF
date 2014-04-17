@@ -47,11 +47,11 @@ static class VDFLoader
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator)) // special case; if there's an empty area where our value data should be
+				if ((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator) // special case; if there's an empty area where our value data should be
 				{
-					objNode.items.Add(new VDFNode {items = new List<VDFNode> {new VDFNode {baseValue = ""}}, metadata_type = lastMetadata_type});
-					if (parser.nextCharPos >= vdfFile.Length) // if this is last char, add a second item
-						objNode.items.Add(new VDFNode { items = new List<VDFNode> { new VDFNode { baseValue = "" } }, metadata_type = lastMetadata_type });
+					objNode.items.Add(new VDFNode {baseValue = "", metadata_type = lastMetadata_type});
+					if (parser.nextCharPos >= vdfFile.Length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n') // if this is last char, add a second item
+						objNode.items.Add(new VDFNode { baseValue = "" });
 				}
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)

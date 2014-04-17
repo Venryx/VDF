@@ -29,17 +29,11 @@ class VDFLoader
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if (((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator)) // special case; if there's an empty area where our value data should be
+				if ((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator) // special case; if there's an empty area where our value data should be
 				{
-					var newNode = new VDFNode(null, lastMetadata_type);
-					newNode.items.push(new VDFNode(""));
-					objNode.items.push(newNode);
-					if (parser.nextCharPos >= vdfFile.length) // if this is last char, add a second item
-					{
-						var newNode2 = new VDFNode(null, lastMetadata_type);
-						newNode2.items.push(new VDFNode(""));
-						objNode.items.push(newNode2);
-					}
+					objNode.items.push(new VDFNode("", lastMetadata_type));
+					if (parser.nextCharPos >= vdfFile.length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n') // if this is last char, add a second item
+						objNode.items.push(new VDFNode(""));
 				}
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)

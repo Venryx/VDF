@@ -43,6 +43,12 @@ namespace VDFTests
 			a.items[0].baseValue.Should().Be("Root string 1.");
 			a.items[1].baseValue.Should().Be("Root string 2.");
 		}
+		[Fact] void VDFNode_Level0_ArrayItems_Empty()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("|");
+			a.items[0].baseValue.Should().Be("");
+			a.items[1].baseValue.Should().Be("");
+		}
 		[Fact] void VDFNode_Level0_ArrayMetadata1()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions(null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
@@ -98,12 +104,6 @@ namespace VDFTests
 			a.properties["names"].items[0].items[0].baseValue.Should().Be("Dan");
 			a.properties["names"].items[1].items[0].baseValue.Should().Be("Bob");
 		}
-		[Fact] void VDFNode_Level1_ArrayItems_Empty()
-		{
-			VDFNode a = VDFLoader.ToVDFNode("|");
-			a.items[0].items[0].baseValue.Should().Be("");
-			a.items[1].items[0].baseValue.Should().Be("");
-		}
 		[Fact] void VDFNode_Level1_ArrayItemsInArrayItems()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}");
@@ -111,6 +111,14 @@ namespace VDFTests
 			a.items[0].items[1].baseValue.Should().Be("1B");
 			a.items[1].items[0].baseValue.Should().Be("2A");
 			a.items[1].items[1].baseValue.Should().Be("2B");
+		}
+		[Fact] void VDFNode_Level1_ArrayItemsInArrayItems_Empty()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("{|}|{|}");
+			a.items[0].items[0].baseValue.Should().Be("");
+			a.items[0].items[1].baseValue.Should().Be("");
+			a.items[1].items[0].baseValue.Should().Be("");
+			a.items[1].items[1].baseValue.Should().Be("");
 		}
 		[Fact] void VDFNode_Level1_DictionaryItemsInDictionaryItems()
 		{
