@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-class VDFLoadOptions
+public class VDFLoadOptions
 {
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
@@ -17,7 +17,7 @@ class VDFLoadOptions
 	}
 }
 
-static class VDFLoader
+public static class VDFLoader
 {
 	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0) { int temp = 0; return ToVDFNode(vdfFile, loadOptions, firstObjTextCharPos, ref temp); }
 	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, int firstObjTextCharPos, ref int parentPoppedOutPropValueCount)

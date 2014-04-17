@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-class VDFSaveOptions
+public class VDFSaveOptions
 {
 	public List<MemberInfo> includePropsL3;
 	public List<MemberInfo> excludePropsL4;
@@ -25,7 +25,7 @@ class VDFSaveOptions
 	}
 }
 
-static class VDFSaver
+public static class VDFSaver
 {
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions = null)
 	{
