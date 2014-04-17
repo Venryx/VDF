@@ -48,10 +48,10 @@ class Saving
 		test("VDFNode_Level1_BaseValues", (assert?: QUnitAssert) =>
 		{
 			var a = new VDFNode();
-			a.properties["bool"] = new VDFNode("false");
-			a.properties["int"] = new VDFNode("5");
-			a.properties["float"] = new VDFNode(".5");
-			a.properties["string"] = new VDFNode("Prop value string.");
+			a.properties.set("bool", new VDFNode("false"));
+			a.properties.set("int", new VDFNode("5"));
+			a.properties.set("float", new VDFNode(".5"));
+			a.properties.set("string", new VDFNode("Prop value string."));
 			a.ToString().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		});
 	}

@@ -120,33 +120,34 @@ function new_Dictionary(keyType, valueType) {
     for (var _i = 0; _i < (arguments.length - 2); _i++) {
         keyValuePairs[_i] = arguments[_i + 2];
     }
-    var result = window["Map"] ? new Map() : {};
+    var mapTypeAvailable = window["Map"];
+
+    var result = mapTypeAvailable ? new Map() : {};
     result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
     result.keyType = keyType;
     result.valueType = valueType;
 
     result.keys = [];
     result.get = function (key) {
-        if (result instanceof Map)
+        if (mapTypeAvailable)
             return Map.prototype.get.call(result, key);
         return result[key];
     };
     result.set = function (key, value) {
         if (!result.keys.contains(key))
             result.keys.push(key);
-        if (result instanceof Map)
+        if (mapTypeAvailable)
             Map.prototype.set.call(result, key, value);
         else
             result[key] = value;
     };
 
     if (keyValuePairs)
-        for (var i = 0; i < keyValuePairs.length; i++) {
-            if (result instanceof Map)
+        for (var i = 0; i < keyValuePairs.length; i++)
+            if (mapTypeAvailable)
                 result.set(keyValuePairs[i][0], keyValuePairs[i][1]);
             else
                 result[keyValuePairs[i][0]] = keyValuePairs[i][1];
-        }
     return result;
 }
 //# sourceMappingURL=VDF.js.map

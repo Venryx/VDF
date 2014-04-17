@@ -102,14 +102,14 @@ var VDFSaver = (function () {
                     for (var key in propValueNode.items)
                         if (propValueNode.items[key].baseValue != "#")
                             propValueNode.items[key].popOutToOwnLine = true;
-                    objNode.properties[propName] = propValueNode;
+                    objNode.properties.set(propName, propValueNode);
                     popOutGroupsAdded++;
                 } else {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     propValueNode.isNamedPropertyValue = true;
                     if (typeDerivedFromDeclaredType)
                         propValueNode.metadata_type = propVTypeName;
-                    objNode.properties[propName] = propValueNode;
+                    objNode.properties.set(propName, propValueNode);
                 }
             }
         }

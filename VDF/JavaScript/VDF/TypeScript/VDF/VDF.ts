@@ -112,7 +112,9 @@ interface Dictionary<K, V> extends Map<K, V>
 }
 function new_Dictionary<K, V>(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>): Dictionary<K, V>
 {
-	var result: any = window["Map"] ? new Map<K, V>() : {}; // try to use 'Map' type, but fallback to basic object (which only accepts strings as keys) otherwise
+	var mapTypeAvailable = window["Map"];
+
+	var result: any = mapTypeAvailable ? new Map<K, V>() : {}; // try to use 'Map' type, but fallback to basic object (which only accepts strings as keys) otherwise
 	result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
 	result.keyType = keyType;
 	result.valueType = valueType;
@@ -120,7 +122,7 @@ function new_Dictionary<K, V>(keyType?: string, valueType?: string, ...keyValueP
 	result.keys = [];
 	result.get = (key: K) =>
 	{
-		if (result instanceof Map)
+		if (mapTypeAvailable)
 			return Map.prototype.get.call(result, key);
 		return result[key];
 	};
@@ -128,7 +130,7 @@ function new_Dictionary<K, V>(keyType?: string, valueType?: string, ...keyValueP
 	{
 		if (!result.keys.contains(key))
 			result.keys.push(key);
-		if (result instanceof Map)
+		if (mapTypeAvailable)
 			Map.prototype.set.call(result, key, value);
 		else
 			result[key] = value;
@@ -136,11 +138,9 @@ function new_Dictionary<K, V>(keyType?: string, valueType?: string, ...keyValueP
 
 	if (keyValuePairs)
 		for (var i = 0; i < keyValuePairs.length; i++)
-		{
-			if (result instanceof Map)
+			if (mapTypeAvailable)
 				result.set(keyValuePairs[i][0], keyValuePairs[i][1]);
 			else
 				result[keyValuePairs[i][0]] = keyValuePairs[i][1];
-		}
 	return result;
 }

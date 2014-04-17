@@ -72,30 +72,30 @@ var Loading = (function () {
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");
-            a.properties["bool"].items[0].baseValue.Should().Be("false");
-            a.properties["int"].items[0].baseValue.Should().Be("5");
-            a.properties["float"].items[0].baseValue.Should().Be(".5");
-            a.properties["string"].items[0].baseValue.Should().Be("Prop value string.");
+            a.properties.get("bool").items[0].baseValue.Should().Be("false");
+            a.properties.get("int").items[0].baseValue.Should().Be("5");
+            a.properties.get("float").items[0].baseValue.Should().Be(".5");
+            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string.");
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@}");
-            a.properties["string"].items[0].baseValue.Should().Be("Prop value string that {needs escaping}.");
+            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string that {needs escaping}.");
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@@|@@}");
-            a.properties["string"].items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
+            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
-            a.properties["string"].items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
+            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("names{#}\n\
 	Dan\n\
 	Bob\n\
 ");
-            a.properties["names"].items[0].items[0].baseValue.Should().Be("Dan");
-            a.properties["names"].items[1].items[0].baseValue.Should().Be("Bob");
+            a.properties.get("names").items[0].items[0].baseValue.Should().Be("Dan");
+            a.properties.get("names").items[1].items[0].baseValue.Should().Be("Bob");
         });
         test("VDFNode_Level0_ArrayMetadata2", function (assert) {
             var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}");
@@ -117,10 +117,10 @@ var Loading = (function () {
 	Bob\n\
 	#10\n\
 	20");
-            a.properties["names"].items[0].items[0].baseValue.Should().Be("Dan");
-            a.properties["names"].items[1].items[0].baseValue.Should().Be("Bob");
-            a.properties["ages"].items[0].items[0].baseValue.Should().Be("10");
-            a.properties["ages"].items[1].items[0].baseValue.Should().Be("20");
+            a.properties.get("names").items[0].items[0].baseValue.Should().Be("Dan");
+            a.properties.get("names").items[1].items[0].baseValue.Should().Be("Bob");
+            a.properties.get("ages").items[0].items[0].baseValue.Should().Be("10");
+            a.properties.get("ages").items[1].items[0].baseValue.Should().Be("20");
         });
     };
     return Loading;

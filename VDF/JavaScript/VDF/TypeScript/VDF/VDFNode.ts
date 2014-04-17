@@ -3,7 +3,7 @@
 	metadata_type: string;
 	baseValue: string;
 	items: Array<VDFNode> = []; // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
-	properties: Map<string, VDFNode> = new Map<string, VDFNode>();
+	properties: Dictionary<string, VDFNode> = new_Dictionary<string, VDFNode>();
 
 	constructor(baseValue?: string, metadata_type?: string)
 	{
@@ -37,9 +37,12 @@
 		for (var key in this.items)
 			if (!this.items[key].popOutToOwnLine)
 				builder.Append(this.items[key].GetInLineItemText());
-		for (var propName in this.properties)
-			if (!this.properties[propName].popOutToOwnLine)
-				builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
+		for (var i in this.properties.keys)
+		{
+			var propName = this.properties.keys[i];
+			if (!this.properties.get(propName).popOutToOwnLine)
+				builder.Append(propName + "{" + this.properties.get(propName).GetInLineItemText() + "}");
+		}
 
 		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
 			builder.Append("}");
@@ -63,9 +66,10 @@
 						lines.push(poppedOutLines[index]);
 			}
 		}
-		for (var propName in this.properties)
+		for (var i in this.properties.keys)
 		{
-			var propValueNode: VDFNode = this.properties[propName];
+			var propName = this.properties.keys[i];
+			var propValueNode: VDFNode = this.properties.get(propName);
 			var poppedOutText: string = propValueNode.GetPoppedOutItemText();
 			{
 				var poppedOutLines = poppedOutText.split('\n');
@@ -152,8 +156,11 @@
 				(<Dictionary<any, any>>result).set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
 				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
-		for (var propName in this.properties)
-			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
+		for (var i in this.properties.keys)
+		{
+			var propName = this.properties.keys[i];
+			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties.get(propName), typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
+		}
 
 		return result;
 	}

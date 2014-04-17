@@ -55,7 +55,7 @@ var VDFLoader = (function () {
                 else if (token.type == 11 /* DataEndMarker */) {
                     if (livePropName != null) {
                         //if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
-                        objNode.properties[livePropName] = livePropValueNode;
+                        objNode.properties.set(livePropName, livePropValueNode);
                         livePropName = null;
                         livePropValueNode = null;
                     } else
