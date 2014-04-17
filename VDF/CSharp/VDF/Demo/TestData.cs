@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-static class Test1
+static class TestData
 {
 	public static World CreateWorld()
 	{
 		var world = new World("Main");
+		world.simpleFlag = true;
 		world.listOfStringLists.AddRange(new List<List<string>> { new List<string> { "1A", "1B", "1C" }, new List<string> { "2A", "2B", "2C" }, new List<string> { "3A", "3B", "3C" } });
 
 		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
@@ -14,6 +15,7 @@ static class Test1
 		grass.AddDuty(new HoldSoil("Grass.png"));
 		var dirt = soils.AddChild(new VObject("Dirt"));
 		dirt.AddDuty(new HoldSoil("Dirt.png"));
+
 
 		var items = world.vObjectRoot.AddChild(new VObject("Items"));
 		items.AddDuty(new Special1(Color.White, .5f));
@@ -46,6 +48,7 @@ class World
 {
 	[VDFProp] public string name;
 	[VDFProp] public VObject vObjectRoot;
+	[VDFProp] public bool simpleFlag;
 	[VDFProp] public List<List<string>> listOfStringLists;
 
 	public World(string name)

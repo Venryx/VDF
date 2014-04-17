@@ -61,7 +61,7 @@
 			this.SavePath.Name = "SavePath";
 			this.SavePath.Size = new System.Drawing.Size(198, 20);
 			this.SavePath.TabIndex = 2;
-			this.SavePath.Text = "Test1/Save1.vdf";
+			this.SavePath.Text = "TestData/Save1.vdf";
 			// 
 			// LoadPath
 			// 
@@ -69,7 +69,7 @@
 			this.LoadPath.Name = "LoadPath";
 			this.LoadPath.Size = new System.Drawing.Size(198, 20);
 			this.LoadPath.TabIndex = 3;
-			this.LoadPath.Text = "Test1/Save1.vdf";
+			this.LoadPath.Text = "TestData/Save1.vdf";
 			// 
 			// Main
 			// 

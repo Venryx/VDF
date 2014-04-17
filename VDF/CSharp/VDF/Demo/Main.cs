@@ -37,7 +37,7 @@ namespace SystemMaker
 
 		private void Save_Click(object sender, EventArgs e)
 		{
-			var testWorld = Test1.CreateWorld();
+			var testWorld = TestData.CreateWorld();
 
 			// serialize it, and save it to file
 			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new[] { typeof(VObject).GetMember("id")[0] })); //, null, null, namespaceAliasesByName, typeAliasesByType, true));

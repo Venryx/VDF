@@ -104,6 +104,8 @@
                 result = VDF.typeImporters_inline[declaredTypeName](rawValue.baseValue); //(string)rawValue);
             else if (EnumValue.IsEnum(declaredTypeName))
                 result = EnumValue.GetEnumIntForStringValue(declaredTypeName, rawValue.baseValue);
+            else if (declaredTypeName == "bool")
+                result = rawValue.baseValue == "true" ? true : false;
             else
                 result = declaredTypeName == "float" ? parseFloat(rawValue.baseValue) : rawValue.baseValue;
         }

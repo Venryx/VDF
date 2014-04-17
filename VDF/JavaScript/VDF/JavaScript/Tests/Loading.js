@@ -141,6 +141,13 @@ var Loading = (function () {
             a.properties.get("ages").items[0].items[0].baseValue.Should().Be("10");
             a.properties.get("ages").items[1].items[0].baseValue.Should().Be("20");
         });
+
+        test("FullLoad_Level0_Bool", function (assert) {
+            VDF.Deserialize("true", "bool").Should().Be(true);
+        });
+        test("FullLoad_Level0_Float", function (assert) {
+            VDF.Deserialize("1.5", "float").Should().Be(1.5);
+        });
     };
     return Loading;
 })();

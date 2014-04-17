@@ -148,5 +148,8 @@ namespace VDFTests
 			a.properties["ages"].items[0].items[0].baseValue.Should().Be("10");
 			a.properties["ages"].items[1].items[0].baseValue.Should().Be("20");
 		}
+
+		[Fact] void FullLoad_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
+		[Fact] void FullLoad_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
 	}
 }

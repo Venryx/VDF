@@ -8,6 +8,7 @@ var Test1;
 (function (Test1) {
     function CreateWorld() {
         var world = new World("Main");
+        world.simpleFlag = true;
         world.listOfStringLists.pushAll([new List("string", "1A", "1B", "1C"), new List("string", "2A", "2B", "2C"), new List("string", "3A", "3B", "3C")]);
 
         var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
@@ -40,11 +41,13 @@ var World = (function () {
     function World(name) {
         this.name = name;
         this.vObjectRoot = new VObject("VObjectRoot");
+        this.simpleFlag = false; // this has to be initialized to something, right here, to get it ordered/positioned correctly in the save file
         this.listOfStringLists = new List("List[string]");
     }
     World.typeInfo = new VDFTypeInfo(false, {
         name: new VDFPropInfo("string", true),
         vObjectRoot: new VDFPropInfo("VObject", true),
+        simpleFlag: new VDFPropInfo("bool", true),
         listOfStringLists: new VDFPropInfo("List[List[string]]", true)
     });
     return World;

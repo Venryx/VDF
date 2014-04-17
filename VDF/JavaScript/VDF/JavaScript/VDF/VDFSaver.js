@@ -15,6 +15,8 @@ var VDFSaver = (function () {
         var objNode = new VDFNode();
         if (VDF.typeExporters_inline[objVTypeName])
             objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj))));
+        else if (objVTypeName == "bool")
+            objNode.items.push(new VDFNode(obj.toString().toLowerCase()));
         else if (objVTypeName == "float" && obj.toString().contains("."))
             objNode.items.push(new VDFNode(obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString()));
         else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
