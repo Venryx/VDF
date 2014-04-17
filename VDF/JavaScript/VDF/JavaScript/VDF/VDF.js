@@ -56,34 +56,6 @@ var VDF = (function () {
     return VDF;
 })();
 
-var VDFTypeInfo = (function () {
-    function VDFTypeInfo(props_includeL1, propInfoByPropName) {
-        this.props_includeL1 = props_includeL1;
-        this.propInfoByPropName = propInfoByPropName || {};
-    }
-    VDFTypeInfo.prototype.SetPropInfo = function (propName, propInfo) {
-        this.propInfoByPropName[propName] = propInfo;
-    };
-    return VDFTypeInfo;
-})();
-
-var VDFPropInfo = (function () {
-    function VDFPropInfo(propType, includeL2, popOutItemsToOwnLines, ignoreEmptyValue) {
-        this.propVTypeName = propType;
-        this.includeL2 = includeL2;
-        this.popOutItemsToOwnLines = popOutItemsToOwnLines;
-        this.ignoreEmptyValue = ignoreEmptyValue;
-    }
-    VDFPropInfo.prototype.IsXIgnorableValue = function (x) {
-        if (this.ignoreEmptyValue && VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
-            return true;
-        if (x === false || x === 0)
-            return true;
-        return x == null;
-    };
-    return VDFPropInfo;
-})();
-
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.data = [];
@@ -148,21 +120,33 @@ function new_Dictionary(keyType, valueType) {
     for (var _i = 0; _i < (arguments.length - 2); _i++) {
         keyValuePairs[_i] = arguments[_i + 2];
     }
-    var result = new Map();
+    var result = window["Map"] ? new Map() : {};
     result.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
     result.keyType = keyType;
     result.valueType = valueType;
 
     result.keys = [];
+    result.get = function (key) {
+        if (result instanceof Map)
+            return Map.prototype.get.call(result, key);
+        return result[key];
+    };
     result.set = function (key, value) {
         if (!result.keys.contains(key))
             result.keys.push(key);
-        Map.prototype.set.call(result, key, value);
+        if (result instanceof Map)
+            Map.prototype.set.call(result, key, value);
+        else
+            result[key] = value;
     };
 
     if (keyValuePairs)
-        for (var i = 0; i < keyValuePairs.length; i++)
-            result.set(keyValuePairs[i][0], keyValuePairs[i][1]);
+        for (var i = 0; i < keyValuePairs.length; i++) {
+            if (result instanceof Map)
+                result.set(keyValuePairs[i][0], keyValuePairs[i][1]);
+            else
+                result[keyValuePairs[i][0]] = keyValuePairs[i][1];
+        }
     return result;
 }
 //# sourceMappingURL=VDF.js.map
