@@ -1,6 +1,7 @@
 ﻿class VDFNode
 {
-	static builtInProps = ["metadata_type", "baseValue", "isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode", "items", "properties"];
+	static builtInProps = ["metadata_type", "baseValue", "items", "properties", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
+		"isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode"];
 
 	metadata_type: string;
 	baseValue: string;
@@ -46,6 +47,28 @@
 		this.properties[key] = value;
 		this[key] = value;
 	}
+
+	GetDictionaryValueNode(key): VDFNode { return this.items.filter((item, index, array)=>item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString())[0].items[1]; } // base equality on whether their 'default output' is the same
+	SetDictionaryValueNode(key, valueNode: VDFNode): void
+	{
+		var keyNode = VDFSaver.ToVDFNode(key);
+		if (this.items.contains(keyNode))
+			this.items.filter((item, index, array) => item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString())[0].SetItem(1, valueNode);
+		else
+		{
+			var newNode = new VDFNode();
+			newNode.isKeyValuePairPseudoNode = true;
+			newNode.PushItem(keyNode);
+			newNode.PushItem(valueNode);
+			this.PushItem(newNode);
+		}
+	}
+	get AsBool() { return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "bool", null); }
+	set AsBool(value: boolean) { this.baseValue = value.toString(); }
+	get AsFloat() { return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "float", null); }
+	set AsFloat(value: number) { this.baseValue = value.toString(); }
+	get AsString() { return this.baseValue; }
+	set AsString(value: string) { this.baseValue = value; }
 
 	// saving
 	// ==================
@@ -154,21 +177,21 @@
 			return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
 		return eval("new " + typeName + "()");
 	}
-	static ConvertRawValueToCorrectType(rawValue: any, declaredTypeName: string, loadOptions: VDFLoadOptions): any
+	static ConvertVDFNodeToCorrectType(rawValue: VDFNode, declaredTypeName: string, loadOptions: VDFLoadOptions): any
 	{
 		var result;
-		if (rawValue.GetTypeName() == "VDFNode" && (<VDFNode>rawValue).baseValue == null)
-			result = (<VDFNode>rawValue).ToObject((<VDFNode>rawValue).metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
-		else // base-value must be a string (todo; update the 'items' var to only accept VDFNodes now)
+		if (rawValue.baseValue == null)
+			result = rawValue.ToObject(rawValue.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
+		else // base-value must be a string
 		{
 			if (VDF.typeImporters_inline[declaredTypeName])
-				result = VDF.typeImporters_inline[declaredTypeName]((<VDFNode>rawValue).baseValue); //(string)rawValue);
+				result = VDF.typeImporters_inline[declaredTypeName](rawValue.baseValue); //(string)rawValue);
 			else if (EnumValue.IsEnum(declaredTypeName))
-				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, (<VDFNode>rawValue).baseValue);
+				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, rawValue.baseValue);
 			else if (declaredTypeName == "bool")
-				result = (<VDFNode>rawValue).baseValue == "true" ? true : false;
+				result = rawValue.baseValue == "true" ? true : false;
 			else // if no specific handler, try auto-converting string to the correct (primitive) type
-				result = declaredTypeName == "float" ? parseFloat((<VDFNode>rawValue).baseValue) : (<VDFNode>rawValue).baseValue;
+				result = declaredTypeName == "float" ? parseFloat(rawValue.baseValue) : rawValue.baseValue;
 		}
 		return result;
 	}
@@ -185,13 +208,13 @@
 		var result = VDFNode.CreateNewInstanceOfType(type);
 		for (var i = 0; i < this.items.length; i++)
 			if (type.startsWith("List["))
-				(<List<any>>result)[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
+				(<List<any>>result)[i] = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
 			else if (type.startsWith("Dictionary[")) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				(<Dictionary<any, any>>result).set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
+				(<Dictionary<any, any>>result).set(VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
-				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
+				result = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], type, loadOptions);
 		for (var propName in this.properties)
-			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
+			result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
 
 		return result;
 	}

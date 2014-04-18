@@ -76,6 +76,13 @@ class Loading
 			a[1][0].baseValue.Should().Be("key 2");
 			a[1][1].baseValue.Should().Be("value 2");
 		});
+		test("VDFNode_Level0_DictionaryItems_GetByKey", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
+			a.GetDictionaryValueNode("key 1").AsString.Should().Be("value 1");
+			a.GetDictionaryValueNode("key 2").AsString.Should().Be("value 2");
+		});
+
 		test("VDFNode_Level1_BaseValues", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");
@@ -83,6 +90,10 @@ class Loading
 			a["int"].baseValue.Should().Be("5");
 			a["float"].baseValue.Should().Be(".5");
 			a["string"].baseValue.Should().Be("Prop value string.");
+
+			a["bool"].AsBool.Should().Be(false);
+			a["float"].AsFloat.Should().Be(.5);
+			a["string"].AsString.Should().Be("Prop value string.");
 		});
 		test("VDFNode_Level1_Literal", ()=>
 		{

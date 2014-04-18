@@ -70,6 +70,12 @@ namespace VDFTests
 			a[1][0].baseValue.Should().Be("key 2");
 			a[1][1].baseValue.Should().Be("value 2");
 		}
+		[Fact] void VDFNode_Level0_DictionaryItems_GetByKey()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
+			a.GetDictionaryValueNode("key 1").AsString.Should().Be("value 1");
+			a.GetDictionaryValueNode("key 2").AsString.Should().Be("value 2");
+		}
 
 		[Fact] void VDFNode_Level1_BaseValues()
 		{
@@ -78,6 +84,11 @@ namespace VDFTests
 			a["int"].baseValue.Should().Be("5");
 			a["float"].baseValue.Should().Be(".5");
 			a["string"].baseValue.Should().Be("Prop value string.");
+
+			a["bool"].AsBool.Should().Be(false);
+			a["int"].AsInt.Should().Be(5);
+			a["float"].AsFloat.Should().Be(.5f);
+			a["string"].AsString.Should().Be("Prop value string.");
 		}
 		[Fact] void VDFNode_Level1_Literal()
 		{

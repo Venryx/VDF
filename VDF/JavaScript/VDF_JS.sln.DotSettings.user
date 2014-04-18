@@ -1,10 +1,10 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:Boolean x:Key="/Default/CoverageSessionsPersistenceManagerSettings/SessionPersistentData/=D5A220799C1741F6B692F7A6E2ABADFD/@KeyIndexDefined">True</s:Boolean>
-	<s:String x:Key="/Default/CoverageSessionsPersistenceManagerSettings/SessionPersistentData/=D5A220799C1741F6B692F7A6E2ABADFD/SessionName/@EntryValue">VDFNode_Level0_BaseValue</s:String>
-	<s:String x:Key="/Default/CoverageSessionsPersistenceManagerSettings/SessionPersistentData/=D5A220799C1741F6B692F7A6E2ABADFD/SnapshotLocation/@EntryValue">C:\Users\Stephen\AppData\Local\Temp\ssmJacarec.tmp</s:String>
+	
+	
+	
 	<s:Boolean x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=D210A807FD2E4C5E93DD570E8B37EFA3/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=D210A807FD2E4C5E93DD570E8B37EFA3/Name/@EntryValue">VDFNode_Level0_BaseValue</s:String>
-	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=D210A807FD2E4C5E93DD570E8B37EFA3/XmlSerializedElements/@EntryValue">&lt;Session&gt;&lt;Elements&gt;&lt;UnitTestElement Provider="QUnit" Id="QUnit::VDFNode_Level0_BaseValue" type="QUnitTestElement" FileName="C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\TypeScript\Tests\Loading.ts" TestName="VDFNode_Level0_BaseValue" RangeStart="1027" RangeEnd="1331" Project="A4A6FB85-9490-40E3-9F62-B5DE2C7C24EA" /&gt;&lt;/Elements&gt;&lt;/Session&gt;</s:String>
+	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=D210A807FD2E4C5E93DD570E8B37EFA3/XmlSerializedElements/@EntryValue">&lt;Session&gt;&lt;Elements&gt;&lt;UnitTestElement Provider="QUnit" Id="QUnit::VDFNode_Level0_BaseValue" type="QUnitTestElement" FileName="C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\TypeScript\Tests\Saving.ts" TestName="VDFNode_Level0_BaseValue" RangeStart="1027" RangeEnd="1331" Project="A4A6FB85-9490-40E3-9F62-B5DE2C7C24EA" /&gt;&lt;/Elements&gt;&lt;/Session&gt;</s:String>
 	
 	
 	

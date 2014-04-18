@@ -45,6 +45,56 @@
         this[key] = value;
     };
 
+    VDFNode.prototype.GetDictionaryValueNode = function (key) {
+        return this.items.filter(function (item, index, array) {
+            return item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString();
+        })[0].items[1];
+    };
+    VDFNode.prototype.SetDictionaryValueNode = function (key, valueNode) {
+        var keyNode = VDFSaver.ToVDFNode(key);
+        if (this.items.contains(keyNode))
+            this.items.filter(function (item, index, array) {
+                return item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString();
+            })[0].SetItem(1, valueNode);
+        else {
+            var newNode = new VDFNode();
+            newNode.isKeyValuePairPseudoNode = true;
+            newNode.PushItem(keyNode);
+            newNode.PushItem(valueNode);
+            this.PushItem(newNode);
+        }
+    };
+    Object.defineProperty(VDFNode.prototype, "AsBool", {
+        get: function () {
+            return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "bool", null);
+        },
+        set: function (value) {
+            this.baseValue = value.toString();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(VDFNode.prototype, "AsFloat", {
+        get: function () {
+            return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "float", null);
+        },
+        set: function (value) {
+            this.baseValue = value.toString();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(VDFNode.prototype, "AsString", {
+        get: function () {
+            return this.baseValue;
+        },
+        set: function (value) {
+            this.baseValue = value;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
     VDFNode.prototype.GetInLineItemText = function () {
         var builder = new StringBuilder();
         if (this.isFirstItemOfNonFirstPopOutGroup)
@@ -132,9 +182,9 @@
             return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
         return eval("new " + typeName + "()");
     };
-    VDFNode.ConvertRawValueToCorrectType = function (rawValue, declaredTypeName, loadOptions) {
+    VDFNode.ConvertVDFNodeToCorrectType = function (rawValue, declaredTypeName, loadOptions) {
         var result;
-        if (rawValue.GetTypeName() == "VDFNode" && rawValue.baseValue == null)
+        if (rawValue.baseValue == null)
             result = rawValue.ToObject(rawValue.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
         else {
             if (VDF.typeImporters_inline[declaredTypeName])
@@ -160,17 +210,19 @@
         var result = VDFNode.CreateNewInstanceOfType(type);
         for (var i = 0; i < this.items.length; i++)
             if (type.startsWith("List["))
-                result[i] = VDFNode.ConvertRawValueToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
+                result[i] = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
             else if (type.startsWith("Dictionary["))
-                result.set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
+                result.set(VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
             else
-                result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
+                result = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], type, loadOptions);
         for (var propName in this.properties)
-            result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
+            result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
 
         return result;
     };
-    VDFNode.builtInProps = ["metadata_type", "baseValue", "isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode", "items", "properties"];
+    VDFNode.builtInProps = [
+        "metadata_type", "baseValue", "items", "properties", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
+        "isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode"];
     return VDFNode;
 })();
 //# sourceMappingURL=VDFNode.js.map
