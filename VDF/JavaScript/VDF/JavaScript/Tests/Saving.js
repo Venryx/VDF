@@ -57,6 +57,15 @@ var Saving = (function () {
             a["string"] = new VDFNode("Prop value string.");
             a.ToString().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
         });
+
+        test("VDFNode_Level1_AnonymousTypeProperties", function () {
+            var a = VDFSaver.ToVDFNode({ Bool: false, Int: 5, Float: .5, String: "Prop value string." });
+            a["Bool"].baseValue.Should().Be("false");
+            a["Int"].baseValue.Should().Be("5");
+            a["Float"].baseValue.Should().Be(".5");
+            a["String"].baseValue.Should().Be("Prop value string.");
+            a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+        });
     };
     return Saving;
 })();

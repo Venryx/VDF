@@ -73,7 +73,8 @@ var VDFSaver = (function () {
             }
             ;
         } else if (typeof obj == "object") {
-            var typeInfo = obj.GetType()["typeInfo"] || new VDFTypeInfo();
+            var isAnonymousType = obj.__proto__ == {}.__proto__;
+            var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
             var popOutGroupsAdded = 0;
             for (var propName in obj) {
                 if (typeof obj[propName] == "function")
@@ -92,7 +93,7 @@ var VDFSaver = (function () {
                     continue;
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
-                var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName;
+                var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
                 if (propInfo.popOutItemsToOwnLines) {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     propValueNode.isNamedPropertyValue = true;

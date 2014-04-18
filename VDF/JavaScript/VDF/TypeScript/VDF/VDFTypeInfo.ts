@@ -31,8 +31,8 @@ class VDFPropInfo
 	{
 		if (this.ignoreEmptyValue && VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
 			return true;
-		if (x === false || x === 0) // if equal to type's default value
-			return true;
+		//if (x === false || x === 0) // if equal to type's default value
+		//	return true;
 		return x == null;
 	}
 }

@@ -19,12 +19,16 @@ public class VDFTypeInfo
 		if (!cachedTypeInfo.ContainsKey(type))
 		{
 			var vdfTypeAttribute = (VDF.typeVDFTypeOverrides.ContainsKey(type) ? VDF.typeVDFTypeOverrides[type] : null) ?? (VDFType)type.GetCustomAttributes(typeof(VDFType), true).FirstOrDefault();
+			bool isAnonymousType = type.Name.StartsWith("<>");
 
 			var typeInfo = new VDFTypeInfo();
 			foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
-				typeInfo.propInfoByName[field.Name] = VDFPropInfo.Get(field);
+				if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
+					typeInfo.propInfoByName[field.Name] = VDFPropInfo.Get(field);
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
 				typeInfo.propInfoByName[property.Name] = VDFPropInfo.Get(property);
+			if (isAnonymousType) // anonymous types should by default have all props included)
+				typeInfo.props_includeL1 = true;
 			if (vdfTypeAttribute != null)
 				typeInfo.props_includeL1 = vdfTypeAttribute.includePropsL1;
 			cachedTypeInfo[type] = typeInfo;
@@ -107,8 +111,8 @@ public class VDFPropInfo
 	{
 		if (ignoreEmptyValue && x is IList && ((IList)x).Count == 0)
 			return true;
-		if (GetPropType().IsValueType)
-			return x == Activator.CreateInstance(GetPropType());
+		//if (GetPropType().IsValueType) // if equal to type's default value
+		//	return x == Activator.CreateInstance(GetPropType());
 		return x == null;
 	}
 	public object GetValue(object objParent)

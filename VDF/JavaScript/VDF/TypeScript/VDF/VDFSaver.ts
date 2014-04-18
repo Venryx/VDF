@@ -75,7 +75,8 @@ class VDFSaver
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
 		{
-			var typeInfo = obj.GetType()["typeInfo"] || new VDFTypeInfo(); // if not specified, use default values
+			var isAnonymousType = obj.__proto__ == (<any>{}).__proto__;
+			var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // if not specified: if anon type, include all props, otherwise, use default values
 			var popOutGroupsAdded = 0;
 			for (var propName in obj)
 			{
@@ -95,7 +96,7 @@ class VDFSaver
 					continue;
 
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
-				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
+				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					var propValueNode: VDFNode = VDFSaver.ToVDFNode(propValue, saveOptions);
