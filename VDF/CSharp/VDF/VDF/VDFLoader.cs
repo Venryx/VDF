@@ -73,7 +73,24 @@ public static class VDFLoader
 						parentPoppedOutPropValueCount++;
 					}
 					else
-						objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
+					{
+						// note; slightly messy, but seems the best practically; if there's only one base-like-value as obj's data, and obj has no type metadata (i.e. it's not explicitly a list), then include it both as obj's base-value and as its solitary item
+						if (objNode.items.Count == 0 && objNode.metadata_type == null)
+						{
+							objNode.baseValue = token.text;
+							objNode.metadata_type = lastMetadata_type;
+							objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
+						}
+						else // if it turns out there was more than one item
+						{
+							if (objNode.baseValue != null) // if we already put the first-item as obj's base-value, remove it
+							{
+								objNode.baseValue = null;
+								objNode.metadata_type = null;
+							}
+							objNode.items.Add(new VDFNode { baseValue = token.text, metadata_type = lastMetadata_type });
+						}
+					}
 				}
 				else if (token.type == VDFTokenType.Data_PropName)
 				{

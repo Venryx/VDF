@@ -8,8 +8,34 @@ public class VDFNode
 {
 	public string metadata_type;
 	public string baseValue;
-	public List<VDFNode> items = new List<VDFNode>(); // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
+	public List<VDFNode> items = new List<VDFNode>();
 	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>();
+
+	public VDFNode this[int index]
+	{
+		get { return items[index]; }
+		set
+		{
+			if (items.Count == index) // lets you add new items easily: vdfNode[0] = new VDFNode();
+				items.Add(value);
+			else
+				items[index] = value;
+		}
+	}
+	public VDFNode this[string key]
+	{
+		get { return properties[key]; }
+		set { properties[key] = value; }
+	}
+	/*public VDFNode GetDictionaryValue(VDFNode keyNode) { return items[items.IndexOf(keyNode)].items[1]; }
+	public void SetDictionaryValue(VDFNode keyNode, VDFNode valueNode)
+	{
+		if (items.Contains(keyNode))
+			items[items.IndexOf(keyNode)].items[1] = valueNode;
+		else
+			items.Add(new VDFNode {isKeyValuePairPseudoNode = true, items = new List<VDFNode> {keyNode, valueNode}});
+	}
+	public bool Equals(VDFNode other) { return ToString() == other.ToString(); } // base equality on whether their 'default output' is the same*/
 	
 	// saving
 	// ==================
