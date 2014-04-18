@@ -10,13 +10,13 @@ class VDFSaver
 		var objVTypeName = VDF.GetVTypeNameOfObject(obj);
 		var objNode = new VDFNode();
 		if (VDF.typeExporters_inline[objVTypeName])
-			objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj))));
+			objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
 		else if (objVTypeName == "bool")
-			objNode.items.push(new VDFNode(obj.toString().toLowerCase()));
+			objNode.baseValue = obj.toString().toLowerCase();
 		else if (objVTypeName == "float" && obj.toString().contains(".")) // float/double
-			objNode.items.push(new VDFNode(obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString()));
+			objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
 		else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
-			objNode.items.push(new VDFNode(VDFSaver.RawDataStringToFinalized(obj.toString())));
+			objNode.baseValue = VDFSaver.RawDataStringToFinalized(obj.toString());
 		else if (objVTypeName.startsWith("List["))
 		{
 			objNode.isListOrDictionary = true;
@@ -36,7 +36,7 @@ class VDFSaver
 					itemValueNode.isListItem_nonFirst = true;
 				if (typeDerivedFromDeclaredType)
 					itemValueNode.metadata_type = itemVTypeName;
-				objNode.items.push(itemValueNode);
+				objNode.PushItem(itemValueNode);
 			}
 		}
 		else if (objVTypeName.startsWith("Dictionary["))
@@ -60,7 +60,7 @@ class VDFSaver
 				var keyNode: VDFNode = VDFSaver.ToVDFNode(key);
 				if (keyTypeDerivedFromDeclaredType)
 					keyNode.metadata_type = keyVTypeName;
-				keyValuePairPseudoNode.items.push(keyNode);
+				keyValuePairPseudoNode.PushItem(keyNode);
 
 				var valueVTypeName = VDF.GetVTypeNameOfObject(value);
 				var valueTypeDerivedFromDeclaredType: boolean = valueVTypeName != objAsDictionary.valueType; // if value's type is *derived* from map's declared value-type
@@ -68,9 +68,9 @@ class VDFSaver
 				valueNode.isListItem_nonFirst = true;
 				if (valueTypeDerivedFromDeclaredType)
 					valueNode.metadata_type = valueVTypeName;
-				keyValuePairPseudoNode.items.push(valueNode);
+				keyValuePairPseudoNode.PushItem(valueNode);
 
-				objNode.items.push(keyValuePairPseudoNode);
+				objNode.PushItem(keyValuePairPseudoNode);
 			};
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
@@ -93,14 +93,14 @@ class VDFSaver
 					propValue = new EnumValue(propInfo.propVTypeName, propValue);
 				if (propInfo.IsXIgnorableValue(propValue))
 					continue;
-				
+
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
 				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					var propValueNode: VDFNode = VDFSaver.ToVDFNode(propValue, saveOptions);
 					propValueNode.isNamedPropertyValue = true;
-					propValueNode.items.insert(0, new VDFNode("#")); // add in-line marker, indicating that items are popped-out
+					propValueNode.InsertItem(0, new VDFNode("#")); // add in-line marker, indicating that items are popped-out
 					if (popOutGroupsAdded > 0 && propValueNode.items.length > 1)
 						propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
 					if (typeDerivedFromDeclaredType)
@@ -108,7 +108,7 @@ class VDFSaver
 					for (var key in propValueNode.items)
 						if (propValueNode.items[key].baseValue != "#")
 							propValueNode.items[key].popOutToOwnLine = true;
-					objNode.properties.set(propName, propValueNode);
+					objNode.SetProperty(propName, propValueNode);
 					popOutGroupsAdded++;
 				}
 				else
@@ -117,7 +117,7 @@ class VDFSaver
 					propValueNode.isNamedPropertyValue = true;
 					if (typeDerivedFromDeclaredType)
 						propValueNode.metadata_type = propVTypeName;
-					objNode.properties.set(propName, propValueNode);
+					objNode.SetProperty(propName, propValueNode);
 				}
 			}
 		}

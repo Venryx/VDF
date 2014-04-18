@@ -51,7 +51,6 @@ class VDF
 
 	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string
 	{
-		var a = VDFSaver.ToVDFNode(obj, saveOptions);
 		return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
 	}
 	static Deserialize<T>(vdf: string, realVTypeName: string, loadOptions?: VDFLoadOptions): string
@@ -97,7 +96,15 @@ class List<T>
 {
 	private innerArray: any[];
 	itemType: string;
-	length: any; // prop with a getter (added below)
+	get length()
+	{
+		//return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
+		var highestIndex = -1;
+		for (var propName in this)
+			if (parseInt(propName) == propName && parseInt(propName) > highestIndex) // if integer key
+				highestIndex = parseInt(propName);
+		return highestIndex + 1;
+	}
 	constructor(itemType: string, ...items: T[])
 	{
 		this.innerArray = [];
@@ -121,15 +128,6 @@ class List<T>
 	remove(...args) { this.modifyInnerListWithCall(Array.prototype.remove, args); }
 	splice(...args) { this.modifyInnerListWithCall(Array.prototype.splice, args); }
 }
-List.prototype.AddGetter_Inline = function length()
-{
-	//return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
-	var highestIndex = -1;
-	for (var propName in this)
-		if (parseInt(propName) == propName && parseInt(propName) > highestIndex) // if integer key
-			highestIndex = parseInt(propName);
-	return highestIndex + 1;
-};
 
 class Dictionary<K, V>
 {

@@ -1,14 +1,50 @@
 ﻿class VDFNode
 {
+	static builtInProps = ["metadata_type", "baseValue", "isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode", "items", "properties"];
+
 	metadata_type: string;
 	baseValue: string;
-	items: Array<VDFNode> = []; // note; it'd be nice to get base-value system working without having to use the one-length-item-list system
-	properties: Dictionary<string, VDFNode> = new Dictionary<string, VDFNode>();
+	get items(): Array<VDFNode>
+	{
+		var result = [];
+		for (var key in this)
+			if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) == key) // if number-index
+				result.push(this[key]);
+		return result;
+	}
+	get properties(): any
+	{
+		var objWithPropKeys = {};
+		for (var key in this)
+			if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) != key) // if not number-index
+				objWithPropKeys[key] = this[key];
+		return objWithPropKeys;
+	}
 
 	constructor(baseValue?: string, metadata_type?: string)
 	{
 		this.baseValue = baseValue;
 		this.metadata_type = metadata_type;
+	}
+
+	SetItem(index: number, value: any)
+	{
+		this.items[index] = value;
+		this[index] = value;
+	}
+	PushItem(value: any) { this.SetItem(this.items.length, value); }
+	InsertItem(index: number, value: any)
+	{
+		var oldItems = this.items;
+		for (var i = 0; i < oldItems.length; i++) // we need to first remove old values, so the slate is clean for manual re-adding/re-ordering
+			delete this[i];
+		for (var i = 0; i < oldItems.length + 1; i++) // now add them all back in, in the correct order
+			this.PushItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
+	}
+	SetProperty(key: string, value: any)
+	{
+		this.properties[key] = value;
+		this[key] = value;
 	}
 
 	// saving
@@ -37,12 +73,9 @@
 		for (var key in this.items)
 			if (!this.items[key].popOutToOwnLine)
 				builder.Append(this.items[key].GetInLineItemText());
-		for (var i in this.properties.keys)
-		{
-			var propName = this.properties.keys[i];
-			if (!this.properties.get(propName).popOutToOwnLine)
-				builder.Append(propName + "{" + this.properties.get(propName).GetInLineItemText() + "}");
-		}
+		for (var propName in this.properties)
+			if (!this.properties[propName].popOutToOwnLine)
+				builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 
 		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
 			builder.Append("}");
@@ -66,10 +99,9 @@
 						lines.push(poppedOutLines[index]);
 			}
 		}
-		for (var i in this.properties.keys)
+		for (var propName in this.properties)
 		{
-			var propName = this.properties.keys[i];
-			var propValueNode: VDFNode = this.properties.get(propName);
+			var propValueNode: VDFNode = this.properties[propName];
 			var poppedOutText: string = propValueNode.GetPoppedOutItemText();
 			{
 				var poppedOutLines = poppedOutText.split('\n');
@@ -158,11 +190,8 @@
 				(<Dictionary<any, any>>result).set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
 				result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
-		for (var i in this.properties.keys)
-		{
-			var propName = this.properties.keys[i];
-			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties.get(propName), typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
-		}
+		for (var propName in this.properties)
+			result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
 
 		return result;
 	}

@@ -33,7 +33,7 @@ class Saving
 			a.ToString().Should().Be("Root string.");
 
 			a = new VDFNode();
-			a.items.push(new VDFNode("Root string also."));
+			a[0] = new VDFNode("Root string also.");
 			a.ToString().Should().Be("Root string also.");
 		});
 
@@ -48,10 +48,10 @@ class Saving
 		test("VDFNode_Level1_BaseValues", (assert?: QUnitAssert) =>
 		{
 			var a = new VDFNode();
-			a.properties.set("bool", new VDFNode("false"));
-			a.properties.set("int", new VDFNode("5"));
-			a.properties.set("float", new VDFNode(".5"));
-			a.properties.set("string", new VDFNode("Prop value string."));
+			a["bool"] = new VDFNode("false");
+			a["int"] = new VDFNode("5");
+			a["float"] = new VDFNode(".5");
+			a["string"] = new VDFNode("Prop value string.");
 			a.ToString().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		});
 	}

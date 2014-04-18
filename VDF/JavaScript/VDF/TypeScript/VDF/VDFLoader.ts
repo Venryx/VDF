@@ -30,9 +30,9 @@ class VDFLoader
 			if (depth == 0)
 			{
 				if ((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator) // special case; if there's an empty area where our value data should be
-					objNode.items.push(new VDFNode("", lastMetadata_type));
+					objNode.PushItem(new VDFNode("", lastMetadata_type));
 				if (token.type == VDFTokenType.ItemSeparator && (parser.nextCharPos >= vdfFile.length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n'))
-					objNode.items.push(new VDFNode(""));
+					objNode.PushItem(new VDFNode(""));
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)
 					lastMetadataStartToken = token.type;
@@ -50,11 +50,28 @@ class VDFLoader
 						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
 						var poppedOutPropValueItemTextPositions: Array<number> = VDFLoader.FindPoppedOutChildDataTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
 						for (var key in poppedOutPropValueItemTextPositions)
-							objNode.items.push(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], sharedData));
+							objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], sharedData));
 						parentSharedData.poppedOutPropValueCount++;
 					}
 					else
-						objNode.items.push(new VDFNode(token.text, lastMetadata_type));
+					{
+						// note; slightly messy, but seems the best practically; if there's only one base-like-value as obj's data, and obj has no type metadata (i.e. it's not explicitly a list), then include it both as obj's base-value and as its solitary item
+						if (objNode.items.length == 0 && objNode.metadata_type == null)
+						{
+							objNode.baseValue = token.text;
+							objNode.metadata_type = lastMetadata_type;
+							objNode.PushItem(new VDFNode(token.text, lastMetadata_type));
+						}
+						else // if it turns out there was more than one item
+						{
+							if (objNode.baseValue != null) // if we already put the first-item as obj's base-value, remove it
+							{
+								objNode.baseValue = null;
+								objNode.metadata_type = null;
+							}
+							objNode.PushItem(new VDFNode(token.text, lastMetadata_type));
+						}
+					}
 				}
 				else if (token.type == VDFTokenType.Data_PropName)
 				{
@@ -68,12 +85,12 @@ class VDFLoader
 					if (livePropName != null) // property of object
 					{
 						//if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
-						objNode.properties.set(livePropName, livePropValueNode);
+						objNode.SetProperty(livePropName, livePropValueNode);
 						livePropName = null;
 						livePropValueNode = null;
 					}
 					else // must be key-value-pair-pseudo-object of a dictionary
-						objNode.items.push(livePropValueNode);
+						objNode.PushItem(livePropValueNode);
 				}
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;

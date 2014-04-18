@@ -1,10 +1,50 @@
 ﻿var VDFNode = (function () {
     function VDFNode(baseValue, metadata_type) {
-        this.items = [];
-        this.properties = new Dictionary();
         this.baseValue = baseValue;
         this.metadata_type = metadata_type;
     }
+    Object.defineProperty(VDFNode.prototype, "items", {
+        get: function () {
+            var result = [];
+            for (var key in this)
+                if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) == key)
+                    result.push(this[key]);
+            return result;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(VDFNode.prototype, "properties", {
+        get: function () {
+            var objWithPropKeys = {};
+            for (var key in this)
+                if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) != key)
+                    objWithPropKeys[key] = this[key];
+            return objWithPropKeys;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    VDFNode.prototype.SetItem = function (index, value) {
+        this.items[index] = value;
+        this[index] = value;
+    };
+    VDFNode.prototype.PushItem = function (value) {
+        this.SetItem(this.items.length, value);
+    };
+    VDFNode.prototype.InsertItem = function (index, value) {
+        var oldItems = this.items;
+        for (var i = 0; i < oldItems.length; i++)
+            delete this[i];
+        for (var i = 0; i < oldItems.length + 1; i++)
+            this.PushItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
+    };
+    VDFNode.prototype.SetProperty = function (key, value) {
+        this.properties[key] = value;
+        this[key] = value;
+    };
+
     VDFNode.prototype.GetInLineItemText = function () {
         var builder = new StringBuilder();
         if (this.isFirstItemOfNonFirstPopOutGroup)
@@ -20,11 +60,9 @@
         for (var key in this.items)
             if (!this.items[key].popOutToOwnLine)
                 builder.Append(this.items[key].GetInLineItemText());
-        for (var i in this.properties.keys) {
-            var propName = this.properties.keys[i];
-            if (!this.properties.get(propName).popOutToOwnLine)
-                builder.Append(propName + "{" + this.properties.get(propName).GetInLineItemText() + "}");
-        }
+        for (var propName in this.properties)
+            if (!this.properties[propName].popOutToOwnLine)
+                builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 
         if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
             builder.Append("}");
@@ -45,9 +83,8 @@
                         lines.push(poppedOutLines[index]);
             }
         }
-        for (var i in this.properties.keys) {
-            var propName = this.properties.keys[i];
-            var propValueNode = this.properties.get(propName);
+        for (var propName in this.properties) {
+            var propValueNode = this.properties[propName];
             var poppedOutText = propValueNode.GetPoppedOutItemText();
              {
                 var poppedOutLines = poppedOutText.split('\n');
@@ -128,13 +165,12 @@
                 result.set(VDFNode.ConvertRawValueToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertRawValueToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
             else
                 result = VDFNode.ConvertRawValueToCorrectType(this.items[i], type, loadOptions);
-        for (var i in this.properties.keys) {
-            var propName = this.properties.keys[i];
-            result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties.get(propName), typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
-        }
+        for (var propName in this.properties)
+            result[propName] = VDFNode.ConvertRawValueToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
 
         return result;
     };
+    VDFNode.builtInProps = ["metadata_type", "baseValue", "isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode", "items", "properties"];
     return VDFNode;
 })();
 //# sourceMappingURL=VDFNode.js.map

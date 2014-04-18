@@ -1,5 +1,5 @@
 ﻿/*window["oldTest"] = test;
-window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // overwrite/wrap actual test func
+window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual test func
 {
 Loading.Init();
 window["oldTest"](title, testFunc);
@@ -32,120 +32,119 @@ var Loading = (function () {
     };
 
     Loading.RunTests = function () {
-        test("VDFNode_Level0_Comment", function (assert) {
+        test("VDFNode_Level0_Comment", function () {
             var a = VDFLoader.ToVDFNode("// comment\n\
 			Root string.");
-            a.items[0].baseValue.Should().Be("			Root string.");
+            a.baseValue.Should().Be("			Root string.");
         });
-        test("VDFNode_Level0_BaseValue", function (assert) {
+        test("VDFNode_Level0_BaseValue", function () {
             var a = VDFLoader.ToVDFNode("Root string.");
-            ok(a.baseValue == null); // base-values should only ever be at one level
-            a.items[0].baseValue.Should().Be("Root string.");
+            a.baseValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
         });
-        test("VDFNode_Level0_Metadata_Type", function (assert) {
+        test("VDFNode_Level0_Metadata_Type", function () {
             var a = VDFLoader.ToVDFNode("<string>Root string.");
             a.metadata_type.Should().Be("string");
         });
-        test("VDFNode_Level0_ArrayItems", function (assert) {
+        test("VDFNode_Level0_ArrayItems", function () {
             var a = VDFLoader.ToVDFNode("Root string 1.|Root string 2.");
-            a.items[0].baseValue.Should().Be("Root string 1.");
-            a.items[1].baseValue.Should().Be("Root string 2.");
+            a[0].baseValue.Should().Be("Root string 1.");
+            a[1].baseValue.Should().Be("Root string 2.");
         });
-        test("VDFNode_Level0_ArrayItems_Empty", function (assert) {
+        test("VDFNode_Level0_ArrayItems_Empty", function () {
             var a = VDFLoader.ToVDFNode("|");
-            a.items[0].baseValue.Should().Be("");
-            a.items[1].baseValue.Should().Be("");
+            a[0].baseValue.Should().Be("");
+            a[1].baseValue.Should().Be("");
         });
-        test("VDFNode_Level0_ArrayMetadata1", function (assert) {
+        test("VDFNode_Level0_ArrayMetadata1", function () {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions());
             a.metadata_type.Should().Be("SpecialList[int]");
-            ok(a.items[0].metadata_type == null);
-            ok(a.items[1].metadata_type == null);
+            ok(a[0].metadata_type == null);
+            ok(a[1].metadata_type == null);
         });
-        test("VDFNode_Level0_ArrayMetadata2", function (assert) {
+        test("VDFNode_Level0_ArrayMetadata2", function () {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>><int>1|<int>2", new VDFLoadOptions());
             a.metadata_type.Should().Be("SpecialList[int]");
-            a.items[0].metadata_type.Should().Be("int");
-            a.items[1].metadata_type.Should().Be("int");
+            a[0].metadata_type.Should().Be("int");
+            a[1].metadata_type.Should().Be("int");
         });
-        test("VDFNode_Level0_DictionaryItems", function (assert) {
+        test("VDFNode_Level0_DictionaryItems", function () {
             var a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
-            a.items[0].items[0].baseValue.Should().Be("key 1");
-            a.items[0].items[1].baseValue.Should().Be("value 1");
-            a.items[1].items[0].baseValue.Should().Be("key 2");
-            a.items[1].items[1].baseValue.Should().Be("value 2");
+            a[0][0].baseValue.Should().Be("key 1");
+            a[0][1].baseValue.Should().Be("value 1");
+            a[1][0].baseValue.Should().Be("key 2");
+            a[1][1].baseValue.Should().Be("value 2");
         });
-        test("VDFNode_Level1_BaseValues", function (assert) {
+        test("VDFNode_Level1_BaseValues", function () {
             var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");
-            a.properties.get("bool").items[0].baseValue.Should().Be("false");
-            a.properties.get("int").items[0].baseValue.Should().Be("5");
-            a.properties.get("float").items[0].baseValue.Should().Be(".5");
-            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string.");
+            a["bool"].baseValue.Should().Be("false");
+            a["int"].baseValue.Should().Be("5");
+            a["float"].baseValue.Should().Be(".5");
+            a["string"].baseValue.Should().Be("Prop value string.");
         });
-        test("VDFNode_Level1_Literal", function (assert) {
+        test("VDFNode_Level1_Literal", function () {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@}");
-            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string that {needs escaping}.");
+            a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.");
         });
-        test("VDFNode_Level1_TroublesomeLiteral1", function (assert) {
+        test("VDFNode_Level1_TroublesomeLiteral1", function () {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@@|@@}");
-            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
+            a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
         });
-        test("VDFNode_Level1_TroublesomeLiteral2", function (assert) {
+        test("VDFNode_Level1_TroublesomeLiteral2", function () {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
-            a.properties.get("string").items[0].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
+            a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
         });
-        test("VDFNode_Level1_PoppedOutNodes", function (assert) {
+        test("VDFNode_Level1_PoppedOutNodes", function () {
             var a = VDFLoader.ToVDFNode("names{#}\n\
 	Dan\n\
 	Bob\n\
 ");
-            a.properties.get("names").items[0].items[0].baseValue.Should().Be("Dan");
-            a.properties.get("names").items[1].items[0].baseValue.Should().Be("Bob");
+            a["names"][0].baseValue.Should().Be("Dan");
+            a["names"][1].baseValue.Should().Be("Bob");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems", function (assert) {
+        test("VDFNode_Level1_ArrayItemsInArrayItems", function () {
             var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}");
-            a.items[0].items[0].baseValue.Should().Be("1A");
-            a.items[0].items[1].baseValue.Should().Be("1B");
-            a.items[1].items[0].baseValue.Should().Be("2A");
-            a.items[1].items[1].baseValue.Should().Be("2B");
+            a[0][0].baseValue.Should().Be("1A");
+            a[0][1].baseValue.Should().Be("1B");
+            a[1][0].baseValue.Should().Be("2A");
+            a[1][1].baseValue.Should().Be("2B");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty", function (assert) {
+        test("VDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty", function () {
             var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
-            a.items[0].items[0].baseValue.Should().Be("1A");
-            a.items[0].items[1].baseValue.Should().Be("");
-            a.items[1].items[0].baseValue.Should().Be("2A");
-            a.items[1].items[1].baseValue.Should().Be("");
+            a[0][0].baseValue.Should().Be("1A");
+            a[0][1].baseValue.Should().Be("");
+            a[1][0].baseValue.Should().Be("2A");
+            a[1][1].baseValue.Should().Be("");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems_BothEmpty", function (assert) {
+        test("VDFNode_Level1_ArrayItemsInArrayItems_BothEmpty", function () {
             var a = VDFLoader.ToVDFNode("{|}|{|}");
-            a.items[0].items[0].baseValue.Should().Be("");
-            a.items[0].items[1].baseValue.Should().Be("");
-            a.items[1].items[0].baseValue.Should().Be("");
-            a.items[1].items[1].baseValue.Should().Be("");
+            a[0][0].baseValue.Should().Be("");
+            a[0][1].baseValue.Should().Be("");
+            a[1][0].baseValue.Should().Be("");
+            a[1][1].baseValue.Should().Be("");
         });
-        test("VDFNode_Level1_DictionaryItemsInDictionaryItems", function (assert) {
+        test("VDFNode_Level1_DictionaryItemsInDictionaryItems", function () {
             var a = VDFLoader.ToVDFNode("{1key|1value}{2key|2value}");
-            a.items[0].items[0].baseValue.Should().Be("1key");
-            a.items[0].items[1].baseValue.Should().Be("1value");
-            a.items[1].items[0].baseValue.Should().Be("2key");
-            a.items[1].items[1].baseValue.Should().Be("2value");
+            a[0][0].baseValue.Should().Be("1key");
+            a[0][1].baseValue.Should().Be("1value");
+            a[1][0].baseValue.Should().Be("2key");
+            a[1][1].baseValue.Should().Be("2value");
         });
-        test("VDFNode_Level1_PoppedOutItemGroups", function (assert) {
+        test("VDFNode_Level1_PoppedOutItemGroups", function () {
             var a = VDFLoader.ToVDFNode("names{#}ages{#}\n\
 	Dan\n\
 	Bob\n\
 	#10\n\
 	20");
-            a.properties.get("names").items[0].items[0].baseValue.Should().Be("Dan");
-            a.properties.get("names").items[1].items[0].baseValue.Should().Be("Bob");
-            a.properties.get("ages").items[0].items[0].baseValue.Should().Be("10");
-            a.properties.get("ages").items[1].items[0].baseValue.Should().Be("20");
+            a["names"][0].baseValue.Should().Be("Dan");
+            a["names"][1].baseValue.Should().Be("Bob");
+            a["ages"][0].baseValue.Should().Be("10");
+            a["ages"][1].baseValue.Should().Be("20");
         });
 
-        test("FullLoad_Level0_Bool", function (assert) {
+        test("FullLoad_Level0_Bool", function () {
             VDF.Deserialize("true", "bool").Should().Be(true);
         });
-        test("FullLoad_Level0_Float", function (assert) {
+        test("FullLoad_Level0_Float", function () {
             VDF.Deserialize("1.5", "float").Should().Be(1.5);
         });
     };

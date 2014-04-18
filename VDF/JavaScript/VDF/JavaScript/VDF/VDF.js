@@ -43,7 +43,6 @@ var VDF = (function () {
     };
 
     VDF.Serialize = function (obj, saveOptions) {
-        var a = VDFSaver.ToVDFNode(obj, saveOptions);
         return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
     };
     VDF.Deserialize = function (vdf, realVTypeName, loadOptions) {
@@ -116,6 +115,19 @@ var List = (function () {
         this.AddItem("realVTypeName", "List[" + itemType + "]");
         this.itemType = itemType;
     }
+    Object.defineProperty(List.prototype, "length", {
+        get: function () {
+            //return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
+            var highestIndex = -1;
+            for (var propName in this)
+                if (parseInt(propName) == propName && parseInt(propName) > highestIndex)
+                    highestIndex = parseInt(propName);
+            return highestIndex + 1;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
     List.prototype.modifyInnerListWithCall = function (func, args) {
         for (var i = 0; i < this.innerArray.length; i++)
             delete this[i];
@@ -167,14 +179,6 @@ var List = (function () {
     };
     return List;
 })();
-List.prototype.AddGetter_Inline = function length() {
-    //return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
-    var highestIndex = -1;
-    for (var propName in this)
-        if (parseInt(propName) == propName && parseInt(propName) > highestIndex)
-            highestIndex = parseInt(propName);
-    return highestIndex + 1;
-};
 
 var Dictionary = (function () {
     function Dictionary(keyType, valueType) {

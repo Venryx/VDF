@@ -33,9 +33,9 @@ var VDFLoader = (function () {
                 break;
             if (depth == 0) {
                 if ((lastToken == null || lastToken.type == 9 /* ItemSeparator */) && token.type == 9 /* ItemSeparator */)
-                    objNode.items.push(new VDFNode("", lastMetadata_type));
+                    objNode.PushItem(new VDFNode("", lastMetadata_type));
                 if (token.type == 9 /* ItemSeparator */ && (parser.nextCharPos >= vdfFile.length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n'))
-                    objNode.items.push(new VDFNode(""));
+                    objNode.PushItem(new VDFNode(""));
 
                 if (token.type == 4 /* MetadataStartMarker */ || token.type == 2 /* SpecialMetadataStartMarker */)
                     lastMetadataStartToken = token.type;
@@ -49,10 +49,22 @@ var VDFLoader = (function () {
                         //objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
                         var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildDataTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
                         for (var key in poppedOutPropValueItemTextPositions)
-                            objNode.items.push(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], sharedData));
+                            objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, loadOptions, poppedOutPropValueItemTextPositions[key], sharedData));
                         parentSharedData.poppedOutPropValueCount++;
-                    } else
-                        objNode.items.push(new VDFNode(token.text, lastMetadata_type));
+                    } else {
+                        // note; slightly messy, but seems the best practically; if there's only one base-like-value as obj's data, and obj has no type metadata (i.e. it's not explicitly a list), then include it both as obj's base-value and as its solitary item
+                        if (objNode.items.length == 0 && objNode.metadata_type == null) {
+                            objNode.baseValue = token.text;
+                            objNode.metadata_type = lastMetadata_type;
+                            objNode.PushItem(new VDFNode(token.text, lastMetadata_type));
+                        } else {
+                            if (objNode.baseValue != null) {
+                                objNode.baseValue = null;
+                                objNode.metadata_type = null;
+                            }
+                            objNode.PushItem(new VDFNode(token.text, lastMetadata_type));
+                        }
+                    }
                 } else if (token.type == 7 /* Data_PropName */) {
                     livePropName = token.text;
                     livePropValueNode = new VDFNode();
@@ -61,11 +73,11 @@ var VDFLoader = (function () {
                 else if (token.type == 11 /* DataEndMarker */) {
                     if (livePropName != null) {
                         //if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
-                        objNode.properties.set(livePropName, livePropValueNode);
+                        objNode.SetProperty(livePropName, livePropValueNode);
                         livePropName = null;
                         livePropValueNode = null;
                     } else
-                        objNode.items.push(livePropValueNode);
+                        objNode.PushItem(livePropValueNode);
                 } else if (token.type == 12 /* LineBreak */)
                     break;
             }

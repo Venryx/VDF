@@ -40,13 +40,13 @@ public static class VDFSaver
 
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
-			objNode.items.Add(new VDFNode { baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj)) });
+			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
 		else if (type == typeof(bool))
-			objNode.items.Add(new VDFNode { baseValue = obj.ToString().ToLower() });
+			objNode.baseValue = obj.ToString().ToLower();
 		else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
-			objNode.items.Add(new VDFNode {baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString()});
+			objNode.baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString();
 		else if (type == typeof(string) || type == typeof(char) || type.IsPrimitive) // string, char, or very simple primitive (i.e. integer-based number)
-			objNode.items.Add(new VDFNode { baseValue = RawDataStringToFinalized(obj.ToString()) });
+			objNode.baseValue = RawDataStringToFinalized(obj.ToString());
 		else if (obj is IList) // note; this saves arrays also
 		{
 			objNode.isListOrDictionary = true;
