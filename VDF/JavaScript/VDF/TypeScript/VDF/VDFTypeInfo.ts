@@ -18,21 +18,23 @@ class VDFPropInfo
 	propVTypeName: string;
 	includeL2: boolean;
 	popOutItemsToOwnLines: boolean;
-	ignoreEmptyValue: boolean;
-	constructor(propType: string, includeL2?: boolean, popOutItemsToOwnLines?: boolean, ignoreEmptyValue?: boolean)
+	writeEmptyValue: boolean;
+	constructor(propType: string, includeL2?: boolean, popOutItemsToOwnLines?: boolean, writeEmptyValue: boolean = true)
 	{
 		this.propVTypeName = propType;
 		this.includeL2 = includeL2;
 		this.popOutItemsToOwnLines = popOutItemsToOwnLines;
-		this.ignoreEmptyValue = ignoreEmptyValue;
+		this.writeEmptyValue = writeEmptyValue;
 	}
 
-	IsXIgnorableValue(x: any)
+	IsXValueEmpty(x: any)
 	{
-		if (this.ignoreEmptyValue && VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
+		if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
 			return true;
-		//if (x === false || x === 0) // if equal to type's default value
-		//	return true;
-		return x == null;
+		if (x === false || x === 0) // if struct, and equal to struct's default value
+			return true;
+		if (x == null) // if reference type, and equal to null
+			return true;
+		return false;
 	}
 }

@@ -92,7 +92,7 @@ class VDFSaver
 				var propValue = obj[propName];
 				if (EnumValue.IsEnum(propInfo.propVTypeName)) // special case; if enum
 					propValue = new EnumValue(propInfo.propVTypeName, propValue);
-				if (propInfo.IsXIgnorableValue(propValue))
+				if (!propInfo.writeEmptyValue && propInfo.IsXValueEmpty(propValue))
 					continue;
 
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);

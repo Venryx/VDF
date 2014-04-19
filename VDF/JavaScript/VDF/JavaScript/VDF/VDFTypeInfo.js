@@ -10,19 +10,21 @@
 })();
 
 var VDFPropInfo = (function () {
-    function VDFPropInfo(propType, includeL2, popOutItemsToOwnLines, ignoreEmptyValue) {
+    function VDFPropInfo(propType, includeL2, popOutItemsToOwnLines, writeEmptyValue) {
+        if (typeof writeEmptyValue === "undefined") { writeEmptyValue = true; }
         this.propVTypeName = propType;
         this.includeL2 = includeL2;
         this.popOutItemsToOwnLines = popOutItemsToOwnLines;
-        this.ignoreEmptyValue = ignoreEmptyValue;
+        this.writeEmptyValue = writeEmptyValue;
     }
-    VDFPropInfo.prototype.IsXIgnorableValue = function (x) {
-        if (this.ignoreEmptyValue && VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
+    VDFPropInfo.prototype.IsXValueEmpty = function (x) {
+        if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
             return true;
-
-        //if (x === false || x === 0) // if equal to type's default value
-        //	return true;
-        return x == null;
+        if (x === false || x === 0)
+            return true;
+        if (x == null)
+            return true;
+        return false;
     };
     return VDFPropInfo;
 })();

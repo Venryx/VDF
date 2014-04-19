@@ -41,11 +41,11 @@ public static class VDFSaver
 		Type type = obj.GetType();
 		if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
-		else if (type == typeof(bool))
+		else if (type == typeof (bool))
 			objNode.baseValue = obj.ToString().ToLower();
-		else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal))
+		else if (type == typeof (float) || type == typeof (double) || type == typeof (decimal))
 			objNode.baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString();
-		else if (type == typeof(string) || type == typeof(char) || type.IsPrimitive) // string, char, or very simple primitive (i.e. integer-based number)
+		else if (type == typeof (string) || type == typeof (char) || type.IsPrimitive) // string, char, or very simple primitive (i.e. integer-based number)
 			objNode.baseValue = RawDataStringToFinalized(obj.ToString());
 		else if (obj is IList) // note; this saves arrays also
 		{
@@ -107,10 +107,10 @@ public static class VDFSaver
 					continue;
 
 				object propValue = propInfo.GetValue(obj);
-				if (propInfo.IsXIgnorableValue(propValue))
+				if (!propInfo.writeEmptyValue && propInfo.IsXValueEmpty(propValue))
 					continue;
 
-				bool typeDerivedFromDeclaredType = propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
+				bool typeDerivedFromDeclaredType = propValue != null && propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
@@ -144,12 +144,10 @@ public static class VDFSaver
 	{
 		string result = rawDataStr;
 		if (rawDataStr.Contains("}"))
-		{
 			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
 				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "|@@";
 			else
 				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "@@";
-		}
 		return result;
 	}
 }

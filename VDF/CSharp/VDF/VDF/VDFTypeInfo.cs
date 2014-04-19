@@ -51,12 +51,12 @@ public class VDFProp : Attribute
 {
 	public bool includeL2;
 	public bool popOutItemsToOwnLines;
-	public bool ignoreEmptyValue;
-	public VDFProp(bool includeL2 = true, bool popOutItemsToOwnLines = false, bool ignoreEmptyValue = false)
+	public bool writeEmptyValue;
+	public VDFProp(bool includeL2 = true, bool popOutItemsToOwnLines = false, bool writeEmptyValue = true)
 	{
 		this.includeL2 = includeL2;
 		this.popOutItemsToOwnLines = popOutItemsToOwnLines;
-		this.ignoreEmptyValue = ignoreEmptyValue;
+		this.writeEmptyValue = writeEmptyValue;
 	}
 }
 
@@ -75,7 +75,7 @@ public class VDFPropInfo
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
 				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
-				propInfo.ignoreEmptyValue = vdfPropAttribute.ignoreEmptyValue;
+				propInfo.writeEmptyValue = vdfPropAttribute.writeEmptyValue;
 			}
 			cachedTypeInfo[field] = propInfo;
 		}
@@ -93,27 +93,28 @@ public class VDFPropInfo
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
 				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
-				propInfo.ignoreEmptyValue = vdfPropAttribute.ignoreEmptyValue;
+				propInfo.writeEmptyValue = vdfPropAttribute.writeEmptyValue;
 			}
 			cachedTypeInfo[property] = propInfo;
 		}
 		return cachedTypeInfo[property];
 	}
 
-	bool ignoreEmptyValue;
-
 	public MemberInfo memberInfo;
 	public bool? includeL2;
 	public bool popOutItemsToOwnLines;
+	public bool writeEmptyValue;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
-	public bool IsXIgnorableValue(object x)
+	public bool IsXValueEmpty(object x)
 	{
-		if (ignoreEmptyValue && x is IList && ((IList)x).Count == 0)
+		if (x is IList && ((IList)x).Count == 0)
 			return true;
-		//if (GetPropType().IsValueType) // if equal to type's default value
-		//	return x == Activator.CreateInstance(GetPropType());
-		return x == null;
+		if (GetPropType().IsValueType && x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
+			return true;
+		if (x == null) // if reference type, and equal to null
+			return true;
+		return false;
 	}
 	public object GetValue(object objParent)
 	{

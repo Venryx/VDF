@@ -65,8 +65,8 @@ class VObject
 	{
 		id: new VDFPropInfo("Guid", true), // todo; rather than marking this here manually, have it marked by the at-runtime system described above
 		name: new VDFPropInfo("string", true),
-		duties: new VDFPropInfo("List[Duty]", true, true, true),
-		children: new VDFPropInfo("List[VObject]", true, true, true)
+		duties: new VDFPropInfo("List[Duty]", true, true, false),
+		children: new VDFPropInfo("List[VObject]", true, true, false)
 	});
 
 	parent: VObject;
@@ -175,7 +175,7 @@ class HoldDuties extends Duty
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
 	{
 		dutiesEnabledWhen: new VDFPropInfo("string", true),
-		duties: new VDFPropInfo("List[Duty]", true, true, true)
+		duties: new VDFPropInfo("List[Duty]", true, true, false)
 	});
 
 	dutiesEnabledWhen: string;
