@@ -13,9 +13,7 @@ var VDFSaver = (function () {
 
         var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
-        if (obj == null)
-            objNode.baseValue = "[#null]";
-        else if (VDF.typeExporters_inline[objVTypeName])
+        if (VDF.typeExporters_inline[objVTypeName])
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
         else if (objVTypeName == "bool")
             objNode.baseValue = obj.toString().toLowerCase();
@@ -78,6 +76,15 @@ var VDFSaver = (function () {
             var isAnonymousType = obj.__proto__ == {}.__proto__;
             var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
             var popOutGroupsAdded = 0;
+
+            // special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
+            var oldObj = obj;
+            obj = {};
+            for (var propName in typeInfo.propInfoByPropName)
+                obj[propName] = null; // first, clear each declared prop to a null value, to ensure that the code below can process each declared property
+            for (var propName in oldObj)
+                obj[propName] = oldObj[propName];
+
             for (var propName in obj) {
                 if (typeof obj[propName] == "function")
                     continue;
@@ -93,6 +100,10 @@ var VDFSaver = (function () {
                     propValue = new EnumValue(propInfo.propVTypeName, propValue);
                 if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
                     continue;
+                if (propValue == null) {
+                    objNode.SetProperty(propName, new VDFNode("[#null]"));
+                    continue;
+                }
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
                 var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;

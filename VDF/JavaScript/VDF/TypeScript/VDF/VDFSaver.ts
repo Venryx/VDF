@@ -9,9 +9,7 @@ class VDFSaver
 
 		var objVTypeName = VDF.GetVTypeNameOfObject(obj);
 		var objNode = new VDFNode();
-		if (obj == null)
-			objNode.baseValue = "[#null]";
-		else if (VDF.typeExporters_inline[objVTypeName])
+		if (VDF.typeExporters_inline[objVTypeName])
 			objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
 		else if (objVTypeName == "bool")
 			objNode.baseValue = obj.toString().toLowerCase();
@@ -80,6 +78,15 @@ class VDFSaver
 			var isAnonymousType = obj.__proto__ == (<any>{}).__proto__;
 			var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // if not specified: if anon type, include all props, otherwise, use default values
 			var popOutGroupsAdded = 0;
+
+			// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
+			var oldObj = obj;
+			obj = {};
+			for (var propName in typeInfo.propInfoByPropName)
+				obj[propName] = null; // first, clear each declared prop to a null value, to ensure that the code below can process each declared property
+			for (var propName in oldObj) // now add in the actual data, for any that are attached to the actual instance
+				obj[propName] = oldObj[propName];
+
 			for (var propName in obj)
 			{
 				if (typeof obj[propName] == "function")
@@ -96,6 +103,11 @@ class VDFSaver
 					propValue = new EnumValue(propInfo.propVTypeName, propValue);
 				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
+				if (propValue == null)
+				{
+					objNode.SetProperty(propName, new VDFNode("[#null]"));
+					continue;
+				}
 
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
 				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type

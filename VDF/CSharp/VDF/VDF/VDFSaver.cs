@@ -39,9 +39,7 @@ public static class VDFSaver
 			objNode.metadata_type = obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
 
 		Type type = obj != null ? obj.GetType() : null;
-		if (obj == null)
-			objNode.baseValue = "[#null]";
-		else if (VDF.typeExporters_inline.ContainsKey(type))
+		if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
 		else if (type == typeof (bool))
 			objNode.baseValue = obj.ToString().ToLower();
@@ -111,6 +109,11 @@ public static class VDFSaver
 				object propValue = propInfo.GetValue(obj);
 				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
+				if (propValue == null)
+				{
+					objNode.properties.Add(propName, new VDFNode{baseValue = "[#null]"});
+					continue;
+				}
 
 				bool typeDerivedFromDeclaredType = propValue != null && propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)

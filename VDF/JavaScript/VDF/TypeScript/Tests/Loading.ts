@@ -13,7 +13,7 @@ class Loading
 		if (this.initialized)
 			return;
 		this.initialized = true;
-		Object.prototype._AddFunction_Inline = function Should() { return { obj: this, Be: function (value, message?: string) { equal(this.obj, value, message); } }; }
+		Object.prototype._AddFunction_Inline = function Should() { return { Be: (value, message?: string) => { equal(this instanceof String ? this.toString() : this, value, message); } }; }
 		VDF.RegisterTypeExporter_Inline("Guid", id => id.ToString());
 		VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
 		VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);

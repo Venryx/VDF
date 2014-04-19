@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace VDFTests
 			});
 		}
 
-		[Fact] void VDFNode_Level0_BaseValue()
+		[Fact] void ToString_Level0_BaseValue()
 		{
 			var a = new VDFNode();
 			a.baseValue = "Root string.";
@@ -28,7 +29,7 @@ namespace VDFTests
 			a[0] = new VDFNode {baseValue = "Root string also."};
 			a.ToString().Should().Be("Root string also.");
 		}
-		[Fact] void VDFNode_Level0_Metadata_Type()
+		[Fact] void ToString_Level0_Metadata_Type()
 		{
 			var a = new VDFNode();
 			a.metadata_type = "string";
@@ -36,7 +37,7 @@ namespace VDFTests
 			a.ToString().Should().Be("<string>Root string.");
 		}
 
-		[Fact] void VDFNode_Level1_BaseValues()
+		[Fact] void ToString_Level1_BaseValues()
 		{
 			var a = new VDFNode();
 			a["bool"] = new VDFNode {baseValue = "false"};
@@ -46,7 +47,7 @@ namespace VDFTests
 			a.ToString().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		}
 
-		[Fact] void VDFNode_Level1_AnonymousTypeProperties()
+		[Fact] void ToString_Level1_AnonymousTypeProperties()
 		{
 			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."});
 			a["Bool"].baseValue.Should().Be("false");
@@ -54,6 +55,15 @@ namespace VDFTests
 			a["Float"].baseValue.Should().Be(".5");
 			a["String"].baseValue.Should().Be("Prop value string.");
 			a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+		}
+		class TypeWithNullableProp { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
+		[Fact] void ToString_Level1_NullValues()
+		{
+			var a = VDFSaver.ToVDFNode(new TypeWithNullableProp());
+			a["obj"].baseValue.Should().Be("[#null]");
+			a["strings"].baseValue.Should().Be("[#null]");
+			a["strings2"].baseValue.Should().Be(null); // it's just a VDFNode, with no children, representing a List
+			a.ToString().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
 		}
 	}
 }

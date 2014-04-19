@@ -4,6 +4,17 @@ window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // 
 Saving.Init();
 window["oldTest"](title, testFunc);
 }*/
+var TypeWithNullableProp = (function () {
+    function TypeWithNullableProp() {
+        this.strings2 = new List("string");
+    }
+    TypeWithNullableProp.typeInfo = new VDFTypeInfo(false, {
+        obj: new VDFPropInfo("object", true),
+        strings: new VDFPropInfo("List[string]", true),
+        strings2: new VDFPropInfo("List[string]", true)
+    });
+    return TypeWithNullableProp;
+})();
 var Saving = (function () {
     function Saving() {
     }
@@ -12,8 +23,9 @@ var Saving = (function () {
             return;
         this.initialized = true;
         Object.prototype._AddFunction_Inline = function Should() {
-            return { obj: this, Be: function (value, message) {
-                    equal(this.obj, value, message);
+            var _this = this;
+            return { Be: function (value, message) {
+                    equal(_this instanceof String ? _this.toString() : _this, value, message);
                 } };
         };
         VDF.RegisterTypeExporter_Inline("Guid", function (id) {
@@ -65,6 +77,14 @@ var Saving = (function () {
             a["Float"].baseValue.Should().Be(".5");
             a["String"].baseValue.Should().Be("Prop value string.");
             a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+        });
+
+        test("ToString_Level1_NullValues", function () {
+            var a = VDFSaver.ToVDFNode(new TypeWithNullableProp());
+            a["obj"].baseValue.Should().Be("[#null]");
+            a["strings"].baseValue.Should().Be("[#null]");
+            equal(a["strings2"].baseValue, null); // it's just a VDFNode, with no children, representing a List
+            a.ToString().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
         });
     };
     return Saving;
