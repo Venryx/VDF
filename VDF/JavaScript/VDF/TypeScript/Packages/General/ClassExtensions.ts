@@ -4,16 +4,16 @@
 interface Object
 {
 	_AddItem(name: string, value, forceAdd?: boolean): void;
-	AddFunction(func: Function, forceAdd?: boolean): void;
+	_AddFunction(func: Function, forceAdd?: boolean): void;
 
-	AddGetterSetter(getter: Function, setter: Function, forceAdd?: boolean): void;
+	_AddGetterSetter(getter: Function, setter: Function, forceAdd?: boolean): void;
 
-	AddFunction_Inline: Function; // prop with a setter
-	AddGetter_Inline: Function; // prop with a setter
-	AddSetter_Inline: Function; // prop with a setter
+	_AddFunction_Inline: Function; // prop with a setter
+	_AddGetter_Inline: Function; // prop with a setter
+	_AddSetter_Inline: Function; // prop with a setter
 }
 
-// the below lets you do stuff like this: Array.prototype.AddFunction(function AddX(value) { this.push(value); }); [].AddX("newItem");
+// the below lets you do stuff like this: Array.prototype._AddFunction(function AddX(value) { this.push(value); }); [].AddX("newItem");
 Object.defineProperty(Object.prototype, "_AddItem", // note; these functions should by default add non-enumerable properties/items
 {
 	enumerable: false,
@@ -29,13 +29,12 @@ Object.defineProperty(Object.prototype, "_AddItem", // note; these functions sho
 			});
 	}
 });
-function GetFunctionName(func): string { return func.name != null ? func.name : func.toString().match(/^function\s*([^\s(]+)/)[1]; }
-Object.prototype._AddItem("AddFunction", function(func, forceAdd?) { this._AddItem(GetFunctionName(func), func, forceAdd); });
+Object.prototype._AddItem("_AddFunction", function(func, forceAdd?) { this._AddItem(func.name || func.toString().match(/^function\s*([^\s(]+)/)[1], func, forceAdd); });
 
-// the below lets you do stuff like this: Array.prototype.AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
-Object.prototype.AddFunction(function AddGetterSetter(getter, setter, forceAdd?)
+// the below lets you do stuff like this: Array.prototype._AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
+Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd?)
 {
-	var name = GetFunctionName(getter || setter);
+	var name = (getter || setter).name || (getter || setter).toString().match(/^function\s*([^\s(]+)/)[1];
 	if (this[name] && forceAdd)
 		delete this[name];
 	if (!this[name]) // if item doesn't exist yet
@@ -47,10 +46,10 @@ Object.prototype.AddFunction(function AddGetterSetter(getter, setter, forceAdd?)
 			Object.defineProperty(this, name, { enumerable: false, set: setter });
 });
 
-// the below lets you do stuff like this: Array.prototype.AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
-Object.prototype.AddGetterSetter(null, function AddFunction_Inline(func) { this.AddFunction(func); });
-Object.prototype.AddGetterSetter(null, function AddGetter_Inline(func) { this.AddGetterSetter(func, null); });
-Object.prototype.AddGetterSetter(null, function AddSetter_Inline(func) { this.AddGetterSetter(null, func); });
+// the below lets you do stuff like this: Array.prototype._AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
+Object.prototype._AddGetterSetter(null, function _AddFunction_Inline(func) { this._AddFunction(func); });
+Object.prototype._AddGetterSetter(null, function _AddGetter_Inline(func) { this._AddGetterSetter(func, null); });
+Object.prototype._AddGetterSetter(null, function _AddSetter_Inline(func) { this._AddGetterSetter(null, func); });
 
 // Object: normal
 // ==================
@@ -67,17 +66,17 @@ interface Object
 	ToJson();
 }
 
-Object.prototype.AddSetter_Inline = function ExtendWith_Inline(value) { this.ExtendWith(value); };
-Object.prototype.AddFunction_Inline = function ExtendWith(value) { $.extend(this, value); };
-Object.prototype.AddFunction_Inline = function GetItem_SetToXIfNull(itemName, /*;optional:*/ defaultValue)
+Object.prototype._AddSetter_Inline = function ExtendWith_Inline(value) { this.ExtendWith(value); };
+Object.prototype._AddFunction_Inline = function ExtendWith(value) { $.extend(this, value); };
+Object.prototype._AddFunction_Inline = function GetItem_SetToXIfNull(itemName, /*;optional:*/ defaultValue)
 {
 	if (!this[itemName])
 		this[itemName] = defaultValue;
 	return this[itemName];
 };
-Object.prototype.AddFunction_Inline = function CopyXChildrenAsOwn(x) { $.extend(this, x); };
-Object.prototype.AddFunction_Inline = function CopyXChildrenToClone(x) { return $.extend($.extend({}, this), x); };
-Object.prototype.AddFunction_Inline = function Keys()
+Object.prototype._AddFunction_Inline = function CopyXChildrenAsOwn(x) { $.extend(this, x); };
+Object.prototype._AddFunction_Inline = function CopyXChildrenToClone(x) { return $.extend($.extend({}, this), x); };
+Object.prototype._AddFunction_Inline = function Keys()
 {
 	var result = [];
 	for (var key in this)
@@ -85,7 +84,7 @@ Object.prototype.AddFunction_Inline = function Keys()
 			result.push(key);
 	return result;
 };
-Object.prototype.AddFunction_Inline = function Items()
+Object.prototype._AddFunction_Inline = function Items()
 {
 	var result = [];
 	for (var key in this)
@@ -93,7 +92,7 @@ Object.prototype.AddFunction_Inline = function Items()
 			result.push(this[key]);
 	return result;
 };
-Object.prototype.AddFunction_Inline = function ToJson() { return JSON.stringify(this); };
+Object.prototype._AddFunction_Inline = function ToJson() { return JSON.stringify(this); };
 
 // String
 // ==================
@@ -112,10 +111,10 @@ interface String
 	splice(index, removeCount, insert);
 }
 
-String.prototype.AddFunction_Inline = function startsWith(str) {return this.lastIndexOf(str, 0) === 0;};
-String.prototype.AddFunction_Inline = function endsWith(str) { var pos = this.length - str.length; return this.indexOf(str, pos) === pos; };
-String.prototype.AddFunction_Inline = function contains(str, startIndex?) { return -1 !== String.prototype.indexOf.call(this, str, startIndex); };
-String.prototype.AddFunction_Inline = function hashCode()
+String.prototype._AddFunction_Inline = function startsWith(str) {return this.lastIndexOf(str, 0) === 0;};
+String.prototype._AddFunction_Inline = function endsWith(str) { var pos = this.length - str.length; return this.indexOf(str, pos) === pos; };
+String.prototype._AddFunction_Inline = function contains(str, startIndex?) { return -1 !== String.prototype.indexOf.call(this, str, startIndex); };
+String.prototype._AddFunction_Inline = function hashCode()
 {
 	var hash = 0;
 	for (var i = 0; i < this.length; i++)
@@ -126,7 +125,7 @@ String.prototype.AddFunction_Inline = function hashCode()
 	}
 	return hash;
 };
-String.prototype.AddFunction_Inline = function matches(regex, index)
+String.prototype._AddFunction_Inline = function matches(regex, index)
 {
 	index = index || 1; // default to the first capturing group
 	var matches = [];
@@ -135,7 +134,7 @@ String.prototype.AddFunction_Inline = function matches(regex, index)
 		matches.push(match[index]);
 	return matches;
 };
-String.prototype.AddFunction_Inline = function IndexOf_Xth(str, x)
+String.prototype._AddFunction_Inline = function IndexOf_Xth(str, x)
 {
 	var currentPos = -1;
 	for (var i = 0; i < x; i++)
@@ -147,7 +146,7 @@ String.prototype.AddFunction_Inline = function IndexOf_Xth(str, x)
 	}
 	return currentPos;
 };
-String.prototype.AddFunction_Inline = function indexOfAny()
+String.prototype._AddFunction_Inline = function indexOfAny()
 {
 	if (arguments[0] instanceof Array)
 		arguments = arguments[0];
@@ -161,14 +160,14 @@ String.prototype.AddFunction_Inline = function indexOfAny()
 	}
 	return lowestIndex;
 };
-String.prototype.AddFunction_Inline = function containsAny()
+String.prototype._AddFunction_Inline = function containsAny()
 {
 	for (var i = 0; i < arguments.length; i++)
 		if (this.contains(arguments[i]))
 			return true;
 	return false;
 };
-String.prototype.AddFunction_Inline = function splitByAny()
+String.prototype._AddFunction_Inline = function splitByAny()
 {
 	if (arguments[0] instanceof Array)
 		arguments = arguments[0];
@@ -180,7 +179,7 @@ String.prototype.AddFunction_Inline = function splitByAny()
 
 	return this.split(splitStr);
 };
-String.prototype.AddFunction_Inline = function splice(index, removeCount, insert) { return this.slice(0, index) + insert + this.slice(index + Math.abs(removeCount)); };
+String.prototype._AddFunction_Inline = function splice(index, removeCount, insert) { return this.slice(0, index) + insert + this.slice(index + Math.abs(removeCount)); };
 
 // Array
 // ==================
@@ -199,22 +198,22 @@ interface Array<T>
 	insert(index: number, obj: T);
 }
 
-Array.prototype.AddFunction_Inline = function contains(str) { return this.indexOf(str) != -1; };
-Array.prototype.AddFunction_Inline = function last() { return this[this.length - 1]; };
+Array.prototype._AddFunction_Inline = function contains(str) { return this.indexOf(str) != -1; };
+Array.prototype._AddFunction_Inline = function last() { return this[this.length - 1]; };
 
-Array.prototype.AddFunction_Inline = function pushAll(array)
+Array.prototype._AddFunction_Inline = function pushAll(array)
 {
 	for (var i in array.indexes())
 		this.push(array[i]);
 };
-Array.prototype.AddFunction_Inline = function indexes()
+Array.prototype._AddFunction_Inline = function indexes()
 {
 	var result = {};
 	for (var i = 0; i < this.length; i++)
 		result[i] = this[i];
 	return result;
 };
-Array.prototype.AddFunction_Inline = function strings()
+Array.prototype._AddFunction_Inline = function strings()
 {
 	var result = {};
 	for (var key in this)
@@ -224,13 +223,13 @@ Array.prototype.AddFunction_Inline = function strings()
 	}
 	return result;
 };
-Array.prototype.AddFunction_Inline = function remove(obj)
+Array.prototype._AddFunction_Inline = function remove(obj)
 {
 	for (var i = this.length;; i--)
 		if(this[i] === obj)
 			return this.splice(i, 1);
 };
-/*Array.prototype.AddFunction_Inline = function filter(matchFunc)
+/*Array.prototype._AddFunction_Inline = function filter(matchFunc)
 {
 	var result = [];
 	for (var i in this.indexes())
@@ -238,13 +237,13 @@ Array.prototype.AddFunction_Inline = function remove(obj)
 			result.push(this[i]);
 	return result;
 };*/
-Array.prototype.AddFunction_Inline = function clear()
+Array.prototype._AddFunction_Inline = function clear()
 {
 	while (this.length > 0)
 		this.pop();
 };
-Array.prototype.AddFunction_Inline = function first(matchFunc = () => true) { return this.filter(matchFunc)[0]; };
-Array.prototype.AddFunction_Inline = function insert(index: number, obj: any)
+Array.prototype._AddFunction_Inline = function first(matchFunc = () => true) { return this.filter(matchFunc)[0]; };
+Array.prototype._AddFunction_Inline = function insert(index: number, obj: any)
 {
 	//for (var i = this.length - 1; i >= index; i--) // shift each item that will be over us, up one
 	//	this[i + 1] = this[i];
