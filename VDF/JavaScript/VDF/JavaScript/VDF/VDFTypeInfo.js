@@ -18,11 +18,11 @@ var VDFPropInfo = (function () {
         this.writeEmptyValue = writeEmptyValue;
     }
     VDFPropInfo.prototype.IsXValueEmpty = function (x) {
-        if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
+        if (x == null)
             return true;
         if (x === false || x === 0)
             return true;
-        if (x == null)
+        if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
             return true;
         return false;
     };

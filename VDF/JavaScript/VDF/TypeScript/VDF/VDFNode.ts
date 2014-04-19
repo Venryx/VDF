@@ -177,29 +177,31 @@
 			return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
 		return eval("new " + typeName + "()");
 	}
-	static ConvertVDFNodeToCorrectType(rawValue: VDFNode, declaredTypeName: string, loadOptions: VDFLoadOptions): any
+	static ConvertVDFNodeToCorrectType(vdfNode: VDFNode, declaredTypeName: string, loadOptions: VDFLoadOptions): any
 	{
 		var result;
-		if (rawValue.baseValue == null)
-			result = rawValue.ToObject(rawValue.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
+		if (vdfNode.baseValue == null)
+			result = vdfNode.ToObject(vdfNode.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string
 		{
-			if (VDF.typeImporters_inline[declaredTypeName])
-				result = VDF.typeImporters_inline[declaredTypeName](rawValue.baseValue); //(string)rawValue);
+			if (vdfNode.baseValue == "[#null]") // special case for null-values
+				result = null;
+			else if (VDF.typeImporters_inline[declaredTypeName])
+				result = VDF.typeImporters_inline[declaredTypeName](vdfNode.baseValue); //(string)vdfNode);
 			else if (EnumValue.IsEnum(declaredTypeName))
-				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, rawValue.baseValue);
+				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, vdfNode.baseValue);
 			else if (declaredTypeName == "bool")
-				result = rawValue.baseValue == "true" ? true : false;
+				result = vdfNode.baseValue == "true" ? true : false;
 			else // if no specific handler, try auto-converting string to the correct (primitive) type
-				result = declaredTypeName == "float" ? parseFloat(rawValue.baseValue) : rawValue.baseValue;
+				result = declaredTypeName == "float" ? parseFloat(vdfNode.baseValue) : vdfNode.baseValue;
 		}
 		return result;
 	}
 
 	public ToObject(declaredTypeName: string, loadOptions?: VDFLoadOptions)
 	{
-		if (declaredTypeName == "string") // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be '[#null]' or the string itself)
-			return this.baseValue == "[#null]" ? null : this.baseValue;
+		if (!loadOptions)
+			loadOptions = new VDFLoadOptions();
 
 		var type = this.metadata_type || declaredTypeName;
 		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);

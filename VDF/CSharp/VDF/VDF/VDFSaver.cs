@@ -36,10 +36,12 @@ public static class VDFSaver
 
 		// if we're adding types for all objects, just do it here (no need to compare actual type with base type)
 		if (saveOptions.saveTypesForAllObjects)
-			objNode.metadata_type = VDF.GetVNameOfType(obj.GetType(), saveOptions);
+			objNode.metadata_type = obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
 
-		Type type = obj.GetType();
-		if (VDF.typeExporters_inline.ContainsKey(type))
+		Type type = obj != null ? obj.GetType() : null;
+		if (obj == null)
+			objNode.baseValue = "[#null]";
+		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
 		else if (type == typeof (bool))
 			objNode.baseValue = obj.ToString().ToLower();
@@ -107,12 +109,8 @@ public static class VDFSaver
 					continue;
 
 				object propValue = propInfo.GetValue(obj);
-				if (propInfo.IsXValueEmpty(propValue))
-				{
-					if (propInfo.writeEmptyValue)
-						objNode.properties.Add(propName, new VDFNode{baseValue = "[#null]"});
+				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
-				}
 
 				bool typeDerivedFromDeclaredType = propValue != null && propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)

@@ -29,11 +29,11 @@ class VDFPropInfo
 
 	IsXValueEmpty(x: any)
 	{
-		if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
+		if (x == null) // if null
 			return true;
 		if (x === false || x === 0) // if struct, and equal to struct's default value
 			return true;
-		if (x == null) // if reference type, and equal to null
+		if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0) // if list, and empty
 			return true;
 		return false;
 	}

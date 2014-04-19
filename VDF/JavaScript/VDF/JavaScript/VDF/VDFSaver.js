@@ -13,7 +13,9 @@ var VDFSaver = (function () {
 
         var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
-        if (VDF.typeExporters_inline[objVTypeName])
+        if (obj == null)
+            objNode.baseValue = "[#null]";
+        else if (VDF.typeExporters_inline[objVTypeName])
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
         else if (objVTypeName == "bool")
             objNode.baseValue = obj.toString().toLowerCase();
@@ -89,11 +91,8 @@ var VDFSaver = (function () {
                 var propValue = obj[propName];
                 if (EnumValue.IsEnum(propInfo.propVTypeName))
                     propValue = new EnumValue(propInfo.propVTypeName, propValue);
-                if (propInfo.IsXValueEmpty(propValue)) {
-                    if (propInfo.writeEmptyValue)
-                        objNode.SetProperty(propName, new VDFNode("[#null]"));
+                if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
                     continue;
-                }
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
                 var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;

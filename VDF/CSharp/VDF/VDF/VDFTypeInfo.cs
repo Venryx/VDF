@@ -108,11 +108,11 @@ public class VDFPropInfo
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
 	public bool IsXValueEmpty(object x)
 	{
-		if (x is IList && ((IList)x).Count == 0)
+		if (x == null) // if null
 			return true;
 		if (GetPropType().IsValueType && x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
 			return true;
-		if (x == null) // if reference type, and equal to null
+		if (x is IList && ((IList)x).Count == 0) // if list, and empty
 			return true;
 		return false;
 	}

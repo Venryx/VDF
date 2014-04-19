@@ -141,7 +141,9 @@ public class VDFNode
 			result = vdfNode.ToObject(vdfNode.metadata_type != null ? VDF.GetTypeByVName(vdfNode.metadata_type, loadOptions) : declaredType, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string
 		{
-			if (VDF.typeImporters_inline.ContainsKey(declaredType))
+			if (vdfNode.baseValue == "[#null]") // special case for null-values
+				result = null;
+			else if (VDF.typeImporters_inline.ContainsKey(declaredType))
 				result = VDF.typeImporters_inline[declaredType](vdfNode.baseValue); //(string)vdfNode);
 			else if (declaredType.IsEnum)
 				result = Enum.Parse(declaredType, vdfNode.baseValue);
@@ -154,8 +156,8 @@ public class VDFNode
 	public T ToObject<T>(VDFLoadOptions loadOptions = null) { return (T)ToObject(typeof(T), loadOptions); }
 	public object ToObject(Type declaredType, VDFLoadOptions loadOptions = null)
 	{
-		if (declaredType == typeof(string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be '[#null]' or the string itself)
-			return baseValue == "[#null]" ? null : baseValue;
+		if (loadOptions == null)
+			loadOptions = new VDFLoadOptions();
 
 		Type type = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
 		var typeInfo = VDFTypeInfo.Get(type);
