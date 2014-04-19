@@ -62,7 +62,6 @@ public class VDFNode
 	// saving
 	// ==================
 
-	public bool isNamedPropertyValue;
 	public bool isListOrDictionary;
 	public bool popOutToOwnLine;
 	public bool isFirstItemOfNonFirstPopOutGroup;
@@ -79,7 +78,7 @@ public class VDFNode
 		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isListItem_list)
 			builder.Append("{");
 		if (metadata_type != null)
-			builder.Append("<" + (isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
+			builder.Append("<" + (isListOrDictionary ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
 
 		builder.Append(baseValue);
 		foreach (VDFNode item in items)

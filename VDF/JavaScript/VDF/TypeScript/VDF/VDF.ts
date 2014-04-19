@@ -35,18 +35,29 @@ class VDF
 	static RegisterTypeExporter_Inline(type: string, exporter: Function) { VDF.typeExporters_inline[type] = exporter; }
 	static RegisterTypeImporter_Inline<T>(type: string, importer: Function) { VDF.typeImporters_inline[type] = importer; }
 
-	static GetVTypeNameOfObject(obj: any): string
+	static GetVTypeNameOfObject(obj)
 	{
-		if (obj["realVTypeName"])
-			return obj["realVTypeName"];
-		var type = obj.GetTypeName();
-		if (type == "Boolean")
+		if (obj == null)
+			return null;
+		var rawType = typeof obj;
+		if (rawType == "object") // if an object (i.e. a thing with real properties that could indicate a more specific type)
+		{
+			if (obj["realVTypeName"])
+				return obj["realVTypeName"];
+			var type = obj.GetTypeName();
+			if (type == "Boolean")
+				return "bool";
+			if (type == "Number")// for now just mark all numbers as floats; note; numbers can't be derived from, so we'll never actually need to mark as "<number>" in metadata, except when part of a "List[object]", or when 'saveTypesForAllObjects' is set to true
+				return "float";
+			if (type == "String")
+				return "string";
+			return type;
+		}
+		if (rawType == "boolean")
 			return "bool";
-		if (type == "Number") // for now just mark all numbers as floats; note; numbers cannot be derived from, so we'll actually never need to mark the number's type, except when part of an array, or when 'saveTypesForAllObjects' is set to true
+		if (rawType == "number")
 			return "float";
-		if (type == "String")
-			return "string";
-		return type;
+		return rawType;
 	}
 
 	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string

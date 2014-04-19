@@ -30,16 +30,26 @@ var VDF = (function () {
     };
 
     VDF.GetVTypeNameOfObject = function (obj) {
-        if (obj["realVTypeName"])
-            return obj["realVTypeName"];
-        var type = obj.GetTypeName();
-        if (type == "Boolean")
+        if (obj == null)
+            return null;
+        var rawType = typeof obj;
+        if (rawType == "object") {
+            if (obj["realVTypeName"])
+                return obj["realVTypeName"];
+            var type = obj.GetTypeName();
+            if (type == "Boolean")
+                return "bool";
+            if (type == "Number")
+                return "float";
+            if (type == "String")
+                return "string";
+            return type;
+        }
+        if (rawType == "boolean")
             return "bool";
-        if (type == "Number")
+        if (rawType == "number")
             return "float";
-        if (type == "String")
-            return "string";
-        return type;
+        return rawType;
     };
 
     VDF.Serialize = function (obj, saveOptions) {
@@ -188,7 +198,7 @@ var Dictionary = (function () {
         }
         this.keys = [];
         this.values = [];
-        this._AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
+        Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "Dictionary[" + keyType + "," + valueType + "]" });
         this.keyType = keyType;
         this.valueType = valueType;
 

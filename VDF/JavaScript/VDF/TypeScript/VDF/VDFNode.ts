@@ -73,7 +73,6 @@
 	// saving
 	// ==================
 
-	isNamedPropertyValue: boolean;
 	isListOrDictionary: boolean;
 	popOutToOwnLine: boolean;
 	isFirstItemOfNonFirstPopOutGroup: boolean;
@@ -90,7 +89,7 @@
 		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
 			builder.Append("{");
 		if (this.metadata_type != null)
-			builder.Append("<" + (this.isListOrDictionary /*&& isNamedPropertyValue*/ ? "<" + this.metadata_type.replace(/ /g, "") + ">" : this.metadata_type.replace(/ /g, "")) + ">");
+			builder.Append("<" + (this.isListOrDictionary ? "<" + this.metadata_type.replace(/ /g, "") + ">" : this.metadata_type.replace(/ /g, "")) + ">");
 		
 		builder.Append(this.baseValue);
 		for (var key in this.items)

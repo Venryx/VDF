@@ -13,7 +13,9 @@ var VDFSaver = (function () {
 
         var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
-        if (VDF.typeExporters_inline[objVTypeName])
+        if (objVTypeName == null)
+            objNode.baseValue = "[#null]";
+        else if (VDF.typeExporters_inline[objVTypeName])
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
         else if (objVTypeName == "bool")
             objNode.baseValue = obj.toString().toLowerCase();
@@ -100,29 +102,25 @@ var VDFSaver = (function () {
                     propValue = new EnumValue(propInfo.propVTypeName, propValue);
                 if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
                     continue;
-                if (propValue == null) {
-                    objNode.SetProperty(propName, new VDFNode("[#null]"));
-                    continue;
-                }
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
                 var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
                 if (propInfo.popOutItemsToOwnLines) {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
-                    propValueNode.isNamedPropertyValue = true;
-                    propValueNode.InsertItem(0, new VDFNode("#")); // add in-line marker, indicating that items are popped-out
-                    if (popOutGroupsAdded > 0 && propValueNode.items.length > 1)
-                        propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
-                    if (typeDerivedFromDeclaredType)
-                        propValueNode.metadata_type = propVTypeName;
-                    for (var key in propValueNode.items)
-                        if (propValueNode.items[key].baseValue != "#")
-                            propValueNode.items[key].popOutToOwnLine = true;
+                    if (propValueNode.baseValue != "[#null]") {
+                        propValueNode.InsertItem(0, new VDFNode("#")); // add in-line marker, indicating that items are popped-out
+                        if (popOutGroupsAdded > 0 && propValueNode.items.length > 1)
+                            propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
+                        if (typeDerivedFromDeclaredType)
+                            propValueNode.metadata_type = propVTypeName;
+                        for (var key in propValueNode.items)
+                            if (propValueNode.items[key].baseValue != "#")
+                                propValueNode.items[key].popOutToOwnLine = true;
+                    }
                     objNode.SetProperty(propName, propValueNode);
                     popOutGroupsAdded++;
                 } else {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
-                    propValueNode.isNamedPropertyValue = true;
                     if (typeDerivedFromDeclaredType)
                         propValueNode.metadata_type = propVTypeName;
                     objNode.SetProperty(propName, propValueNode);

@@ -39,7 +39,9 @@ public static class VDFSaver
 			objNode.metadata_type = obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
 
 		Type type = obj != null ? obj.GetType() : null;
-		if (VDF.typeExporters_inline.ContainsKey(type))
+		if (obj == null)
+			objNode.baseValue = "[#null]";
+		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
 		else if (type == typeof (bool))
 			objNode.baseValue = obj.ToString().ToLower();
@@ -109,32 +111,28 @@ public static class VDFSaver
 				object propValue = propInfo.GetValue(obj);
 				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
-				if (propValue == null)
-				{
-					objNode.properties.Add(propName, new VDFNode{baseValue = "[#null]"});
-					continue;
-				}
 
 				bool typeDerivedFromDeclaredType = propValue != null && propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
-					propValueNode.isNamedPropertyValue = true;
-					propValueNode.items.Insert(0, new VDFNode {baseValue = "#"}); // add in-line marker, indicating that items are popped-out
-					if (popOutGroupsAdded > 0 && propValueNode.items.Count > 1)
-						propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
-					if (typeDerivedFromDeclaredType)
-						propValueNode.metadata_type = VDF.GetVNameOfType(propValue.GetType(), saveOptions);
-					foreach (VDFNode propValueNodeItem in propValueNode.items)
-						if (propValueNodeItem.baseValue != "#")
-							propValueNodeItem.popOutToOwnLine = true;
+					if (propValueNode.baseValue != "[#null]")
+					{
+						propValueNode.items.Insert(0, new VDFNode {baseValue = "#"}); // add in-line marker, indicating that items are popped-out
+						if (popOutGroupsAdded > 0 && propValueNode.items.Count > 1)
+							propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
+						if (typeDerivedFromDeclaredType)
+							propValueNode.metadata_type = VDF.GetVNameOfType(propValue.GetType(), saveOptions);
+						foreach (VDFNode propValueNodeItem in propValueNode.items)
+							if (propValueNodeItem.baseValue != "#")
+								propValueNodeItem.popOutToOwnLine = true;
+					}
 					objNode.properties.Add(propName, propValueNode);
 					popOutGroupsAdded++;
 				}
 				else
 				{
 					VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
-					propValueNode.isNamedPropertyValue = true;
 					if (typeDerivedFromDeclaredType)
 						propValueNode.metadata_type = VDF.GetVNameOfType(propValue.GetType(), saveOptions);
 					objNode.properties.Add(propName, propValueNode);
