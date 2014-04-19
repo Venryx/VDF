@@ -92,8 +92,12 @@ class VDFSaver
 				var propValue = obj[propName];
 				if (EnumValue.IsEnum(propInfo.propVTypeName)) // special case; if enum
 					propValue = new EnumValue(propInfo.propVTypeName, propValue);
-				if (!propInfo.writeEmptyValue && propInfo.IsXValueEmpty(propValue))
+				if (propInfo.IsXValueEmpty(propValue))
+				{
+					if (propInfo.writeEmptyValue)
+						objNode.SetProperty(propName, new VDFNode("[#null]"));
 					continue;
+				}
 
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
 				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type

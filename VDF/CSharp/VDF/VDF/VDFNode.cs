@@ -154,8 +154,8 @@ public class VDFNode
 	public T ToObject<T>(VDFLoadOptions loadOptions = null) { return (T)ToObject(typeof(T), loadOptions); }
 	public object ToObject(Type declaredType, VDFLoadOptions loadOptions = null)
 	{
-		if (declaredType == typeof(string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
-			return items[0].baseValue == "null" ? null : items[0].baseValue;
+		if (declaredType == typeof(string)) // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be '[#null]' or the string itself)
+			return baseValue == "[#null]" ? null : baseValue;
 
 		Type type = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
 		var typeInfo = VDFTypeInfo.Get(type);

@@ -198,8 +198,8 @@
 
 	public ToObject(declaredTypeName: string, loadOptions?: VDFLoadOptions)
 	{
-		if (declaredTypeName == "string") // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be 'null' or the string itself)
-			return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
+		if (declaredTypeName == "string") // special case for properties of type 'string'; just return first item (there will always only be one, and it will always either be '[#null]' or the string itself)
+			return this.baseValue == "[#null]" ? null : this.baseValue;
 
 		var type = this.metadata_type || declaredTypeName;
 		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);

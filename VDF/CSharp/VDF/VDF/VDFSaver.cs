@@ -107,8 +107,12 @@ public static class VDFSaver
 					continue;
 
 				object propValue = propInfo.GetValue(obj);
-				if (!propInfo.writeEmptyValue && propInfo.IsXValueEmpty(propValue))
+				if (propInfo.IsXValueEmpty(propValue))
+				{
+					if (propInfo.writeEmptyValue)
+						objNode.properties.Add(propName, new VDFNode{baseValue = "[#null]"});
 					continue;
+				}
 
 				bool typeDerivedFromDeclaredType = propValue != null && propValue.GetType() != propInfo.GetPropType(); // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
 				if (propInfo.popOutItemsToOwnLines)

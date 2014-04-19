@@ -201,7 +201,7 @@
 
     VDFNode.prototype.ToObject = function (declaredTypeName, loadOptions) {
         if (declaredTypeName == "string")
-            return this.items[0].baseValue == "null" ? null : this.items[0].baseValue;
+            return this.baseValue == "[#null]" ? null : this.baseValue;
 
         var type = this.metadata_type || declaredTypeName;
         var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);

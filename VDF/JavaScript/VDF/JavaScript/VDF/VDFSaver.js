@@ -89,8 +89,11 @@ var VDFSaver = (function () {
                 var propValue = obj[propName];
                 if (EnumValue.IsEnum(propInfo.propVTypeName))
                     propValue = new EnumValue(propInfo.propVTypeName, propValue);
-                if (!propInfo.writeEmptyValue && propInfo.IsXValueEmpty(propValue))
+                if (propInfo.IsXValueEmpty(propValue)) {
+                    if (propInfo.writeEmptyValue)
+                        objNode.SetProperty(propName, new VDFNode("[#null]"));
                     continue;
+                }
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
                 var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
