@@ -56,14 +56,28 @@ namespace VDFTests
 			a["String"].baseValue.Should().Be("Prop value string.");
 			a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
 		}
-		class TypeWithNullableProp { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
+		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
 		[Fact] void ToString_Level1_NullValues()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithNullableProp());
+			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
 			a["obj"].baseValue.Should().Be("[#null]");
 			a["strings"].baseValue.Should().Be("[#null]");
 			a["strings2"].baseValue.Should().Be(null); // it's just a VDFNode, with no children, representing a List
 			a.ToString().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
+		}
+		[Fact] void ToString_Level1_ListItems_Null()
+		{
+			var a = VDFSaver.ToVDFNode(new List<string>{null});
+			a[0].baseValue.Should().Be("[#null]");
+			a.ToString().Should().Be("[#null]");
+		}
+		[Fact] void ToString_Level1_DictionaryValues_Null()
+		{
+			var dictionary = new Dictionary<string, string>();
+			dictionary.Add("key1", null);
+			var a = VDFSaver.ToVDFNode(dictionary);
+			a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
+			a.ToString().Should().Be("{key1|[#null]}");
 		}
 	}
 }

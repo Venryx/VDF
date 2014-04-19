@@ -4,16 +4,16 @@ window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // 
 Saving.Init();
 window["oldTest"](title, testFunc);
 }*/
-var TypeWithNullableProp = (function () {
-    function TypeWithNullableProp() {
+var TypeWithNullProps = (function () {
+    function TypeWithNullProps() {
         this.strings2 = new List("string");
     }
-    TypeWithNullableProp.typeInfo = new VDFTypeInfo(false, {
+    TypeWithNullProps.typeInfo = new VDFTypeInfo(false, {
         obj: new VDFPropInfo("object", true),
         strings: new VDFPropInfo("List[string]", true),
         strings2: new VDFPropInfo("List[string]", true)
     });
-    return TypeWithNullableProp;
+    return TypeWithNullProps;
 })();
 var Saving = (function () {
     function Saving() {
@@ -80,11 +80,21 @@ var Saving = (function () {
         });
 
         test("ToString_Level1_NullValues", function () {
-            var a = VDFSaver.ToVDFNode(new TypeWithNullableProp());
+            var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
             a["obj"].baseValue.Should().Be("[#null]");
             a["strings"].baseValue.Should().Be("[#null]");
             equal(a["strings2"].baseValue, null); // it's just a VDFNode, with no children, representing a List
             a.ToString().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
+        });
+        test("ToString_Level1_ListItems_Null", function () {
+            var a = VDFSaver.ToVDFNode(new List("string", null));
+            a[0].baseValue.Should().Be("[#null]");
+            a.ToString().Should().Be("[#null]");
+        });
+        test("ToString_Level1_DictionaryValues_Null", function () {
+            var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));
+            a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
+            a.ToString().Should().Be("{key1|[#null]}");
         });
     };
     return Saving;

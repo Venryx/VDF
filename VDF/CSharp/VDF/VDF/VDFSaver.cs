@@ -56,7 +56,7 @@ public static class VDFSaver
 			for (int i = 0; i < objAsList.Count; i++)
 			{
 				object item = objAsList[i];
-				bool typeDerivedFromDeclaredType = type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
+				bool typeDerivedFromDeclaredType = item != null && type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
 				VDFNode itemValueNode = ToVDFNode(item, saveOptions);
 				if (item is IList) // if list item is itself a list
 					itemValueNode.isListItem_list = true;
@@ -83,7 +83,7 @@ public static class VDFSaver
 					keyNode.metadata_type = VDF.GetVNameOfType(key.GetType(), saveOptions);
 				keyValuePairPseudoNode.items.Add(keyNode);
 
-				bool valueTypeDerivedFromDeclaredType = type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
+				bool valueTypeDerivedFromDeclaredType = value != null && type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
 				VDFNode valueNode = ToVDFNode(value, saveOptions);
 				valueNode.isListItem_nonFirst = true;
 				if (valueTypeDerivedFromDeclaredType)

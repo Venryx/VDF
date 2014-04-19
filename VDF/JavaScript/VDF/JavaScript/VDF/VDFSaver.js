@@ -13,7 +13,7 @@ var VDFSaver = (function () {
 
         var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
-        if (objVTypeName == null)
+        if (obj == null)
             objNode.baseValue = "[#null]";
         else if (VDF.typeExporters_inline[objVTypeName])
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
@@ -32,9 +32,9 @@ var VDFSaver = (function () {
                     item = new EnumValue(objAsList.itemType, item);
 
                 var itemVTypeName = VDF.GetVTypeNameOfObject(item);
-                var typeDerivedFromDeclaredType = itemVTypeName != objAsList.itemType;
+                var typeDerivedFromDeclaredType = item != null && itemVTypeName != objAsList.itemType;
                 var itemValueNode = VDFSaver.ToVDFNode(item, saveOptions);
-                if (itemVTypeName.startsWith("List["))
+                if (itemVTypeName && itemVTypeName.startsWith("List["))
                     itemValueNode.isListItem_list = true;
                 if (i > 0)
                     itemValueNode.isListItem_nonFirst = true;
@@ -64,7 +64,7 @@ var VDFSaver = (function () {
                 keyValuePairPseudoNode.PushItem(keyNode);
 
                 var valueVTypeName = VDF.GetVTypeNameOfObject(value);
-                var valueTypeDerivedFromDeclaredType = valueVTypeName != objAsDictionary.valueType;
+                var valueTypeDerivedFromDeclaredType = value != null && valueVTypeName != objAsDictionary.valueType;
                 var valueNode = VDFSaver.ToVDFNode(value);
                 valueNode.isListItem_nonFirst = true;
                 if (valueTypeDerivedFromDeclaredType)
@@ -104,7 +104,7 @@ var VDFSaver = (function () {
                     continue;
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
-                var typeDerivedFromDeclaredType = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
+                var typeDerivedFromDeclaredType = propValue != null && propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
                 if (propInfo.popOutItemsToOwnLines) {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     if (propValueNode.baseValue != "[#null]") {

@@ -5,7 +5,7 @@ window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // 
 	Saving.Init();
 	window["oldTest"](title, testFunc);
 }*/
-class TypeWithNullableProp
+class TypeWithNullProps
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
 	{
@@ -79,11 +79,23 @@ class Saving
 		
 		test("ToString_Level1_NullValues", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithNullableProp());
+			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
 			a["obj"].baseValue.Should().Be("[#null]");
 			a["strings"].baseValue.Should().Be("[#null]");
 			equal(a["strings2"].baseValue, null); // it's just a VDFNode, with no children, representing a List
 			a.ToString().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
+		});
+		test("ToString_Level1_ListItems_Null", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new List<string>("string", null));
+			a[0].baseValue.Should().Be("[#null]");
+			a.ToString().Should().Be("[#null]");
+		});
+		test("ToString_Level1_DictionaryValues_Null", () =>
+		{
+			var a = VDFSaver.ToVDFNode(new Dictionary<string, string>("string", "string", ["key1", null]));
+			a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
+			a.ToString().Should().Be("{key1|[#null]}");
 		});
 	}
 }

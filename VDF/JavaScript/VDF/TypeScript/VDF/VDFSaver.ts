@@ -9,7 +9,7 @@ class VDFSaver
 
 		var objVTypeName = VDF.GetVTypeNameOfObject(obj);
 		var objNode = new VDFNode();
-		if (objVTypeName == null)
+		if (obj == null)
 			objNode.baseValue = "[#null]";
 		else if (VDF.typeExporters_inline[objVTypeName])
 			objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
@@ -30,9 +30,9 @@ class VDFSaver
 					item = new EnumValue(objAsList.itemType, item);
 
 				var itemVTypeName = VDF.GetVTypeNameOfObject(item);
-				var typeDerivedFromDeclaredType: boolean = itemVTypeName != objAsList.itemType; // if value's type is *derived* from list's declared item-type
+				var typeDerivedFromDeclaredType: boolean = item != null && itemVTypeName != objAsList.itemType; // if value's type is *derived* from list's declared item-type
 				var itemValueNode: VDFNode = VDFSaver.ToVDFNode(item, saveOptions);
-				if (itemVTypeName.startsWith("List[")) // if list item is itself a list
+				if (itemVTypeName && itemVTypeName.startsWith("List[")) // if list item is itself a list
 					itemValueNode.isListItem_list = true;
 				if (i > 0)
 					itemValueNode.isListItem_nonFirst = true;
@@ -65,7 +65,7 @@ class VDFSaver
 				keyValuePairPseudoNode.PushItem(keyNode);
 
 				var valueVTypeName = VDF.GetVTypeNameOfObject(value);
-				var valueTypeDerivedFromDeclaredType: boolean = valueVTypeName != objAsDictionary.valueType; // if value's type is *derived* from map's declared value-type
+				var valueTypeDerivedFromDeclaredType: boolean = value != null && valueVTypeName != objAsDictionary.valueType; // if value's type is *derived* from map's declared value-type
 				var valueNode: VDFNode = VDFSaver.ToVDFNode(value);
 				valueNode.isListItem_nonFirst = true;
 				if (valueTypeDerivedFromDeclaredType)
@@ -107,7 +107,7 @@ class VDFSaver
 					continue;
 
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
-				var typeDerivedFromDeclaredType: boolean = propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
+				var typeDerivedFromDeclaredType: boolean = propValue != null && propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
 				if (propInfo.popOutItemsToOwnLines)
 				{
 					var propValueNode: VDFNode = VDFSaver.ToVDFNode(propValue, saveOptions);
