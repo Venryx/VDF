@@ -103,7 +103,7 @@ public class VDFPropInfo
 	public MemberInfo memberInfo;
 	public bool? includeL2;
 	public bool popOutItemsToOwnLines;
-	public bool writeEmptyValue;
+	public bool writeEmptyValue = true;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
 	public bool IsXValueEmpty(object x)
