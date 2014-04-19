@@ -106,13 +106,16 @@
         if (this.metadata_type != null)
             builder.Append("<" + (this.isListOrDictionary ? "<" + this.metadata_type.replace(/ /g, "") + ">" : this.metadata_type.replace(/ /g, "")) + ">");
 
-        builder.Append(this.baseValue);
-        for (var key in this.items)
-            if (!this.items[key].popOutToOwnLine)
-                builder.Append(this.items[key].GetInLineItemText());
-        for (var propName in this.properties)
-            if (!this.properties[propName].popOutToOwnLine)
-                builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
+        if (this.baseValue != null)
+            builder.Append(this.baseValue);
+        else if (this.items.length > 0) {
+            for (var key in this.items)
+                if (!this.items[key].popOutToOwnLine)
+                    builder.Append(this.items[key].GetInLineItemText());
+        } else
+            for (var propName in this.properties)
+                if (!this.properties[propName].popOutToOwnLine)
+                    builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 
         if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
             builder.Append("}");

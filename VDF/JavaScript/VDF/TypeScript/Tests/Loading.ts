@@ -37,6 +37,14 @@ class Loading
 			var a = VDFLoader.ToVDFNode("Root string.");
 			a.baseValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
 		});
+		test("ToVDFNode_Level0_BaseValue_SaveThenLoad", ()=>
+		{
+			var vdf = VDF.Serialize("Root string.");
+			var a = VDFLoader.ToVDFNode(vdf);
+			a.baseValue.Should().Be("Root string.");
+			a.items[0].baseValue.Should().Be("Root string.");
+			a.ToString().Should().Be("Root string."); // it should print only the base-value
+		});
 		test("VDFNode_Level0_Metadata_Type", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("<string>Root string.");

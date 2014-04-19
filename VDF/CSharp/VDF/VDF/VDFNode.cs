@@ -80,13 +80,18 @@ public class VDFNode
 		if (metadata_type != null)
 			builder.Append("<" + (isListOrDictionary ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
 
-		builder.Append(baseValue);
-		foreach (VDFNode item in items)
-			if (!item.popOutToOwnLine)
-				builder.Append(item.GetInLineItemText());
-		foreach (string propName in properties.Keys)
-			if (!properties[propName].popOutToOwnLine)
-				builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
+		if (baseValue != null)
+			builder.Append(baseValue);
+		else if (items.Count > 0)
+		{
+			foreach (VDFNode item in items)
+				if (!item.popOutToOwnLine)
+					builder.Append(item.GetInLineItemText());
+		}
+		else
+			foreach (string propName in properties.Keys)
+				if (!properties[propName].popOutToOwnLine)
+					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
 
 		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isListItem_list)
 			builder.Append("}");
