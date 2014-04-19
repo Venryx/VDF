@@ -107,9 +107,9 @@ class List<T>
 	}
 	constructor(itemType: string, ...items: T[])
 	{
+		Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "List[" + itemType + "]" });
 		this.innerArray = [];
 		this.pushAll(items);
-		this.AddItem("realVTypeName", "List[" + itemType + "]");
 		this.itemType = itemType;
 	}
 
@@ -137,7 +137,7 @@ class Dictionary<K, V>
 	values: any[] = [];
 	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
-		this.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
+		Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "Dictionary[" + keyType + "," + valueType + "]" });
 		this.keyType = keyType;
 		this.valueType = valueType;
 

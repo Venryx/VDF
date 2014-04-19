@@ -3,7 +3,7 @@
 
 interface Object
 {
-	AddItem(name: string, value, forceAdd?: boolean): void;
+	_AddItem(name: string, value, forceAdd?: boolean): void;
 	AddFunction(func: Function, forceAdd?: boolean): void;
 
 	AddGetterSetter(getter: Function, setter: Function, forceAdd?: boolean): void;
@@ -14,7 +14,7 @@ interface Object
 }
 
 // the below lets you do stuff like this: Array.prototype.AddFunction(function AddX(value) { this.push(value); }); [].AddX("newItem");
-Object.defineProperty(Object.prototype, "AddItem", // note; these functions should by default add non-enumerable properties/items
+Object.defineProperty(Object.prototype, "_AddItem", // note; these functions should by default add non-enumerable properties/items
 {
 	enumerable: false,
 	value: function(name, value, forceAdd?)
@@ -30,7 +30,7 @@ Object.defineProperty(Object.prototype, "AddItem", // note; these functions shou
 	}
 });
 function GetFunctionName(func): string { return func.name != null ? func.name : func.toString().match(/^function\s*([^\s(]+)/)[1]; }
-Object.prototype.AddItem("AddFunction", function(func, forceAdd?) { this.AddItem(GetFunctionName(func), func, forceAdd); });
+Object.prototype._AddItem("AddFunction", function(func, forceAdd?) { this._AddItem(GetFunctionName(func), func, forceAdd); });
 
 // the below lets you do stuff like this: Array.prototype.AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
 Object.prototype.AddFunction(function AddGetterSetter(getter, setter, forceAdd?)

@@ -110,9 +110,9 @@ var List = (function () {
         for (var _i = 0; _i < (arguments.length - 1); _i++) {
             items[_i] = arguments[_i + 1];
         }
+        Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "List[" + itemType + "]" });
         this.innerArray = [];
         this.pushAll(items);
-        this.AddItem("realVTypeName", "List[" + itemType + "]");
         this.itemType = itemType;
     }
     Object.defineProperty(List.prototype, "length", {
@@ -188,7 +188,7 @@ var Dictionary = (function () {
         }
         this.keys = [];
         this.values = [];
-        this.AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
+        this._AddItem("realVTypeName", "Dictionary[" + keyType + "," + valueType + "]");
         this.keyType = keyType;
         this.valueType = valueType;
 

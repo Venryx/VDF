@@ -2,7 +2,7 @@
 // ==================
 
 // the below lets you do stuff like this: Array.prototype.AddFunction(function AddX(value) { this.push(value); }); [].AddX("newItem");
-Object.defineProperty(Object.prototype, "AddItem", {
+Object.defineProperty(Object.prototype, "_AddItem", {
     enumerable: false,
     value: function (name, value, forceAdd) {
         if (this[name] && forceAdd)
@@ -17,8 +17,8 @@ Object.defineProperty(Object.prototype, "AddItem", {
 function GetFunctionName(func) {
     return func.name != null ? func.name : func.toString().match(/^function\s*([^\s(]+)/)[1];
 }
-Object.prototype.AddItem("AddFunction", function (func, forceAdd) {
-    this.AddItem(GetFunctionName(func), func, forceAdd);
+Object.prototype._AddItem("AddFunction", function (func, forceAdd) {
+    this._AddItem(GetFunctionName(func), func, forceAdd);
 });
 
 // the below lets you do stuff like this: Array.prototype.AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
