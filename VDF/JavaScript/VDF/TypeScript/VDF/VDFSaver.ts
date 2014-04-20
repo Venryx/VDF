@@ -77,7 +77,7 @@ class VDFSaver
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
 		{
-			var isAnonymousType = obj.__proto__ == (<any>{}).__proto__;
+			var isAnonymousType = obj.constructor == (<any>{}).constructor || obj.constructor == object; // if true anonymous object, or if VDF-anonymous-object
 			var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // if not specified: if anon type, include all props, otherwise, use default values
 			var popOutGroupsAdded = 0;
 

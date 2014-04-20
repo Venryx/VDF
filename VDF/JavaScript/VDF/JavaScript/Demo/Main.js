@@ -47,13 +47,22 @@
             var vdf = VDF.Serialize(testWorld, new VDFSaveOptions());
             $("#outputA").val(vdf);
         });
-        $("#makeOutputB").click(function (event, ui) {
+        $("#makeOutputB_asWorld").click(function (event, ui) {
             // load from output-a textbox
             var vdf = decodeURIComponent($("#outputA").val()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
             var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
 
             // reserialize it, and save it to second file, to check data
             var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions());
+            $("#outputB").val(vdf2);
+        });
+        $("#makeOutputB_asObject").click(function (event, ui) {
+            // load from output-a textbox
+            var vdf = decodeURIComponent($("#outputA").val()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+            var testObj = VDF.Deserialize(vdf, "object", new VDFLoadOptions());
+
+            // reserialize it, and save it to second file, to check data
+            var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions());
             $("#outputB").val(vdf2);
         });
     });

@@ -38,12 +38,12 @@ var Loading = (function () {
     };
 
     Loading.RunTests = function () {
-        test("VDFNode_Level0_Comment", function () {
+        test("ToVDFNode_Level0_Comment", function () {
             var a = VDFLoader.ToVDFNode("// comment\n\
 			Root string.");
             a.baseValue.Should().Be("			Root string.");
         });
-        test("VDFNode_Level0_BaseValue", function () {
+        test("ToVDFNode_Level0_BaseValue", function () {
             var a = VDFLoader.ToVDFNode("Root string.");
             a.baseValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
         });
@@ -54,46 +54,46 @@ var Loading = (function () {
             a.items[0].baseValue.Should().Be("Root string.");
             a.ToVDF().Should().Be("Root string."); // it should print only the base-value
         });
-        test("VDFNode_Level0_Metadata_Type", function () {
+        test("ToVDFNode_Level0_Metadata_Type", function () {
             var a = VDFLoader.ToVDFNode("<string>Root string.");
             a.metadata_type.Should().Be("string");
         });
-        test("VDFNode_Level0_ArrayItems", function () {
+        test("ToVDFNode_Level0_ArrayItems", function () {
             var a = VDFLoader.ToVDFNode("Root string 1.|Root string 2.");
             a[0].baseValue.Should().Be("Root string 1.");
             a[1].baseValue.Should().Be("Root string 2.");
         });
-        test("VDFNode_Level0_ArrayItems_Empty", function () {
+        test("ToVDFNode_Level0_ArrayItems_Empty", function () {
             var a = VDFLoader.ToVDFNode("|");
             a[0].baseValue.Should().Be("");
             a[1].baseValue.Should().Be("");
         });
-        test("VDFNode_Level0_ArrayMetadata1", function () {
+        test("ToVDFNode_Level0_ArrayMetadata1", function () {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions());
             a.metadata_type.Should().Be("SpecialList[int]");
             ok(a[0].metadata_type == null);
             ok(a[1].metadata_type == null);
         });
-        test("VDFNode_Level0_ArrayMetadata2", function () {
+        test("ToVDFNode_Level0_ArrayMetadata2", function () {
             var a = VDFLoader.ToVDFNode("<<SpecialList[int]>><int>1|<int>2", new VDFLoadOptions());
             a.metadata_type.Should().Be("SpecialList[int]");
             a[0].metadata_type.Should().Be("int");
             a[1].metadata_type.Should().Be("int");
         });
-        test("VDFNode_Level0_DictionaryItems", function () {
+        test("ToVDFNode_Level0_DictionaryItems", function () {
             var a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
             a[0][0].baseValue.Should().Be("key 1");
             a[0][1].baseValue.Should().Be("value 1");
             a[1][0].baseValue.Should().Be("key 2");
             a[1][1].baseValue.Should().Be("value 2");
         });
-        test("VDFNode_Level0_DictionaryItems_GetByKey", function () {
+        test("ToVDFNode_Level0_DictionaryItems_GetByKey", function () {
             var a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
             a.GetDictionaryValueNode("key 1").AsString.Should().Be("value 1");
             a.GetDictionaryValueNode("key 2").AsString.Should().Be("value 2");
         });
 
-        test("VDFNode_Level1_BaseValues", function () {
+        test("ToVDFNode_Level1_BaseValues", function () {
             var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");
             a["bool"].baseValue.Should().Be("false");
             a["int"].baseValue.Should().Be("5");
@@ -104,19 +104,19 @@ var Loading = (function () {
             a["float"].AsFloat.Should().Be(.5);
             a["string"].AsString.Should().Be("Prop value string.");
         });
-        test("VDFNode_Level1_Literal", function () {
+        test("ToVDFNode_Level1_Literal", function () {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@}");
             a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.");
         });
-        test("VDFNode_Level1_TroublesomeLiteral1", function () {
+        test("ToVDFNode_Level1_TroublesomeLiteral1", function () {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@@|@@}");
             a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
         });
-        test("VDFNode_Level1_TroublesomeLiteral2", function () {
+        test("ToVDFNode_Level1_TroublesomeLiteral2", function () {
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
             a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
         });
-        test("VDFNode_Level1_PoppedOutNodes", function () {
+        test("ToVDFNode_Level1_PoppedOutNodes", function () {
             var a = VDFLoader.ToVDFNode("names{#}\n\
 	Dan\n\
 	Bob\n\
@@ -124,35 +124,42 @@ var Loading = (function () {
             a["names"][0].baseValue.Should().Be("Dan");
             a["names"][1].baseValue.Should().Be("Bob");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems", function () {
+        test("ToVDFNode_Level1_ArrayItemsInArrayItems", function () {
             var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}");
             a[0][0].baseValue.Should().Be("1A");
             a[0][1].baseValue.Should().Be("1B");
             a[1][0].baseValue.Should().Be("2A");
             a[1][1].baseValue.Should().Be("2B");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty", function () {
+        test("ToVDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty", function () {
             var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
             a[0][0].baseValue.Should().Be("1A");
             a[0][1].baseValue.Should().Be("");
             a[1][0].baseValue.Should().Be("2A");
             a[1][1].baseValue.Should().Be("");
         });
-        test("VDFNode_Level1_ArrayItemsInArrayItems_BothEmpty", function () {
+        test("ToVDFNode_Level1_ArrayItemsInArrayItems_BothEmpty", function () {
             var a = VDFLoader.ToVDFNode("{|}|{|}");
             a[0][0].baseValue.Should().Be("");
             a[0][1].baseValue.Should().Be("");
             a[1][0].baseValue.Should().Be("");
             a[1][1].baseValue.Should().Be("");
         });
-        test("VDFNode_Level1_DictionaryItemsInDictionaryItems", function () {
+        test("ToVDFNode_Level1_DictionaryItems", function () {
             var a = VDFLoader.ToVDFNode("{1key|1value}{2key|2value}");
             a[0][0].baseValue.Should().Be("1key");
             a[0][1].baseValue.Should().Be("1value");
             a[1][0].baseValue.Should().Be("2key");
             a[1][1].baseValue.Should().Be("2value");
         });
-        test("VDFNode_Level1_PoppedOutItemGroups", function () {
+        test("ToVDFNode_Level1_DictionaryItems_Complex", function () {
+            var a = VDFLoader.ToVDFNode("uiPrefs{{toolOptions|@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}@@}{liveTool|Select}}");
+            a["uiPrefs"][0][0].baseValue.Should().Be("toolOptions");
+            a["uiPrefs"][0][1].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}");
+            a["uiPrefs"][1][0].baseValue.Should().Be("liveTool");
+            a["uiPrefs"][1][1].baseValue.Should().Be("Select");
+        });
+        test("ToVDFNode_Level1_PoppedOutItemGroups", function () {
             var a = VDFLoader.ToVDFNode("names{#}ages{#}\n\
 	Dan\n\
 	Bob\n\
@@ -164,15 +171,15 @@ var Loading = (function () {
             a["ages"][1].baseValue.Should().Be("20");
         });
 
-        test("FullLoad_Level0_Bool", function () {
+        test("ToObject_Level0_Bool", function () {
             VDF.Deserialize("true", "bool").Should().Be(true);
         });
-        test("FullLoad_Level0_Float", function () {
+        test("ToObject_Level0_Float", function () {
             VDF.Deserialize("1.5", "float").Should().Be(1.5);
         });
 
-        // unique to JavaScript version; todo
-        test("FullLoad_AsObject", function () {
+        // unique to JavaScript version
+        test("ToObject_AsObject", function () {
             var a = VDF.Deserialize("bool{<bool>false}int{<int>3.5}", "object");
             a.bool.Should().Be(false);
             a.int.Should().BeExactly(3.5);

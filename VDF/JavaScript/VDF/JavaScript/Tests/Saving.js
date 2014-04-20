@@ -49,7 +49,7 @@ var Saving = (function () {
     };
 
     Saving.RunTests = function () {
-        test("VDFNode_Level0_BaseValue", function (assert) {
+        test("ToVDF_Level0_BaseValue", function () {
             var a = new VDFNode();
             a.baseValue = "Root string.";
             a.ToVDF().Should().Be("Root string.");
@@ -58,15 +58,14 @@ var Saving = (function () {
             a[0] = new VDFNode("Root string also.");
             a.ToVDF().Should().Be("Root string also.");
         });
-
-        test("VDFNode_Level0_Metadata_Type", function (assert) {
+        test("ToVDF_Level0_Metadata_Type", function () {
             var a = new VDFNode();
             a.metadata_type = "string";
             a.baseValue = "Root string.";
             a.ToVDF().Should().Be("<string>Root string.");
         });
 
-        test("VDFNode_Level1_BaseValues", function (assert) {
+        test("ToVDF_Level1_BaseValues", function () {
             var a = new VDFNode();
             a["bool"] = new VDFNode("false");
             a["int"] = new VDFNode("5");
@@ -74,8 +73,7 @@ var Saving = (function () {
             a["string"] = new VDFNode("Prop value string.");
             a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
         });
-
-        test("VDFNode_Level1_AnonymousTypeProperties", function () {
+        test("ToVDF_Level1_AnonymousTypeProperties", function () {
             var a = VDFSaver.ToVDFNode({ Bool: false, Int: 5, Float: .5, String: "Prop value string." });
             a["Bool"].baseValue.Should().Be("false");
             a["Int"].baseValue.Should().Be("5");
@@ -83,20 +81,19 @@ var Saving = (function () {
             a["String"].baseValue.Should().Be("Prop value string.");
             a.ToVDF().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
         });
-
-        test("ToString_Level1_NullValues", function () {
+        test("ToVDF_Level1_NullValues", function () {
             var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
             a["obj"].baseValue.Should().Be("[#null]");
             a["strings"].baseValue.Should().Be("[#null]");
             equal(a["strings2"].baseValue, null); // it's just a VDFNode, with no children, representing a List
             a.ToVDF().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
         });
-        test("ToString_Level1_ListItems_Null", function () {
+        test("ToVDF_Level1_ListItems_Null", function () {
             var a = VDFSaver.ToVDFNode(new List("string", null));
             a[0].baseValue.Should().Be("[#null]");
             a.ToVDF().Should().Be("[#null]");
         });
-        test("ToString_Level1_DictionaryValues_Null", function () {
+        test("ToVDF_Level1_DictionaryValues_Null", function () {
             var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));
             a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
             a.ToVDF().Should().Be("{key1|[#null]}");

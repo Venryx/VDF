@@ -98,11 +98,6 @@ namespace VDFTests
 			Assert.True(a["int"] == 5);
 			Assert.True(a["float"] == .5f);
 			Assert.True(a["string"] == "Prop value string.");
-
-			var test1 = a.ToString();
-			var test2 = "" + a;
-			var test3 = "hi:" + a;
-			var b = "";
 		}
 		[Fact] void ToVDFNode_Level1_Literal()
 		{
@@ -152,13 +147,21 @@ namespace VDFTests
 			a[1][0].baseValue.Should().Be("");
 			a[1][1].baseValue.Should().Be("");
 		}
-		[Fact] void ToVDFNode_Level1_DictionaryItemsInDictionaryItems()
+		[Fact] void ToVDFNode_Level1_DictionaryItems()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{1key|1value}{2key|2value}");
 			a[0][0].baseValue.Should().Be("1key");
 			a[0][1].baseValue.Should().Be("1value");
 			a[1][0].baseValue.Should().Be("2key");
 			a[1][1].baseValue.Should().Be("2value");
+		}
+		[Fact] void ToVDFNode_Level1_DictionaryItems_Complex()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("uiPrefs{{toolOptions|@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}@@}{liveTool|Select}}");
+			a["uiPrefs"][0][0].baseValue.Should().Be("toolOptions");
+			a["uiPrefs"][0][1].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}");
+			a["uiPrefs"][1][0].baseValue.Should().Be("liveTool");
+			a["uiPrefs"][1][1].baseValue.Should().Be("Select");
 		}
 		[Fact] void ToVDFNode_Level1_PoppedOutItemGroups() // each 'group' is actually just the value-data of one of the parent's properties
 		{
@@ -173,7 +176,7 @@ namespace VDFTests
 			a["ages"][1].baseValue.Should().Be("20");
 		}
 
-		[Fact] void Object_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
-		[Fact] void Object_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
+		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
+		[Fact] void ToObject_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
 	}
 }

@@ -9,7 +9,6 @@ public enum VDFTypes
 {
 	None,
 	Derived,
-	DerivedAndPrimitives,
 	All
 }
 public class VDFSaveOptions
@@ -42,8 +41,8 @@ public static class VDFSaver
 		var objNode = new VDFNode();
 		Type type = obj != null ? obj.GetType() : null;
 
-		// if we're marking types for all objects, or we're a primitive type and we're marking all primitive types, just do it here (no need to compare actual type with base type)
-		if (saveOptions.saveTypesFor == VDFTypes.All || (saveOptions.saveTypesFor == VDFTypes.DerivedAndPrimitives && type.IsPrimitive))
+		// if we're marking types for all objects, just do it here (no need to compare actual type with base type)
+		if (saveOptions.saveTypesFor == VDFTypes.All)
 			objNode.metadata_type = obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
 
 		if (obj == null)

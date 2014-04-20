@@ -75,7 +75,7 @@ var VDFSaver = (function () {
             }
             ;
         } else if (typeof obj == "object") {
-            var isAnonymousType = obj.__proto__ == {}.__proto__;
+            var isAnonymousType = obj.constructor == {}.constructor || obj.constructor == object;
             var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
             var popOutGroupsAdded = 0;
 
