@@ -15,27 +15,24 @@ public static class VDF
 	public static MemberInfo AnyMember = typeof(VDF).GetMember("AnyMember")[0];
 	public static List<MemberInfo> AllMembers = new List<MemberInfo> {AnyMember};
 
-	static Dictionary<string, Type> builtInTypesByAlias;
 	static Dictionary<Type, string> builtInTypeAliasesByType;
 	
 	static VDF()
 	{
-		builtInTypesByAlias = new Dictionary<string, Type>
+		builtInTypeAliasesByType = new Dictionary<Type, string>
 		{
-			{"byte", typeof(Byte)}, {"sbyte", typeof(SByte)}, {"short", typeof(Int16)}, {"ushort", typeof(UInt16)},
-			{"int", typeof(Int32)}, {"uint", typeof(UInt32)}, {"long", typeof(Int64)}, {"ulong", typeof(UInt64)},
-			{"float", typeof(Single)}, {"double", typeof(Double)}, {"decimal", typeof(Decimal)},
-			{"bool", typeof(Boolean)}, {"char", typeof(Char)}, {"string", typeof(String)}, {"object", typeof(Object)}
+			{typeof(Byte), "byte"}, {typeof(SByte), "sbyte"}, {typeof(Int16), "short"}, {typeof(UInt16), "ushort"},
+			{typeof(Int32), "int"}, {typeof(UInt32), "uint"}, {typeof(Int64), "long"}, {typeof(UInt64), "ulong"},
+			{typeof(Single), "float"}, {typeof(Double), "double"}, {typeof(Decimal), "decimal"},
+			{typeof(Boolean), "bool"}, {typeof(Char), "char"}, {typeof(String), "string"}, {typeof(Object), "object"},
+			{typeof(List<>), "List"}, {typeof(Dictionary<,>), "Dictionary"}
 		};
-		builtInTypeAliasesByType = new Dictionary<Type, string>();
-		foreach (KeyValuePair<string, Type> pair in builtInTypesByAlias)
-			builtInTypeAliasesByType.Add(pair.Value, pair.Key);
 
 		// initialize exporters/importers for some common types
-		VDF.RegisterTypeExporter_Inline<Color>(color => color.Name);
-		VDF.RegisterTypeImporter_Inline<Color>(str => Color.FromName(str));
-		VDF.RegisterTypeExporter_Inline<Guid>(id => id.ToString());
-		VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
+		RegisterTypeExporter_Inline<Color>(color => color.Name);
+		RegisterTypeImporter_Inline<Color>(str => Color.FromName(str));
+		RegisterTypeExporter_Inline<Guid>(id => id.ToString());
+		RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
 	}
 	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { typeExporters_inline[typeof(T)] = obj => exporter((T)obj); }
 	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { typeImporters_inline[typeof(T)] = str => importer(str); }
@@ -81,13 +78,17 @@ public static class VDF
 	{
 		if (loadOptions.typeAliasesByType.Values.Contains(vName))
 			return loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vName).Key;
-		if (builtInTypesByAlias.ContainsKey(vName))
-			return builtInTypesByAlias[vName];
+		if (builtInTypeAliasesByType.Values.Contains(vName))
+			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vName).Key;
 
 		var rootName = vName.Contains("[") ? vName.Substring(0, vName.IndexOf("[")) : vName;
 		if (loadOptions.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
 			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[]{'`'})[0];
 		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vName), loadOptions);
+		if (typeof(List<>).IsAssignableFrom(rootType)) // if type 'List' or a derivative, 'collapse' its VTypeName to 'List', since that is how we handle it
+			rootType = typeof(List<>);
+		else if (typeof(Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, 'collapse' its VTypeName to 'Dictionary', since that is how we handle it
+			rootType = typeof(Dictionary<,>);
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();
