@@ -37,7 +37,7 @@ namespace VDFTests
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.baseValue.Should().Be("Root string.");
 			a.items[0].baseValue.Should().Be("Root string.");
-			a.ToString().Should().Be("Root string."); // it should print only the base-value
+			a.ToVDF().Should().Be("Root string."); // it should print only the base-value
 		}
 		[Fact] void ToVDFNode_Level0_Metadata_Type()
 		{
@@ -81,11 +81,11 @@ namespace VDFTests
 		[Fact] void ToVDFNode_Level0_DictionaryItems_GetByKey()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
-			a.GetDictionaryValueNode("key 1").AsString.Should().Be("value 1");
-			a.GetDictionaryValueNode("key 2").AsString.Should().Be("value 2");
+			a.GetDictionaryValueNode("key 1").baseValue.Should().Be("value 1");
+			a.GetDictionaryValueNode("key 2").baseValue.Should().Be("value 2");
 		}
 
-		[Fact] void ToVDFNode_Level1_BaseValues()
+		[Fact] void ToVDFNode_Level1_BaseValuesWithImplicitCasting()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");
 			a["bool"].baseValue.Should().Be("false");
@@ -93,10 +93,16 @@ namespace VDFTests
 			a["float"].baseValue.Should().Be(".5");
 			a["string"].baseValue.Should().Be("Prop value string.");
 
-			a["bool"].AsBool.Should().Be(false);
-			a["int"].AsInt.Should().Be(5);
-			a["float"].AsFloat.Should().Be(.5f);
-			a["string"].AsString.Should().Be("Prop value string.");
+			// uses implicit casting
+			Assert.True(a["bool"] == false);
+			Assert.True(a["int"] == 5);
+			Assert.True(a["float"] == .5f);
+			Assert.True(a["string"] == "Prop value string.");
+
+			var test1 = a.ToString();
+			var test2 = "" + a;
+			var test3 = "hi:" + a;
+			var b = "";
 		}
 		[Fact] void ToVDFNode_Level1_Literal()
 		{

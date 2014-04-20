@@ -27,7 +27,7 @@
     });
     VDF.RegisterTypeExporter_Inline("Guid", function (id) {
         return "";
-    }); //id.ToString());
+    }); //id.toString());
     VDF.RegisterTypeImporter_Inline("Guid", function (str) {
         return new Guid(str);
     });

@@ -47,14 +47,14 @@
 
     VDFNode.prototype.GetDictionaryValueNode = function (key) {
         return this.items.filter(function (item, index, array) {
-            return item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString();
+            return item.items[0].ToVDF() == VDFSaver.ToVDFNode(key).ToVDF();
         })[0].items[1];
     };
     VDFNode.prototype.SetDictionaryValueNode = function (key, valueNode) {
         var keyNode = VDFSaver.ToVDFNode(key);
         if (this.items.contains(keyNode))
             this.items.filter(function (item, index, array) {
-                return item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString();
+                return item.items[0].ToVDF() == VDFSaver.ToVDFNode(key).ToVDF();
             })[0].SetItem(1, valueNode);
         else {
             var newNode = new VDFNode();
@@ -94,6 +94,9 @@
         enumerable: true,
         configurable: true
     });
+    VDFNode.prototype.toString = function () {
+        return this.AsString;
+    };
 
     VDFNode.prototype.GetInLineItemText = function () {
         var builder = new StringBuilder();
@@ -151,7 +154,7 @@
             builder.Append(i2 == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i2]); // line-breaks + indents + data
         return builder.ToString();
     };
-    VDFNode.prototype.ToString = function () {
+    VDFNode.prototype.ToVDF = function () {
         var poppedOutItemText = this.GetPoppedOutItemText();
         return this.GetInLineItemText() + (poppedOutItemText.length > 0 ? "\n" + poppedOutItemText : "");
     };

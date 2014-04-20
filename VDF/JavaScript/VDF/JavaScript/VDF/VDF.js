@@ -52,7 +52,7 @@ var VDF = (function () {
     };
 
     VDF.Serialize = function (obj, saveOptions) {
-        return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
+        return VDFSaver.ToVDFNode(obj, saveOptions).ToVDF();
     };
     VDF.Deserialize = function (vdf, realVTypeName, loadOptions) {
         return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions);

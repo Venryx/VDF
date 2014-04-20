@@ -37,28 +37,37 @@ public class VDFNode
 		else
 			items.Add(new VDFNode {isKeyValuePairPseudoNode = true, items = new List<VDFNode> {keyNode, valueNode}});
 	}
-	public bool Equals(VDFNode other) { return ToString() == other.ToString(); } // base equality on whether their 'default output' is the same
-	public bool AsBool
-	{
-		get { return (bool)ConvertVDFNodeToCorrectType(new VDFNode{baseValue = baseValue}, typeof(bool), null); }
-		set { baseValue = value.ToString().ToLower(); }
-	}
-	public int AsInt
-	{
-		get { return (int)ConvertVDFNodeToCorrectType(new VDFNode{baseValue = baseValue}, typeof(int), null); }
-		set { baseValue = value.ToString(); }
-	}
-	public float AsFloat
-	{
-		get { return (float)ConvertVDFNodeToCorrectType(new VDFNode{baseValue = baseValue}, typeof(float), null); }
-		set { baseValue = value.ToString(); }
-	}
-	public string AsString
-	{
-		get { return baseValue; }
-		set { baseValue = value; }
-	}
-	
+	public bool Equals(VDFNode other) { return ToVDF() == other.ToVDF(); } // base equality on whether their 'default output' is the same
+	// base-types: ["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"]
+	public static implicit operator bool(VDFNode node) { return bool.Parse(node.baseValue); }
+	public static implicit operator VDFNode(bool val) { return new VDFNode { baseValue = val.ToString().ToLower() }; }
+	public static implicit operator char(VDFNode node) { return char.Parse(node.baseValue); }
+	public static implicit operator VDFNode(char val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator byte(VDFNode node) { return byte.Parse(node.baseValue); }
+	public static implicit operator VDFNode(byte val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator sbyte(VDFNode node) { return sbyte.Parse(node.baseValue); }
+	public static implicit operator VDFNode(sbyte val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator short(VDFNode node) { return short.Parse(node.baseValue); }
+	public static implicit operator VDFNode(short val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator ushort(VDFNode node) { return ushort.Parse(node.baseValue); }
+	public static implicit operator VDFNode(ushort val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator int(VDFNode node) { return int.Parse(node.baseValue); }
+	public static implicit operator VDFNode(int val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator uint(VDFNode node) { return uint.Parse(node.baseValue); }
+	public static implicit operator VDFNode(uint val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator long(VDFNode node) { return long.Parse(node.baseValue); }
+	public static implicit operator VDFNode(long val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator ulong(VDFNode node) { return ulong.Parse(node.baseValue); }
+	public static implicit operator VDFNode(ulong val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator float(VDFNode node) { return float.Parse(node.baseValue); }
+	public static implicit operator VDFNode(float val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator double(VDFNode node) { return double.Parse(node.baseValue); }
+	public static implicit operator VDFNode(double val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator decimal(VDFNode node) { return decimal.Parse(node.baseValue); }
+	public static implicit operator VDFNode(decimal val) { return new VDFNode { baseValue = val.ToString() }; }
+	public static implicit operator string(VDFNode node) { return node.baseValue; }
+	public static implicit operator VDFNode(string val) { return new VDFNode { baseValue = val }; }
+	public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
 	// saving
 	// ==================
 
@@ -123,7 +132,7 @@ public class VDFNode
 			builder.Append(i == 0 ? "" : "\n").Append(popOutToOwnLine ? "\t" : "").Append(lines[i]); // line-breaks + indents + data
 		return builder.ToString();
 	}
-	public override string ToString()
+	public string ToVDF()
 	{
 		string poppedOutItemText = GetPoppedOutItemText();
 		return GetInLineItemText() + (poppedOutItemText.Length > 0 ? "\n" + poppedOutItemText : "");

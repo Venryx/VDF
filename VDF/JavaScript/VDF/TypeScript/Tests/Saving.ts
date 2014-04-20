@@ -49,11 +49,11 @@ class Saving
 		{
 			var a = new VDFNode();
 			a.baseValue = "Root string.";
-			a.ToString().Should().Be("Root string.");
+			a.ToVDF().Should().Be("Root string.");
 
 			a = new VDFNode();
 			a[0] = new VDFNode("Root string also.");
-			a.ToString().Should().Be("Root string also.");
+			a.ToVDF().Should().Be("Root string also.");
 		});
 
 		test("VDFNode_Level0_Metadata_Type", (assert?: QUnitAssert) =>
@@ -61,7 +61,7 @@ class Saving
 			var a = new VDFNode();
 			a.metadata_type = "string";
 			a.baseValue = "Root string.";
-			a.ToString().Should().Be("<string>Root string.");
+			a.ToVDF().Should().Be("<string>Root string.");
 		});
 
 		test("VDFNode_Level1_BaseValues", (assert?: QUnitAssert) =>
@@ -71,7 +71,7 @@ class Saving
 			a["int"] = new VDFNode("5");
 			a["float"] = new VDFNode(".5");
 			a["string"] = new VDFNode("Prop value string.");
-			a.ToString().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
+			a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		});
 
 		test("VDFNode_Level1_AnonymousTypeProperties", ()=>
@@ -81,7 +81,7 @@ class Saving
 			a["Int"].baseValue.Should().Be("5");
 			a["Float"].baseValue.Should().Be(".5");
 			a["String"].baseValue.Should().Be("Prop value string.");
-			a.ToString().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
+			a.ToVDF().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
 		});
 		
 		test("ToString_Level1_NullValues", ()=>
@@ -90,19 +90,19 @@ class Saving
 			a["obj"].baseValue.Should().Be("[#null]");
 			a["strings"].baseValue.Should().Be("[#null]");
 			equal(a["strings2"].baseValue, null); // it's just a VDFNode, with no children, representing a List
-			a.ToString().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
+			a.ToVDF().Should().Be("obj{[#null]}strings{[#null]}strings2{}");
 		});
 		test("ToString_Level1_ListItems_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new List<string>("string", null));
 			a[0].baseValue.Should().Be("[#null]");
-			a.ToString().Should().Be("[#null]");
+			a.ToVDF().Should().Be("[#null]");
 		});
 		test("ToString_Level1_DictionaryValues_Null", () =>
 		{
 			var a = VDFSaver.ToVDFNode(new Dictionary<string, string>("string", "string", ["key1", null]));
 			a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
-			a.ToString().Should().Be("{key1|[#null]}");
+			a.ToVDF().Should().Be("{key1|[#null]}");
 		});
 	}
 }

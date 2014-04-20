@@ -48,12 +48,12 @@
 		this[key] = value;
 	}
 
-	GetDictionaryValueNode(key): VDFNode { return this.items.filter((item, index, array)=>item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString())[0].items[1]; } // base equality on whether their 'default output' is the same
+	GetDictionaryValueNode(key): VDFNode { return this.items.filter((item, index, array)=>item.items[0].ToVDF() == VDFSaver.ToVDFNode(key).ToVDF())[0].items[1]; } // base equality on whether their 'default output' is the same
 	SetDictionaryValueNode(key, valueNode: VDFNode): void
 	{
 		var keyNode = VDFSaver.ToVDFNode(key);
 		if (this.items.contains(keyNode))
-			this.items.filter((item, index, array) => item.items[0].ToString() == VDFSaver.ToVDFNode(key).ToString())[0].SetItem(1, valueNode);
+			this.items.filter((item, index, array) => item.items[0].ToVDF() == VDFSaver.ToVDFNode(key).ToVDF())[0].SetItem(1, valueNode);
 		else
 		{
 			var newNode = new VDFNode();
@@ -69,6 +69,7 @@
 	set AsFloat(value: number) { this.baseValue = value.toString(); }
 	get AsString() { return this.baseValue; }
 	set AsString(value: string) { this.baseValue = value; }
+	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
 
 	// saving
 	// ==================
@@ -142,7 +143,7 @@
 			builder.Append(i2 == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i2]); // line-breaks + indents + data
 		return builder.ToString();
 	}
-	ToString(): string
+	ToVDF(): string
 	{
 		var poppedOutItemText: string = this.GetPoppedOutItemText();
 		return this.GetInLineItemText() + (poppedOutItemText.length > 0 ? "\n" + poppedOutItemText : "");

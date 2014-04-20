@@ -60,7 +60,7 @@ class VDF
 		return rawType;
 	}
 
-	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string { return VDFSaver.ToVDFNode(obj, saveOptions).ToString(); }
+	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string { return VDFSaver.ToVDFNode(obj, saveOptions).ToVDF(); }
 	static Deserialize<T>(vdf: string, realVTypeName: string, loadOptions?: VDFLoadOptions): string { return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions); }
 }
 

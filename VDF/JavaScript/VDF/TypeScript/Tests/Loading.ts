@@ -50,7 +50,7 @@ class Loading
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.baseValue.Should().Be("Root string.");
 			a.items[0].baseValue.Should().Be("Root string.");
-			a.ToString().Should().Be("Root string."); // it should print only the base-value
+			a.ToVDF().Should().Be("Root string."); // it should print only the base-value
 		});
 		test("VDFNode_Level0_Metadata_Type", ()=>
 		{
