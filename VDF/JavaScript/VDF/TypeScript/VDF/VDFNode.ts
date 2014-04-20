@@ -172,7 +172,8 @@
 	}
 	static CreateNewInstanceOfType(typeName: string)
 	{
-		if (["bool", "float", "string"].contains(typeName) || EnumValue.IsEnum(typeName)) // no need to "instantiate" primitives and enums (we create them straight-forwardly later on)
+		// no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
+		if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
 			return null;
 		var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
 		if (typeName.startsWith("List["))
@@ -196,8 +197,10 @@
 				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, vdfNode.baseValue);
 			else if (declaredTypeName == "bool")
 				result = vdfNode.baseValue == "true" ? true : false;
-			else // if no specific handler, try auto-converting string to the correct (primitive) type
-				result = declaredTypeName == "float" ? parseFloat(vdfNode.baseValue) : vdfNode.baseValue;
+			else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(declaredTypeName)) // if number
+				result = parseFloat(vdfNode.baseValue);
+			else // must be a string or char
+				result = vdfNode.baseValue;
 		}
 		return result;
 	}
@@ -219,8 +222,8 @@
 				(<Dictionary<any, any>>result).set(VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
 			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
 				result = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], type, loadOptions);
-		for (var propName in this.properties)
-			result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
+		for (var propName in this.properties) // for below; if prop-info not specified, consider its declared-type to be 'object'
+			result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo && typeInfo.propInfoByPropName[propName] ? typeInfo.propInfoByPropName[propName].propVTypeName : "object", loadOptions);
 
 		return result;
 	}

@@ -17,7 +17,7 @@ interface Object
 Object.defineProperty(Object.prototype, "_AddItem", // note; these functions should by default add non-enumerable properties/items
 {
 	enumerable: false,
-	value: function(name, value, forceAdd?)
+	value: function(name, value, forceAdd = true)
 	{
 		if (this[name] && forceAdd)
 			delete this[name];
@@ -29,10 +29,10 @@ Object.defineProperty(Object.prototype, "_AddItem", // note; these functions sho
 			});
 	}
 });
-Object.prototype._AddItem("_AddFunction", function(func, forceAdd?) { this._AddItem(func.name || func.toString().match(/^function\s*([^\s(]+)/)[1], func, forceAdd); });
+Object.prototype._AddItem("_AddFunction", function(func, forceAdd = true) { this._AddItem(func.name || func.toString().match(/^function\s*([^\s(]+)/)[1], func, forceAdd); });
 
 // the below lets you do stuff like this: Array.prototype._AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
-Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd?)
+Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd = true)
 {
 	var name = (getter || setter).name || (getter || setter).toString().match(/^function\s*([^\s(]+)/)[1];
 	if (this[name] && forceAdd)
@@ -47,7 +47,7 @@ Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd
 });
 
 // the below lets you do stuff like this: Array.prototype._AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
-Object.prototype._AddGetterSetter(null, function _AddFunction_Inline(func) { this._AddFunction(func); });
+Object.prototype._AddGetterSetter(null, function _AddFunction_Inline(func) { this._AddFunction(func, true); });
 Object.prototype._AddGetterSetter(null, function _AddGetter_Inline(func) { this._AddGetterSetter(func, null); });
 Object.prototype._AddGetterSetter(null, function _AddSetter_Inline(func) { this._AddGetterSetter(null, func); });
 

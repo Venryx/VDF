@@ -151,7 +151,7 @@ public class VDFNode
 				result = VDF.typeImporters_inline[declaredType](vdfNode.baseValue); //(string)vdfNode);
 			else if (declaredType.IsEnum)
 				result = Enum.Parse(declaredType, vdfNode.baseValue);
-			else // if no specific handler, try auto-converting string to the correct (primitive) type
+			else // if no specific handler, try auto-converting string to the correct (string-or-primitive) type
 				result = Convert.ChangeType(vdfNode.baseValue, declaredType);
 		}
 		return result;

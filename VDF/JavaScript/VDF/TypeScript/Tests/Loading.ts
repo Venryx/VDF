@@ -1,4 +1,4 @@
-﻿interface Object { Should(): { obj: any; Be(value, message?: string); } }
+﻿interface Object { Should(): { obj: any; Be(value, message?: string); BeExactly(value, message?: string); } }
 /*window["oldTest"] = test;
 window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual test func
 {
@@ -13,7 +13,14 @@ class Loading
 		if (this.initialized)
 			return;
 		this.initialized = true;
-		Object.prototype._AddFunction_Inline = function Should() { return { Be: (value, message?: string) => { equal(this instanceof String ? this.toString() : this, value, message); } }; }
+		Object.prototype._AddFunction_Inline = function Should()
+		{
+			return 0 || // fix for auto-semicolon-insertion
+			{
+				Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
+				BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
+			};
+		};
 		VDF.RegisterTypeExporter_Inline("Guid", id => id.ToString());
 		VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
 		VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);
@@ -174,5 +181,13 @@ class Loading
 
 		test("FullLoad_Level0_Bool", ()=> { VDF.Deserialize<boolean>("true", "bool").Should().Be(true); });
 		test("FullLoad_Level0_Float", ()=> { VDF.Deserialize<number>("1.5", "float").Should().Be(1.5); });
+
+		// unique to JavaScript version; todo
+		test("FullLoad_AsObject", ()=>
+		{
+			var a = <any>VDF.Deserialize<Object>("bool{<bool>false}int{<int>3.5}", "object");
+			a.bool.Should().Be(false);
+			a.int.Should().BeExactly(3.5);
+		});
 	}
 }

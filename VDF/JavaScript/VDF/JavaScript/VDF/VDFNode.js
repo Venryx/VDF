@@ -176,7 +176,8 @@
         return genericArgumentTypes;
     };
     VDFNode.CreateNewInstanceOfType = function (typeName) {
-        if (["bool", "float", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
+        // no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
+        if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
             return null;
         var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
         if (typeName.startsWith("List["))
@@ -198,8 +199,10 @@
                 result = EnumValue.GetEnumIntForStringValue(declaredTypeName, vdfNode.baseValue);
             else if (declaredTypeName == "bool")
                 result = vdfNode.baseValue == "true" ? true : false;
+            else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(declaredTypeName))
+                result = parseFloat(vdfNode.baseValue);
             else
-                result = declaredTypeName == "float" ? parseFloat(vdfNode.baseValue) : vdfNode.baseValue;
+                result = vdfNode.baseValue;
         }
         return result;
     };
@@ -221,7 +224,7 @@
             else
                 result = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], type, loadOptions);
         for (var propName in this.properties)
-            result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo.propInfoByPropName[propName].propVTypeName, loadOptions);
+            result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo && typeInfo.propInfoByPropName[propName] ? typeInfo.propInfoByPropName[propName].propVTypeName : "object", loadOptions);
 
         return result;
     };

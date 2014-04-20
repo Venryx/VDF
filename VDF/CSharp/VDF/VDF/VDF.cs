@@ -116,6 +116,8 @@ public static class VDF
 			return saveOptions.typeAliasesByType[type];
 		if (builtInTypeAliasesByType.ContainsKey(type))
 			return builtInTypeAliasesByType[type];
+		if (type.Name.StartsWith("<>")) // if anonymous type, return null, as the name would not be usable (note; this may not actually be true; should test it sometime)
+			return null;
 
 		var rootType = type.IsGenericType ? Type.GetType(type.FullName.Substring(0, type.FullName.IndexOf("["))) : type;
 		if (type.IsGenericType && saveOptions.typeAliasesByType.ContainsKey(rootType))

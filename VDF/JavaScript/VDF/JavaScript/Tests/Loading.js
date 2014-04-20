@@ -13,9 +13,14 @@ var Loading = (function () {
         this.initialized = true;
         Object.prototype._AddFunction_Inline = function Should() {
             var _this = this;
-            return { Be: function (value, message) {
-                    equal(_this instanceof String ? _this.toString() : _this, value, message);
-                } };
+            return 0 || {
+                Be: function (value, message) {
+                    equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+                },
+                BeExactly: function (value, message) {
+                    strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+                }
+            };
         };
         VDF.RegisterTypeExporter_Inline("Guid", function (id) {
             return id.ToString();
@@ -164,6 +169,13 @@ var Loading = (function () {
         });
         test("FullLoad_Level0_Float", function () {
             VDF.Deserialize("1.5", "float").Should().Be(1.5);
+        });
+
+        // unique to JavaScript version; todo
+        test("FullLoad_AsObject", function () {
+            var a = VDF.Deserialize("bool{<bool>false}int{<int>3.5}", "object");
+            a.bool.Should().Be(false);
+            a.int.Should().BeExactly(3.5);
         });
     };
     return Loading;

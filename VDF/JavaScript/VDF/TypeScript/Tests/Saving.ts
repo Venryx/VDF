@@ -25,7 +25,14 @@ class Saving
 		if (this.initialized)
 			return;
 		this.initialized = true;
-		Object.prototype._AddFunction_Inline = function Should() { return { Be: (value, message?: string) => { equal(this instanceof String ? this.toString() : this, value, message); } }; }
+		Object.prototype._AddFunction_Inline = function Should()
+		{
+			return 0 || // fix for auto-semicolon-insertion
+			{
+				Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
+				BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
+			};
+		};
 		VDF.RegisterTypeExporter_Inline("Guid", id => id.ToString());
 		VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
 		VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);
@@ -74,7 +81,7 @@ class Saving
 			a["Int"].baseValue.Should().Be("5");
 			a["Float"].baseValue.Should().Be(".5");
 			a["String"].baseValue.Should().Be("Prop value string.");
-			a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+			a.ToString().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
 		});
 		
 		test("ToString_Level1_NullValues", ()=>

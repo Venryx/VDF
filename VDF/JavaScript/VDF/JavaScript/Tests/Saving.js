@@ -24,9 +24,14 @@ var Saving = (function () {
         this.initialized = true;
         Object.prototype._AddFunction_Inline = function Should() {
             var _this = this;
-            return { Be: function (value, message) {
-                    equal(_this instanceof String ? _this.toString() : _this, value, message);
-                } };
+            return 0 || {
+                Be: function (value, message) {
+                    equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+                },
+                BeExactly: function (value, message) {
+                    strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+                }
+            };
         };
         VDF.RegisterTypeExporter_Inline("Guid", function (id) {
             return id.ToString();
@@ -76,7 +81,7 @@ var Saving = (function () {
             a["Int"].baseValue.Should().Be("5");
             a["Float"].baseValue.Should().Be(".5");
             a["String"].baseValue.Should().Be("Prop value string.");
-            a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+            a.ToString().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
         });
 
         test("ToString_Level1_NullValues", function () {

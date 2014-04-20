@@ -18,7 +18,6 @@
     if (window["OnVDFReady"])
         window["OnVDFReady"]();
 })(VDF_SetUp || (VDF_SetUp = {}));
-
 var VDF = (function () {
     function VDF() {
     }
@@ -40,7 +39,7 @@ var VDF = (function () {
             if (type == "Boolean")
                 return "bool";
             if (type == "Number")
-                return "float";
+                return obj.toString().contains(".") ? "float" : "int";
             if (type == "String")
                 return "string";
             return type;
@@ -48,7 +47,7 @@ var VDF = (function () {
         if (rawType == "boolean")
             return "bool";
         if (rawType == "number")
-            return "float";
+            return obj.toString().contains(".") ? "float" : "int";
         return rawType;
     };
 
@@ -66,6 +65,8 @@ var VDF = (function () {
     return VDF;
 })();
 
+// helper classes
+// ==================
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.data = [];
@@ -91,6 +92,13 @@ var StringBuilder = (function () {
     return StringBuilder;
 })();
 
+// VDF-usable data wrappers
+// ==================
+var object = (function () {
+    function object() {
+    }
+    return object;
+})();
 var EnumValue = (function () {
     function EnumValue(enumTypeName, intValue) {
         this.realVTypeName = enumTypeName;
@@ -113,7 +121,6 @@ var EnumValue = (function () {
     };
     return EnumValue;
 })();
-
 var List = (function () {
     function List(itemType) {
         var items = [];
@@ -189,7 +196,6 @@ var List = (function () {
     };
     return List;
 })();
-
 var Dictionary = (function () {
     function Dictionary(keyType, valueType) {
         var keyValuePairs = [];

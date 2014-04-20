@@ -19,9 +19,9 @@ var VDFSaver = (function () {
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
         else if (objVTypeName == "bool")
             objNode.baseValue = obj.toString().toLowerCase();
-        else if (objVTypeName == "float" && obj.toString().contains("."))
+        else if (["float", "double", "decimal"].contains(objVTypeName))
             objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
-        else if (objVTypeName == "float" || objVTypeName == "string" || obj.GetTypeName() == "EnumValue")
+        else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName) || obj.GetTypeName() == "EnumValue")
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(obj.toString());
         else if (objVTypeName.startsWith("List[")) {
             objNode.isListOrDictionary = true;
@@ -91,7 +91,7 @@ var VDFSaver = (function () {
                 if (typeof obj[propName] == "function")
                     continue;
 
-                var propInfo = typeInfo.propInfoByPropName[propName] || new VDFPropInfo(null);
+                var propInfo = typeInfo.propInfoByPropName[propName] || new VDFPropInfo("object");
                 var include = typeInfo.props_includeL1;
                 include = propInfo.includeL2 != null ? propInfo.includeL2 : include;
                 if (!include)

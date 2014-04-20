@@ -46,15 +46,19 @@ namespace VDFTests
 			a["string"] = new VDFNode {baseValue = "Prop value string."};
 			a.ToString().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		}
-
-		[Fact] void ToString_Level1_AnonymousTypeProperties()
+		[Fact] void ToString_Level1_AnonymousTypeProperties_MarkNoTypes()
 		{
-			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."});
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{saveTypesFor = VDFTypes.None});
 			a["Bool"].baseValue.Should().Be("false");
 			a["Int"].baseValue.Should().Be("5");
 			a["Float"].baseValue.Should().Be(".5");
 			a["String"].baseValue.Should().Be("Prop value string.");
 			a.ToString().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+		}
+		[Fact] void ToString_Level1_AnonymousTypeProperties_MarkAllTypes()
+		{
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{saveTypesFor = VDFTypes.All});
+			a.ToString().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
 		}
 		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
 		[Fact] void ToString_Level1_NullValues()

@@ -4,7 +4,8 @@ module VDF_SetUp
 	Object.defineProperty(Object.prototype, "GetTypeName", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
 	{
 		enumerable: false,
-		value: function () {
+		value: function ()
+		{
 			var results = this["constructor"].toString().match(/function (.{1,})\(/);
 			return (results && results.length > 1) ? results[1] : "";
 		}
@@ -22,7 +23,6 @@ module VDF_SetUp
 	if (window["OnVDFReady"])
 		window["OnVDFReady"]();
 }
-
 class VDF
 {
 	static typeExporters_inline = {};
@@ -47,8 +47,8 @@ class VDF
 			var type = obj.GetTypeName();
 			if (type == "Boolean")
 				return "bool";
-			if (type == "Number")// for now just mark all numbers as floats; note; numbers can't be derived from, so we'll never actually need to mark as "<number>" in metadata, except when part of a "List[object]", or when 'saveTypesForAllObjects' is set to true
-				return "float";
+			if (type == "Number")
+				return obj.toString().contains(".") ? "float" : "int";
 			if (type == "String")
 				return "string";
 			return type;
@@ -56,19 +56,16 @@ class VDF
 		if (rawType == "boolean")
 			return "bool";
 		if (rawType == "number")
-			return "float";
+			return obj.toString().contains(".") ? "float" : "int";
 		return rawType;
 	}
 
-	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string
-	{
-		return VDFSaver.ToVDFNode(obj, saveOptions).ToString();
-	}
-	static Deserialize<T>(vdf: string, realVTypeName: string, loadOptions?: VDFLoadOptions): string
-	{
-		return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions);
-	}
+	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string { return VDFSaver.ToVDFNode(obj, saveOptions).ToString(); }
+	static Deserialize<T>(vdf: string, realVTypeName: string, loadOptions?: VDFLoadOptions): string { return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions); }
 }
+
+// helper classes
+// ==================
 
 class StringBuilder
 {
@@ -85,6 +82,10 @@ class StringBuilder
 	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
 }
 
+// VDF-usable data wrappers
+// ==================
+
+class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
 class EnumValue
 {
 	realVTypeName: string; // prop-name is special; used to identify 'true' or 'represented' type of object
@@ -102,7 +103,6 @@ class EnumValue
 	static GetEnumIntForStringValue(enumTypeName: string, stringValue: string) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); }
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
-
 class List<T>
 {
 	private innerArray: any[];
@@ -139,7 +139,6 @@ class List<T>
 	remove(...args) { this.modifyInnerListWithCall(Array.prototype.remove, args); }
 	splice(...args) { this.modifyInnerListWithCall(Array.prototype.splice, args); }
 }
-
 class Dictionary<K, V>
 {
 	keyType: string;
