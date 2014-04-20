@@ -179,6 +179,10 @@ var Loading = (function () {
         });
 
         // unique to JavaScript version
+        test("ToVDFNode_Level0_UnknownTypeAsAnonymous", function () {
+            var a = VDFLoader.ToVDFNode("<UnknownType>string{Prop value string.}", new VDFLoadOptions(true));
+            a["string"].baseValue.Should().Be("Prop value string.");
+        });
         test("ToObject_AsObject", function () {
             var a = VDF.Deserialize("bool{<bool>false}int{<int>3.5}", "object");
             a.bool.Should().Be(false);

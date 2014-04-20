@@ -1,5 +1,7 @@
 ﻿var VDFLoadOptions = (function () {
-    function VDFLoadOptions() {
+    function VDFLoadOptions(loadUnknownTypesAsAnonymous) {
+        if (typeof loadUnknownTypesAsAnonymous === "undefined") { loadUnknownTypesAsAnonymous = false; }
+        this.loadUnknownTypesAsAnonymous = loadUnknownTypesAsAnonymous;
     }
     return VDFLoadOptions;
 })();

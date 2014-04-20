@@ -1,4 +1,11 @@
-﻿class VDFLoadOptions {}
+﻿class VDFLoadOptions
+{
+	loadUnknownTypesAsAnonymous: boolean;
+	constructor(loadUnknownTypesAsAnonymous: boolean = false)
+	{
+		this.loadUnknownTypesAsAnonymous = loadUnknownTypesAsAnonymous;
+	}
+}
 
 class VDFLoader
 {

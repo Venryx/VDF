@@ -188,9 +188,14 @@ class Loading
 		});
 
 		test("ToObject_Level0_Bool", ()=> { VDF.Deserialize<boolean>("true", "bool").Should().Be(true); });
-		test("ToObject_Level0_Float", () => { VDF.Deserialize<number>("1.5", "float").Should().Be(1.5); });
+		test("ToObject_Level0_Float", ()=> { VDF.Deserialize<number>("1.5", "float").Should().Be(1.5); });
 
 		// unique to JavaScript version
+		test("ToVDFNode_Level0_UnknownTypeAsAnonymous", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("<UnknownType>string{Prop value string.}", new VDFLoadOptions(true));
+			a["string"].baseValue.Should().Be("Prop value string.");
+		});
 		test("ToObject_AsObject", ()=>
 		{
 			var a = <any>VDF.Deserialize<Object>("bool{<bool>false}int{<int>3.5}", "object");

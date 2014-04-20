@@ -63,6 +63,7 @@
 			this.PushItem(newNode);
 		}
 	}
+	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
 	get AsBool() { return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "bool", null); }
 	set AsBool(value: boolean) { this.baseValue = value.toString(); }
 	get AsFloat() { return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "float", null); }
@@ -171,7 +172,7 @@
 		}
 		return genericArgumentTypes;
 	}
-	static CreateNewInstanceOfType(typeName: string)
+	static CreateNewInstanceOfType(typeName: string, loadOptions: VDFLoadOptions)
 	{
 		// no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
 		if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
@@ -181,7 +182,11 @@
 			return eval("new List(\"" + genericParameters[0] + "\")");
 		if (typeName.startsWith("Dictionary["))
 			return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
-		return eval("new " + typeName + "()");
+		if (window[typeName] instanceof Function) // if class found
+			return new window[typeName];
+		else if (loadOptions.loadUnknownTypesAsAnonymous)
+			return {};
+		throw new Error("Class \"" + typeName + "\" not found.");
 	}
 	static ConvertVDFNodeToCorrectType(vdfNode: VDFNode, declaredTypeName: string, loadOptions: VDFLoadOptions): any
 	{
@@ -215,7 +220,7 @@
 		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);
 		var typeInfo = (window[declaredTypeName] || {}).typeInfo;
 
-		var result = VDFNode.CreateNewInstanceOfType(type);
+		var result = VDFNode.CreateNewInstanceOfType(type, loadOptions);
 		for (var i = 0; i < this.items.length; i++)
 			if (type.startsWith("List["))
 				(<List<any>>result)[i] = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);

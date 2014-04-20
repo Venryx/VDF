@@ -64,7 +64,9 @@
             this.PushItem(newNode);
         }
     };
+
     Object.defineProperty(VDFNode.prototype, "AsBool", {
+        // in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
         get: function () {
             return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "bool", null);
         },
@@ -178,7 +180,7 @@
         }
         return genericArgumentTypes;
     };
-    VDFNode.CreateNewInstanceOfType = function (typeName) {
+    VDFNode.CreateNewInstanceOfType = function (typeName, loadOptions) {
         // no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
         if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
             return null;
@@ -187,7 +189,11 @@
             return eval("new List(\"" + genericParameters[0] + "\")");
         if (typeName.startsWith("Dictionary["))
             return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
-        return eval("new " + typeName + "()");
+        if (window[typeName] instanceof Function)
+            return new window[typeName];
+        else if (loadOptions.loadUnknownTypesAsAnonymous)
+            return {};
+        throw new Error("Class \"" + typeName + "\" not found.");
     };
     VDFNode.ConvertVDFNodeToCorrectType = function (vdfNode, declaredTypeName, loadOptions) {
         var result;
@@ -218,7 +224,7 @@
         var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);
         var typeInfo = (window[declaredTypeName] || {}).typeInfo;
 
-        var result = VDFNode.CreateNewInstanceOfType(type);
+        var result = VDFNode.CreateNewInstanceOfType(type, loadOptions);
         for (var i = 0; i < this.items.length; i++)
             if (type.startsWith("List["))
                 result[i] = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);

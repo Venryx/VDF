@@ -49,11 +49,11 @@ public static class VDFSaver
 			objNode.baseValue = "[#null]";
 		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
-		else if (type == typeof (bool))
+		else if (type == typeof(bool))
 			objNode.baseValue = obj.ToString().ToLower();
-		else if (type == typeof (float) || type == typeof (double) || type == typeof (decimal))
+		else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal)) // if floating-point primitive
 			objNode.baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString();
-		else if (type == typeof (string) || type.IsPrimitive) // string, or non-floating-point-primitive (i.e. char or integer-based number)
+		else if (type.IsPrimitive || type == typeof(string)) // if other primitive (i.e. char or integer-based number), or string
 			objNode.baseValue = RawDataStringToFinalized(obj.ToString());
 		else if (obj is IList) // note; this saves arrays also
 		{
