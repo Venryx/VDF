@@ -2,8 +2,8 @@
 {
 	None,
 	PoppedOutNodeMarker,
-	SpecialMetadataStartMarker,
-	SpecialMetadataEndMarker,
+	WiderMetadataStartMarker,
+	WiderMetadataEndMarker,
 	MetadataStartMarker,
 	Metadata_BaseValue,
 	MetadataEndMarker,
@@ -71,7 +71,7 @@ class VDFTokenParser
 			{
 				if (nextChar == '<')
 				{
-					tokenType = VDFTokenType.SpecialMetadataStartMarker;
+					tokenType = VDFTokenType.WiderMetadataStartMarker;
 					i++;
 				}
 				else
@@ -81,7 +81,7 @@ class VDFTokenParser
 			{
 				if (nextChar == '>')
 				{
-					tokenType = VDFTokenType.SpecialMetadataEndMarker;
+					tokenType = VDFTokenType.WiderMetadataEndMarker;
 					i++;
 				}
 				else

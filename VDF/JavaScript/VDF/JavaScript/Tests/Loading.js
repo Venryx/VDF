@@ -81,11 +81,12 @@ var Loading = (function () {
             a[1].metadata_type.Should().Be("int");
         });
         test("ToVDFNode_Level0_DictionaryItems", function () {
-            var a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
-            a[0][0].baseValue.Should().Be("key 1");
-            a[0][1].baseValue.Should().Be("value 1");
-            a[1][0].baseValue.Should().Be("key 2");
-            a[1][1].baseValue.Should().Be("value 2");
+            var a = VDFLoader.ToVDFNode("{key1|Simple string.}{key2|name{Dan}age{50}}");
+            a[0][0].baseValue.Should().Be("key1");
+            a[0][1].baseValue.Should().Be("Simple string.");
+            a[1][0].baseValue.Should().Be("key2");
+            a[1][1]["name"].baseValue.Should().Be("Dan");
+            a[1][1]["age"].AsFloat.Should().Be(50);
         });
         test("ToVDFNode_Level0_DictionaryItems_GetByKey", function () {
             var a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
@@ -188,6 +189,10 @@ var Loading = (function () {
             a.bool.Should().Be(false);
             a.int.Should().BeExactly(3.5);
         });
+        /*test("ToObject_AsObject_DeepNesting", ()=>
+        {
+        var a = <any>VDF.Deserialize<Object>("id{1.1.1}name{Soils}children{id{1.1.1.1}name{Grass}duties{name{Grass}texturePath{Soils/Grass.jpg}}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}", "object");
+        });*/
     };
     return Loading;
 })();

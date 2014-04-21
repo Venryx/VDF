@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 public class VDFLoadOptions
 {
@@ -19,7 +17,11 @@ public class VDFLoadOptions
 
 public static class VDFLoader
 {
-	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0) { int temp = 0; return ToVDFNode(vdfFile, loadOptions, firstObjTextCharPos, ref temp); }
+	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0)
+	{
+		int temp = 0;
+		return ToVDFNode(vdfFile, loadOptions, firstObjTextCharPos, ref temp);
+	}
 	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, int firstObjTextCharPos, ref int parentPoppedOutPropValueCount)
 	{
 		vdfFile = vdfFile.Replace("\r\n", "\n");
@@ -29,12 +31,10 @@ public static class VDFLoader
 		var objNode = new VDFNode();
 
 		int depth = 0;
+		var liveItemNode = new VDFNode();
+		string liveItemPropName = null;
 		int poppedOutPropValueCount = 0;
-		string livePropName = null;
-		VDFNode livePropValueNode = null;
-		bool hasWiderMetadata = false;
-		bool lastMetadata_type_isWide = false;
-		string lastMetadata_type = null;
+		VDFNode liveItemPropValueNode = null;
 		var lastMetadataStartToken = VDFTokenType.None;
 
 		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
@@ -43,85 +43,89 @@ public static class VDFLoader
 			VDFToken lastToken = parser.tokens.Count > 1 ? parser.tokens[parser.tokens.Count - 2] : null;
 			VDFToken token = parser.tokens.Last();
 			if (token.type == VDFTokenType.DataEndMarker)
-				depth--; 
+				depth--;
 
 			if (depth < 0)
 				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			if (depth == 0)
 			{
-				if ((lastToken == null || lastToken.type == VDFTokenType.ItemSeparator) && token.type == VDFTokenType.ItemSeparator) // special case; if there's an empty area where our value data should be
-					objNode.items.Add(new VDFNode {baseValue = "", metadata_type = lastMetadata_type});
-				if (token.type == VDFTokenType.ItemSeparator && (parser.nextCharPos >= vdfFile.Length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n'))
-						objNode.items.Add(new VDFNode { baseValue = "" });
+				if (token.type == VDFTokenType.ItemSeparator)
+				{
+					if (liveItemNode.metadata_type == null && liveItemNode.baseValue == null && liveItemNode.items.Count == 0 && liveItemNode.properties.Count == 0) // special case; if the item we're just now wrapping up had no value set
+						liveItemNode.baseValue = "";
+					objNode.items.Add(liveItemNode);
+					liveItemNode = new VDFNode();
+					if (parser.nextCharPos >= vdfFile.Length || new[] {'|', '}', '\n'}.Contains(vdfFile[parser.nextCharPos])) // special case; if we see that the next item has no text representing it, set its base-value to ""
+						liveItemNode.baseValue = "";
+				}
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.WiderMetadataStartMarker)
-				{
-					if (token.type == VDFTokenType.WiderMetadataStartMarker)
-						hasWiderMetadata = true;
 					lastMetadataStartToken = token.type;
-					lastMetadata_type_isWide = token.type == VDFTokenType.WiderMetadataStartMarker;
-				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
-				{
-					var type = VDF.GetTypeByVName(token.text, loadOptions); //Type.GetType(vdfToken.text);
-					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.WiderMetadataStartMarker || (!typeof (IList).IsAssignableFrom(type) && !typeof (IDictionary).IsAssignableFrom(type))))
+					if (lastMetadataStartToken == VDFTokenType.WiderMetadataStartMarker)
 						objNode.metadata_type = token.text;
-					lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
-				}
+					else
+						liveItemNode.metadata_type = token.text;
 				else if (token.type == VDFTokenType.Data_BaseValue)
-				{
 					if (token.text == "#")
 					{
-						//objNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
+						//liveItemNode.children.Add(token.text); // don't need to load marker itself as child, as it was just to let the person change the visual layout in-file
 						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentPoppedOutPropValueCount);
 						foreach (int pos in poppedOutPropValueItemTextPositions)
 							objNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos, ref poppedOutPropValueCount));
 						parentPoppedOutPropValueCount++;
 					}
 					else
-					{
-						// note; slightly messy, but seems the best practically; if only one base-like-value as obj's data, and obj does not have wider-metadata (i.e. isn't List or Dictionary), then include it both as obj's base-value and as its solitary item
-						if (objNode.items.Count == 0 && !hasWiderMetadata)
-						{
-							objNode.baseValue = token.text;
-							objNode.metadata_type = lastMetadata_type;
-							objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type});
-						}
-						else // if it turns out there was more than one item
-						{
-							if (objNode.baseValue != null) // if we already put the first-item as obj's base-value, remove it
-							{
-								objNode.baseValue = null;
-								objNode.metadata_type = null;
-							}
-							objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type_isWide ? null : lastMetadata_type});
-						}
-					}
-				}
+						liveItemNode.baseValue = token.text;
 				else if (token.type == VDFTokenType.Data_PropName)
 				{
-					livePropName = token.text;
-					livePropValueNode = new VDFNode();
+					liveItemPropName = token.text;
+					liveItemPropValueNode = new VDFNode();
 				}
 				else if (token.type == VDFTokenType.DataStartMarker)
-					livePropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, ref poppedOutPropValueCount);
+					if (liveItemPropName != null) // if data of a prop
+						liveItemPropValueNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, ref poppedOutPropValueCount);
+					else // if data of an item
+					{
+						if (lastToken != null && lastToken.type == VDFTokenType.DataEndMarker) // if starting another key-value-pair-pseudo-object of a dictionary, be sure to add last one
+							objNode.items.Add(liveItemNode);
+						liveItemNode = ToVDFNode(vdfFile, loadOptions, parser.nextCharPos, ref poppedOutPropValueCount);
+					}
 				else if (token.type == VDFTokenType.DataEndMarker)
 				{
-					if (livePropName != null) // property of object
+					if (liveItemPropName != null) // property of object
 					{
 						//if (livePropValueNode.items.Count > 0 || livePropValueNode.properties.Count > 0) // only add properties if the property-value node has items or properties of its own (i.e. data)
-						objNode.properties.Add(livePropName, livePropValueNode);
-						livePropName = null;
-						livePropValueNode = null;
+						liveItemNode.properties.Add(liveItemPropName, liveItemPropValueNode);
+						liveItemPropName = null;
+						liveItemPropValueNode = null;
 					}
-					else // must be key-value-pair-pseudo-object of a dictionary
-						objNode.items.Add(livePropValueNode);
+					else if (liveItemPropValueNode != null) // must be item-of-type-list of a list, or key-value-pair-pseudo-object of a dictionary
+						liveItemNode.items.Add(liveItemPropValueNode);
 				}
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 					break;
 			}
 			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
+		}
+		// add final item, if not yet added
+		if (liveItemNode.metadata_type != null || liveItemNode.baseValue != null || liveItemNode.items.Count > 0 || liveItemNode.properties.Count > 0)
+		{
+			if (liveItemNode.metadata_type == null && liveItemNode.baseValue == null && liveItemNode.items.Count == 0 && liveItemNode.properties.Count == 0) // special case; if the item we're just now wrapping up had no value set
+				liveItemNode.baseValue = "";
+			objNode.items.Add(liveItemNode);
+		}
+
+		// note; slightly messy, but seems the best practically; if only one value as obj's data, and obj does not have wider-metadata (i.e. isn't List or Dictionary), then include it both as obj's value and as its solitary item's value
+		if (objNode.items.Count == 1) // if only one child, and child is not a list
+		{
+			objNode.baseValue = objNode.items[0].baseValue;
+			if (objNode.items[0].items.Count == 0) // don't grab metadata from something that has its own items
+			{
+				objNode.metadata_type = objNode.items[0].metadata_type;
+				objNode.properties = objNode.items[0].properties;
+			}
 		}
 
 		return objNode;
@@ -155,26 +159,23 @@ public static class VDFLoader
 				indentsOnThisLine = 0;
 			else if (ch == '\t')
 				indentsOnThisLine++;
-			else
+			else if (indentsOnThisLine == parentIndentDepth + 1)
 			{
-				if (indentsOnThisLine == parentIndentDepth + 1)
-				{
-					if (poppedOutChildDatasReached == 0 || ch == '#')
-						poppedOutChildDatasReached++;
-					if (poppedOutChildDatasReached == poppedOutChildDataIndex + 1)
-						result.Add(i);
-					if (poppedOutChildDatasReached > poppedOutChildDataIndex + 1) // we just finished processing the given popped-out child-data, so break
-						break;
-
-					int nextLineBreakCharPos = FindNextLineBreakCharPos(vdfFile, i);
-					if (nextLineBreakCharPos != -1)
-						i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
-					else
-						break; // last line, so break
-				}
-				else if (indentsOnThisLine <= parentIndentDepth) // we've reached a peer of the parent, so break
+				if (poppedOutChildDatasReached == 0 || ch == '#')
+					poppedOutChildDatasReached++;
+				if (poppedOutChildDatasReached == poppedOutChildDataIndex + 1)
+					result.Add(i);
+				if (poppedOutChildDatasReached > poppedOutChildDataIndex + 1) // we just finished processing the given popped-out child-data, so break
 					break;
+
+				int nextLineBreakCharPos = FindNextLineBreakCharPos(vdfFile, i);
+				if (nextLineBreakCharPos != -1)
+					i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
+				else
+					break; // last line, so break
 			}
+			else if (indentsOnThisLine <= parentIndentDepth) // we've reached a peer of the parent, so break
+				break;
 		}
 
 		return result;

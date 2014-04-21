@@ -25,6 +25,16 @@
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(VDFNode.prototype, "propertyCount", {
+        get: function () {
+            var result = 0;
+            for (var key in this.properties)
+                result++;
+            return result;
+        },
+        enumerable: true,
+        configurable: true
+    });
 
     VDFNode.prototype.SetItem = function (index, value) {
         this.items[index] = value;
@@ -196,19 +206,20 @@
         throw new Error("Class \"" + typeName + "\" not found.");
     };
     VDFNode.ConvertVDFNodeToCorrectType = function (vdfNode, declaredTypeName, loadOptions) {
+        var finalTypeName = vdfNode.metadata_type || declaredTypeName;
         var result;
         if (vdfNode.baseValue == null)
-            result = vdfNode.ToObject(vdfNode.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
+            result = vdfNode.ToObject(finalTypeName, loadOptions); // tell node to return itself as the correct type
         else {
             if (vdfNode.baseValue == "[#null]")
                 result = null;
-            else if (VDF.typeImporters_inline[declaredTypeName])
-                result = VDF.typeImporters_inline[declaredTypeName](vdfNode.baseValue); //(string)vdfNode);
-            else if (EnumValue.IsEnum(declaredTypeName))
-                result = EnumValue.GetEnumIntForStringValue(declaredTypeName, vdfNode.baseValue);
-            else if (declaredTypeName == "bool")
+            else if (VDF.typeImporters_inline[finalTypeName])
+                result = VDF.typeImporters_inline[finalTypeName](vdfNode.baseValue); //(string)vdfNode);
+            else if (EnumValue.IsEnum(finalTypeName))
+                result = EnumValue.GetEnumIntForStringValue(finalTypeName, vdfNode.baseValue);
+            else if (finalTypeName == "bool")
                 result = vdfNode.baseValue == "true" ? true : false;
-            else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(declaredTypeName))
+            else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName))
                 result = parseFloat(vdfNode.baseValue);
             else
                 result = vdfNode.baseValue;
@@ -221,8 +232,11 @@
             loadOptions = new VDFLoadOptions();
 
         var type = this.metadata_type || declaredTypeName;
-        var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);
-        var typeInfo = (window[declaredTypeName] || {}).typeInfo;
+
+        //if (this.items && this.items.length > 1) // we can infer we're a list; todo; look more carefully into how to implement type inference
+        //	type = "List[object]";
+        var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(type);
+        var typeInfo = (window[type] || {}).typeInfo;
 
         var result = VDFNode.CreateNewInstanceOfType(type, loadOptions);
         for (var i = 0; i < this.items.length; i++)
@@ -238,7 +252,7 @@
         return result;
     };
     VDFNode.builtInProps = [
-        "metadata_type", "baseValue", "items", "properties", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
+        "metadata_type", "baseValue", "items", "properties", "propertyCount", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
         "isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode"];
     return VDFNode;
 })();

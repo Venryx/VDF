@@ -149,19 +149,20 @@ public class VDFNode
 	}
 	static object ConvertVDFNodeToCorrectType(VDFNode vdfNode, Type declaredType, VDFLoadOptions loadOptions)
 	{
+		var finalType = vdfNode.metadata_type != null ? VDF.GetTypeByVName(vdfNode.metadata_type, loadOptions) : declaredType;
 		object result;
 		if (vdfNode.baseValue == null)
-			result = vdfNode.ToObject(vdfNode.metadata_type != null ? VDF.GetTypeByVName(vdfNode.metadata_type, loadOptions) : declaredType, loadOptions); // tell node to return itself as the correct type
+			result = vdfNode.ToObject(finalType, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string
 		{
 			if (vdfNode.baseValue == "[#null]") // special case for null-values
 				result = null;
-			else if (VDF.typeImporters_inline.ContainsKey(declaredType))
-				result = VDF.typeImporters_inline[declaredType](vdfNode.baseValue); //(string)vdfNode);
-			else if (declaredType.IsEnum)
-				result = Enum.Parse(declaredType, vdfNode.baseValue);
+			else if (VDF.typeImporters_inline.ContainsKey(finalType))
+				result = VDF.typeImporters_inline[finalType](vdfNode.baseValue); //(string)vdfNode);
+			else if (finalType.IsEnum)
+				result = Enum.Parse(finalType, vdfNode.baseValue);
 			else // if no specific handler, try auto-converting string to the correct (string-or-primitive) type
-				result = Convert.ChangeType(vdfNode.baseValue, declaredType);
+				result = Convert.ChangeType(vdfNode.baseValue, finalType);
 		}
 		return result;
 	}

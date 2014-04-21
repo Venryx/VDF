@@ -95,7 +95,7 @@ class Saving
 			a[0].baseValue.Should().Be("[#null]");
 			a.ToVDF().Should().Be("[#null]");
 		});
-		test("ToVDF_Level1_DictionaryValues_Null", () =>
+		test("ToVDF_Level1_DictionaryValues_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new Dictionary<string, string>("string", "string", ["key1", null]));
 			a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");

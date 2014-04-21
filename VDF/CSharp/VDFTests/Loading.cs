@@ -50,6 +50,14 @@ namespace VDFTests
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
 		}
+		[Fact] void ToVDFNode_Level0_ArrayItems_Objects()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("name{Dan}age{50}|name{Bob}age{60}");
+			((string)a[0]["name"]).Should().Be("Dan");
+			((int)a[0]["age"]).Should().Be(50);
+			((string)a[1]["name"]).Should().Be("Bob");
+			((int)a[1]["age"]).Should().Be(60);
+		}
 		[Fact] void ToVDFNode_Level0_ArrayItems_Empty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("|");
@@ -72,11 +80,12 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level0_DictionaryItems()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
-			a[0][0].baseValue.Should().Be("key 1");
-			a[0][1].baseValue.Should().Be("value 1");
-			a[1][0].baseValue.Should().Be("key 2");
-			a[1][1].baseValue.Should().Be("value 2");
+			VDFNode a = VDFLoader.ToVDFNode("{key1|Simple string.}{key2|name{Dan}age{50}}");
+			a[0][0].baseValue.Should().Be("key1");
+			a[0][1].baseValue.Should().Be("Simple string.");
+			a[1][0].baseValue.Should().Be("key2");
+			((string)a[1][1]["name"]).Should().Be("Dan");
+			((int)a[1][1]["age"]).Should().Be(50);
 		}
 		[Fact] void ToVDFNode_Level0_DictionaryItems_GetByKey()
 		{

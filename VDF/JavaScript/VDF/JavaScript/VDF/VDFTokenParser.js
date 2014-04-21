@@ -2,8 +2,8 @@
 (function (VDFTokenType) {
     VDFTokenType[VDFTokenType["None"] = 0] = "None";
     VDFTokenType[VDFTokenType["PoppedOutNodeMarker"] = 1] = "PoppedOutNodeMarker";
-    VDFTokenType[VDFTokenType["SpecialMetadataStartMarker"] = 2] = "SpecialMetadataStartMarker";
-    VDFTokenType[VDFTokenType["SpecialMetadataEndMarker"] = 3] = "SpecialMetadataEndMarker";
+    VDFTokenType[VDFTokenType["WiderMetadataStartMarker"] = 2] = "WiderMetadataStartMarker";
+    VDFTokenType[VDFTokenType["WiderMetadataEndMarker"] = 3] = "WiderMetadataEndMarker";
     VDFTokenType[VDFTokenType["MetadataStartMarker"] = 4] = "MetadataStartMarker";
     VDFTokenType[VDFTokenType["Metadata_BaseValue"] = 5] = "Metadata_BaseValue";
     VDFTokenType[VDFTokenType["MetadataEndMarker"] = 6] = "MetadataEndMarker";
@@ -57,13 +57,13 @@ var VDFTokenParser = (function () {
 
             if (ch == '<') {
                 if (nextChar == '<') {
-                    tokenType = 2 /* SpecialMetadataStartMarker */;
+                    tokenType = 2 /* WiderMetadataStartMarker */;
                     i++;
                 } else
                     tokenType = 4 /* MetadataStartMarker */;
             } else if (ch == '>') {
                 if (nextChar == '>') {
-                    tokenType = 3 /* SpecialMetadataEndMarker */;
+                    tokenType = 3 /* WiderMetadataEndMarker */;
                     i++;
                 } else
                     tokenType = 6 /* MetadataEndMarker */;

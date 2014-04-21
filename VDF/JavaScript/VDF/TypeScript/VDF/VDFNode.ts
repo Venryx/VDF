@@ -1,6 +1,6 @@
 ﻿class VDFNode
 {
-	static builtInProps = ["metadata_type", "baseValue", "items", "properties", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
+	static builtInProps = ["metadata_type", "baseValue", "items", "properties", "propertyCount", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
 		"isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode"];
 
 	metadata_type: string;
@@ -20,6 +20,13 @@
 			if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) != key) // if not number-index
 				objWithPropKeys[key] = this[key];
 		return objWithPropKeys;
+	}
+	get propertyCount()
+	{
+		var result = 0;
+		for (var key in this.properties)
+			result++;
+		return result;
 	}
 
 	constructor(baseValue?: string, metadata_type?: string)
@@ -190,20 +197,21 @@
 	}
 	static ConvertVDFNodeToCorrectType(vdfNode: VDFNode, declaredTypeName: string, loadOptions: VDFLoadOptions): any
 	{
+		var finalTypeName = vdfNode.metadata_type || declaredTypeName;
 		var result;
 		if (vdfNode.baseValue == null)
-			result = vdfNode.ToObject(vdfNode.metadata_type || declaredTypeName, loadOptions); // tell node to return itself as the correct type
+			result = vdfNode.ToObject(finalTypeName, loadOptions); // tell node to return itself as the correct type
 		else // base-value must be a string
 		{
 			if (vdfNode.baseValue == "[#null]") // special case for null-values
 				result = null;
-			else if (VDF.typeImporters_inline[declaredTypeName])
-				result = VDF.typeImporters_inline[declaredTypeName](vdfNode.baseValue); //(string)vdfNode);
-			else if (EnumValue.IsEnum(declaredTypeName))
-				result = EnumValue.GetEnumIntForStringValue(declaredTypeName, vdfNode.baseValue);
-			else if (declaredTypeName == "bool")
+			else if (VDF.typeImporters_inline[finalTypeName])
+				result = VDF.typeImporters_inline[finalTypeName](vdfNode.baseValue); //(string)vdfNode);
+			else if (EnumValue.IsEnum(finalTypeName))
+				result = EnumValue.GetEnumIntForStringValue(finalTypeName, vdfNode.baseValue);
+			else if (finalTypeName == "bool")
 				result = vdfNode.baseValue == "true" ? true : false;
-			else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(declaredTypeName)) // if number
+			else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName)) // if number
 				result = parseFloat(vdfNode.baseValue);
 			else // must be a string or char
 				result = vdfNode.baseValue;
@@ -217,8 +225,10 @@
 			loadOptions = new VDFLoadOptions();
 
 		var type = this.metadata_type || declaredTypeName;
-		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(declaredTypeName);
-		var typeInfo = (window[declaredTypeName] || {}).typeInfo;
+		//if (this.items && this.items.length > 1) // we can infer we're a list; todo; look more carefully into how to implement type inference
+		//	type = "List[object]";
+		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(type);
+		var typeInfo = (window[type] || {}).typeInfo;
 
 		var result = VDFNode.CreateNewInstanceOfType(type, loadOptions);
 		for (var i = 0; i < this.items.length; i++)
