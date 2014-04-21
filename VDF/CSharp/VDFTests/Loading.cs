@@ -99,6 +99,15 @@ namespace VDFTests
 			Assert.True(a["float"] == .5f);
 			Assert.True(a["string"] == "Prop value string.");
 		}
+		[Fact]
+		void ToVDFNode_Level1_BaseValuesWithMarkedTypes()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("bool{<bool>false}int{<int>5}float{<float>.5}string{<string>Prop value string.}");
+			((bool)a["bool"]).Should().Be(false);
+			((int)a["int"]).Should().Be(5);
+			((float)a["float"]).Should().Be(.5f);
+			((string)a["string"]).Should().Be("Prop value string.");
+		}
 		[Fact] void ToVDFNode_Level1_Literal()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@}");

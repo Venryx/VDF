@@ -7,8 +7,8 @@ public enum VDFTokenType
 {
 	None,
 	PoppedOutNodeMarker,
-	SpecialMetadataStartMarker,
-	SpecialMetadataEndMarker,
+	WiderMetadataStartMarker,
+	WiderMetadataEndMarker,
 	MetadataStartMarker,
 	Metadata_BaseValue,
 	MetadataEndMarker,
@@ -75,7 +75,7 @@ public class VDFTokenParser
 			if (ch == '<')
 				if (nextChar == '<')
 				{
-					tokenType = VDFTokenType.SpecialMetadataStartMarker;
+					tokenType = VDFTokenType.WiderMetadataStartMarker;
 					i++;
 				}
 				else
@@ -83,7 +83,7 @@ public class VDFTokenParser
 			else if (ch == '>')
 				if (nextChar == '>')
 				{
-					tokenType = VDFTokenType.SpecialMetadataEndMarker;
+					tokenType = VDFTokenType.WiderMetadataEndMarker;
 					i++;
 				}
 				else
@@ -100,8 +100,8 @@ public class VDFTokenParser
 					tokenType = VDFTokenType.InLineComment;
 					i = FindNextLineBreakCharPos(vdf, i + 2); // since rest of line is comment, skip to first char of next line
 				}
-					//else if (ch == '\t')
-					//	tokenType = VDFTokenType.Indent;
+				//else if (ch == '\t')
+				//	tokenType = VDFTokenType.Indent;
 				else if (ch == '#' && lastChar == '\t')
 					tokenType = VDFTokenType.PoppedOutNodeMarker;
 				else if (ch == '|')

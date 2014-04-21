@@ -32,6 +32,8 @@ public static class VDFLoader
 		int poppedOutPropValueCount = 0;
 		string livePropName = null;
 		VDFNode livePropValueNode = null;
+		bool hasWiderMetadata = false;
+		bool lastMetadata_type_isWide = false;
 		string lastMetadata_type = null;
 		var lastMetadataStartToken = VDFTokenType.None;
 
@@ -52,15 +54,19 @@ public static class VDFLoader
 				if (token.type == VDFTokenType.ItemSeparator && (parser.nextCharPos >= vdfFile.Length || vdfFile[parser.nextCharPos] == '}' || vdfFile[parser.nextCharPos] == '\n'))
 						objNode.items.Add(new VDFNode { baseValue = "" });
 
-				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.SpecialMetadataStartMarker)
+				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.WiderMetadataStartMarker)
+				{
+					if (token.type == VDFTokenType.WiderMetadataStartMarker)
+						hasWiderMetadata = true;
 					lastMetadataStartToken = token.type;
+					lastMetadata_type_isWide = token.type == VDFTokenType.WiderMetadataStartMarker;
+				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
 				{
 					var type = VDF.GetTypeByVName(token.text, loadOptions); //Type.GetType(vdfToken.text);
-					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.SpecialMetadataStartMarker || (!typeof(IList).IsAssignableFrom(type) && !typeof(IDictionary).IsAssignableFrom(type))))
+					if (objNode.metadata_type == null && (lastMetadataStartToken == VDFTokenType.WiderMetadataStartMarker || (!typeof (IList).IsAssignableFrom(type) && !typeof (IDictionary).IsAssignableFrom(type))))
 						objNode.metadata_type = token.text;
-					else // if we're supposed to be finding these tokens as nodes, to fill list-obj
-						lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
+					lastMetadata_type = token.text; //Type.GetType(vdfToken.text);
 				}
 				else if (token.type == VDFTokenType.Data_BaseValue)
 				{
@@ -74,8 +80,8 @@ public static class VDFLoader
 					}
 					else
 					{
-						// note; slightly messy, but seems the best practically; if there's only one base-like-value as obj's data, and obj has no type metadata (i.e. it's not explicitly a list), then include it both as obj's base-value and as its solitary item
-						if (objNode.items.Count == 0 && objNode.metadata_type == null)
+						// note; slightly messy, but seems the best practically; if only one base-like-value as obj's data, and obj does not have wider-metadata (i.e. isn't List or Dictionary), then include it both as obj's base-value and as its solitary item
+						if (objNode.items.Count == 0 && !hasWiderMetadata)
 						{
 							objNode.baseValue = token.text;
 							objNode.metadata_type = lastMetadata_type;
@@ -88,7 +94,7 @@ public static class VDFLoader
 								objNode.baseValue = null;
 								objNode.metadata_type = null;
 							}
-							objNode.items.Add(new VDFNode { baseValue = token.text, metadata_type = lastMetadata_type });
+							objNode.items.Add(new VDFNode {baseValue = token.text, metadata_type = lastMetadata_type_isWide ? null : lastMetadata_type});
 						}
 					}
 				}
