@@ -51,6 +51,8 @@ class VDF
 				return obj.toString().contains(".") ? "float" : "int";
 			if (type == "String")
 				return "string";
+			if (type == "Object")
+				return "object";
 			return type;
 		}
 		if (rawType == "boolean")
