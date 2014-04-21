@@ -85,10 +85,6 @@ public static class VDF
 		if (loadOptions.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
 			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[]{'`'})[0];
 		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vName), loadOptions);
-		if (typeof(List<>).IsAssignableFrom(rootType)) // if type 'List' or a derivative, 'collapse' its VTypeName to 'List', since that is how we handle it
-			rootType = typeof(List<>);
-		else if (typeof(Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, 'collapse' its VTypeName to 'Dictionary', since that is how we handle it
-			rootType = typeof(Dictionary<,>);
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();
@@ -120,15 +116,32 @@ public static class VDF
 		if (type.Name.StartsWith("<>")) // if anonymous type, return null, as the name would not be usable (note; this may not actually be true; should test it sometime)
 			return null;
 
-		var rootType = type.IsGenericType ? Type.GetType(type.FullName.Substring(0, type.FullName.IndexOf("["))) : type;
-		if (type.IsGenericType && saveOptions.typeAliasesByType.ContainsKey(rootType))
-			return saveOptions.typeAliasesByType[rootType] + "[" + String.Join(",", type.GetGenericArguments().Select(type2 => GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
+		if (type.IsGenericType)
+		{
+			var rootType = Type.GetType(type.FullName.Substring(0, type.FullName.IndexOf("[")));
+			if (saveOptions.typeAliasesByType.ContainsKey(rootType))
+				return saveOptions.typeAliasesByType[rootType] + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
 
-		string result = type.IsGenericType ? type.FullName.Substring(0, type.FullName.IndexOf("`")) + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions)).ToArray()) + "]" : type.FullName;
-		foreach (KeyValuePair<string, string> pair in saveOptions.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
-			if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'['})[0].Contains("."))
-				result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
-		return result;
+			var rootTypeName = rootType.FullName.Substring(0, rootType.FullName.IndexOf("`"));
+			if (typeof(List<>).IsAssignableFrom(rootType)) // if type 'List' or a derivative, collapse its v-type-name to 'List', since that is how we handle it
+				rootTypeName = "List";
+			else if (typeof (Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
+				rootTypeName = "Dictionary";
+
+			string result = rootTypeName + "[" + String.Join(",", type.GetGenericArguments().Select(type2 => GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
+			foreach (KeyValuePair<string, string> pair in saveOptions.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
+				if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'['})[0].Contains("."))
+					result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
+			return result;
+		}
+		else
+		{
+			string result = type.FullName;
+			foreach (KeyValuePair<string, string> pair in saveOptions.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
+				if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'['})[0].Contains("."))
+					result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
+			return result;
+		}
 	}
 
 	public static string Serialize(object obj, VDFSaveOptions saveOptions = null) { return VDFSaver.ToVDFNode(obj, saveOptions).ToVDF(); }

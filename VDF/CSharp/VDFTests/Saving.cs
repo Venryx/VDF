@@ -36,6 +36,11 @@ namespace VDFTests
 			a.baseValue = "Root string.";
 			a.ToVDF().Should().Be("<string>Root string.");
 		}
+		[Fact] void ToVDF_Level0_Metadata_Type_Collapsed()
+		{
+			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions{saveTypesFor = VDFTypes.All});
+			a.ToVDF().Should().Be("<<List[string]>>");
+		}
 
 		[Fact] void ToVDF_Level1_BaseValues()
 		{
