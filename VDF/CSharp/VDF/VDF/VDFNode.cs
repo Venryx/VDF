@@ -191,6 +191,9 @@ public class VDFNode
 			propInfo.SetValue(result, ConvertVDFNodeToCorrectType(properties[propName], propInfo.GetPropType(), loadOptions));
 		}
 
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfoByName.Values.Where(methodInfo => methodInfo.postDeserializeMethod))
+			method.Call(result);
+
 		return result;
 	}
 }

@@ -37,9 +37,13 @@ public static class VDFSaver
 	{
 		if (saveOptions == null)
 			saveOptions = new VDFSaveOptions();
-
+		
 		var objNode = new VDFNode();
 		Type type = obj != null ? obj.GetType() : null;
+
+		if (obj != null)
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfoByName.Values.Where(methodInfo=>methodInfo.preSerializeMethod))
+				method.Call(obj);
 
 		// if we're marking types for all objects, just do it here (no need to compare actual type with base type)
 		if (saveOptions.saveTypesFor == VDFTypes.All)

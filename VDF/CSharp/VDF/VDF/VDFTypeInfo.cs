@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-public class VDFType : Attribute
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute
 {
 	public bool includePropsL1;
 	public VDFType(bool includePropsL1) { this.includePropsL1 = includePropsL1; }
 }
-
 public class VDFTypeInfo
 {
 	static Dictionary<Type, VDFTypeInfo> cachedTypeInfo = new Dictionary<Type, VDFTypeInfo>();
@@ -25,6 +23,8 @@ public class VDFTypeInfo
 					typeInfo.propInfoByName[field.Name] = VDFPropInfo.Get(field);
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
 				typeInfo.propInfoByName[property.Name] = VDFPropInfo.Get(property);
+			foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+				typeInfo.methodInfoByName[method.Name] = VDFMethodInfo.Get(method);
 			if (type.Name.StartsWith("<>")) // if anonymous type, include all props, by default
 				typeInfo.props_includeL1 = true;
 			if (vdfTypeAttribute != null)
@@ -34,18 +34,12 @@ public class VDFTypeInfo
 		return cachedTypeInfo[type];
 	}
 
-	public bool props_includeL1;
-	public Dictionary<string, VDFPropInfo> propInfoByName;
-
-	public VDFTypeInfo()
-	{
-		props_includeL1 = false; // by default, use an opt-in approach
-		propInfoByName = new Dictionary<string, VDFPropInfo>();
-	}
+	public bool props_includeL1 = false; // by default, use an opt-in approach
+	public Dictionary<string, VDFPropInfo> propInfoByName = new Dictionary<string, VDFPropInfo>();
+	public Dictionary<string, VDFMethodInfo> methodInfoByName = new Dictionary<string, VDFMethodInfo>();
 }
 
-[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public class VDFProp : Attribute
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute
 {
 	public bool includeL2;
 	public bool popOutItemsToOwnLines;
@@ -57,13 +51,12 @@ public class VDFProp : Attribute
 		this.writeEmptyValue = writeEmptyValue;
 	}
 }
-
 public class VDFPropInfo
 {
-	static Dictionary<MemberInfo, VDFPropInfo> cachedTypeInfo = new Dictionary<MemberInfo, VDFPropInfo>();
+	static Dictionary<MemberInfo, VDFPropInfo> cachedPropInfo = new Dictionary<MemberInfo, VDFPropInfo>();
 	public static VDFPropInfo Get(FieldInfo field)
 	{
-		if (!cachedTypeInfo.ContainsKey(field))
+		if (!cachedPropInfo.ContainsKey(field))
 		{
 			var vdfPropAttribute = (VDF.propVDFPropOverrides.ContainsKey(field) ? VDF.propVDFPropOverrides[field] : null) ?? (VDFProp)field.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault();
 
@@ -75,13 +68,13 @@ public class VDFPropInfo
 				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
 				propInfo.writeEmptyValue = vdfPropAttribute.writeEmptyValue;
 			}
-			cachedTypeInfo[field] = propInfo;
+			cachedPropInfo[field] = propInfo;
 		}
-		return cachedTypeInfo[field];
+		return cachedPropInfo[field];
 	}
 	public static VDFPropInfo Get(PropertyInfo property)
 	{
-		if (!cachedTypeInfo.ContainsKey(property))
+		if (!cachedPropInfo.ContainsKey(property))
 		{
 			var vdfPropAttribute = (VDF.propVDFPropOverrides.ContainsKey(property) ? VDF.propVDFPropOverrides[property] : null) ?? (VDFProp)property.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault();
 
@@ -93,9 +86,9 @@ public class VDFPropInfo
 				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
 				propInfo.writeEmptyValue = vdfPropAttribute.writeEmptyValue;
 			}
-			cachedTypeInfo[property] = propInfo;
+			cachedPropInfo[property] = propInfo;
 		}
-		return cachedTypeInfo[property];
+		return cachedPropInfo[property];
 	}
 
 	public MemberInfo memberInfo;
@@ -127,4 +120,34 @@ public class VDFPropInfo
 		else
 			((PropertyInfo)memberInfo).SetValue(objParent, value, null);
 	}
+}
+
+[AttributeUsage(AttributeTargets.Method)] public class VDFPreSerialize : Attribute {}
+[AttributeUsage(AttributeTargets.Method)] public class VDFPostDeserialize : Attribute {}
+public class VDFMethodInfo
+{
+	static Dictionary<MemberInfo, VDFMethodInfo> cachedMethodInfo = new Dictionary<MemberInfo, VDFMethodInfo>();
+	public static VDFMethodInfo Get(MethodInfo method)
+	{
+		if (!cachedMethodInfo.ContainsKey(method))
+		{
+			var vdfPreSerializeAttribute = (VDFPreSerialize)method.GetCustomAttributes(typeof(VDFPreSerialize), true).FirstOrDefault();
+			var vdfPostDeserializeAttribute = (VDFPostDeserialize)method.GetCustomAttributes(typeof(VDFPostDeserialize), true).FirstOrDefault();
+
+			var methodInfo = new VDFMethodInfo();
+			methodInfo.memberInfo = method;
+			if (vdfPreSerializeAttribute != null)
+				methodInfo.preSerializeMethod = true;
+			if (vdfPostDeserializeAttribute != null)
+				methodInfo.postDeserializeMethod = true;
+			cachedMethodInfo[method] = methodInfo;
+		}
+		return cachedMethodInfo[method];
+	}
+
+	public MethodInfo memberInfo;
+	public bool preSerializeMethod = false;
+	public bool postDeserializeMethod = false;
+
+	public object Call(object objParent, params object[] args) { return memberInfo.Invoke(objParent, args); }
 }

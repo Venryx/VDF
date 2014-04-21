@@ -88,5 +88,16 @@ namespace VDFTests
 			a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
 			a.ToVDF().Should().Be("{key1|[#null]}");
 		}
+		class TypeWithPreSerializePrepMethod
+		{
+			[VDFProp] bool preSerializeWasCalled;
+			[VDFPreSerialize] void PreSerialize() { preSerializeWasCalled = true; }
+		}
+		[Fact] void ToVDF_Level1_PreSerializePreparation()
+		{
+			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod());
+			((bool)a["preSerializeWasCalled"]).Should().Be(true);
+			a.ToVDF().Should().Be("preSerializeWasCalled{true}");
+		}
 	}
 }

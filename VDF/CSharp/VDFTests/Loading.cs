@@ -178,5 +178,15 @@ namespace VDFTests
 
 		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
 		[Fact] void ToObject_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
+		class TypeWithPostDeserializeInitMethod
+		{
+			[VDFProp] public bool postDeserializeWasCalled;
+			[VDFPostDeserialize] void PostDeserialize() { postDeserializeWasCalled = true; }
+		}
+		[Fact] void ToObject_Level1_PostDeserializeInitialization()
+		{
+			var a = VDF.Deserialize<TypeWithPostDeserializeInitMethod>("");
+			a.postDeserializeWasCalled.Should().Be(true);
+		}
 	}
 }
