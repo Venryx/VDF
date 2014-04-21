@@ -105,7 +105,7 @@ var VDFSaver = (function () {
 
                 var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
                 var typeDerivedFromDeclaredType = propValue != null && propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
-                if (propInfo.popOutItemsToOwnLines) {
+                if (propInfo.popDataOutOfLine) {
                     var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     if (propValueNode.baseValue != "[#null]") {
                         propValueNode.InsertItem(0, new VDFNode("#")); // add in-line marker, indicating that items are popped-out

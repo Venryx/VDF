@@ -36,8 +36,8 @@ namespace VDFTests
 			var vdf = VDF.Serialize("Root string.");
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.baseValue.Should().Be("Root string.");
-			a.items[0].baseValue.Should().Be("Root string.");
-			a.ToVDF().Should().Be("Root string."); // it should print only the base-value
+			a.items.Count.Should().Be(0); // it should assume it's a base-value, unless indicated otherwise
+			a.ToVDF().Should().Be("Root string.");
 		}
 		[Fact] void ToVDFNode_Level0_Metadata_Type()
 		{
@@ -61,8 +61,8 @@ namespace VDFTests
 		[Fact] void ToVDFNode_Level0_ArrayItems_Empty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("|");
-			a[0].baseValue.Should().Be("");
-			a[1].baseValue.Should().Be("");
+			a[0].baseValue.Should().Be(null);
+			a[1].baseValue.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata1()
 		{
@@ -80,18 +80,15 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level0_DictionaryItems()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key1|Simple string.}{key2|name{Dan}age{50}}");
-			a[0][0].baseValue.Should().Be("key1");
-			a[0][1].baseValue.Should().Be("Simple string.");
-			a[1][0].baseValue.Should().Be("key2");
-			((string)a[1][1]["name"]).Should().Be("Dan");
-			((int)a[1][1]["age"]).Should().Be(50);
+			VDFNode a = VDFLoader.ToVDFNode("key1{Simple string.}key2{name{Dan}age{50}}");
+			a["key1"].baseValue.Should().Be("Simple string.");
+			((int)a["key2"]["age"]).Should().Be(50);
 		}
 		[Fact] void ToVDFNode_Level0_DictionaryItems_GetByKey()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key 1|value 1}{key 2|value 2}");
-			a.GetDictionaryValueNode("key 1").baseValue.Should().Be("value 1");
-			a.GetDictionaryValueNode("key 2").baseValue.Should().Be("value 2");
+			VDFNode a = VDFLoader.ToVDFNode("key 1{value 1}key 2{value 2}");
+			a["key 1"].baseValue.Should().Be("value 1");
+			a["key 2"].baseValue.Should().Be("value 2");
 		}
 
 		[Fact] void ToVDFNode_Level1_BaseValuesWithImplicitCasting()
@@ -153,33 +150,29 @@ namespace VDFTests
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
 			a[0][0].baseValue.Should().Be("1A");
-			a[0][1].baseValue.Should().Be("");
+			a[0][1].baseValue.Should().Be(null);
 			a[1][0].baseValue.Should().Be("2A");
-			a[1][1].baseValue.Should().Be("");
+			a[1][1].baseValue.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level1_ArrayItemsInArrayItems_BothEmpty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{|}|{|}");
-			a[0][0].baseValue.Should().Be("");
-			a[0][1].baseValue.Should().Be("");
-			a[1][0].baseValue.Should().Be("");
-			a[1][1].baseValue.Should().Be("");
+			a[0][0].baseValue.Should().Be(null);
+			a[0][1].baseValue.Should().Be(null);
+			a[1][0].baseValue.Should().Be(null);
+			a[1][1].baseValue.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level1_DictionaryItems()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{1key|1value}{2key|2value}");
-			a[0][0].baseValue.Should().Be("1key");
-			a[0][1].baseValue.Should().Be("1value");
-			a[1][0].baseValue.Should().Be("2key");
-			a[1][1].baseValue.Should().Be("2value");
+			VDFNode a = VDFLoader.ToVDFNode("key1{value1}key2{value2}");
+			a["key1"].baseValue.Should().Be("value1");
+			a["key2"].baseValue.Should().Be("value2");
 		}
 		[Fact] void ToVDFNode_Level1_DictionaryItems_Complex()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("uiPrefs{{toolOptions|@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}@@}{liveTool|Select}}");
-			a["uiPrefs"][0][0].baseValue.Should().Be("toolOptions");
-			a["uiPrefs"][0][1].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}");
-			a["uiPrefs"][1][0].baseValue.Should().Be("liveTool");
-			a["uiPrefs"][1][1].baseValue.Should().Be("Select");
+			VDFNode a = VDFLoader.ToVDFNode("uiPrefs{toolOptions{@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}@@}liveTool{Select}}");
+			a["uiPrefs"]["toolOptions"].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}");
+			a["uiPrefs"]["liveTool"].baseValue.Should().Be("Select");
 		}
 		[Fact] void ToVDFNode_Level1_PoppedOutItemGroups() // each 'group' is actually just the value-data of one of the parent's properties
 		{

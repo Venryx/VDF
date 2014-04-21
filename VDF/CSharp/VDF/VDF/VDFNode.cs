@@ -10,7 +10,7 @@ public class VDFNode
 	public string metadata_type;
 	public string baseValue;
 	public List<VDFNode> items = new List<VDFNode>();
-	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>();
+	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>(); // this also holds Dictionaries' keys/values
 
 	public VDFNode this[int index]
 	{
@@ -27,15 +27,6 @@ public class VDFNode
 	{
 		get { return properties[key]; }
 		set { properties[key] = value; }
-	}
-	public VDFNode GetDictionaryValueNode(object key) { return items.FirstOrDefault(item=>item.items[0].Equals(VDFSaver.ToVDFNode(key))).items[1]; }
-	public void SetDictionaryValueNode(object key, VDFNode valueNode)
-	{
-		var keyNode = VDFSaver.ToVDFNode(key);
-		if (items.Exists(item=>item.items[0].Equals(keyNode)))
-			items.FirstOrDefault(item=>item.items[0].Equals(keyNode)).items[1] = valueNode;
-		else
-			items.Add(new VDFNode {isKeyValuePairPseudoNode = true, items = new List<VDFNode> {keyNode, valueNode}});
 	}
 	public bool Equals(VDFNode other) { return ToVDF() == other.ToVDF(); } // base equality on whether their 'default output' is the same
 	// base-types: ["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"]
@@ -71,12 +62,12 @@ public class VDFNode
 	// saving
 	// ==================
 
-	public bool isListOrDictionary;
+	public bool isList;
+	public bool isDictionary;
 	public bool popOutToOwnLine;
 	public bool isFirstItemOfNonFirstPopOutGroup;
-	public bool isListItem_list;
+	public bool isListItem;
 	public bool isListItem_nonFirst;
-	public bool isKeyValuePairPseudoNode;
 	public string GetInLineItemText()
 	{
 		var builder = new StringBuilder();
@@ -84,10 +75,10 @@ public class VDFNode
 			builder.Append("#");
 		if (isListItem_nonFirst && !popOutToOwnLine)
 			builder.Append("|");
-		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isListItem_list)
+		if (isListItem && isList)
 			builder.Append("{");
 		if (metadata_type != null)
-			builder.Append("<" + (isListOrDictionary ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
+			builder.Append("<" + (isList || isDictionary ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
 
 		if (baseValue != null)
 			builder.Append(baseValue);
@@ -102,7 +93,7 @@ public class VDFNode
 				if (!properties[propName].popOutToOwnLine)
 					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
 
-		if ((isKeyValuePairPseudoNode && !popOutToOwnLine) || isListItem_list)
+		if (isListItem && isList)
 			builder.Append("}");
 
 		return builder.ToString();
@@ -147,25 +138,6 @@ public class VDFNode
 			return Activator.CreateInstance(type, true);
 		return FormatterServices.GetUninitializedObject(type); // preferred (for simplicity/consistency's sake): create an instance of the type, completely uninitialized 
 	}
-	static object ConvertVDFNodeToCorrectType(VDFNode vdfNode, Type declaredType, VDFLoadOptions loadOptions)
-	{
-		var finalType = vdfNode.metadata_type != null ? VDF.GetTypeByVName(vdfNode.metadata_type, loadOptions) : declaredType;
-		object result;
-		if (vdfNode.baseValue == null)
-			result = vdfNode.ToObject(finalType, loadOptions); // tell node to return itself as the correct type
-		else // base-value must be a string
-		{
-			if (vdfNode.baseValue == "[#null]") // special case for null-values
-				result = null;
-			else if (VDF.typeImporters_inline.ContainsKey(finalType))
-				result = VDF.typeImporters_inline[finalType](vdfNode.baseValue); //(string)vdfNode);
-			else if (finalType.IsEnum)
-				result = Enum.Parse(finalType, vdfNode.baseValue);
-			else // if no specific handler, try auto-converting string to the correct (string-or-primitive) type
-				result = Convert.ChangeType(vdfNode.baseValue, finalType);
-		}
-		return result;
-	}
 
 	public T ToObject<T>(VDFLoadOptions loadOptions = null) { return (T)ToObject(typeof(T), loadOptions); }
 	public object ToObject(Type declaredType, VDFLoadOptions loadOptions = null)
@@ -173,26 +145,32 @@ public class VDFNode
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
 
-		Type type = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
-		var typeInfo = VDFTypeInfo.Get(type);
+		Type finalType = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
+		var finalTypeInfo = VDFTypeInfo.Get(finalType);
 
-		object result = CreateNewInstanceOfType(type);
-		for (int i = 0; i < items.Count; i++)
-			if (result is Array)
-				((Array)result).SetValue(ConvertVDFNodeToCorrectType(items[i], type.GetElementType(), loadOptions), i);
-			else if (result is IList)
-				((IList)result).Add(ConvertVDFNodeToCorrectType(items[i], type.GetGenericArguments()[0], loadOptions));
-			else if (result is IDictionary) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				((IDictionary)result).Add(ConvertVDFNodeToCorrectType(items[i].items[0], type.GetGenericArguments()[0], loadOptions), ConvertVDFNodeToCorrectType(items[i].items[1], type.GetGenericArguments()[1], loadOptions));
-			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
-				result = ConvertVDFNodeToCorrectType(items[i], type, loadOptions);
-		foreach (string propName in properties.Keys)
+		object result;
+		if (baseValue == "[#null]") // special case for null-values
+			result = null;
+		else if (VDF.typeImporters_inline.ContainsKey(finalType))
+			result = VDF.typeImporters_inline[finalType](baseValue);
+		else if (!finalType.IsEnum && !finalType.IsPrimitive && finalType != typeof(string))
 		{
-			VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-			propInfo.SetValue(result, ConvertVDFNodeToCorrectType(properties[propName], propInfo.GetPropType(), loadOptions));
+			result = CreateNewInstanceOfType(finalType);
+			for (int i = 0; i < items.Count; i++)
+				if (result is Array)
+					((Array)result).SetValue(items[i].ToObject(finalType.GetElementType(), loadOptions), i);
+				else if (result is IList)
+					((IList)result).Add(items[i].ToObject(finalType.GetGenericArguments()[0], loadOptions));
+			foreach (string propName in properties.Keys)
+				if (result is IDictionary)
+					((IDictionary)result).Add(VDF.typeImporters_inline.ContainsKey(finalType.GetGenericArguments()[0]) ? VDF.typeImporters_inline[finalType.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(finalType.GetGenericArguments()[1], loadOptions));
+				else
+					finalTypeInfo.propInfoByName[propName].SetValue(result, properties[propName].ToObject(finalTypeInfo.propInfoByName[propName].GetPropType(), loadOptions));
 		}
+		else
+			result = finalType.IsEnum ? Enum.Parse(finalType, baseValue) : Convert.ChangeType(baseValue, finalType);
 
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfoByName.Values.Where(methodInfo => methodInfo.postDeserializeMethod))
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.postDeserializeMethod))
 			method.Call(result);
 
 		return result;

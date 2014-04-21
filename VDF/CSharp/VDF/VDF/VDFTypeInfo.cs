@@ -42,12 +42,12 @@ public class VDFTypeInfo
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute
 {
 	public bool includeL2;
-	public bool popOutItemsToOwnLines;
+	public bool popDataOutOfLine;
 	public bool writeEmptyValue;
-	public VDFProp(bool includeL2 = true, bool popOutItemsToOwnLines = false, bool writeEmptyValue = true)
+	public VDFProp(bool includeL2 = true, bool popDataOutOfLine = false, bool writeEmptyValue = true)
 	{
 		this.includeL2 = includeL2;
-		this.popOutItemsToOwnLines = popOutItemsToOwnLines;
+		this.popDataOutOfLine = popDataOutOfLine;
 		this.writeEmptyValue = writeEmptyValue;
 	}
 }
@@ -65,7 +65,7 @@ public class VDFPropInfo
 			if (vdfPropAttribute != null)
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
-				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
+				propInfo.popDataOutOfLine = vdfPropAttribute.popDataOutOfLine;
 				propInfo.writeEmptyValue = vdfPropAttribute.writeEmptyValue;
 			}
 			cachedPropInfo[field] = propInfo;
@@ -83,7 +83,7 @@ public class VDFPropInfo
 			if (vdfPropAttribute != null)
 			{
 				propInfo.includeL2 = vdfPropAttribute.includeL2;
-				propInfo.popOutItemsToOwnLines = vdfPropAttribute.popOutItemsToOwnLines;
+				propInfo.popDataOutOfLine = vdfPropAttribute.popDataOutOfLine;
 				propInfo.writeEmptyValue = vdfPropAttribute.writeEmptyValue;
 			}
 			cachedPropInfo[property] = propInfo;
@@ -93,7 +93,7 @@ public class VDFPropInfo
 
 	public MemberInfo memberInfo;
 	public bool? includeL2;
-	public bool popOutItemsToOwnLines;
+	public bool popDataOutOfLine;
 	public bool writeEmptyValue = true;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }

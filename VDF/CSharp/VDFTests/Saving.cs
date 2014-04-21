@@ -38,7 +38,7 @@ namespace VDFTests
 		}
 		[Fact] void ToVDF_Level0_Metadata_Type_Collapsed()
 		{
-			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions{saveTypesFor = VDFTypes.All});
+			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions{typeSafety = VDFTypeSafety.All});
 			a.ToVDF().Should().Be("<<List[string]>>");
 		}
 
@@ -53,7 +53,7 @@ namespace VDFTests
 		}
 		[Fact] void ToVDF_Level1_AnonymousTypeProperties_MarkNoTypes()
 		{
-			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{saveTypesFor = VDFTypes.None});
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{typeSafety = VDFTypeSafety.None});
 			a["Bool"].baseValue.Should().Be("false");
 			a["Int"].baseValue.Should().Be("5");
 			a["Float"].baseValue.Should().Be(".5");
@@ -62,7 +62,7 @@ namespace VDFTests
 		}
 		[Fact] void ToVDF_Level1_AnonymousTypeProperties_MarkAllTypes()
 		{
-			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{saveTypesFor = VDFTypes.All});
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{typeSafety = VDFTypeSafety.All});
 			a.ToVDF().Should().Be("Bool{<bool>false}Int{<int>5}Float{<float>.5}String{<string>Prop value string.}");
 		}
 		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
@@ -78,15 +78,15 @@ namespace VDFTests
 		{
 			var a = VDFSaver.ToVDFNode(new List<string>{null});
 			a[0].baseValue.Should().Be("[#null]");
-			a.ToVDF().Should().Be("[#null]");
+			a.ToVDF().Should().Be("<<>>[#null]");
 		}
 		[Fact] void ToVDF_Level1_DictionaryValues_Null()
 		{
 			var dictionary = new Dictionary<string, string>();
 			dictionary.Add("key1", null);
 			var a = VDFSaver.ToVDFNode(dictionary);
-			a.GetDictionaryValueNode("key1").baseValue.Should().Be("[#null]");
-			a.ToVDF().Should().Be("{key1|[#null]}");
+			a["key1"].baseValue.Should().Be("[#null]");
+			a.ToVDF().Should().Be("key1{[#null]}");
 		}
 		class TypeWithPreSerializePrepMethod
 		{

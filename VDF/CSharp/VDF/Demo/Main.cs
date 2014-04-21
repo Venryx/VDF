@@ -13,7 +13,7 @@ namespace SystemMaker
 		static Main()
 		{
 			VDF.RegisterTypeExporter_Inline<Guid>(id => ""); //id.ToString());
-			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
+			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid()); //new Guid(str)
 			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
 			VDF.RegisterTypeImporter_Inline<Vector3>(str =>
 			{

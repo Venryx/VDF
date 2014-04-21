@@ -10,11 +10,11 @@
 })();
 
 var VDFPropInfo = (function () {
-    function VDFPropInfo(propType, includeL2, popOutItemsToOwnLines, writeEmptyValue) {
+    function VDFPropInfo(propType, includeL2, popDataOutOfLine, writeEmptyValue) {
         if (typeof writeEmptyValue === "undefined") { writeEmptyValue = true; }
         this.propVTypeName = propType;
         this.includeL2 = includeL2;
-        this.popOutItemsToOwnLines = popOutItemsToOwnLines;
+        this.popDataOutOfLine = popDataOutOfLine;
         this.writeEmptyValue = writeEmptyValue;
     }
     VDFPropInfo.prototype.IsXValueEmpty = function (x) {

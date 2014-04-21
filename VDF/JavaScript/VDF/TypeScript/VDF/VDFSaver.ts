@@ -108,7 +108,7 @@ class VDFSaver
 
 				var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
 				var typeDerivedFromDeclaredType: boolean = propValue != null && propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null; // if value's type is *derived* from prop's declared type; note; assumes lists/dictionaries are of declared type
-				if (propInfo.popOutItemsToOwnLines)
+				if (propInfo.popDataOutOfLine)
 				{
 					var propValueNode: VDFNode = VDFSaver.ToVDFNode(propValue, saveOptions);
 					if (propValueNode.baseValue != "[#null]")

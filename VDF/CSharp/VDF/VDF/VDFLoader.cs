@@ -33,8 +33,10 @@ public static class VDFLoader
 		int depth = 0;
 		var liveItemNode = new VDFNode();
 		string liveItemPropName = null;
+		bool dataIsPoppedOut = false;
 		int poppedOutPropValueCount = 0;
 		VDFNode liveItemPropValueNode = null;
+		var firstMetadataStartToken = VDFTokenType.None;
 		var lastMetadataStartToken = VDFTokenType.None;
 
 		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
@@ -51,19 +53,19 @@ public static class VDFLoader
 			{
 				if (token.type == VDFTokenType.ItemSeparator)
 				{
-					if (liveItemNode.metadata_type == null && liveItemNode.baseValue == null && liveItemNode.items.Count == 0 && liveItemNode.properties.Count == 0) // special case; if the item we're just now wrapping up had no value set
-						liveItemNode.baseValue = "";
 					objNode.items.Add(liveItemNode);
 					liveItemNode = new VDFNode();
-					if (parser.nextCharPos >= vdfFile.Length || new[] {'|', '}', '\n'}.Contains(vdfFile[parser.nextCharPos])) // special case; if we see that the next item has no text representing it, set its base-value to ""
-						liveItemNode.baseValue = "";
 				}
 
 				if (token.type == VDFTokenType.MetadataStartMarker || token.type == VDFTokenType.WiderMetadataStartMarker)
+				{
+					if (firstMetadataStartToken == VDFTokenType.None)
+						firstMetadataStartToken = token.type;
 					lastMetadataStartToken = token.type;
+				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
 					if (lastMetadataStartToken == VDFTokenType.WiderMetadataStartMarker)
-						objNode.metadata_type = token.text;
+						objNode.metadata_type = token.text == "" ? "List[object]" : (token.text == "," ? "Dictionary[object,object]" : token.text);
 					else
 						liveItemNode.metadata_type = token.text;
 				else if (token.type == VDFTokenType.Data_BaseValue)
@@ -74,6 +76,7 @@ public static class VDFLoader
 						foreach (int pos in poppedOutPropValueItemTextPositions)
 							objNode.items.Add(ToVDFNode(vdfFile, loadOptions, pos, ref poppedOutPropValueCount));
 						parentPoppedOutPropValueCount++;
+						dataIsPoppedOut = true;
 					}
 					else
 						liveItemNode.baseValue = token.text;
@@ -109,24 +112,12 @@ public static class VDFLoader
 			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
 		}
-		// add final item, if not yet added
-		if (liveItemNode.metadata_type != null || liveItemNode.baseValue != null || liveItemNode.items.Count > 0 || liveItemNode.properties.Count > 0)
-		{
-			if (liveItemNode.metadata_type == null && liveItemNode.baseValue == null && liveItemNode.items.Count == 0 && liveItemNode.properties.Count == 0) // special case; if the item we're just now wrapping up had no value set
-				liveItemNode.baseValue = "";
+		if (!dataIsPoppedOut) // if data is in-line, (meaning we're adding the items as we pass their last char), add final item
 			objNode.items.Add(liveItemNode);
-		}
 
-		// note; slightly messy, but seems the best practically; if only one value as obj's data, and obj does not have wider-metadata (i.e. isn't List or Dictionary), then include it both as obj's value and as its solitary item's value
-		if (objNode.items.Count == 1) // if only one child, and child is not a list
-		{
-			objNode.baseValue = objNode.items[0].baseValue;
-			if (objNode.items[0].items.Count == 0) // don't grab metadata from something that has its own items
-			{
-				objNode.metadata_type = objNode.items[0].metadata_type;
-				objNode.properties = objNode.items[0].properties;
-			}
-		}
+		// if only one item, and obj does not have wider-metadata (i.e. isn't explicitly a List or Dictionary), then assume it is the data of objNode itself
+		if (objNode.items.Count == 1 && firstMetadataStartToken != VDFTokenType.WiderMetadataStartMarker)
+			objNode = objNode.items[0];
 
 		return objNode;
 	}
