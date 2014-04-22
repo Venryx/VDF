@@ -146,7 +146,7 @@ public class VDFNode
 	{
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
-
+		
 		Type finalType = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
 		var finalTypeInfo = VDFTypeInfo.Get(finalType);
 

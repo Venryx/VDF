@@ -103,7 +103,10 @@ var VDFLoader = (function () {
                     livePropName = token.text;
                 else if (token.type == 6 /* DataStartMarker */)
                     if (livePropName != null)
-                        livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, sharedData));
+                        if (objTypeName && objTypeName.startsWith("Dictionary["))
+                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, sharedData));
+                        else
+                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, sharedData));
                     else
                         livePropAddNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, sharedData);
                 else if (token.type == 9 /* DataEndMarker */ && livePropName != null)
@@ -120,6 +123,8 @@ var VDFLoader = (function () {
             return [6 /* DataStartMarker */, 8 /* Data_BaseValue */, 7 /* ItemSeparator */].contains(token.type);
         }).length && !dataIsPoppedOut)
             objNode.PushItem(livePropAddNode);
+        if (objNode.baseValue != null && objNode.metadata_type == null && declaredTypeName == null)
+            objNode.metadata_type = "string";
 
         return objNode;
     };

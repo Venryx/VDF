@@ -113,7 +113,10 @@ class VDFLoader
 					livePropName = token.text;
 				else if (token.type == VDFTokenType.DataStartMarker)
 					if (livePropName != null) // if data of a prop
-						livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, sharedData));
+						if (objTypeName && objTypeName.startsWith("Dictionary[")) // dictionary key-value-pair
+							livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, sharedData));
+						else // property
+							livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, sharedData));
 					else // if data of an in-list-list (at depth 0, which we are at, these are only ever for obj) (note; no need to set live-prop-add-node-type-info, because we know both obj and item have no properties, and so line above is unaffected by it)
 						livePropAddNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, sharedData);
 				else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
@@ -127,6 +130,8 @@ class VDFLoader
 		// if live-prop-add-node is not obj itself, and block wasn't empty, and data is in-line, (meaning we're adding the items as we pass their last char), add final item
 		if (livePropAddNode != objNode && parser.tokens.filter(token=>[VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator].contains(token.type)).length && !dataIsPoppedOut)
 			objNode.PushItem(livePropAddNode);
+		if (objNode.baseValue != null && objNode.metadata_type == null && declaredTypeName == null) // if base-value, and no type specified, and no declared type set either, infer it to be string
+			objNode.metadata_type = "string";
 
 		return objNode;
 	}

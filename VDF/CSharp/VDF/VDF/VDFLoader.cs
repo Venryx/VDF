@@ -114,8 +114,11 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.Data_PropName)
 					livePropName = token.text;
 				else if (token.type == VDFTokenType.DataStartMarker)
-					if (livePropName != null) // if data of a prop
-						livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, sharedData));
+					if (livePropName != null)
+						if (typeof(IDictionary).IsAssignableFrom(objType)) // dictionary key-value-pair
+							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, objType.GetGenericArguments()[0], loadOptions, parser.nextCharPos, sharedData));
+						else // property
+							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, sharedData));
 					else // if data of an in-list-list (at depth 0, which we are at, these are only ever for obj) (note; no need to set live-prop-add-node-type-info, because we know both obj and item have no properties, and so line above is unaffected by it)
 						livePropAddNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : typeof(IList), loadOptions, parser.nextCharPos, sharedData);
 				else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
@@ -129,6 +132,8 @@ public static class VDFLoader
 		// if live-prop-add-node is not obj itself, and block wasn't empty, and data is in-line, (meaning we're adding the items as we pass their last char), add final item
 		if (livePropAddNode != objNode && parser.tokens.Any(token=>new[]{VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator}.Contains(token.type)) && !dataIsPoppedOut)
 			objNode.items.Add(livePropAddNode);
+		if (objNode.baseValue != null && objNode.metadata_type == null && declaredType == null) // if base-value, and no type specified, and no declared type set either, infer it to be string
+			objNode.metadata_type = "string";
 
 		return objNode;
 	}

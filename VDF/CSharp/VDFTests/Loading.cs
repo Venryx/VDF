@@ -39,7 +39,7 @@ namespace VDFTests
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.baseValue.Should().Be("Root string.");
 			a.items.Count.Should().Be(0); // it should assume it's a base-value, unless indicated otherwise
-			a.ToVDF().Should().Be("Root string.");
+			a.ToVDF().Should().Be("string>Root string."); // the "string" metadata was inferred while loading
 		}
 		[Fact] void ToVDFNode_Level0_Metadata_Type()
 		{

@@ -6,3 +6,4 @@ C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.pdb
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Main.resources
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
+C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csprojResolveAssemblyReference.cache
