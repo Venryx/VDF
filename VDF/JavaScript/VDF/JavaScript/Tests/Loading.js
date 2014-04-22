@@ -229,6 +229,10 @@ var Loading = (function () {
             a.bool.Should().Be(false);
             a.int.Should().BeExactly(3.5);
         });
+        test("ToObject_AsObject_NestedList", function () {
+            var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}");
+            a["children"].length.Should().Be(3);
+        });
     };
     return Loading;
 })();

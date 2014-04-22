@@ -178,7 +178,9 @@
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
 
-		var finalTypeName = (this.metadata_type != null ? this.metadata_type : declaredTypeName) || "object"; // metadata-specified type, else declared-type, else anonymous-type (final type must be something)
+		var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
+		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
+			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
 		var finalTypeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
 		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 
@@ -199,13 +201,12 @@
 		{
 			result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
 			for (var i = 0; i < this.items.length; i++)
-				if (result instanceof List)
-					(<List<any>>result).push(this.items[i].ToObject(finalTypeGenericParameters[0], loadOptions));
+				(<List<any>>result).push(this.items[i].ToObject(finalTypeGenericParameters[0], loadOptions));
 			for (var propName in this.properties)
 				if (result instanceof Dictionary)
 					(<Dictionary<any, any>>result).set(VDF.typeImporters_inline[finalTypeGenericParameters[0]] ? VDF.typeImporters_inline[finalTypeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(finalTypeGenericParameters[1], loadOptions));
 				else
-					result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : "object", loadOptions);
+					result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
 		}
 
 		if (result.VDFPostDeserialize)
