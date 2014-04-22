@@ -52,6 +52,8 @@ public static class VDFSaver
 			objNode.baseValue = "[#null]";
 		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
+		else if (type.IsEnum)
+			objNode.baseValue = obj.ToString();
 		else if (type == typeof(bool))
 			objNode.baseValue = obj.ToString().ToLower();
 		else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal)) // if floating-point primitive

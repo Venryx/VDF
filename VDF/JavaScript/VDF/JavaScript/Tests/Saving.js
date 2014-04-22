@@ -45,6 +45,13 @@ var TypeWithMixOfProps = (function () {
     });
     return TypeWithMixOfProps;
 })();
+var Enum1;
+(function (Enum1) {
+    Enum1[Enum1["_IsEnum"] = 0] = "_IsEnum";
+    Enum1[Enum1["A"] = 1] = "A";
+    Enum1[Enum1["B"] = 2] = "B";
+    Enum1[Enum1["C"] = 3] = "C";
+})(Enum1 || (Enum1 = {}));
 var Saving = (function () {
     function Saving() {
     }
@@ -99,6 +106,10 @@ var Saving = (function () {
             a.ToVDF().Should().Be("string>>");
             a = VDFSaver.ToVDFNode(new List("List[string]", new List("string", "1A", "1B", "1C")), new VDFSaveOptions(2 /* AssemblyExternal */));
             a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
+        });
+        test("ToVDF_Level0_EnumDefault", function () {
+            var a = VDFSaver.ToVDFNode(1 /* A */, "Enum1");
+            a.ToVDF().Should().Be("A");
         });
 
         test("ToVDF_Level1_BaseValues", function () {

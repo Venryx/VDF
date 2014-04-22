@@ -44,6 +44,7 @@ class TypeWithMixOfProps
 	list = new List<string>("string", "2A", "2B");
 	nestedList = new List<List<string>>("List[string]", new List<string>("string", "1A"));
 }
+enum Enum1 { _IsEnum, A, B, C }
 class Saving
 {
 	static initialized: boolean;
@@ -95,6 +96,11 @@ class Saving
 			a.ToVDF().Should().Be("string>>");
 			a = VDFSaver.ToVDFNode(new List("List[string]", new List("string", "1A", "1B", "1C")), new VDFSaveOptions(VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
+		});
+		test("ToVDF_Level0_EnumDefault", () =>
+		{
+			var a = VDFSaver.ToVDFNode(Enum1.A, "Enum1");
+			a.ToVDF().Should().Be("A");
 		});
 
 		test("ToVDF_Level1_BaseValues", ()=>

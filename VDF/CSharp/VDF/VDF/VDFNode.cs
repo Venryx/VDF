@@ -155,8 +155,10 @@ public class VDFNode
 			result = null;
 		else if (VDF.typeImporters_inline.ContainsKey(finalType))
 			result = VDF.typeImporters_inline[finalType](baseValue);
-		else if (finalType.IsEnum || finalType.IsPrimitive || finalType == typeof(string))
-			result = finalType.IsEnum ? Enum.Parse(finalType, baseValue) : Convert.ChangeType(baseValue, finalType);
+		else if (finalType.IsEnum)
+			result = Enum.Parse(finalType, baseValue);
+		else if (finalType.IsPrimitive || finalType == typeof(string))
+			result = Convert.ChangeType(baseValue, finalType);
 		else
 		{
 			result = CreateNewInstanceOfType(finalType);

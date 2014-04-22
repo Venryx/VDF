@@ -43,6 +43,12 @@ namespace VDFTests
 			a = VDFSaver.ToVDFNode(new List<List<string>> {new List<string> {"1A", "1B", "1C"}}, new VDFSaveOptions {typeMarking = VDFTypeMarking.AssemblyExternal});
 			a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
 		}
+		enum Enum1 { A, B, C }
+		[Fact] void ToVDF_Level0_EnumDefault()
+		{
+			var a = VDFSaver.ToVDFNode<Enum1>(Enum1.A);
+			a.ToVDF().Should().Be("A");
+		}
 
 		[Fact] void ToVDF_Level1_BaseValues()
 		{

@@ -8,7 +8,7 @@ static class TestData
 	{
 		var world = new World("Main");
 		world.simpleFlag = true;
-		world.listOfStringLists.AddRange(new List<List<string>> { new List<string> { "1A", "1B", "1C" }, new List<string> { "2A", "2B", "2C" }, new List<string> { "3A", "3B", "3C" } });
+		world.listOfStringLists.AddRange(new List<List<string>> {new List<string> {"1A", "1B", "1C"}, new List<string> {"2A", "2B", "2C"}, new List<string> {"3A", "3B", "3C"}});
 
 		var soils = world.vObjectRoot.AddChild(new VObject("Soils"));
 		var grass = soils.AddChild(new VObject("Grass"));
@@ -44,11 +44,13 @@ static class TestData
 	}
 }
 
+enum SimpleEnum { A, B, C }
 class World
 {
 	[VDFProp] public string name;
 	[VDFProp] public VObject vObjectRoot;
 	[VDFProp] public bool simpleFlag;
+	[VDFProp] public SimpleEnum simpleEnum;
 	[VDFProp] public List<List<string>> listOfStringLists;
 
 	public World(string name)

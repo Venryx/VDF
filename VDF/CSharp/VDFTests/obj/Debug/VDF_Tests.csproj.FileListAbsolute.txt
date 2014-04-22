@@ -12,9 +12,7 @@ C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\VDFTests.dll
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\VDFTests.pdb
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\SystemMaker.exe
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\SystemMaker.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\FluentAssertions.pdb
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\FluentAssertions.xml
-C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\xunit.xml
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDF_Tests.csprojResolveAssemblyReference.cache
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.dll
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.pdb

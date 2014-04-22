@@ -35,6 +35,7 @@
 	}
 }
 
+enum SimpleEnum { _IsEnum, A, B, C }
 class World
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
@@ -42,12 +43,14 @@ class World
 		name: new VDFPropInfo("string", true),
 		vObjectRoot: new VDFPropInfo("VObject", true),
 		simpleFlag: new VDFPropInfo("bool", true),
+		simpleEnum: new VDFPropInfo("SimpleEnum", true),
 		listOfStringLists: new VDFPropInfo("List[List[string]]", true)
 	});
 
 	name: string;
 	vObjectRoot: VObject;
 	simpleFlag: boolean;
+	simpleEnum: SimpleEnum;
 	listOfStringLists: List<List<string>>;
 
 	constructor(name: string)
@@ -55,6 +58,7 @@ class World
 		this.name = name;
 		this.vObjectRoot = new VObject("VObjectRoot");
 		this.simpleFlag = false; // this has to be initialized to something, right here, to get it ordered/positioned correctly in the save file
+		this.simpleEnum = SimpleEnum.A;
 		this.listOfStringLists = new List<List<string>>("List[string]");
 	}
 }

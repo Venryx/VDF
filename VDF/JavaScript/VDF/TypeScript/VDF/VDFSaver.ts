@@ -40,10 +40,10 @@ class VDFSaver
 			objNode.baseValue = "[#null]";
 		else if (VDF.typeExporters_inline[objVTypeName])
 			objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
-		else if (objVTypeName == "bool")
-			objNode.baseValue = obj.toString().toLowerCase();
 		else if (EnumValue.IsEnum(objVTypeName)) // if enum value (at bottom, an integer; but we can get the nice-name based on type info)
 			objNode.baseValue = new EnumValue(objVTypeName, obj).toString();
+		else if (objVTypeName == "bool")
+			objNode.baseValue = obj.toString().toLowerCase();
 		else if (["float", "double", "decimal"].contains(objVTypeName)) // floating-point number
 			objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
 		else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName))

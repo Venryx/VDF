@@ -37,17 +37,26 @@ var Test1;
     Test1.CreateWorld = CreateWorld;
 })(Test1 || (Test1 = {}));
 
+var SimpleEnum;
+(function (SimpleEnum) {
+    SimpleEnum[SimpleEnum["_IsEnum"] = 0] = "_IsEnum";
+    SimpleEnum[SimpleEnum["A"] = 1] = "A";
+    SimpleEnum[SimpleEnum["B"] = 2] = "B";
+    SimpleEnum[SimpleEnum["C"] = 3] = "C";
+})(SimpleEnum || (SimpleEnum = {}));
 var World = (function () {
     function World(name) {
         this.name = name;
         this.vObjectRoot = new VObject("VObjectRoot");
         this.simpleFlag = false; // this has to be initialized to something, right here, to get it ordered/positioned correctly in the save file
+        this.simpleEnum = 1 /* A */;
         this.listOfStringLists = new List("List[string]");
     }
     World.typeInfo = new VDFTypeInfo(false, {
         name: new VDFPropInfo("string", true),
         vObjectRoot: new VDFPropInfo("VObject", true),
         simpleFlag: new VDFPropInfo("bool", true),
+        simpleEnum: new VDFPropInfo("SimpleEnum", true),
         listOfStringLists: new VDFPropInfo("List[List[string]]", true)
     });
     return World;
