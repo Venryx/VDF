@@ -1,7 +1,7 @@
 ﻿class VDFNode
 {
-	static builtInProps = ["metadata_type", "baseValue", "items", "properties", "propertyCount", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsFloat", "AsString",
-		"isNamedPropertyValue", "isListOrDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem_list", "isListItem_nonFirst", "isKeyValuePairPseudoNode"];
+	static builtInProps = ["metadata_type", "baseValue", "items", "properties", "propertyCount", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsInt", "AsFloat", "AsString",
+		"isNamedPropertyValue", "isList", "isDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "isListItem_nonFirst"];
 
 	metadata_type: string;
 	baseValue: string;
@@ -13,7 +13,7 @@
 				result.push(this[key]);
 		return result;
 	}
-	get properties(): any
+	get properties(): any // this also holds Dictionaries' keys/values
 	{
 		var objWithPropKeys = {};
 		for (var key in this)
@@ -54,26 +54,13 @@
 		this.properties[key] = value;
 		this[key] = value;
 	}
-
-	GetDictionaryValueNode(key): VDFNode { return this.items.filter((item, index, array)=>item.items[0].ToVDF() == VDFSaver.ToVDFNode(key).ToVDF())[0].items[1]; } // base equality on whether their 'default output' is the same
-	SetDictionaryValueNode(key, valueNode: VDFNode): void
-	{
-		var keyNode = VDFSaver.ToVDFNode(key);
-		if (this.items.contains(keyNode))
-			this.items.filter((item, index, array) => item.items[0].ToVDF() == VDFSaver.ToVDFNode(key).ToVDF())[0].SetItem(1, valueNode);
-		else
-		{
-			var newNode = new VDFNode();
-			newNode.isKeyValuePairPseudoNode = true;
-			newNode.PushItem(keyNode);
-			newNode.PushItem(valueNode);
-			this.PushItem(newNode);
-		}
-	}
+	
 	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
-	get AsBool() { return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "bool", null); }
+	get AsBool() { return new VDFNode(this.baseValue).ToObject("bool"); }
 	set AsBool(value: boolean) { this.baseValue = value.toString(); }
-	get AsFloat() { return VDFNode.ConvertVDFNodeToCorrectType(new VDFNode(this.baseValue), "float", null); }
+	get AsInt() { return new VDFNode(this.baseValue).ToObject("int"); }
+	set AsInt(value: number) { this.baseValue = parseInt(value.toString()).toString(); }
+	get AsFloat() { return new VDFNode(this.baseValue).ToObject("float"); }
 	set AsFloat(value: number) { this.baseValue = value.toString(); }
 	get AsString() { return this.baseValue; }
 	set AsString(value: string) { this.baseValue = value; }
@@ -82,12 +69,12 @@
 	// saving
 	// ==================
 
-	isListOrDictionary: boolean;
+	isList: boolean;
+	isDictionary: boolean;
 	popOutToOwnLine: boolean;
 	isFirstItemOfNonFirstPopOutGroup: boolean;
-	isListItem_list: boolean;
+	isListItem: boolean;
 	isListItem_nonFirst: boolean;
-	isKeyValuePairPseudoNode: boolean;
 	GetInLineItemText(): string
 	{
 		var builder = new StringBuilder();
@@ -95,10 +82,10 @@
 			builder.Append("#");
 		if (this.isListItem_nonFirst && !this.popOutToOwnLine)
 			builder.Append("|");
-		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
+		if (this.isListItem && this.isList)
 			builder.Append("{");
 		if (this.metadata_type != null)
-			builder.Append("<" + (this.isListOrDictionary ? "<" + this.metadata_type.replace(/ /g, "") + ">" : this.metadata_type.replace(/ /g, "")) + ">");
+			builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
 		
 		if (this.baseValue != null)
 			builder.Append(this.baseValue);
@@ -113,7 +100,7 @@
 				if (!this.properties[propName].popOutToOwnLine)
 					builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 
-		if ((this.isKeyValuePairPseudoNode && !this.popOutToOwnLine) || this.isListItem_list)
+		if (this.isListItem && this.isList)
 			builder.Append("}");
 
 		return builder.ToString();
@@ -159,32 +146,13 @@
 
 	// loading
 	// ==================
-	
-	static GetGenericParametersOfTypeName(typeName: string): string[]
-	{
-		var genericArgumentTypes = new Array<string>();
-		var depth = 0;
-		var lastStartBracketPos = -1;
-		for (var i = 0; i < typeName.length; i++)
-		{
-			var ch = typeName[i];
-			if (ch == ']')
-				depth--;
-			if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
-				genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
-			if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
-				lastStartBracketPos = i;
-			if (ch == '[')
-				depth++;
-		}
-		return genericArgumentTypes;
-	}
+
 	static CreateNewInstanceOfType(typeName: string, loadOptions: VDFLoadOptions)
 	{
 		// no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
 		if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
 			return null;
-		var genericParameters = VDFNode.GetGenericParametersOfTypeName(typeName);
+		var genericParameters = VDF.GetGenericParametersOfTypeName(typeName);
 		if (typeName.startsWith("List["))
 			return eval("new List(\"" + genericParameters[0] + "\")");
 		if (typeName.startsWith("Dictionary["))
@@ -195,51 +163,53 @@
 			return {};
 		throw new Error("Class \"" + typeName + "\" not found.");
 	}
-	static ConvertVDFNodeToCorrectType(vdfNode: VDFNode, declaredTypeName: string, loadOptions: VDFLoadOptions): any
-	{
-		var finalTypeName = vdfNode.metadata_type || declaredTypeName;
-		var result;
-		if (vdfNode.baseValue == null)
-			result = vdfNode.ToObject(finalTypeName, loadOptions); // tell node to return itself as the correct type
-		else // base-value must be a string
-		{
-			if (vdfNode.baseValue == "[#null]") // special case for null-values
-				result = null;
-			else if (VDF.typeImporters_inline[finalTypeName])
-				result = VDF.typeImporters_inline[finalTypeName](vdfNode.baseValue); //(string)vdfNode);
-			else if (EnumValue.IsEnum(finalTypeName))
-				result = EnumValue.GetEnumIntForStringValue(finalTypeName, vdfNode.baseValue);
-			else if (finalTypeName == "bool")
-				result = vdfNode.baseValue == "true" ? true : false;
-			else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName)) // if number
-				result = parseFloat(vdfNode.baseValue);
-			else // must be a string or char
-				result = vdfNode.baseValue;
-		}
-		return result;
-	}
 
-	public ToObject(declaredTypeName: string, loadOptions?: VDFLoadOptions)
+	ToObject(loadOptions: VDFLoadOptions, declaredTypeName: string): any;
+	ToObject(declaredTypeName: string, loadOptions: VDFLoadOptions): any;
+	ToObject(declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any;
+	ToObject(declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any
 	{
-		if (!loadOptions)
+		var declaredTypeName: string;
+		var loadOptions: VDFLoadOptions;
+		if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions)
+			{declaredTypeName = declaredTypeName_orLoadOptions; loadOptions = loadOptions_orDeclaredTypeName;}
+		else
+			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
+		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
 
-		var type = this.metadata_type || declaredTypeName;
-		//if (this.items && this.items.length > 1) // we can infer we're a list; todo; look more carefully into how to implement type inference
-		//	type = "List[object]";
-		var typeGenericParameters = VDFNode.GetGenericParametersOfTypeName(type);
-		var typeInfo = (window[type] || {}).typeInfo;
+		var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
+		var finalTypeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
+		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 
-		var result = VDFNode.CreateNewInstanceOfType(type, loadOptions);
-		for (var i = 0; i < this.items.length; i++)
-			if (type.startsWith("List["))
-				(<List<any>>result)[i] = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], typeGenericParameters[0], loadOptions);
-			else if (type.startsWith("Dictionary[")) // note; if result is of type 'Dictionary', then each of these items we're looping through are key-value-pair-pseudo-objects
-				(<Dictionary<any, any>>result).set(VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[0], typeGenericParameters[0], loadOptions), VDFNode.ConvertVDFNodeToCorrectType(this.items[i].items[1], typeGenericParameters[1], loadOptions));
-			else // must be low-level node, with first item's base-value actually being what this node's base-value should be set to
-				result = VDFNode.ConvertVDFNodeToCorrectType(this.items[i], type, loadOptions);
-		for (var propName in this.properties) // for below; if prop-info not specified, consider its declared-type to be 'object'
-			result[propName] = VDFNode.ConvertVDFNodeToCorrectType(this.properties[propName], typeInfo && typeInfo.propInfoByPropName[propName] ? typeInfo.propInfoByPropName[propName].propVTypeName : "object", loadOptions);
+		var result;
+		if (this.baseValue == "[#null]") // special case for null-values
+			result = null;
+		else if (VDF.typeImporters_inline[finalTypeName])
+			result = VDF.typeImporters_inline[finalTypeName](this.baseValue);
+		else if (EnumValue.IsEnum(finalTypeName))
+			result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.baseValue);
+		else if (finalTypeName == "bool")
+			result = this.baseValue == "true" ? true : false;
+		else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName)) // if number
+			result = parseFloat(this.baseValue);
+		else if (["string", "char"].contains(finalTypeName))
+			result = this.baseValue;
+		else
+		{
+			result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
+			for (var i = 0; i < this.items.length; i++)
+				if (result instanceof List)
+					(<List<any>>result).push(this.items[i].ToObject(finalTypeGenericParameters[0], loadOptions));
+			for (var propName in this.properties)
+				if (result instanceof Dictionary)
+					(<Dictionary<any, any>>result).set(VDF.typeImporters_inline[finalTypeGenericParameters[0]] ? VDF.typeImporters_inline[finalTypeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(finalTypeGenericParameters[1], loadOptions));
+				else
+					result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : "object", loadOptions);
+		}
+
+		if (result.VDFPostDeserialize)
+			result.VDFPostDeserialize();
 
 		return result;
 	}

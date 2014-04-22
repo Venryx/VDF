@@ -2,9 +2,7 @@
 {
 	None,
 	PoppedOutNodeMarker,
-	WiderMetadataStartMarker,
 	WiderMetadataEndMarker,
-	MetadataStartMarker,
 	Metadata_BaseValue,
 	MetadataEndMarker,
 	//LiteralMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
@@ -39,7 +37,7 @@ class VDFTokenParser
 		this.tokens = new Array<VDFToken>();
 	}
 
-	GetNextToken(): VDFToken
+	MoveNextToken(): boolean
 	{
 		var tokenType = VDFTokenType.None;
 		var tokenTextBuilder = new StringBuilder();
@@ -67,16 +65,14 @@ class VDFTokenParser
 			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
 				continue;
 
-			if (ch == '<')
-			{
-				if (nextChar == '<')
+			if (ch == '>')
+				if (nextChar == '>')
 				{
-					tokenType = VDFTokenType.WiderMetadataStartMarker;
+					tokenType = VDFTokenType.WiderMetadataEndMarker;
 					i++;
 				}
 				else
-					tokenType = VDFTokenType.MetadataStartMarker;
-			}
+					tokenType = VDFTokenType.MetadataEndMarker;
 			else if (ch == '>')
 			{
 				if (nextChar == '>')
@@ -116,8 +112,20 @@ class VDFTokenParser
 		this.nextCharPos = i;
 
 		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, tokenTextBuilder.ToString()) : null;
-		this.tokens.push(token);
-		return token;
+		if (token != null)
+			this.tokens.push(token);
+		return token != null;
+	}
+
+	PeekNextToken(): VDFToken
+	{
+		var oldPos = this.nextCharPos;
+		var oldTokenCount = this.tokens.length;
+		this.MoveNextToken();
+		this.nextCharPos = oldPos;
+		if (this.tokens.length > oldTokenCount)
+			return this.tokens[this.tokens.length - 1];
+		return null;
 	}
 
 	static FindNextLineBreakCharPos(vdfFile: string, searchStartPos: number): number

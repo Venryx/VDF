@@ -155,7 +155,9 @@ public class VDFNode
 			result = null;
 		else if (VDF.typeImporters_inline.ContainsKey(finalType))
 			result = VDF.typeImporters_inline[finalType](baseValue);
-		else if (!finalType.IsEnum && !finalType.IsPrimitive && finalType != typeof(string))
+		else if (finalType.IsEnum || finalType.IsPrimitive || finalType == typeof(string))
+			result = finalType.IsEnum ? Enum.Parse(finalType, baseValue) : Convert.ChangeType(baseValue, finalType);
+		else
 		{
 			result = CreateNewInstanceOfType(finalType);
 			for (int i = 0; i < items.Count; i++)
@@ -169,8 +171,6 @@ public class VDFNode
 				else
 					finalTypeInfo.propInfoByName[propName].SetValue(result, properties[propName].ToObject(finalTypeInfo.propInfoByName[propName].GetPropType(), loadOptions));
 		}
-		else
-			result = finalType.IsEnum ? Enum.Parse(finalType, baseValue) : Convert.ChangeType(baseValue, finalType);
 
 		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.postDeserializeMethod))
 			method.Call(result);

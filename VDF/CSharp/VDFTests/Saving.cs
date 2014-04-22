@@ -79,7 +79,7 @@ namespace VDFTests
 		class TypeWithPreSerializePrepMethod
 		{
 			[VDFProp] bool preSerializeWasCalled;
-			[VDFPreSerialize] void PreSerialize() { preSerializeWasCalled = true; }
+			[VDFPreSerialize] void VDFPreSerialize() { preSerializeWasCalled = true; }
 		}
 		[Fact] void ToVDF_Level1_PreSerializePreparation()
 		{

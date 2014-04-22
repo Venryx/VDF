@@ -28,6 +28,12 @@ var VDF = (function () {
         VDF.typeImporters_inline[type] = importer;
     };
 
+    VDF.GetType = function (vTypeName) {
+        return window[vTypeName];
+    };
+    VDF.GetTypeInfo = function (vTypeName) {
+        return (window[vTypeName] || {}).typeInfo;
+    };
     VDF.GetVTypeNameOfObject = function (obj) {
         if (obj == null)
             return null;
@@ -52,12 +58,48 @@ var VDF = (function () {
             return obj.toString().contains(".") ? "float" : "int";
         return rawType;
     };
-
-    VDF.Serialize = function (obj, saveOptions) {
-        return VDFSaver.ToVDFNode(obj, saveOptions).ToVDF();
+    VDF.GetGenericParametersOfTypeName = function (typeName) {
+        var genericArgumentTypes = new Array();
+        var depth = 0;
+        var lastStartBracketPos = -1;
+        for (var i = 0; i < typeName.length; i++) {
+            var ch = typeName[i];
+            if (ch == ']')
+                depth--;
+            if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
+                genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
+            if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
+                lastStartBracketPos = i;
+            if (ch == '[')
+                depth++;
+        }
+        return genericArgumentTypes;
     };
-    VDF.Deserialize = function (vdf, realVTypeName, loadOptions) {
-        return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions);
+
+    VDF.Serialize = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName) {
+        var declaredTypeName;
+        var saveOptions;
+        if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions) {
+            declaredTypeName = declaredTypeName_orSaveOptions;
+            saveOptions = saveOptions_orDeclaredTypeName;
+        } else {
+            declaredTypeName = saveOptions_orDeclaredTypeName;
+            saveOptions = declaredTypeName_orSaveOptions;
+        }
+        return VDFSaver.ToVDFNode(obj, declaredTypeName, saveOptions).ToVDF();
+    };
+
+    VDF.Deserialize = function (vdf, declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName) {
+        var declaredTypeName;
+        var loadOptions;
+        if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions) {
+            declaredTypeName = declaredTypeName_orLoadOptions;
+            loadOptions = loadOptions_orDeclaredTypeName;
+        } else {
+            declaredTypeName = loadOptions_orDeclaredTypeName;
+            loadOptions = declaredTypeName_orLoadOptions;
+        }
+        return VDFLoader.ToVDFNode(vdf, declaredTypeName, loadOptions).ToObject(declaredTypeName, loadOptions);
     };
     VDF.typeExporters_inline = {};
     VDF.typeImporters_inline = {};

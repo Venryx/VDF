@@ -138,12 +138,17 @@ namespace VDFTests
 			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
 			a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
 		}
+		[Fact] void ToVDFNode_Level1_PoppedOutBaseValue()
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"name{#}
+	Dan");
+			a["name"].baseValue.Should().Be("Dan");
+		}
 		[Fact] void ToVDFNode_Level1_PoppedOutNodes()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@"names{#}
 	Dan
-	Bob
-");
+	Bob");
 			a["names"][0].baseValue.Should().Be("Dan");
 			a["names"][1].baseValue.Should().Be("Bob");
 		}
@@ -186,7 +191,7 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level1_DictionaryItems_TypesInferredFromGenerics()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"HoldMesh>vertexColors{Dictionary[Vector3,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}", new VDFLoadOptions
+			VDFNode a = VDFLoader.ToVDFNode("HoldMesh>vertexColors{Dictionary[Vector3,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}", new VDFLoadOptions
 			{
 				typeAliasesByType = new Dictionary<Type, string> {{typeof(Color), "Color"}}
 			});
@@ -212,7 +217,7 @@ namespace VDFTests
 		class TypeWithPostDeserializeInitMethod
 		{
 			[VDFProp] public bool postDeserializeWasCalled;
-			[VDFPostDeserialize] void PostDeserialize() { postDeserializeWasCalled = true; }
+			[VDFPostDeserialize] void VDFPostDeserialize() { postDeserializeWasCalled = true; }
 		}
 		[Fact] void ToObject_Level1_PostDeserializeInitialization()
 		{

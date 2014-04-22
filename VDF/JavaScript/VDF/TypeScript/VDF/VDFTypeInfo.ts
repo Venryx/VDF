@@ -1,15 +1,15 @@
 ﻿class VDFTypeInfo
 {
 	props_includeL1: boolean;
-	propInfoByPropName: Object;
+	propInfoByName: Object;
 	constructor(props_includeL1?: boolean, propInfoByPropName?: Object)
 	{
 		this.props_includeL1 = props_includeL1;
-		this.propInfoByPropName = propInfoByPropName || {};
+		this.propInfoByName = propInfoByPropName || {};
 	}
 	SetPropInfo(propName: string, propInfo: VDFPropInfo)
 	{
-		this.propInfoByPropName[propName] = propInfo;
+		this.propInfoByName[propName] = propInfo;
 	}
 }
 

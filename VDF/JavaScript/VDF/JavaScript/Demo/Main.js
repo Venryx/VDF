@@ -29,8 +29,8 @@
         return "";
     }); //id.toString());
     VDF.RegisterTypeImporter_Inline("Guid", function (str) {
-        return new Guid(str);
-    });
+        return new Guid();
+    }); //new Guid(str)
 
     $(function () {
         var urlVars = GetUrlVars(window.location.href);
@@ -44,7 +44,7 @@
             var testWorld = Test1.CreateWorld();
 
             // serialize it, and save it to file
-            var vdf = VDF.Serialize(testWorld, new VDFSaveOptions());
+            var vdf = VDF.Serialize(testWorld, new VDFSaveOptions(1 /* Assembly */));
             $("#outputA").val(vdf);
         });
         $("#makeOutputB_asWorld").click(function (event, ui) {
@@ -53,7 +53,7 @@
             var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
 
             // reserialize it, and save it to second file, to check data
-            var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions());
+            var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(1 /* Assembly */));
             $("#outputB").val(vdf2);
         });
         $("#makeOutputB_asObject").click(function (event, ui) {
@@ -62,7 +62,7 @@
             var testObj = VDF.Deserialize(vdf, "object", new VDFLoadOptions());
 
             // reserialize it, and save it to second file, to check data
-            var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions());
+            var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions(1 /* Assembly */));
             $("#outputB").val(vdf2);
         });
     });

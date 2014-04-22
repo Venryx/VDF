@@ -35,6 +35,8 @@ class VDF
 	static RegisterTypeExporter_Inline(type: string, exporter: Function) { VDF.typeExporters_inline[type] = exporter; }
 	static RegisterTypeImporter_Inline<T>(type: string, importer: Function) { VDF.typeImporters_inline[type] = importer; }
 
+	static GetType(vTypeName: string) { return window[vTypeName]; }
+	static GetTypeInfo(vTypeName: string) { return (window[vTypeName] || {}).typeInfo; }
 	static GetVTypeNameOfObject(obj)
 	{
 		if (obj == null)
@@ -61,9 +63,52 @@ class VDF
 			return obj.toString().contains(".") ? "float" : "int";
 		return rawType;
 	}
+	static GetGenericParametersOfTypeName(typeName: string): string[]
+	{
+		var genericArgumentTypes = new Array<string>();
+		var depth = 0;
+		var lastStartBracketPos = -1;
+		for (var i = 0; i < typeName.length; i++)
+		{
+			var ch = typeName[i];
+			if (ch == ']')
+				depth--;
+			if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
+				genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
+			if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
+				lastStartBracketPos = i;
+			if (ch == '[')
+				depth++;
+		}
+		return genericArgumentTypes;
+	}
 
-	static Serialize(obj: any, saveOptions?: VDFSaveOptions): string { return VDFSaver.ToVDFNode(obj, saveOptions).ToVDF(); }
-	static Deserialize<T>(vdf: string, realVTypeName: string, loadOptions?: VDFLoadOptions): string { return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject(realVTypeName, loadOptions); }
+	static Serialize(obj: any, saveOptions: VDFSaveOptions, declaredTypeName?: string): string;
+	static Serialize(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions): string;
+	static Serialize(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any): string;
+	static Serialize(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any): string
+	{
+		var declaredTypeName: string;
+		var saveOptions: VDFSaveOptions;
+		if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions)
+			{declaredTypeName = declaredTypeName_orSaveOptions; saveOptions = saveOptions_orDeclaredTypeName;}
+		else
+			{declaredTypeName = saveOptions_orDeclaredTypeName; saveOptions = declaredTypeName_orSaveOptions;}
+		return VDFSaver.ToVDFNode(obj, declaredTypeName, saveOptions).ToVDF();
+	}
+	static Deserialize(vdf: string, loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
+	static Deserialize(vdf: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;
+	static Deserialize(vdf: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any;
+	static Deserialize(vdf: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any
+	{
+		var declaredTypeName: string;
+		var loadOptions: VDFLoadOptions;
+		if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions)
+			{declaredTypeName = declaredTypeName_orLoadOptions; loadOptions = loadOptions_orDeclaredTypeName;}
+		else
+			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
+		return VDFLoader.ToVDFNode(vdf, declaredTypeName, loadOptions).ToObject(declaredTypeName, loadOptions);
+	}
 }
 
 // helper classes
@@ -149,7 +194,7 @@ class Dictionary<K, V>
 	values: any[] = [];
 	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
-		Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "Dictionary[" + keyType + "," + valueType + "]" });
+		Object.defineProperty(this, "realVTypeName", {enumerable: false, value: "Dictionary[" + keyType + "," + valueType + "]"});
 		this.keyType = keyType;
 		this.valueType = valueType;
 

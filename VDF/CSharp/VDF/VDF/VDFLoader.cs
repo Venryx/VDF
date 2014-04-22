@@ -28,13 +28,13 @@ public static class VDFLoader
 			loadOptions = new VDFLoadOptions();
 
 		var objNode = new VDFNode();
-		var objType = declaredType != null ? declaredType : null;
-		if (objType == null && FindNextDepthXItemSeparatorCharPos(vdfFile, firstObjTextCharPos, 0) != -1) // if obj-data has item-separators, of its depth-level, we can infer that it is a List
+		var objType = declaredType;
+		if (objType == null && FindNextDepthXItemSeparatorCharPos(vdfFile, firstObjTextCharPos, 0) != -1) // if obj-data has item-separators (of its depth-level), we can infer that it's a List
 			objType = typeof(IList);
 		var livePropAddNode = objType != null && typeof(IList).IsAssignableFrom(objType) ? new VDFNode() : objNode; // if list, create a new node for holding the about-to-be-reached props
 		var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDFTypeInfo.Get(objType.IsGenericType ? objType.GetGenericArguments()[0] : typeof(object)) : (objType != null ? VDFTypeInfo.Get(objType) : null);
 
-		var sharedData = new VDFLoader_SharedData{poppedOutPropValueCount = 0};
+		var sharedData = new VDFLoader_SharedData();
 		int depth = 0;
 		bool dataIsPoppedOut = false;
 		string livePropName = null;
@@ -86,7 +86,7 @@ public static class VDFLoader
 						objNode.metadata_type = FindNextDepthXCharYPos(objNode.metadata_type, 0, 0, ',', '[', ']') != -1 ? "Dictionary[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has generic-params without root-type, infer root type to be "Dictionary"
 						objNode.metadata_type = !objNode.metadata_type.Contains("[") ? "List[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has no generic-params, infer root type to be "List"
 						objType = VDF.GetTypeByVName(objNode.metadata_type, loadOptions);
-						if (objType != null && typeof (IList).IsAssignableFrom(objType)) // if obj is List (as opposed to Dictionary)
+						if (objType != null && typeof(IList).IsAssignableFrom(objType)) // if obj is List (as opposed to Dictionary)
 						{
 							livePropAddNode = new VDFNode(); // we found out we're a list, so create a new item-node to hold the about-to-be-reached props
 							livePropAddNodeTypeInfo = VDFTypeInfo.Get(objType.GetGenericArguments()[0]);
@@ -100,9 +100,12 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildDataTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
-						foreach (int pos in poppedOutPropValueItemTextPositions)
-							objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof (object)) : null, loadOptions, pos, sharedData));
+						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
+						if (typeof(IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
+							foreach (int pos in poppedOutPropValueItemTextPositions)
+								objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos, sharedData));
+						else
+							objNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0], sharedData);
 						parentSharedData.poppedOutPropValueCount++;
 						dataIsPoppedOut = true;
 					}
@@ -174,7 +177,7 @@ public static class VDFLoader
 				return i;
 		return -1;
 	}
-	static List<int> FindPoppedOutChildDataTextPositions(string vdfFile, int parentIndentDepth, int searchStartPos, int poppedOutChildDataIndex)
+	static List<int> FindPoppedOutChildTextPositions(string vdfFile, int parentIndentDepth, int searchStartPos, int poppedOutChildDataIndex)
 	{
 		var result = new List<int>();
 

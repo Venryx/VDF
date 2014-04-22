@@ -1,5 +1,14 @@
-﻿var VDFSaveOptions = (function () {
-    function VDFSaveOptions() {
+﻿var VDFTypeMarking;
+(function (VDFTypeMarking) {
+    VDFTypeMarking[VDFTypeMarking["None"] = 0] = "None";
+    VDFTypeMarking[VDFTypeMarking["Assembly"] = 1] = "Assembly";
+    VDFTypeMarking[VDFTypeMarking["AssemblyExternal"] = 2] = "AssemblyExternal";
+    VDFTypeMarking[VDFTypeMarking["AssemblyExternalNoCollapse"] = 3] = "AssemblyExternalNoCollapse";
+})(VDFTypeMarking || (VDFTypeMarking = {}));
+var VDFSaveOptions = (function () {
+    function VDFSaveOptions(typeMarking) {
+        if (typeof typeMarking === "undefined") { typeMarking = 1 /* Assembly */; }
+        this.typeMarking = typeMarking;
     }
     return VDFSaveOptions;
 })();
@@ -7,73 +16,52 @@
 var VDFSaver = (function () {
     function VDFSaver() {
     }
-    VDFSaver.ToVDFNode = function (obj, saveOptions) {
+    VDFSaver.ToVDFNode = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName, isGenericParamValue) {
+        var declaredTypeName;
+        var saveOptions;
+        if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions) {
+            declaredTypeName = declaredTypeName_orSaveOptions;
+            saveOptions = saveOptions_orDeclaredTypeName;
+        } else {
+            declaredTypeName = saveOptions_orDeclaredTypeName;
+            saveOptions = declaredTypeName_orSaveOptions;
+        }
         if (saveOptions == null)
             saveOptions = new VDFSaveOptions();
 
-        var objVTypeName = VDF.GetVTypeNameOfObject(obj);
         var objNode = new VDFNode();
+        var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj);
+
+        if (obj != null && obj.VDFPreSerialize)
+            obj.VDFPreSerialize();
+
         if (obj == null)
             objNode.baseValue = "[#null]";
         else if (VDF.typeExporters_inline[objVTypeName])
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
         else if (objVTypeName == "bool")
             objNode.baseValue = obj.toString().toLowerCase();
+        else if (EnumValue.IsEnum(objVTypeName))
+            objNode.baseValue = new EnumValue(objVTypeName, obj).toString();
         else if (["float", "double", "decimal"].contains(objVTypeName))
             objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
-        else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName) || obj.GetTypeName() == "EnumValue")
+        else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName))
             objNode.baseValue = VDFSaver.RawDataStringToFinalized(obj.toString());
         else if (objVTypeName.startsWith("List[")) {
-            objNode.isListOrDictionary = true;
+            objNode.isList = true;
             var objAsList = obj;
             for (var i = 0; i < objAsList.length; i++) {
-                var item = objAsList[i];
-                if (eval("window['" + objAsList.itemType + "'] && " + objAsList.itemType + "['_IsEnum'] === 0"))
-                    item = new EnumValue(objAsList.itemType, item);
-
-                var itemVTypeName = VDF.GetVTypeNameOfObject(item);
-                var typeDerivedFromDeclaredType = item != null && itemVTypeName != objAsList.itemType;
-                var itemValueNode = VDFSaver.ToVDFNode(item, saveOptions);
-                if (itemVTypeName && itemVTypeName.startsWith("List["))
-                    itemValueNode.isListItem_list = true;
+                var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true);
+                itemValueNode.isListItem = true;
                 if (i > 0)
                     itemValueNode.isListItem_nonFirst = true;
-                if (typeDerivedFromDeclaredType)
-                    itemValueNode.metadata_type = itemVTypeName;
                 objNode.PushItem(itemValueNode);
             }
         } else if (objVTypeName.startsWith("Dictionary[")) {
-            objNode.isListOrDictionary = true;
+            objNode.isDictionary = true;
             var objAsDictionary = obj;
-            for (var i in objAsDictionary.keys) {
-                var key = objAsDictionary.keys[i];
-                var value = objAsDictionary.get(key);
-                if (eval("window['" + objAsDictionary.keyType + "'] && " + objAsDictionary.keyType + "['_IsEnum'] === 0"))
-                    key = new EnumValue(objAsDictionary.keyType, key);
-                if (eval("window['" + objAsDictionary.valueType + "'] && " + objAsDictionary.valueType + "['_IsEnum'] === 0"))
-                    value = new EnumValue(objAsDictionary.valueType, value);
-
-                var keyValuePairPseudoNode = new VDFNode();
-                keyValuePairPseudoNode.isKeyValuePairPseudoNode = true;
-
-                var keyVTypeName = VDF.GetVTypeNameOfObject(key);
-                var keyTypeDerivedFromDeclaredType = keyVTypeName != objAsDictionary.keyType;
-                var keyNode = VDFSaver.ToVDFNode(key);
-                if (keyTypeDerivedFromDeclaredType)
-                    keyNode.metadata_type = keyVTypeName;
-                keyValuePairPseudoNode.PushItem(keyNode);
-
-                var valueVTypeName = VDF.GetVTypeNameOfObject(value);
-                var valueTypeDerivedFromDeclaredType = value != null && valueVTypeName != objAsDictionary.valueType;
-                var valueNode = VDFSaver.ToVDFNode(value);
-                valueNode.isListItem_nonFirst = true;
-                if (valueTypeDerivedFromDeclaredType)
-                    valueNode.metadata_type = valueVTypeName;
-                keyValuePairPseudoNode.PushItem(valueNode);
-
-                objNode.PushItem(keyValuePairPseudoNode);
-            }
-            ;
+            for (var i in objAsDictionary.keys)
+                objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
         } else if (typeof obj == "object") {
             var isAnonymousType = obj.constructor == {}.constructor || obj.constructor == object;
             var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
@@ -82,7 +70,7 @@ var VDFSaver = (function () {
             // special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
             var oldObj = obj;
             obj = {};
-            for (var propName in typeInfo.propInfoByPropName)
+            for (var propName in typeInfo.propInfoByName)
                 obj[propName] = null; // first, clear each declared prop to a null value, to ensure that the code below can process each declared property
             for (var propName in oldObj)
                 obj[propName] = oldObj[propName];
@@ -91,41 +79,46 @@ var VDFSaver = (function () {
                 if (typeof obj[propName] == "function")
                     continue;
 
-                var propInfo = typeInfo.propInfoByPropName[propName] || new VDFPropInfo("object");
+                var propInfo = typeInfo.propInfoByName[propName] || new VDFPropInfo("object");
                 var include = typeInfo.props_includeL1;
                 include = propInfo.includeL2 != null ? propInfo.includeL2 : include;
                 if (!include)
                     continue;
 
                 var propValue = obj[propName];
-                if (EnumValue.IsEnum(propInfo.propVTypeName))
-                    propValue = new EnumValue(propInfo.propVTypeName, propValue);
                 if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
                     continue;
 
-                var propVTypeName = VDF.GetVTypeNameOfObject(propValue);
-                var typeDerivedFromDeclaredType = propValue != null && propVTypeName != propInfo.propVTypeName && propInfo.propVTypeName != null;
+                var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions);
                 if (propInfo.popDataOutOfLine) {
-                    var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
                     if (propValueNode.baseValue != "[#null]") {
+                        for (var i in propValueNode.items)
+                            propValueNode.items[i].popOutToOwnLine = true;
+                        if (popOutGroupsAdded > 0 && propValueNode.items.length > 0)
+                            propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
                         propValueNode.InsertItem(0, new VDFNode("#")); // add in-line marker, indicating that items are popped-out
-                        if (popOutGroupsAdded > 0 && propValueNode.items.length > 1)
-                            propValueNode.items[1].isFirstItemOfNonFirstPopOutGroup = true;
-                        if (typeDerivedFromDeclaredType)
-                            propValueNode.metadata_type = propVTypeName;
-                        for (var key in propValueNode.items)
-                            if (propValueNode.items[key].baseValue != "#")
-                                propValueNode.items[key].popOutToOwnLine = true;
                     }
-                    objNode.SetProperty(propName, propValueNode);
                     popOutGroupsAdded++;
-                } else {
-                    var propValueNode = VDFSaver.ToVDFNode(propValue, saveOptions);
-                    if (typeDerivedFromDeclaredType)
-                        propValueNode.metadata_type = propVTypeName;
-                    objNode.SetProperty(propName, propValueNode);
                 }
+                objNode.SetProperty(propName, propValueNode);
             }
+        }
+
+        // do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)
+        var markType = saveOptions.typeMarking == 3 /* AssemblyExternalNoCollapse */;
+        markType = [1 /* Assembly */, 2 /* AssemblyExternal */].contains(saveOptions.typeMarking) && obj != null && objVTypeName != declaredTypeName ? true : markType; // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
+        markType = saveOptions.typeMarking == 2 /* AssemblyExternal */ && obj instanceof List && objNode.items.length == 1 ? true : markType; // if list with only one item (i.e. indistinguishable from base-prop)
+        markType = saveOptions.typeMarking == 2 /* AssemblyExternal */ && obj instanceof Dictionary ? true : markType; // if dictionary (i.e. indistinguishable from prop-set)
+        markType = saveOptions.typeMarking == 2 /* AssemblyExternal */ && !isGenericParamValue ? true : markType; // we're a non-generics-based value (i.e. we have no value-default-type specified)
+        objNode.metadata_type = markType && obj != null ? objVTypeName : null;
+        if (saveOptions.typeMarking != 3 /* AssemblyExternalNoCollapse */) {
+            var collapseMap = { "string": null, "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": "" };
+            if (objNode.metadata_type != null && collapseMap[objNode.metadata_type] !== undefined)
+                objNode.metadata_type = collapseMap[objNode.metadata_type];
+
+            // if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params
+            if (objNode.metadata_type != null && ((objNode.metadata_type.startsWith("List[") && !objNode.metadata_type.substring(5).contains("[")) || objNode.metadata_type.startsWith("Dictionary[")))
+                objNode.metadata_type = objNode.metadata_type.startsWith("List[") ? objNode.metadata_type.substring(5, objNode.metadata_type.length - 1) : objNode.metadata_type.substring(11, objNode.metadata_type.length - 1);
         }
 
         return objNode;

@@ -1,10 +1,10 @@
 ﻿var VDFTypeInfo = (function () {
     function VDFTypeInfo(props_includeL1, propInfoByPropName) {
         this.props_includeL1 = props_includeL1;
-        this.propInfoByPropName = propInfoByPropName || {};
+        this.propInfoByName = propInfoByPropName || {};
     }
     VDFTypeInfo.prototype.SetPropInfo = function (propName, propInfo) {
-        this.propInfoByPropName[propName] = propInfo;
+        this.propInfoByName[propName] = propInfo;
     };
     return VDFTypeInfo;
 })();

@@ -27,8 +27,8 @@
 		var parts: string[] = str.split(',');
 		return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
 	});
-	VDF.RegisterTypeExporter_Inline("Guid", id => ""); //id.toString());
-	VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
+	VDF.RegisterTypeExporter_Inline("Guid", id=>""); //id.toString());
+	VDF.RegisterTypeImporter_Inline("Guid", str=>new Guid()); //new Guid(str)
 
 	$(() =>
 	{
@@ -44,7 +44,7 @@
 			var testWorld = Test1.CreateWorld();
 
 			// serialize it, and save it to file
-			var vdf = VDF.Serialize(testWorld, new VDFSaveOptions()); //, null, null, namespaceAliasesByName, typeAliasesByType, true));
+			var vdf = VDF.Serialize(testWorld, new VDFSaveOptions(VDFTypeMarking.Assembly));
 			$("#outputA").val(vdf);
 		});
 		$("#makeOutputB_asWorld").click((event, ui) =>
@@ -54,7 +54,7 @@
 			var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
 
 			// reserialize it, and save it to second file, to check data
-			var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions()); //, null, null, namespaceAliasesByName, typeAliasesByType, true));
+			var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(VDFTypeMarking.Assembly));
 			$("#outputB").val(vdf2);
 		});
 		$("#makeOutputB_asObject").click((event, ui) =>
@@ -64,7 +64,7 @@
 			var testObj = VDF.Deserialize(vdf, "object", new VDFLoadOptions());
 			
 			// reserialize it, and save it to second file, to check data
-			var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions()); //, null, null, namespaceAliasesByName, typeAliasesByType, true));
+			var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions(VDFTypeMarking.Assembly));
 			$("#outputB").val(vdf2);
 		});
 	});
