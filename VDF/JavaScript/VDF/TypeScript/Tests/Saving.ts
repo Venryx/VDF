@@ -126,6 +126,20 @@ class Saving
 			a["key1"].baseValue.Should().Be("[#null]");
 			a.ToVDF().Should().Be("string,string>>key1{[#null]}");
 		});
+		test("ToVDF_Level1_AnonymousTypeProperties_MarkNoTypes", ()=>
+		{
+			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(VDFTypeMarking.None));
+			a["Bool"].baseValue.Should().Be("false");
+			a["Int"].baseValue.Should().Be("5");
+			a["Float"].baseValue.Should().Be(".5");
+			a["String"].baseValue.Should().Be("Prop value string.");
+			a.ToVDF().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+		});
+		test("ToVDF_Level1_AnonymousTypeProperties_MarkAllTypes", ()=>
+		{
+			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(VDFTypeMarking.AssemblyExternal));
+			a.ToVDF().Should().Be("Bool{>false}Int{>5}Float{>.5}String{Prop value string.}");
+		});
 		test("ToVDF_Level1_PreSerializePreparation", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod());

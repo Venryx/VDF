@@ -41,6 +41,8 @@ class VDF
 	{
 		if (obj == null)
 			return null;
+		if (obj.constructor == (<any>{}).constructor || obj.constructor == object) // if true anonymous object, or if VDF-anonymous-object
+			return null; // return null, as the name would not be usable (note; this may not actually be true; should test it sometime)
 		var rawType = typeof obj;
 		if (rawType == "object") // if an object (i.e. a thing with real properties that could indicate a more specific type)
 		{

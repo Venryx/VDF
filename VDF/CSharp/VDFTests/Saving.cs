@@ -76,6 +76,20 @@ namespace VDFTests
 			a["key1"].baseValue.Should().Be("[#null]");
 			a.ToVDF().Should().Be("string,string>>key1{[#null]}");
 		}
+		[Fact] void ToVDF_Level1_AnonymousTypeProperties_MarkNoTypes()
+		{
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{typeMarking = VDFTypeMarking.None});
+			a["Bool"].baseValue.Should().Be("false");
+			a["Int"].baseValue.Should().Be("5");
+			a["Float"].baseValue.Should().Be(".5");
+			a["String"].baseValue.Should().Be("Prop value string.");
+			a.ToVDF().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
+		}
+		[Fact] void ToVDF_Level1_AnonymousTypeProperties_MarkAllTypes()
+		{
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Float = .5f, String = "Prop value string."}, new VDFSaveOptions{typeMarking = VDFTypeMarking.AssemblyExternal});
+			a.ToVDF().Should().Be("Bool{>false}Int{>5}Float{>.5}String{Prop value string.}");
+		}
 		class TypeWithPreSerializePrepMethod
 		{
 			[VDFProp] bool preSerializeWasCalled;

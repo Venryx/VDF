@@ -37,6 +37,8 @@ var VDF = (function () {
     VDF.GetVTypeNameOfObject = function (obj) {
         if (obj == null)
             return null;
+        if (obj.constructor == {}.constructor || obj.constructor == object)
+            return null;
         var rawType = typeof obj;
         if (rawType == "object") {
             if (obj["realVTypeName"])

@@ -48,7 +48,7 @@ class VDFSaver
 			objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
 		else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName))
 			objNode.baseValue = VDFSaver.RawDataStringToFinalized(obj.toString());
-		else if (objVTypeName.startsWith("List["))
+		else if (objVTypeName && objVTypeName.startsWith("List["))
 		{
 			objNode.isList = true;
 			var objAsList = <List<any>>obj;
@@ -61,7 +61,7 @@ class VDFSaver
 				objNode.PushItem(itemValueNode);
 			}
 		}
-		else if (objVTypeName.startsWith("Dictionary["))
+		else if (objVTypeName && objVTypeName.startsWith("Dictionary["))
 		{
 			objNode.isDictionary = true;
 			var objAsDictionary = <Dictionary<any, any>>obj;
