@@ -1,20 +1,20 @@
-name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}simpleFlag{true}listOfStringLists{{1A|1B|1C}|{2A|2B|2C}|{3A|3B|3C}}
+World>name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}simpleFlag{true}listOfStringLists{{1A|1B|1C}|{2A|2B|2C}|{3A|3B|3C}}
 	id{}name{Soils}children{#}
-		id{}name{Grass}duties{<<>>#}
-			<HoldSoil>texturePath{Grass.png}
-		id{}name{Dirt}duties{<<>>#}
-			<HoldSoil>texturePath{Dirt.png}
-	id{}name{Items}duties{<<>>#}children{#}
-		<Special1>color{White}brightness{.5}
+		id{}name{Grass}duties{#}
+			HoldSoil>texturePath{Grass.png}
+		id{}name{Dirt}duties{#}
+			HoldSoil>texturePath{Dirt.png}
+	id{}name{Items}duties{#}children{#}
+		Special1>color{White}brightness{.5}
 		#id{}name{@@NameThat{NeedsEscaping@gmail.com}@@}
 		id{}name{Camera}duties{#}
-			<HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
-			<HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}
-			<HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
-				<MoveSelfToInventory>
-				<RenderMesh>
-			<HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{<<>>#}
-				<MoveSelfToWorld>
+			HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
+			HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}
+			HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{#}
+				MoveSelfToInventory>
+				RenderMesh>
+			HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{#}
+				MoveSelfToWorld>
 		id{}name{GardenHoe}duties{#}
-			<HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
-			<HoldMesh>vertexes{}vertexColors{}
+			HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
+			HoldMesh>vertexes{}vertexColors{}

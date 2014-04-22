@@ -59,6 +59,7 @@ public class VDFNode
 	public static implicit operator string(VDFNode node) { return node.baseValue; }
 	public static implicit operator VDFNode(string val) { return new VDFNode { baseValue = val }; }
 	public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
+
 	// saving
 	// ==================
 
@@ -78,7 +79,7 @@ public class VDFNode
 		if (isListItem && isList)
 			builder.Append("{");
 		if (metadata_type != null)
-			builder.Append("<" + (isList || isDictionary ? "<" + metadata_type.Replace(" ", "") + ">" : metadata_type.Replace(" ", "")) + ">");
+			builder.Append(isList || isDictionary ? metadata_type.Replace(" ", "") + ">>" : metadata_type.Replace(" ", "") + ">");
 
 		if (baseValue != null)
 			builder.Append(baseValue);
@@ -140,7 +141,8 @@ public class VDFNode
 	}
 
 	public T ToObject<T>(VDFLoadOptions loadOptions = null) { return (T)ToObject(typeof(T), loadOptions); }
-	public object ToObject(Type declaredType, VDFLoadOptions loadOptions = null)
+	public object ToObject(VDFLoadOptions loadOptions, Type declaredType = null) { return ToObject(declaredType, loadOptions); }
+	public object ToObject(Type declaredType = null, VDFLoadOptions loadOptions = null)
 	{
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();

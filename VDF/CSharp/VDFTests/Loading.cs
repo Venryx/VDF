@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
 using FluentAssertions;
 using Xunit;
 
@@ -41,18 +43,18 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level0_Metadata_Type()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("<string>Root string.");
+			VDFNode a = VDFLoader.ToVDFNode("string>Root string.");
 			a.metadata_type.Should().Be("string");
 		}
 		[Fact] void ToVDFNode_Level0_ArrayItems()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("Root string 1.|Root string 2.");
+			VDFNode a = VDFLoader.ToVDFNode<IList>("Root string 1.|Root string 2.");
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
 		}
 		[Fact] void ToVDFNode_Level0_ArrayItems_Objects()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("name{Dan}age{50}|name{Bob}age{60}");
+			VDFNode a = VDFLoader.ToVDFNode<IList>("name{Dan}age{50}|name{Bob}age{60}");
 			((string)a[0]["name"]).Should().Be("Dan");
 			((int)a[0]["age"]).Should().Be(50);
 			((string)a[1]["name"]).Should().Be("Bob");
@@ -60,20 +62,27 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level0_ArrayItems_Empty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("|");
+			VDFNode a = VDFLoader.ToVDFNode<IList>("|");
 			a[0].baseValue.Should().Be(null);
 			a[1].baseValue.Should().Be(null);
 		}
+		[Fact] void ToVDFNode_Level0_ArrayItems_None()
+		{
+			VDFNode a = VDFLoader.ToVDFNode<IList>("");
+			a.items.Count.Should().Be(0);
+			a = VDFLoader.ToVDFNode(">>");
+			a.items.Count.Should().Be(0);
+		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata1()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("<<SpecialList[int]>>1|2", new VDFLoadOptions(null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
+			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2", new VDFLoadOptions(null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
 			a.metadata_type.Should().Be("SpecialList[int]");
 			a[0].metadata_type.Should().Be(null);
 			a[1].metadata_type.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata2()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("<<SpecialList[int]>><int>1|<int>2", new VDFLoadOptions(null, new Dictionary<Type, string> { { typeof(SpecialList<>), "SpecialList" } }));
+			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2", new VDFLoadOptions(null, new Dictionary<Type, string> { { typeof(SpecialList<>), "SpecialList" } }));
 			a.metadata_type.Should().Be("SpecialList[int]");
 			a[0].metadata_type.Should().Be("int");
 			a[1].metadata_type.Should().Be("int");
@@ -108,7 +117,7 @@ namespace VDFTests
 		[Fact]
 		void ToVDFNode_Level1_BaseValuesWithMarkedTypes()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("bool{<bool>false}int{<int>5}float{<float>.5}string{<string>Prop value string.}");
+			VDFNode a = VDFLoader.ToVDFNode("bool{bool>false}int{int>5}float{float>.5}string{string>Prop value string.}");
 			((bool)a["bool"]).Should().Be(false);
 			((int)a["int"]).Should().Be(5);
 			((float)a["float"]).Should().Be(.5f);
@@ -140,11 +149,12 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level1_ArrayItemsInArrayItems()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}");
+			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|{3A}"); // should be able to infer the "{3A}" text represents an array, by that it has braces without a prop-name
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be("1B");
 			a[1][0].baseValue.Should().Be("2A");
 			a[1][1].baseValue.Should().Be("2B");
+			a[2][0].baseValue.Should().Be("3A");
 		}
 		[Fact] void ToVDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty()
 		{
@@ -173,6 +183,16 @@ namespace VDFTests
 			VDFNode a = VDFLoader.ToVDFNode("uiPrefs{toolOptions{@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}@@}liveTool{Select}}");
 			a["uiPrefs"]["toolOptions"].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}");
 			a["uiPrefs"]["liveTool"].baseValue.Should().Be("Select");
+		}
+		[Fact] void ToVDFNode_Level1_DictionaryItems_TypesInferredFromGenerics()
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"HoldMesh>vertexColors{Dictionary[Vector3,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}", new VDFLoadOptions
+			{
+				typeAliasesByType = new Dictionary<Type, string> {{typeof(Color), "Color"}}
+			});
+			a["vertexColors"]["9,4,2.5"].baseValue.Should().Be("Black");
+			a["vertexColors"]["1,8,9.5435"].baseValue.Should().Be("Gray");
+			a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");
 		}
 		[Fact] void ToVDFNode_Level1_PoppedOutItemGroups() // each 'group' is actually just the value-data of one of the parent's properties
 		{

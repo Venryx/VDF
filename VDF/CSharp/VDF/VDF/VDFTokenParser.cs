@@ -7,9 +7,7 @@ public enum VDFTokenType
 {
 	None,
 	PoppedOutNodeMarker,
-	WiderMetadataStartMarker,
 	WiderMetadataEndMarker,
-	MetadataStartMarker,
 	Metadata_BaseValue,
 	MetadataEndMarker,
 	//LiteralMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
@@ -44,7 +42,7 @@ public class VDFTokenParser
 		tokens = new List<VDFToken>();
 	}
 
-	public VDFToken GetNextToken()
+	public bool MoveNextToken()
 	{
 		var tokenType = VDFTokenType.None;
 		var tokenTextBuilder = new StringBuilder();
@@ -72,15 +70,7 @@ public class VDFTokenParser
 			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
 				continue;
 
-			if (ch == '<')
-				if (nextChar == '<')
-				{
-					tokenType = VDFTokenType.WiderMetadataStartMarker;
-					i++;
-				}
-				else
-					tokenType = VDFTokenType.MetadataStartMarker;
-			else if (ch == '>')
+			if (ch == '>')
 				if (nextChar == '>')
 				{
 					tokenType = VDFTokenType.WiderMetadataEndMarker;
@@ -116,8 +106,19 @@ public class VDFTokenParser
 		nextCharPos = i;
 
 		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, tokenTextBuilder.ToString()) : null;
-		tokens.Add(token);
-		return token;
+		if (token != null)
+			tokens.Add(token);
+		return token != null;
+	}
+	public VDFToken PeekNextToken()
+	{
+		var oldPos = nextCharPos;
+		var oldTokenCount = tokens.Count;
+		MoveNextToken();
+		nextCharPos = oldPos;
+		if (tokens.Count > oldTokenCount)
+			return tokens.Last();
+		return null;
 	}
 
 	static int FindNextLineBreakCharPos(string vdfFile, int searchStartPos)

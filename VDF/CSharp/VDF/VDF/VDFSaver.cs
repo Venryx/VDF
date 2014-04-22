@@ -5,12 +5,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-public enum VDFTypeSafety
+public enum VDFTypeMarking
 {
-	None,
-	TypeSafeForAssembly,
-	TypeSafeForAll,
-	All
+	None, // can cause errors; only real use is for saving anonymous types, without redundant type-markings
+	Assembly,
+	AssemblyExternal,
+	AssemblyExternalNoCollapse
 }
 public class VDFSaveOptions
 {
@@ -19,22 +19,24 @@ public class VDFSaveOptions
 	public List<MemberInfo> includePropsL5;
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
-	public VDFTypeSafety typeSafety;
+	public VDFTypeMarking typeMarking;
 
-	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null, VDFTypeSafety typeSafety = VDFTypeSafety.TypeSafeForAssembly)
+	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null, VDFTypeMarking typeMarking = VDFTypeMarking.Assembly)
 	{
 		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
 		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
 		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
-		this.typeSafety = typeSafety;
+		this.typeMarking = typeMarking;
 	}
 }
 
 public static class VDFSaver
 {
-	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions = null)
+	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions saveOptions = null) { return ToVDFNode(obj, typeof(T), saveOptions); }
+	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions, Type declaredType = null) { return ToVDFNode(obj, declaredType, saveOptions); }
+	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false)
 	{
 		if (saveOptions == null)
 			saveOptions = new VDFSaveOptions();
@@ -45,10 +47,6 @@ public static class VDFSaver
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfoByName.Values.Where(methodInfo=>methodInfo.preSerializeMethod))
 				method.Call(obj);
-
-		// if we're marking types for all objects, just do it here (no need to compare actual type with base type)
-		if (saveOptions.typeSafety == VDFTypeSafety.All)
-			objNode.metadata_type = obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
 
 		if (obj == null)
 			objNode.baseValue = "[#null]";
@@ -66,41 +64,19 @@ public static class VDFSaver
 			var objAsList = (IList)obj;
 			for (int i = 0; i < objAsList.Count; i++)
 			{
-				object item = objAsList[i];
-				bool typeDerivedFromDeclaredType = item != null && type.IsGenericType && item.GetType() != type.GetGenericArguments()[0]; // if List item is of a type *derived* from the List's base item-type (i.e. we need to specify actual item-type)
-				VDFNode itemValueNode = ToVDFNode(item, saveOptions);
+				VDFNode itemValueNode = ToVDFNode(objAsList[i], type.GetGenericArguments()[0], saveOptions, true);
 				itemValueNode.isListItem = true;
 				if (i > 0)
 					itemValueNode.isListItem_nonFirst = true;
-				if (typeDerivedFromDeclaredType && saveOptions.typeSafety != VDFTypeSafety.None)
-					itemValueNode.metadata_type = VDF.GetVNameOfType(item.GetType(), saveOptions);
 				objNode.items.Add(itemValueNode);
 			}
-			if (saveOptions.typeSafety != VDFTypeSafety.None && objNode.items.Count == 1) // only one item, so we have to indicate this object is a list; we'll do that by setting its wider-metadata to ""
-				objNode.metadata_type = "";
 		}
 		else if (obj is IDictionary)
 		{
 			objNode.isDictionary = true;
 			var objAsDictionary = (IDictionary)obj;
 			foreach (object key in objAsDictionary.Keys)
-			{
-				object value = objAsDictionary[key];
-
-				bool keyTypeDerivedFromDeclaredType = type.IsGenericType && key.GetType() != type.GetGenericArguments()[0]; // if key is of a type *derived* from the Dictionary's base key-type (i.e. we need to specify actual key-type)
-				VDFNode keyNode = ToVDFNode(key, saveOptions); // todo; add checks to ensure that key ends up as a string
-				if (keyTypeDerivedFromDeclaredType && saveOptions.typeSafety != VDFTypeSafety.None)
-					keyNode.metadata_type = VDF.GetVNameOfType(key.GetType(), saveOptions);
-				
-				bool valueTypeDerivedFromDeclaredType = value != null && type.IsGenericType && value.GetType() != type.GetGenericArguments()[1]; // if value is of a type *derived* from the Dictionary's base value-type (i.e. we need to specify actual value-type)
-				VDFNode valueNode = ToVDFNode(value, saveOptions);
-				if (valueTypeDerivedFromDeclaredType && saveOptions.typeSafety != VDFTypeSafety.None)
-					valueNode.metadata_type = VDF.GetVNameOfType(value.GetType(), saveOptions);
-
-				objNode.properties.Add(keyNode, valueNode);
-			}
-			if (saveOptions.typeSafety == VDFTypeSafety.TypeSafeForAll)
-				objNode.metadata_type = ","; // we always have to mark dictionaries, for universal type-safety, since their key-values-pairs look just like properties
+				objNode.properties.Add(ToVDFNode(key, type.GetGenericArguments()[0], saveOptions, true), ToVDFNode(objAsDictionary[key], type.GetGenericArguments()[1], saveOptions, true));
 		}
 		else // an object, with properties
 		{
@@ -121,9 +97,7 @@ public static class VDFSaver
 				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
 
-				var propDeclaredType = !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object); // if obj is an anonymous type, considers its props' declared-types to be 'object'
-				bool typeDerivedFromDeclaredType = propValue != null && propValue.GetType() != propDeclaredType; // if value is of a type *derived* from the property's base value-type (i.e. we need to specify actual value-type)
-				VDFNode propValueNode = ToVDFNode(propValue, saveOptions);
+				VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions); // if obj is an anonymous type, considers its props' declared-types to be 'object'
 				if (propInfo.popDataOutOfLine)
 				{
 					if (propValueNode.baseValue != "[#null]")
@@ -136,10 +110,25 @@ public static class VDFSaver
 					}
 					popOutGroupsAdded++;
 				}
-				if (saveOptions.typeSafety != VDFTypeSafety.None && typeDerivedFromDeclaredType)
-					propValueNode.metadata_type = VDF.GetVNameOfType(propValue.GetType(), saveOptions);
 				objNode.properties.Add(propName, propValueNode);
 			}
+		}
+
+		// do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)
+		bool markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternalNoCollapse;
+		markType = new[] {VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal}.Contains(saveOptions.typeMarking) && obj != null && obj.GetType() != declaredType ? true : markType; // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
+		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IList && objNode.items.Count == 1 ? true : markType; // if list with only one item (i.e. indistinguishable from base-prop)
+		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IDictionary ? true : markType; // if dictionary (i.e. indistinguishable from prop-set)
+		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue ? true : markType; // we're a non-generics-based value (i.e. we have no value-default-type specified)
+		objNode.metadata_type = markType && obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
+		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
+		{
+			var collapseMap = new Dictionary<string, string> {{"string", null}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
+			if (objNode.metadata_type != null && collapseMap.ContainsKey(objNode.metadata_type))
+				objNode.metadata_type = collapseMap[objNode.metadata_type];
+			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params
+			if (objNode.metadata_type != null && ((objNode.metadata_type.StartsWith("List[") && !objNode.metadata_type.Substring(5).Contains("[")) || objNode.metadata_type.StartsWith("Dictionary[")))
+				objNode.metadata_type = objNode.metadata_type.StartsWith("List[") ? objNode.metadata_type.Substring(5, objNode.metadata_type.Length - 6) : objNode.metadata_type.Substring(11, objNode.metadata_type.Length - 12);
 		}
 
 		return objNode;

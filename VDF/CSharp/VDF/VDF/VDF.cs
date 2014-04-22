@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 
 public static class VDF
 {
@@ -57,6 +59,8 @@ public static class VDF
 	{
 		if (loadOptions.typeAliasesByType.Values.Contains(vNameRoot))
 			return loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == vNameRoot).Key;
+		if (builtInTypeAliasesByType.Values.Contains(vNameRoot))
+			return builtInTypeAliasesByType.FirstOrDefault(pair => pair.Value == vNameRoot).Key;
 
 		var result = Type.GetType(vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		if (result != null)
@@ -123,7 +127,8 @@ public static class VDF
 				return saveOptions.typeAliasesByType[rootType] + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
 
 			var rootTypeName = rootType.FullName.Substring(0, rootType.FullName.IndexOf("`"));
-			if (typeof(List<>).IsAssignableFrom(rootType)) // if type 'List' or a derivative, collapse its v-type-name to 'List', since that is how we handle it
+			rootTypeName = rootTypeName.Contains("+") ? rootTypeName.Substring(rootTypeName.IndexOf("+") + 1) : rootTypeName; // remove assembly name, if specified in string (may want to ensure this doesn't break anything)
+			if (typeof(IList).IsAssignableFrom(rootType)) // if type 'List' or a derivative, collapse its v-type-name to 'List', since that is how we handle it
 				rootTypeName = "List";
 			else if (typeof (Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
 				rootTypeName = "Dictionary";
@@ -137,6 +142,7 @@ public static class VDF
 		else
 		{
 			string result = type.FullName;
+			result = result.Contains("+") ? result.Substring(result.IndexOf("+") + 1) : result; // remove assembly name, if specified in string (may want to ensure this doesn't break anything)
 			foreach (KeyValuePair<string, string> pair in saveOptions.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
 				if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'['})[0].Contains("."))
 					result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
@@ -144,6 +150,10 @@ public static class VDF
 		}
 	}
 
-	public static string Serialize(object obj, VDFSaveOptions saveOptions = null) { return VDFSaver.ToVDFNode(obj, saveOptions).ToVDF(); }
-	public static T Deserialize<T>(string vdf, VDFLoadOptions loadOptions = null) { return VDFLoader.ToVDFNode(vdf, loadOptions).ToObject<T>(loadOptions); }
+	public static string Serialize<T>(object obj, VDFSaveOptions saveOptions = null) { return Serialize(obj, typeof(T), saveOptions); }
+	public static string Serialize(object obj, VDFSaveOptions saveOptions, Type declaredType = null) { return Serialize(obj, declaredType, saveOptions); }
+	public static string Serialize(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null) { return VDFSaver.ToVDFNode(obj, declaredType, saveOptions).ToVDF(); }
+	public static T Deserialize<T>(string vdf, VDFLoadOptions loadOptions = null) { return (T)Deserialize(vdf, typeof(T), loadOptions);}
+	public static object Deserialize(string vdf, VDFLoadOptions loadOptions, Type declaredType = null) { return Deserialize(vdf, declaredType, loadOptions); }
+	public static object Deserialize(string vdf, Type declaredType = null, VDFLoadOptions loadOptions = null) { return VDFLoader.ToVDFNode(vdf, declaredType, loadOptions).ToObject(declaredType, loadOptions); }
 }
