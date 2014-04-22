@@ -229,10 +229,6 @@ var Loading = (function () {
             a.bool.Should().Be(false);
             a.int.Should().BeExactly(3.5);
         });
-        /*test("ToObject_AsObject_DeepNesting", ()=>
-        {
-        var a = <any>VDF.Deserialize<Object>("id{1.1.1}name{Soils}children{id{1.1.1.1}name{Grass}duties{name{Grass}texturePath{Soils/Grass.jpg}}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}", "object");
-        });*/
     };
     return Loading;
 })();

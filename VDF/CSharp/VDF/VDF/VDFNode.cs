@@ -147,6 +147,7 @@ public class VDFNode
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
 		
+		// note; C# 3.5 doesn't have anonymous objects, so if the type isn't specified in the VDF text itself, a declared-type is required
 		Type finalType = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
 		var finalTypeInfo = VDFTypeInfo.Get(finalType);
 

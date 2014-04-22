@@ -178,7 +178,7 @@
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
 
-		var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
+		var finalTypeName = (this.metadata_type != null ? this.metadata_type : declaredTypeName) || "object"; // metadata-specified type, else declared-type, else anonymous-type (final type must be something)
 		var finalTypeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
 		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 
