@@ -18,12 +18,12 @@ public class VDFTypeInfo
 		{
 			var vdfTypeAttribute = (VDF.typeVDFTypeOverrides.ContainsKey(type) ? VDF.typeVDFTypeOverrides[type] : null) ?? (VDFType)type.GetCustomAttributes(typeof(VDFType), true).FirstOrDefault();
 			var typeInfo = new VDFTypeInfo();
-			foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+			foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 				if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
 					typeInfo.propInfoByName[field.Name] = VDFPropInfo.Get(field);
-			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 				typeInfo.propInfoByName[property.Name] = VDFPropInfo.Get(property);
-			foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Where(member=>member is MethodBase)) // include constructors
+			foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(member=>member is MethodBase)) // include constructors
 				typeInfo.methodInfoByName[method.Name] = VDFMethodInfo.Get(method);
 			if (type.Name.StartsWith("<>")) // if anonymous type, include all props, by default
 				typeInfo.props_includeL1 = true;
