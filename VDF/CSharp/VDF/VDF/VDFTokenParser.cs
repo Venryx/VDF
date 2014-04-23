@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -120,6 +121,7 @@ public class VDFTokenParser
 			return tokens.Last();
 		return null;
 	}
+	public string PeekNextChars(int charsToPeek = 1) { return vdf.Substring(nextCharPos, Math.Min(charsToPeek, vdf.Length - nextCharPos)); }
 
 	static int FindNextLineBreakCharPos(string vdfFile, int searchStartPos)
 	{

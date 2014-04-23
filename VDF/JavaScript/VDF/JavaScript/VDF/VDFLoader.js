@@ -76,7 +76,7 @@ var VDFLoader = (function () {
                             objNode.metadata_type = "int";
                     }
                 } else if (token.type == 3 /* Metadata_BaseValue */)
-                    if (vdfFile[parser.nextCharPos] == '>' && vdfFile[parser.nextCharPos + 1] == '>') {
+                    if (parser.PeekNextChars(2) == ">>") {
                         objNode.metadata_type = token.text == "," ? "Dictionary[object,object]" : token.text;
                         objNode.metadata_type = VDFLoader.FindNextDepthXCharYPos(objNode.metadata_type, 0, 0, ',', '[', ']') != -1 ? "Dictionary[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has generic-params without root-type, infer root type to be "Dictionary"
                         objNode.metadata_type = !objNode.metadata_type.contains("[") ? "List[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has no generic-params, infer root type to be "List"

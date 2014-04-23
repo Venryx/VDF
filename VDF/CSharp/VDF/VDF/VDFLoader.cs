@@ -82,7 +82,7 @@ public static class VDFLoader
 					}
 				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
-					if (vdfFile[parser.nextCharPos] == '>' && vdfFile[parser.nextCharPos + 1] == '>') // if wider-metadata (i.e. metadata for List or Dictionary)
+					if (parser.PeekNextChars(2) == ">>") // if wider-metadata (i.e. metadata for List or Dictionary)
 					{
 						objNode.metadata_type = token.text == "," ? "Dictionary[object,object]" : token.text;
 						objNode.metadata_type = FindNextDepthXCharYPos(objNode.metadata_type, 0, 0, ',', '[', ']') != -1 ? "Dictionary[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has generic-params without root-type, infer root type to be "Dictionary"

@@ -94,7 +94,6 @@ var VDFTokenParser = (function () {
             this.tokens.push(token);
         return token != null;
     };
-
     VDFTokenParser.prototype.PeekNextToken = function () {
         var oldPos = this.nextCharPos;
         var oldTokenCount = this.tokens.length;
@@ -103,6 +102,10 @@ var VDFTokenParser = (function () {
         if (this.tokens.length > oldTokenCount)
             return this.tokens[this.tokens.length - 1];
         return null;
+    };
+    VDFTokenParser.prototype.PeekNextChars = function (charsToPeek) {
+        if (typeof charsToPeek === "undefined") { charsToPeek = 1; }
+        return this.vdf.substring(this.nextCharPos, Math.min(this.nextCharPos + charsToPeek, this.vdf.length));
     };
 
     VDFTokenParser.FindNextLineBreakCharPos = function (vdfFile, searchStartPos) {
