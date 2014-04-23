@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -186,7 +187,10 @@ public class VDFNode
 					finalTypeInfo.propInfoByName[propName].SetValue(result, properties[propName].ToObject(finalTypeInfo.propInfoByName[propName].GetPropType(), loadOptions));
 		}
 
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.postDeserializeMethod))
+		// call post-deserialize constructors before post-deserialize normal methods
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
+			method.Call(result);
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
 			method.Call(result);
 
 		return result;
