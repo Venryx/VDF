@@ -38,7 +38,7 @@ var VDFSaver = (function () {
         if (obj == null)
             objNode.baseValue = "null";
         else if (VDF.typeExporters_inline[objVTypeName])
-            objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
+            objNode.baseValue = VDF.typeExporters_inline[objVTypeName](obj);
         else if (EnumValue.IsEnum(objVTypeName))
             objNode.baseValue = new EnumValue(objVTypeName, obj).toString();
         else if (objVTypeName == "bool")
@@ -46,7 +46,7 @@ var VDFSaver = (function () {
         else if (["float", "double", "decimal"].contains(objVTypeName))
             objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
         else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName))
-            objNode.baseValue = VDFSaver.RawDataStringToFinalized(obj.toString());
+            objNode.baseValue = obj.toString();
         else if (objVTypeName && objVTypeName.startsWith("List[")) {
             objNode.isList = true;
             var objAsList = obj;
@@ -122,17 +122,6 @@ var VDFSaver = (function () {
         }
 
         return objNode;
-    };
-
-    VDFSaver.RawDataStringToFinalized = function (dataStr) {
-        var result = dataStr;
-        if (dataStr.contains("}")) {
-            if (dataStr.endsWith("@") || dataStr.endsWith("|"))
-                result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "|@@";
-            else
-                result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "@@";
-        }
-        return result;
     };
     return VDFSaver;
 })();

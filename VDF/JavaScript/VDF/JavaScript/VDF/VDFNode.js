@@ -113,7 +113,7 @@
             builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
 
         if (this.baseValue != null)
-            builder.Append(this.baseValue);
+            builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue));
         else if (this.items.length > 0) {
             for (var key in this.items)
                 if (!this.items[key].popOutToOwnLine)
@@ -127,6 +127,15 @@
             builder.Append("}");
 
         return builder.ToString();
+    };
+    VDFNode.RawDataStringToFinalized = function (rawDataStr) {
+        var result = rawDataStr;
+        if (rawDataStr.contains(">") || rawDataStr.contains("}"))
+            if (rawDataStr.endsWith("@") || rawDataStr.endsWith("|"))
+                result = "@@" + rawDataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "|@@";
+            else
+                result = "@@" + rawDataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "@@";
+        return result;
     };
     VDFNode.prototype.GetPoppedOutItemText = function () {
         var lines = new Array();

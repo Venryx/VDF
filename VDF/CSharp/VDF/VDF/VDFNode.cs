@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.RegularExpressions;
 
 public class VDFNode
 {
@@ -82,7 +83,7 @@ public class VDFNode
 			builder.Append(isList || isDictionary ? metadata_type.Replace(" ", "") + ">>" : metadata_type.Replace(" ", "") + ">");
 
 		if (baseValue != null)
-			builder.Append(baseValue);
+			builder.Append(RawDataStringToFinalized(baseValue));
 		else if (items.Count > 0)
 		{
 			foreach (VDFNode item in items)
@@ -98,6 +99,16 @@ public class VDFNode
 			builder.Append("}");
 
 		return builder.ToString();
+	}
+	static string RawDataStringToFinalized(string rawDataStr)
+	{
+		string result = rawDataStr;
+		if (rawDataStr.Contains(">") || rawDataStr.Contains("}"))
+			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
+				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "|@@";
+			else
+				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "@@";
+		return result;
 	}
 	public string GetPoppedOutItemText()
 	{

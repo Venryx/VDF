@@ -135,7 +135,7 @@ public class VDFTokenParser
 		if (finalizedDataStr.Contains("}"))
 		{
 			if ((result[result.Length - 2] == '@' || result[result.Length - 2] == '|') && result.EndsWith("|"))
-				result = result.Substring(0, result.Length - 1); // chop of last char, as it was just added by the serializer for separation
+				result = result.Substring(0, result.Length - 1); // chop off last char, as it was just added by the serializer for separation
 			result = new Regex("@@@(?=\n|}|$)").Replace(result, "@@"); // remove extra '@' char added to all troublesome (before-end-of-line-or-end-bracket-or-end-of-string) two-at-signs char-segments
 		}
 		return result;

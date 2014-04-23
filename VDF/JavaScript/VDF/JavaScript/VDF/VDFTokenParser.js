@@ -116,7 +116,7 @@ var VDFTokenParser = (function () {
         var result = finalizedDataStr;
         if (finalizedDataStr.contains("}")) {
             if ((result[result.length - 2] == '@' || result[result.length - 2] == '|') && result.endsWith("|"))
-                result = result.substring(0, result.length - 1); // chop of last char, as it was just added by the serializer for separation
+                result = result.substring(0, result.length - 1); // chop off last char, as it was just added by the serializer for separation
             result = result.replace(/@@@(?=\n|}|$)/g, "@@"); // remove extra '@' char added to all troublesome (before-end-of-line-or-end-bracket-or-end-of-string) two-at-signs char-segments
         }
         return result;

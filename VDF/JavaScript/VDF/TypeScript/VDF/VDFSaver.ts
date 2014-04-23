@@ -39,7 +39,7 @@ class VDFSaver
 		if (obj == null)
 			objNode.baseValue = "null";
 		else if (VDF.typeExporters_inline[objVTypeName])
-			objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
+			objNode.baseValue = VDF.typeExporters_inline[objVTypeName](obj);
 		else if (EnumValue.IsEnum(objVTypeName)) // if enum value (at bottom, an integer; but we can get the nice-name based on type info)
 			objNode.baseValue = new EnumValue(objVTypeName, obj).toString();
 		else if (objVTypeName == "bool")
@@ -47,7 +47,7 @@ class VDFSaver
 		else if (["float", "double", "decimal"].contains(objVTypeName)) // floating-point number
 			objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
 		else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName))
-			objNode.baseValue = VDFSaver.RawDataStringToFinalized(obj.toString());
+			objNode.baseValue = obj.toString();
 		else if (objVTypeName && objVTypeName.startsWith("List["))
 		{
 			objNode.isList = true;
@@ -132,18 +132,5 @@ class VDFSaver
 		}
 
 		return objNode;
-	}
-
-	private static RawDataStringToFinalized(dataStr: string): string
-	{
-		var result: string = dataStr;
-		if (dataStr.contains("}"))
-		{
-			if (dataStr.endsWith("@") || dataStr.endsWith("|"))
-				result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "|@@";
-			else
-				result = "@@" + dataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "@@";
-		}
-		return result;
 	}
 }

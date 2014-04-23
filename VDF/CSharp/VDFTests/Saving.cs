@@ -59,6 +59,11 @@ namespace VDFTests
 			a["string"] = new VDFNode {baseValue = "Prop value string."};
 			a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		}
+		[Fact] void ToVDF_Level1_BaseValuesThatNeedEscaping()
+		{
+			var a = new VDFNode{baseValue = "string>In-string VDF data."};
+			a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
+		}
 		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
 		[Fact] void ToVDF_Level1_NullValues()
 		{

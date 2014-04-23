@@ -51,7 +51,7 @@ public static class VDFSaver
 		if (type == null)
 			objNode.baseValue = "null";
 		else if (VDF.typeExporters_inline.ContainsKey(type))
-			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
+			objNode.baseValue = VDF.typeExporters_inline[type](obj);
 		else if (type.IsEnum)
 			objNode.baseValue = obj.ToString();
 		else if (type == typeof(bool))
@@ -59,7 +59,7 @@ public static class VDFSaver
 		else if (type == typeof(float) || type == typeof(double) || type == typeof(decimal)) // if floating-point primitive
 			objNode.baseValue = obj.ToString().StartsWith("0.") ? obj.ToString().Substring(1) : obj.ToString();
 		else if (type.IsPrimitive || type == typeof(string)) // if other primitive (i.e. char or integer-based number), or string
-			objNode.baseValue = RawDataStringToFinalized(obj.ToString());
+			objNode.baseValue = obj.ToString();
 		else if (obj is IList) // note; this saves arrays also
 		{
 			objNode.isList = true;
@@ -134,16 +134,5 @@ public static class VDFSaver
 		}
 
 		return objNode;
-	}
-
-	static string RawDataStringToFinalized(string rawDataStr)
-	{
-		string result = rawDataStr;
-		if (rawDataStr.Contains("}"))
-			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
-				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "|@@";
-			else
-				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "@@";
-		return result;
 	}
 }

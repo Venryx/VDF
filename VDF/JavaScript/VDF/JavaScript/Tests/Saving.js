@@ -120,6 +120,10 @@ var Saving = (function () {
             a["string"] = new VDFNode("Prop value string.");
             a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
         });
+        test("ToVDF_Level1_BaseValuesThatNeedEscaping", function () {
+            var a = new VDFNode("string>In-string VDF data.");
+            a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
+        });
         test("ToVDF_Level1_NullValues", function () {
             var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
             a["obj"].metadata_type.Should().Be(""); // type "null" should be collapsed
