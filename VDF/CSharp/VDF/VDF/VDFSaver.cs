@@ -45,7 +45,7 @@ public static class VDFSaver
 		Type type = obj != null ? obj.GetType() : null;
 
 		if (obj != null)
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfoByName.Values.Where(methodInfo=>methodInfo.preSerializeMethod))
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
 				method.Call(obj);
 
 		if (type == null)

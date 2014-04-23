@@ -24,7 +24,7 @@ public class VDFTypeInfo
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 				typeInfo.propInfoByName[property.Name] = VDFPropInfo.Get(property);
 			foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(member=>member is MethodBase)) // include constructors
-				typeInfo.methodInfoByName[method.Name] = VDFMethodInfo.Get(method);
+				typeInfo.methodInfo.Add(VDFMethodInfo.Get(method));
 			if (type.Name.StartsWith("<>")) // if anonymous type, include all props, by default
 				typeInfo.props_includeL1 = true;
 			if (vdfTypeAttribute != null)
@@ -36,7 +36,7 @@ public class VDFTypeInfo
 
 	public bool props_includeL1 = false; // by default, use an opt-in approach
 	public Dictionary<string, VDFPropInfo> propInfoByName = new Dictionary<string, VDFPropInfo>();
-	public Dictionary<string, VDFMethodInfo> methodInfoByName = new Dictionary<string, VDFMethodInfo>();
+	public List<VDFMethodInfo> methodInfo = new List<VDFMethodInfo>();
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute

@@ -188,9 +188,9 @@ public class VDFNode
 		}
 
 		// call post-deserialize constructors before post-deserialize normal methods
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfo.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
 			method.Call(result);
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfoByName.Values.Where(methodInfo => methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfo.Where(methodInfo => methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
 			method.Call(result);
 
 		return result;
