@@ -46,8 +46,8 @@ class VDF
 		var rawType = typeof obj;
 		if (rawType == "object") // if an object (i.e. a thing with real properties that could indicate a more specific type)
 		{
-			if (obj["realVTypeName"])
-				return obj["realVTypeName"];
+			if (obj.realVTypeName)
+				return obj.realVTypeName;
 			var type = obj.GetTypeName();
 			if (type == "Boolean")
 				return "bool";
@@ -116,6 +116,40 @@ class VDF
 // helper classes
 // ==================
 
+class VDFUtils
+{
+	static MakePropertiesNonEnumerable(obj, alsoMakeFunctionsNonEnumerable: boolean = false)
+	{
+		for (var propName in obj)
+		{
+			var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
+			if (propDescriptor)
+			{
+				propDescriptor.enumerable = false;
+				Object.defineProperty(obj, propName, propDescriptor);
+			}
+			else if (alsoMakeFunctionsNonEnumerable && obj[propName] instanceof Function)
+				VDFUtils.SetUpStashFields(obj, propName);
+		}
+	}
+	static SetUpStashFields(obj, ...fieldNames)
+	{
+		if (!obj._stashFieldStore)
+			Object.defineProperty(obj, "_stashFieldStore", { enumerable: false, value: {} });
+		for (var i in fieldNames)
+		(()=>{
+			var propName = fieldNames[i];
+			var origValue = obj[propName];
+			Object.defineProperty(obj, propName,
+			{
+				enumerable: false,
+				get: function() { return obj["_stashFieldStore"][propName]; },
+				set: function(value) { obj["_stashFieldStore"][propName] = value; }
+			});
+			obj[propName] = origValue; // for 'stashing' a prop that was set beforehand
+		})();
+	}
+}
 class StringBuilder
 {
 	public data: Array<string> = [];
@@ -155,6 +189,7 @@ class EnumValue
 class List<T>
 {
 	private innerArray: any[];
+	realVTypeName: string;
 	itemType: string;
 	get length()
 	{
@@ -167,7 +202,8 @@ class List<T>
 	}
 	constructor(itemType: string, ...items: T[])
 	{
-		Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "List[" + itemType + "]" });
+		VDFUtils.SetUpStashFields(this, "innerArray", "realVTypeName", "itemType");
+		this.realVTypeName = "List[" + itemType + "]";
 		this.innerArray = [];
 		for (var i in items)
 			this.push(items[i]);
@@ -211,17 +247,22 @@ class List<T>
 	reduce(...args) { return Array.prototype.reduce.apply(this.innerArray, args); }
 	reduceRight(...args) { return Array.prototype.reduceRight.apply(this.innerArray, args); }
 }
+VDFUtils.MakePropertiesNonEnumerable(List.prototype, true);
 class Dictionary<K, V>
 {
+	realVTypeName: string;
 	keyType: string;
 	valueType: string;
-	keys: any[] = [];
-	values: any[] = [];
+	keys: any[];
+	values: any[];
 	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
-		Object.defineProperty(this, "realVTypeName", {enumerable: false, value: "Dictionary[" + keyType + "," + valueType + "]"});
+		VDFUtils.SetUpStashFields(this, "realVTypeName", "keyType", "valueType", "keys", "values");
+		this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
 		this.keyType = keyType;
 		this.valueType = valueType;
+		this.keys = [];
+		this.values = [];
 
 		if (keyValuePairs)
 			for (var i = 0; i < keyValuePairs.length; i++)
@@ -236,3 +277,4 @@ class Dictionary<K, V>
 		this.values[this.keys.indexOf(key)] = value;
 	}
 }
+VDFUtils.MakePropertiesNonEnumerable(Dictionary.prototype, true);

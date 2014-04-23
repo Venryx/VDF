@@ -1,5 +1,6 @@
 ﻿var VDFNode = (function () {
     function VDFNode(baseValue, metadata_type) {
+        VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "isListItem_nonFirst");
         this.baseValue = baseValue;
         this.metadata_type = metadata_type;
     }
@@ -7,7 +8,7 @@
         get: function () {
             var result = [];
             for (var key in this)
-                if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) == key)
+                if (!(this[key] instanceof Function) && parseInt(key) == key)
                     result.push(this[key]);
             return result;
         },
@@ -18,7 +19,7 @@
         get: function () {
             var objWithPropKeys = {};
             for (var key in this)
-                if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) != key)
+                if (!(this[key] instanceof Function) && parseInt(key) != key)
                     objWithPropKeys[key] = this[key];
             return objWithPropKeys;
         },
@@ -35,25 +36,6 @@
         enumerable: true,
         configurable: true
     });
-
-    VDFNode.prototype.SetItem = function (index, value) {
-        this.items[index] = value;
-        this[index] = value;
-    };
-    VDFNode.prototype.PushItem = function (value) {
-        this.SetItem(this.items.length, value);
-    };
-    VDFNode.prototype.InsertItem = function (index, value) {
-        var oldItems = this.items;
-        for (var i = 0; i < oldItems.length; i++)
-            delete this[i];
-        for (var i = 0; i < oldItems.length + 1; i++)
-            this.PushItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
-    };
-    VDFNode.prototype.SetProperty = function (key, value) {
-        this.properties[key] = value;
-        this[key] = value;
-    };
 
     Object.defineProperty(VDFNode.prototype, "AsBool", {
         // in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
@@ -98,6 +80,25 @@
     });
     VDFNode.prototype.toString = function () {
         return this.AsString;
+    };
+
+    VDFNode.prototype.SetItem = function (index, value) {
+        this.items[index] = value;
+        this[index] = value;
+    };
+    VDFNode.prototype.PushItem = function (value) {
+        this.SetItem(this.items.length, value);
+    };
+    VDFNode.prototype.InsertItem = function (index, value) {
+        var oldItems = this.items;
+        for (var i = 0; i < oldItems.length; i++)
+            delete this[i];
+        for (var i = 0; i < oldItems.length + 1; i++)
+            this.PushItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
+    };
+    VDFNode.prototype.SetProperty = function (key, value) {
+        this.properties[key] = value;
+        this[key] = value;
     };
 
     VDFNode.prototype.GetInLineItemText = function () {
@@ -227,9 +228,7 @@
 
         return result;
     };
-    VDFNode.builtInProps = [
-        "metadata_type", "baseValue", "items", "properties", "propertyCount", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsInt", "AsFloat", "AsString",
-        "isNamedPropertyValue", "isList", "isDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "isListItem_nonFirst"];
     return VDFNode;
 })();
+VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);
 //# sourceMappingURL=VDFNode.js.map

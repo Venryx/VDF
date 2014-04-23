@@ -1,15 +1,12 @@
 ﻿class VDFNode
 {
-	static builtInProps = ["metadata_type", "baseValue", "items", "properties", "propertyCount", "GetDictionaryValueNode", "SetDictionaryValueNode", "AsBool", "AsInt", "AsFloat", "AsString",
-		"isNamedPropertyValue", "isList", "isDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "isListItem_nonFirst"];
-
 	metadata_type: string;
 	baseValue: string;
 	get items(): Array<VDFNode>
 	{
 		var result = [];
 		for (var key in this)
-			if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) == key) // if number-index
+			if (!(this[key] instanceof Function) && parseInt(key) == key) // if number-index
 				result.push(this[key]);
 		return result;
 	}
@@ -17,7 +14,7 @@
 	{
 		var objWithPropKeys = {};
 		for (var key in this)
-			if (!VDFNode.builtInProps.contains(key) && !(this[key] instanceof Function) && parseInt(key) != key) // if not number-index
+			if (!(this[key] instanceof Function) && parseInt(key) != key) // if not number-index
 				objWithPropKeys[key] = this[key];
 		return objWithPropKeys;
 	}
@@ -28,9 +25,20 @@
 			result++;
 		return result;
 	}
+	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
+	get AsBool() { return new VDFNode(this.baseValue).ToObject("bool"); }
+	set AsBool(value: boolean) { this.baseValue = value.toString(); }
+	get AsInt() { return new VDFNode(this.baseValue).ToObject("int"); }
+	set AsInt(value: number) { this.baseValue = parseInt(value.toString()).toString(); }
+	get AsFloat() { return new VDFNode(this.baseValue).ToObject("float"); }
+	set AsFloat(value: number) { this.baseValue = value.toString(); }
+	get AsString() { return this.baseValue; }
+	set AsString(value: string) { this.baseValue = value; }
+	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
 
 	constructor(baseValue?: string, metadata_type?: string)
 	{
+		VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "isListItem_nonFirst");
 		this.baseValue = baseValue;
 		this.metadata_type = metadata_type;
 	}
@@ -54,17 +62,6 @@
 		this.properties[key] = value;
 		this[key] = value;
 	}
-	
-	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
-	get AsBool() { return new VDFNode(this.baseValue).ToObject("bool"); }
-	set AsBool(value: boolean) { this.baseValue = value.toString(); }
-	get AsInt() { return new VDFNode(this.baseValue).ToObject("int"); }
-	set AsInt(value: number) { this.baseValue = parseInt(value.toString()).toString(); }
-	get AsFloat() { return new VDFNode(this.baseValue).ToObject("float"); }
-	set AsFloat(value: number) { this.baseValue = value.toString(); }
-	get AsString() { return this.baseValue; }
-	set AsString(value: string) { this.baseValue = value; }
-	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
 
 	// saving
 	// ==================
@@ -215,3 +212,4 @@
 		return result;
 	}
 }
+VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);

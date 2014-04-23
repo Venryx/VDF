@@ -41,8 +41,8 @@ var VDF = (function () {
             return null;
         var rawType = typeof obj;
         if (rawType == "object") {
-            if (obj["realVTypeName"])
-                return obj["realVTypeName"];
+            if (obj.realVTypeName)
+                return obj.realVTypeName;
             var type = obj.GetTypeName();
             if (type == "Boolean")
                 return "bool";
@@ -113,6 +113,45 @@ var VDF = (function () {
 
 // helper classes
 // ==================
+var VDFUtils = (function () {
+    function VDFUtils() {
+    }
+    VDFUtils.MakePropertiesNonEnumerable = function (obj, alsoMakeFunctionsNonEnumerable) {
+        if (typeof alsoMakeFunctionsNonEnumerable === "undefined") { alsoMakeFunctionsNonEnumerable = false; }
+        for (var propName in obj) {
+            var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
+            if (propDescriptor) {
+                propDescriptor.enumerable = false;
+                Object.defineProperty(obj, propName, propDescriptor);
+            } else if (alsoMakeFunctionsNonEnumerable && obj[propName] instanceof Function)
+                VDFUtils.SetUpStashFields(obj, propName);
+        }
+    };
+    VDFUtils.SetUpStashFields = function (obj) {
+        var fieldNames = [];
+        for (var _i = 0; _i < (arguments.length - 1); _i++) {
+            fieldNames[_i] = arguments[_i + 1];
+        }
+        if (!obj._stashFieldStore)
+            Object.defineProperty(obj, "_stashFieldStore", { enumerable: false, value: {} });
+        for (var i in fieldNames)
+            (function () {
+                var propName = fieldNames[i];
+                var origValue = obj[propName];
+                Object.defineProperty(obj, propName, {
+                    enumerable: false,
+                    get: function () {
+                        return obj["_stashFieldStore"][propName];
+                    },
+                    set: function (value) {
+                        obj["_stashFieldStore"][propName] = value;
+                    }
+                });
+                obj[propName] = origValue; // for 'stashing' a prop that was set beforehand
+            })();
+    };
+    return VDFUtils;
+})();
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.data = [];
@@ -173,7 +212,8 @@ var List = (function () {
         for (var _i = 0; _i < (arguments.length - 1); _i++) {
             items[_i] = arguments[_i + 1];
         }
-        Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "List[" + itemType + "]" });
+        VDFUtils.SetUpStashFields(this, "innerArray", "realVTypeName", "itemType");
+        this.realVTypeName = "List[" + itemType + "]";
         this.innerArray = [];
         for (var i in items)
             this.push(items[i]);
@@ -343,17 +383,19 @@ var List = (function () {
     };
     return List;
 })();
+VDFUtils.MakePropertiesNonEnumerable(List.prototype, true);
 var Dictionary = (function () {
     function Dictionary(keyType, valueType) {
         var keyValuePairs = [];
         for (var _i = 0; _i < (arguments.length - 2); _i++) {
             keyValuePairs[_i] = arguments[_i + 2];
         }
-        this.keys = [];
-        this.values = [];
-        Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "Dictionary[" + keyType + "," + valueType + "]" });
+        VDFUtils.SetUpStashFields(this, "realVTypeName", "keyType", "valueType", "keys", "values");
+        this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
         this.keyType = keyType;
         this.valueType = valueType;
+        this.keys = [];
+        this.values = [];
 
         if (keyValuePairs)
             for (var i = 0; i < keyValuePairs.length; i++)
@@ -369,4 +411,5 @@ var Dictionary = (function () {
     };
     return Dictionary;
 })();
+VDFUtils.MakePropertiesNonEnumerable(Dictionary.prototype, true);
 //# sourceMappingURL=VDF.js.map
