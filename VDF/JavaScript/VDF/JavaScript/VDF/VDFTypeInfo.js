@@ -22,7 +22,8 @@ var VDFPropInfo = (function () {
             return true;
         if (x === false || x === 0)
             return true;
-        if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0)
+        var vTypeName = VDF.GetVTypeNameOfObject(x);
+        if (vTypeName && vTypeName.startsWith("List[") && x.length == 0)
             return true;
         return false;
     };

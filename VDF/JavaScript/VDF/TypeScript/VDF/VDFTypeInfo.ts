@@ -33,7 +33,8 @@ class VDFPropInfo
 			return true;
 		if (x === false || x === 0) // if struct, and equal to struct's default value
 			return true;
-		if (VDF.GetVTypeNameOfObject(x).startsWith("List[") && x.length == 0) // if list, and empty
+		var vTypeName = VDF.GetVTypeNameOfObject(x);
+		if (vTypeName && vTypeName.startsWith("List[") && x.length == 0) // if list, and empty
 			return true;
 		return false;
 	}
