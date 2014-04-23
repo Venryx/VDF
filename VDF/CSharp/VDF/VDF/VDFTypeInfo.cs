@@ -23,7 +23,7 @@ public class VDFTypeInfo
 					typeInfo.propInfoByName[field.Name] = VDFPropInfo.Get(field);
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
 				typeInfo.propInfoByName[property.Name] = VDFPropInfo.Get(property);
-			foreach (MethodInfo method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+			foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Where(member=>member is MethodBase)) // include constructors
 				typeInfo.methodInfoByName[method.Name] = VDFMethodInfo.Get(method);
 			if (type.Name.StartsWith("<>")) // if anonymous type, include all props, by default
 				typeInfo.props_includeL1 = true;
@@ -123,11 +123,11 @@ public class VDFPropInfo
 }
 
 [AttributeUsage(AttributeTargets.Method)] public class VDFPreSerialize : Attribute {}
-[AttributeUsage(AttributeTargets.Method)] public class VDFPostDeserialize : Attribute {}
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)] public class VDFPostDeserialize : Attribute {}
 public class VDFMethodInfo
 {
 	static Dictionary<MemberInfo, VDFMethodInfo> cachedMethodInfo = new Dictionary<MemberInfo, VDFMethodInfo>();
-	public static VDFMethodInfo Get(MethodInfo method)
+	public static VDFMethodInfo Get(MethodBase method)
 	{
 		if (!cachedMethodInfo.ContainsKey(method))
 		{
@@ -145,7 +145,7 @@ public class VDFMethodInfo
 		return cachedMethodInfo[method];
 	}
 
-	public MethodInfo memberInfo;
+	public MethodBase memberInfo;
 	public bool preSerializeMethod = false;
 	public bool postDeserializeMethod = false;
 
