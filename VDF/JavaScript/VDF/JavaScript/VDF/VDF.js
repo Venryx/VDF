@@ -175,7 +175,8 @@ var List = (function () {
         }
         Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "List[" + itemType + "]" });
         this.innerArray = [];
-        this.pushAll(items);
+        for (var i in items)
+            this.push(items[i]);
         this.itemType = itemType;
     }
     Object.defineProperty(List.prototype, "length", {
@@ -191,54 +192,154 @@ var List = (function () {
         configurable: true
     });
 
+    List.prototype.pushAll = function (items) {
+        for (var i = 0; i < items.length; i++)
+            this.push(items[i]);
+    };
+    List.prototype.remove = function (item) {
+        this.splice(this.indexOf(item), 1);
+    };
+
+    // create wrappers for the inner-array's standard functions, making them callable from the List object itself
+    // ==================
     List.prototype.modifyInnerListWithCall = function (func, args) {
         for (var i = 0; i < this.innerArray.length; i++)
             delete this[i];
-        func.apply(this.innerArray, args);
+        var result = func.apply(this.innerArray, args);
         for (var i = 0; i < this.innerArray.length; i++)
             this[i] = this.innerArray[i];
-    };
-    List.prototype.push = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        this.modifyInnerListWithCall(Array.prototype.push, args);
-    };
-    List.prototype.pushAll = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        this.modifyInnerListWithCall(Array.prototype.pushAll, args);
+        return result;
     };
     List.prototype.pop = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        this.modifyInnerListWithCall(Array.prototype.pop, args);
+        return this.modifyInnerListWithCall(Array.prototype.pop);
     };
-    List.prototype.insert = function () {
-        var args = [];
+    List.prototype.push = function () {
+        var items = [];
         for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
+            items[_i] = arguments[_i + 0];
         }
-        this.modifyInnerListWithCall(Array.prototype.insert, args);
+        return this.modifyInnerListWithCall(Array.prototype.push, items);
     };
-    List.prototype.remove = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        this.modifyInnerListWithCall(Array.prototype.remove, args);
+    List.prototype.reverse = function () {
+        return this.modifyInnerListWithCall(Array.prototype.reverse);
     };
-    List.prototype.splice = function () {
+    List.prototype.shift = function () {
+        return this.modifyInnerListWithCall(Array.prototype.shift);
+    };
+    List.prototype.sort = function (compareFn) {
+        return this.modifyInnerListWithCall(Array.prototype.sort, [compareFn]);
+    };
+    List.prototype.splice = function (start, deleteCount) {
+        var items = [];
+        for (var _i = 0; _i < (arguments.length - 2); _i++) {
+            items[_i] = arguments[_i + 2];
+        }
+        return this.modifyInnerListWithCall(Array.prototype.splice, [start, deleteCount].concat(items));
+    };
+    List.prototype.unshift = function () {
+        var items = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            items[_i] = arguments[_i + 0];
+        }
+        return this.modifyInnerListWithCall(Array.prototype.unshift, items);
+    };
+    List.prototype.concat = function () {
         var args = [];
         for (var _i = 0; _i < (arguments.length - 0); _i++) {
             args[_i] = arguments[_i + 0];
         }
-        this.modifyInnerListWithCall(Array.prototype.splice, args);
+        return Array.prototype.concat.apply(this.innerArray, args);
+    };
+    List.prototype.join = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.join.apply(this.innerArray, args);
+    };
+    List.prototype.slice = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.slice.apply(this.innerArray, args);
+    };
+    List.prototype.toString = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.toString.apply(this.innerArray, args);
+    };
+    List.prototype.toLocaleString = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.toLocaleString.apply(this.innerArray, args);
+    };
+    List.prototype.indexOf = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.indexOf.apply(this.innerArray, args);
+    };
+    List.prototype.lastIndexOf = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.lastIndexOf.apply(this.innerArray, args);
+    };
+    List.prototype.forEach = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.forEach.apply(this.innerArray, args);
+    };
+    List.prototype.every = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.every.apply(this.innerArray, args);
+    };
+    List.prototype.some = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.some.apply(this.innerArray, args);
+    };
+    List.prototype.filter = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.filter.apply(this.innerArray, args);
+    };
+    List.prototype.map = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.map.apply(this.innerArray, args);
+    };
+    List.prototype.reduce = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.reduce.apply(this.innerArray, args);
+    };
+    List.prototype.reduceRight = function () {
+        var args = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            args[_i] = arguments[_i + 0];
+        }
+        return Array.prototype.reduceRight.apply(this.innerArray, args);
     };
     return List;
 })();

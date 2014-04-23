@@ -169,24 +169,47 @@ class List<T>
 	{
 		Object.defineProperty(this, "realVTypeName", { enumerable: false, value: "List[" + itemType + "]" });
 		this.innerArray = [];
-		this.pushAll(items);
+		for (var i in items)
+			this.push(items[i]);
 		this.itemType = itemType;
 	}
 
-	modifyInnerListWithCall(func, args: any[])
+	pushAll(items: Array<T>) { for (var i = 0; i < items.length; i++) this.push(items[i]); }
+	remove(item: T) { this.splice(this.indexOf(item), 1); }
+
+	// create wrappers for the inner-array's standard functions, making them callable from the List object itself
+	// ==================
+
+	private modifyInnerListWithCall(func, args?: any[])
 	{
 		for (var i = 0; i < this.innerArray.length; i++)
 			delete this[i];
-		func.apply(this.innerArray, args);
+		var result = func.apply(this.innerArray, args);
 		for (var i = 0; i < this.innerArray.length; i++) // copy all inner-array items as our own
 			this[i] = this.innerArray[i];
+		return result;
 	}
-	push(...args) { this.modifyInnerListWithCall(Array.prototype.push, args); }
-	pushAll(...args) { this.modifyInnerListWithCall(Array.prototype.pushAll, args); }
-	pop(...args) { this.modifyInnerListWithCall(Array.prototype.pop, args); }
-	insert(...args) { this.modifyInnerListWithCall(Array.prototype.insert, args); }
-	remove(...args) { this.modifyInnerListWithCall(Array.prototype.remove, args); }
-	splice(...args) { this.modifyInnerListWithCall(Array.prototype.splice, args); }
+	pop(): T { return this.modifyInnerListWithCall(Array.prototype.pop); }
+	push(...items): number { return this.modifyInnerListWithCall(Array.prototype.push, items); }
+	reverse() :T[] { return this.modifyInnerListWithCall(Array.prototype.reverse); }
+	shift(): T { return this.modifyInnerListWithCall(Array.prototype.shift); }
+	sort(compareFn?: (a: T, b: T) => number): T[] { return this.modifyInnerListWithCall(Array.prototype.sort, [compareFn]); }
+	splice(start: number, deleteCount?: number, ...items: T[]): T[] { return this.modifyInnerListWithCall(Array.prototype.splice, (<Array<any>>[start, deleteCount]).concat(items)); }
+	unshift(...items: T[]): number { return this.modifyInnerListWithCall(Array.prototype.unshift, items); }
+	concat(...args) { return Array.prototype.concat.apply(this.innerArray, args); }
+	join(...args) { return Array.prototype.join.apply(this.innerArray, args); }
+	slice(...args) { return Array.prototype.slice.apply(this.innerArray, args); }
+	toString(...args) { return Array.prototype.toString.apply(this.innerArray, args); }
+	toLocaleString(...args) { return Array.prototype.toLocaleString.apply(this.innerArray, args); }
+	indexOf(...args) { return Array.prototype.indexOf.apply(this.innerArray, args); }
+	lastIndexOf(...args) { return Array.prototype.lastIndexOf.apply(this.innerArray, args); }
+	forEach(...args) { return Array.prototype.forEach.apply(this.innerArray, args); }
+	every(...args) { return Array.prototype.every.apply(this.innerArray, args); }
+	some(...args) { return Array.prototype.some.apply(this.innerArray, args); }
+	filter(...args) { return Array.prototype.filter.apply(this.innerArray, args); }
+	map(...args) { return Array.prototype.map.apply(this.innerArray, args); }
+	reduce(...args) { return Array.prototype.reduce.apply(this.innerArray, args); }
+	reduceRight(...args) { return Array.prototype.reduceRight.apply(this.innerArray, args); }
 }
 class Dictionary<K, V>
 {
