@@ -71,7 +71,9 @@ public static class VDFLoader
 					if (objNode.metadata_type == null) // if metadata-type text is empty, infer its type
 					{
 						VDFToken peekedNextToken = parser.PeekNextToken();
-						if (new[] {"true", "false"}.Contains(peekedNextToken.text))
+						if (peekedNextToken.text == "null")
+							objNode.metadata_type = "null";
+						else if (new[] {"true", "false"}.Contains(peekedNextToken.text))
 							objNode.metadata_type = "bool";
 						else if (peekedNextToken.text.Contains("."))
 							objNode.metadata_type = "float";

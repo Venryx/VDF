@@ -174,6 +174,8 @@
 			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
+		if (this.metadata_type == "null")
+			return null;
 
 		var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
 		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
@@ -182,9 +184,7 @@
 		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 
 		var result;
-		if (this.baseValue == "[#null]") // special case for null-values
-			result = null;
-		else if (VDF.typeImporters_inline[finalTypeName])
+		if (VDF.typeImporters_inline[finalTypeName])
 			result = VDF.typeImporters_inline[finalTypeName](this.baseValue);
 		else if (EnumValue.IsEnum(finalTypeName))
 			result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.baseValue);

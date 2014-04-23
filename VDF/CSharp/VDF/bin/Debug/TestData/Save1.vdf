@@ -1,4 +1,4 @@
-World>name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}simpleFlag{true}simpleEnum{A}listOfStringLists{{1A|1B|1C}|{2A|2B|2C}|{3A|3B|3C}}
+World>name{Main}vObjectRoot{id{}name{VObjectRoot}children{#}}stringPropNull{>null}simpleFlag{true}simpleEnum{A}listOfStringLists{{1A|1B|1C}|{2A|2B|2C}|{3A|3B|3C}}
 	id{}name{Soils}children{#}
 		id{}name{Grass}duties{#}
 			HoldSoil>texturePath{Grass.png}

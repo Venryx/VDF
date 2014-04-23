@@ -66,7 +66,9 @@ var VDFLoader = (function () {
                 } else if (token.type == 4 /* MetadataEndMarker */) {
                     if (objNode.metadata_type == null) {
                         var peekedNextToken = parser.PeekNextToken();
-                        if (["true", "false"].contains(peekedNextToken.text))
+                        if (peekedNextToken.text == "null")
+                            objNode.metadata_type = "null";
+                        else if (["true", "false"].contains(peekedNextToken.text))
                             objNode.metadata_type = "bool";
                         else if (peekedNextToken.text.contains("."))
                             objNode.metadata_type = "float";

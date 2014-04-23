@@ -146,15 +146,15 @@ public class VDFNode
 	{
 		if (loadOptions == null)
 			loadOptions = new VDFLoadOptions();
+		if (metadata_type == "null") // special case for null-values
+			return null;
 		
 		// note; C# 3.5 doesn't have anonymous objects, so if the type isn't specified in the VDF text itself, a declared-type is required
 		Type finalType = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
 		var finalTypeInfo = VDFTypeInfo.Get(finalType);
 
 		object result;
-		if (baseValue == "[#null]") // special case for null-values
-			result = null;
-		else if (VDF.typeImporters_inline.ContainsKey(finalType))
+		if (VDF.typeImporters_inline.ContainsKey(finalType))
 			result = VDF.typeImporters_inline[finalType](baseValue);
 		else if (finalType.IsEnum)
 			result = Enum.Parse(finalType, baseValue);

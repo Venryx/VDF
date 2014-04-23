@@ -55,6 +55,7 @@ var World = (function () {
     World.typeInfo = new VDFTypeInfo(false, {
         name: new VDFPropInfo("string", true),
         vObjectRoot: new VDFPropInfo("VObject", true),
+        stringPropNull: new VDFPropInfo("string", true),
         simpleFlag: new VDFPropInfo("bool", true),
         simpleEnum: new VDFPropInfo("SimpleEnum", true),
         listOfStringLists: new VDFPropInfo("List[List[string]]", true)

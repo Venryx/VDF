@@ -78,29 +78,31 @@ public static class VDF
 					return Type.GetType(pair.Key + "." + vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		return null;
 	}
-	public static Type GetTypeByVName(string vName, VDFLoadOptions loadOptions)
+	public static Type GetTypeByVName(string vTypeName, VDFLoadOptions loadOptions)
 	{
-		if (loadOptions.typeAliasesByType.Values.Contains(vName))
-			return loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vName).Key;
-		if (builtInTypeAliasesByType.Values.Contains(vName))
-			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vName).Key;
+		if (vTypeName == "null")
+			return null;
+		if (loadOptions.typeAliasesByType.Values.Contains(vTypeName))
+			return loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
+		if (builtInTypeAliasesByType.Values.Contains(vTypeName))
+			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
 
-		var rootName = vName.Contains("[") ? vName.Substring(0, vName.IndexOf("[")) : vName;
+		var rootName = vTypeName.Contains("[") ? vTypeName.Substring(0, vTypeName.IndexOf("[")) : vTypeName;
 		if (loadOptions.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
 			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[]{'`'})[0];
-		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vName), loadOptions);
+		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vTypeName), loadOptions);
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();
 			int depth = 0;
 			int lastStartBracketPos = -1;
-			for (int i = 0; i < vName.Length; i++)
+			for (int i = 0; i < vTypeName.Length; i++)
 			{
-				char ch = vName[i];
+				char ch = vTypeName[i];
 				if (ch == ']')
 					depth--;
 				if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
-					genericArgumentTypes.Add(GetTypeByVName(vName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)), loadOptions)); // get generic-parameter type, by sending its parsed real-name back into this method
+					genericArgumentTypes.Add(GetTypeByVName(vTypeName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)), loadOptions)); // get generic-parameter type, by sending its parsed real-name back into this method
 				if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
 					lastStartBracketPos = i;
 				if (ch == '[')
@@ -113,6 +115,8 @@ public static class VDF
 
 	public static string GetVNameOfType(Type type, VDFSaveOptions saveOptions)
 	{
+		if (type == null)
+			return "null";
 		if (saveOptions.typeAliasesByType.ContainsKey(type))
 			return saveOptions.typeAliasesByType[type];
 		if (builtInTypeAliasesByType.ContainsKey(type))

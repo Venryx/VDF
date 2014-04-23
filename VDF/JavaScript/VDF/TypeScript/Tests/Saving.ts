@@ -115,22 +115,28 @@ class Saving
 		test("ToVDF_Level1_NullValues", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
-			a["obj"].baseValue.Should().Be("[#null]");
-			a["strings"].baseValue.Should().Be("[#null]");
-			equal(a["strings2"].baseValue, null); // it's just a VDFNode, with no children, representing a List
-			a.ToVDF().Should().Be("TypeWithNullProps>obj{[#null]}strings{[#null]}strings2{}");
+			a["obj"].metadata_type.Should().Be(""); // type "null" should be collapsed
+			a["obj"].baseValue.Should().Be("null");
+			a["strings"].metadata_type.Should().Be("");
+			a["strings"].baseValue.Should().Be("null");
+			equal(a["strings2"].metadata_type, null); // unmarked type
+			equal(a["strings2"].baseValue, null); // it's a List, so it shouldn't have a base-value
+			a["strings2"].items.length.Should().Be(0);
+			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
 		});
 		test("ToVDF_Level1_ListItems_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new List("string", null));
-			a[0].baseValue.Should().Be("[#null]");
-			a.ToVDF().Should().Be("string>>[#null]");
+			a[0].metadata_type.Should().Be("");
+			a[0].baseValue.Should().Be("null");
+			a.ToVDF().Should().Be("string>>>null");
 		});
 		test("ToVDF_Level1_DictionaryValues_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));
-			a["key1"].baseValue.Should().Be("[#null]");
-			a.ToVDF().Should().Be("string,string>>key1{[#null]}");
+			a["key1"].metadata_type.Should().Be("");
+			a["key1"].baseValue.Should().Be("null");
+			a.ToVDF().Should().Be("string,string>>key1{>null}");
 		});
 		test("ToVDF_Level1_AnonymousTypeProperties_MarkNoTypes", ()=>
 		{

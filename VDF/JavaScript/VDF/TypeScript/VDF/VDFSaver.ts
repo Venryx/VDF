@@ -37,7 +37,7 @@ class VDFSaver
 			obj.VDFPreSerialize();
 
 		if (obj == null)
-			objNode.baseValue = "[#null]";
+			objNode.baseValue = "null";
 		else if (VDF.typeExporters_inline[objVTypeName])
 			objNode.baseValue = VDFSaver.RawDataStringToFinalized(VDF.typeExporters_inline[objVTypeName](obj));
 		else if (EnumValue.IsEnum(objVTypeName)) // if enum value (at bottom, an integer; but we can get the nice-name based on type info)
@@ -100,7 +100,7 @@ class VDFSaver
 				var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions); // if obj is an anonymous type, considers its props' declared-types to be 'object'
 				if (propInfo.popDataOutOfLine)
 				{
-					if (propValueNode.baseValue != "[#null]")
+					if (propValue != null) // just assume that ">null" should go inline; there's almost always no point in popping it out
 					{
 						for (var i in propValueNode.items)
 							propValueNode.items[i].popOutToOwnLine = true;
@@ -116,14 +116,14 @@ class VDFSaver
 
 		// do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)
 		var markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternalNoCollapse;
-		markType = [VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal].contains(saveOptions.typeMarking) && obj != null && objVTypeName != declaredTypeName ? true : markType; // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
-		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof List && objNode.items.length == 1 ? true : markType; // if list with only one item (i.e. indistinguishable from base-prop)
-		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof Dictionary ? true : markType; // if dictionary (i.e. indistinguishable from prop-set)
-		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue ? true : markType; // we're a non-generics-based value (i.e. we have no value-default-type specified)
-		objNode.metadata_type = markType && obj != null ? objVTypeName : null;
+		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof List && objNode.items.length == 1); // if list with only one item (i.e. indistinguishable from base-prop)
+		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof Dictionary); // if dictionary (i.e. indistinguishable from prop-set)
+		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue); // we're a non-generics-based value (i.e. we have no value-default-type specified)
+		markType = markType || ([VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal].contains(saveOptions.typeMarking) && (obj == null || objVTypeName != declaredTypeName)); // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
+		objNode.metadata_type = markType ? objVTypeName : null;
 		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
 		{
-			var collapseMap = {"string": null, "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": ""};
+			var collapseMap = {"string": null, "null": "", "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": ""};
 			if (objNode.metadata_type != null && collapseMap[objNode.metadata_type] !== undefined)
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
 			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params

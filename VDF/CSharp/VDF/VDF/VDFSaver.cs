@@ -48,8 +48,8 @@ public static class VDFSaver
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfoByName.Values.Where(methodInfo=>methodInfo.preSerializeMethod))
 				method.Call(obj);
 
-		if (obj == null)
-			objNode.baseValue = "[#null]";
+		if (type == null)
+			objNode.baseValue = "null";
 		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = RawDataStringToFinalized(VDF.typeExporters_inline[type](obj));
 		else if (type.IsEnum)
@@ -102,15 +102,15 @@ public static class VDFSaver
 				VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions); // if obj is an anonymous type, considers its props' declared-types to be 'object'
 				if (propInfo.popDataOutOfLine)
 				{
-					if (propValueNode.baseValue != "[#null]")
+					if (propValue != null) // just assume that ">null" should go inline; there's almost always no point in popping it out
 					{
 						foreach (VDFNode propValueNodeItem in propValueNode.items)
 							propValueNodeItem.popOutToOwnLine = true;
 						if (popOutGroupsAdded > 0 && propValueNode.items.Count > 0)
 							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-						propValueNode.items.Insert(0, new VDFNode {baseValue = "#"}); // add in-line marker, indicating that items are popped-out
+						propValueNode.items.Insert(0, new VDFNode{baseValue = "#"}); // add in-line marker, indicating that items are popped-out
+						popOutGroupsAdded++;
 					}
-					popOutGroupsAdded++;
 				}
 				objNode.properties.Add(propName, propValueNode);
 			}
@@ -118,14 +118,14 @@ public static class VDFSaver
 
 		// do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)
 		bool markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternalNoCollapse;
-		markType = new[] {VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal}.Contains(saveOptions.typeMarking) && obj != null && obj.GetType() != declaredType ? true : markType; // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
-		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IList && objNode.items.Count == 1 ? true : markType; // if list with only one item (i.e. indistinguishable from base-prop)
-		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IDictionary ? true : markType; // if dictionary (i.e. indistinguishable from prop-set)
-		markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue ? true : markType; // we're a non-generics-based value (i.e. we have no value-default-type specified)
-		objNode.metadata_type = markType && obj != null ? VDF.GetVNameOfType(obj.GetType(), saveOptions) : null;
+		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IList && objNode.items.Count == 1); // if list with only one item (i.e. indistinguishable from base-prop)
+		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IDictionary); // if dictionary (i.e. indistinguishable from prop-set)
+		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue); // we're a non-generics-based value (i.e. we have no value-default-type specified)
+		markType = markType || (new[]{VDFTypeMarking.AssemblyExternal, VDFTypeMarking.Assembly}.Contains(saveOptions.typeMarking) && (obj == null || obj.GetType() != declaredType)); // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
+		objNode.metadata_type = markType ? VDF.GetVNameOfType(obj != null ? obj.GetType() : null, saveOptions) : null;
 		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
 		{
-			var collapseMap = new Dictionary<string, string> {{"string", null}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
+			var collapseMap = new Dictionary<string, string> {{"string", null}, {"null", ""}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
 			if (objNode.metadata_type != null && collapseMap.ContainsKey(objNode.metadata_type))
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
 			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params

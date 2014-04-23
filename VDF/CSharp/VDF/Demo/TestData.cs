@@ -49,6 +49,7 @@ class World
 {
 	[VDFProp] public string name;
 	[VDFProp] public VObject vObjectRoot;
+	[VDFProp] public string stringPropNull;
 	[VDFProp] public bool simpleFlag;
 	[VDFProp] public SimpleEnum simpleEnum;
 	[VDFProp] public List<List<string>> listOfStringLists;

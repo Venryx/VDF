@@ -192,6 +192,8 @@
         }
         if (loadOptions == null)
             loadOptions = new VDFLoadOptions();
+        if (this.metadata_type == "null")
+            return null;
 
         var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
         if (finalTypeName == null)
@@ -200,9 +202,7 @@
         var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 
         var result;
-        if (this.baseValue == "[#null]")
-            result = null;
-        else if (VDF.typeImporters_inline[finalTypeName])
+        if (VDF.typeImporters_inline[finalTypeName])
             result = VDF.typeImporters_inline[finalTypeName](this.baseValue);
         else if (EnumValue.IsEnum(finalTypeName))
             result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.baseValue);
@@ -223,7 +223,7 @@
                     result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
         }
 
-        if (result.VDFPostDeserialize)
+        if (result && result.VDFPostDeserialize)
             result.VDFPostDeserialize();
 
         return result;

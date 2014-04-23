@@ -186,8 +186,8 @@ var Loading = (function () {
             a["key2"].baseValue.Should().Be("value2");
         });
         test("ToVDFNode_Level1_DictionaryItems_Complex", function () {
-            var a = VDFLoader.ToVDFNode("uiPrefs{toolOptions{@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}@@}liveTool{Select}}");
-            a["uiPrefs"]["toolOptions"].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{[#null]}size{7}}");
+            var a = VDFLoader.ToVDFNode("uiPrefs{toolOptions{@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{>null}size{7}}@@}liveTool{Select}}");
+            a["uiPrefs"]["toolOptions"].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{>null}size{7}}");
             a["uiPrefs"]["liveTool"].baseValue.Should().Be("Select");
         });
         test("ToVDFNode_Level1_DictionaryItems_TypesInferredFromGenerics", function () {
