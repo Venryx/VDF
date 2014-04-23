@@ -32,7 +32,7 @@ var VDFSaver = (function () {
         var objNode = new VDFNode();
         var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj);
 
-        if (obj != null && obj.VDFPreSerialize)
+        if (obj && obj.VDFPreSerialize)
             obj.VDFPreSerialize();
 
         if (obj == null)

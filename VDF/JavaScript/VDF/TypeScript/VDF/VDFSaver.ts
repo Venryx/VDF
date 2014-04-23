@@ -33,7 +33,7 @@ class VDFSaver
 		var objNode = new VDFNode();
 		var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj); // at bottom, enums an integer; but consider it of a distinct type
 
-		if (obj != null && obj.VDFPreSerialize)
+		if (obj && obj.VDFPreSerialize)
 			obj.VDFPreSerialize();
 
 		if (obj == null)

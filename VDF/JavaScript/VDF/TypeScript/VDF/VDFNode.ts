@@ -206,7 +206,7 @@
 					result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
 		}
 
-		if (result.VDFPostDeserialize)
+		if (result && result.VDFPostDeserialize)
 			result.VDFPostDeserialize();
 
 		return result;
