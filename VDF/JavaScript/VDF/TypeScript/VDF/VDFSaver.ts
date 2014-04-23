@@ -66,7 +66,7 @@ class VDFSaver
 			objNode.isDictionary = true;
 			var objAsDictionary = <Dictionary<any, any>>obj;
 			for (var i in objAsDictionary.keys)
-				objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
+				objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
 		{

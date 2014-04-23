@@ -266,14 +266,17 @@ class Dictionary<K, V>
 
 		if (keyValuePairs)
 			for (var i = 0; i < keyValuePairs.length; i++)
-				this.set(keyValuePairs[i][0], keyValuePairs[i][1]);
+				this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
 	}
 
-	get(key: K) { return this.values[this.keys.indexOf(key)]; }
-	set(key: K, value: V)
+	Get(key: K) { return this.values[this.keys.indexOf(key)]; }
+	Set(key: K, value: V)
 	{
 		if (!this.keys.contains(key))
+		{
 			this.keys.push(key);
+			(<any>this)[key] = value; // make value accessible directly on Dictionary object
+		}
 		this.values[this.keys.indexOf(key)] = value;
 	}
 }

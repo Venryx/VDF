@@ -227,7 +227,7 @@
                 result.push(this.items[i].ToObject(finalTypeGenericParameters[0], loadOptions));
             for (var propName in this.properties)
                 if (result instanceof Dictionary)
-                    result.set(VDF.typeImporters_inline[finalTypeGenericParameters[0]] ? VDF.typeImporters_inline[finalTypeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(finalTypeGenericParameters[1], loadOptions));
+                    result.Set(VDF.typeImporters_inline[finalTypeGenericParameters[0]] ? VDF.typeImporters_inline[finalTypeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(finalTypeGenericParameters[1], loadOptions));
                 else
                     result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
         }

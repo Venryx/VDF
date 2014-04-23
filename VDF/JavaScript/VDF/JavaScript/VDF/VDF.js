@@ -399,14 +399,16 @@ var Dictionary = (function () {
 
         if (keyValuePairs)
             for (var i = 0; i < keyValuePairs.length; i++)
-                this.set(keyValuePairs[i][0], keyValuePairs[i][1]);
+                this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
     }
-    Dictionary.prototype.get = function (key) {
+    Dictionary.prototype.Get = function (key) {
         return this.values[this.keys.indexOf(key)];
     };
-    Dictionary.prototype.set = function (key, value) {
-        if (!this.keys.contains(key))
+    Dictionary.prototype.Set = function (key, value) {
+        if (!this.keys.contains(key)) {
             this.keys.push(key);
+            this[key] = value; // make value accessible directly on Dictionary object
+        }
         this.values[this.keys.indexOf(key)] = value;
     };
     return Dictionary;

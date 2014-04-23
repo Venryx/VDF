@@ -61,7 +61,7 @@ var VDFSaver = (function () {
             objNode.isDictionary = true;
             var objAsDictionary = obj;
             for (var i in objAsDictionary.keys)
-                objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
+                objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
         } else if (typeof obj == "object") {
             var isAnonymousType = obj.constructor == {}.constructor || obj.constructor == object;
             var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
