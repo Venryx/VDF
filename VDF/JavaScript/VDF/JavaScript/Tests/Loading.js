@@ -87,6 +87,10 @@ var Loading = (function () {
             a.items.length.Should().Be(0); // it should assume it's a base-value, unless indicated otherwise
             a.ToVDF().Should().Be("Root string.");
         });
+        test("ToVDFNode_Level0_BaseValue_Literal", function () {
+            var a = VDFLoader.ToVDFNode("@@Base-value string that {needs escaping}.@@");
+            a.baseValue.Should().Be("Base-value string that {needs escaping}.");
+        });
         test("ToVDFNode_Level0_Metadata_Type", function () {
             var a = VDFLoader.ToVDFNode("string>Root string.");
             a.metadata_type.Should().Be("string");
