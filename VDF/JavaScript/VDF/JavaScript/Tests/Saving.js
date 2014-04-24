@@ -4,6 +4,15 @@ window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // 
 Saving.Init();
 window["oldTest"](title, testFunc);
 }*/
+var TypeWithEmptyStringProp = (function () {
+    function TypeWithEmptyStringProp() {
+        this.emptyString = "";
+    }
+    TypeWithEmptyStringProp.typeInfo = new VDFTypeInfo(false, {
+        emptyString: new VDFPropInfo("string", null, null, false)
+    });
+    return TypeWithEmptyStringProp;
+})();
 var TypeWithNullProps = (function () {
     function TypeWithNullProps() {
         this.strings2 = new List("string");
@@ -123,6 +132,9 @@ var Saving = (function () {
         test("ToVDF_Level1_BaseValuesThatNeedEscaping", function () {
             var a = new VDFNode("string>In-string VDF data.");
             a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
+        });
+        test("ToVDF_Level1_IgnoreEmptyString", function () {
+            VDF.Serialize(new TypeWithEmptyStringProp(), "TypeWithEmptyStringProp").Should().Be("");
         });
         test("ToVDF_Level1_NullValues", function () {
             var a = VDFSaver.ToVDFNode(new TypeWithNullProps());

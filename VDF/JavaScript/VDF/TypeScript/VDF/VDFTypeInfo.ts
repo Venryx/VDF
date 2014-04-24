@@ -36,6 +36,8 @@ class VDFPropInfo
 		var vTypeName = VDF.GetVTypeNameOfObject(x);
 		if (vTypeName && vTypeName.startsWith("List[") && x.length == 0) // if list, and empty
 			return true;
+		if (vTypeName == "string" && !x.length) // if string, and empty
+			return true;
 		return false;
 	}
 }

@@ -105,6 +105,8 @@ public class VDFPropInfo
 			return true;
 		if (x is IList && ((IList)x).Count == 0) // if list, and empty
 			return true;
+		if (x is string && ((string)x).Length == 0) // if string, and empty
+			return true;
 		return false;
 	}
 	public object GetValue(object objParent)

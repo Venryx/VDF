@@ -64,6 +64,8 @@ namespace VDFTests
 			var a = new VDFNode{baseValue = "string>In-string VDF data."};
 			a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
 		}
+		class TypeWithEmptyStringProp { [VDFProp(writeEmptyValue = false)] string emptyString = ""; }
+		[Fact] void ToVDF_Level1_IgnoreEmptyString() { VDF.Serialize<TypeWithEmptyStringProp>(new TypeWithEmptyStringProp()).Should().Be(""); }
 		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
 		[Fact] void ToVDF_Level1_NullValues()
 		{

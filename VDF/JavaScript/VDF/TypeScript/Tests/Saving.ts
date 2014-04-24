@@ -5,6 +5,14 @@ window["test"] = (title: string, testFunc: (assert?: QUnitAssert) => any) => // 
 	Saving.Init();
 	window["oldTest"](title, testFunc);
 }*/
+class TypeWithEmptyStringProp
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		emptyString: new VDFPropInfo("string", null, null, false)
+	});
+	emptyString: string = "";
+}
 class TypeWithNullProps
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
@@ -117,6 +125,7 @@ class Saving
 			var a = new VDFNode("string>In-string VDF data.");
 			a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
 		});
+		test("ToVDF_Level1_IgnoreEmptyString", ()=>{ VDF.Serialize(new TypeWithEmptyStringProp(), "TypeWithEmptyStringProp").Should().Be(""); });
 		test("ToVDF_Level1_NullValues", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());

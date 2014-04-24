@@ -25,6 +25,8 @@ var VDFPropInfo = (function () {
         var vTypeName = VDF.GetVTypeNameOfObject(x);
         if (vTypeName && vTypeName.startsWith("List[") && x.length == 0)
             return true;
+        if (vTypeName == "string" && !x.length)
+            return true;
         return false;
     };
     return VDFPropInfo;
