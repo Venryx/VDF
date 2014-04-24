@@ -9,10 +9,18 @@ class TypeWithPostDeserializeInitMethod
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
 	{
-		postDeserializeWasCalled: new VDFPropInfo("boolean", true)
+		postDeserializeWasCalled: new VDFPropInfo("bool", true)
 	});
 	postDeserializeWasCalled: boolean;
 	VDFPostDeserialize(): void { this.postDeserializeWasCalled = true; }
+}
+class TypeInstantiatedManuallyThenFilled
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		flag: new VDFPropInfo("bool", true)
+	});
+	flag: boolean;
 }
 class Loading
 {
@@ -233,6 +241,12 @@ class Loading
 		{
 			var a = VDF.Deserialize("", "TypeWithPostDeserializeInitMethod");
 			a.postDeserializeWasCalled.Should().Be(true);
+		});
+		test("ToObject_Level1_InstantiateTypeManuallyThenFill", ()=>
+		{
+			var a = new TypeInstantiatedManuallyThenFilled();
+			VDF.DeserializeInto("flag{true}", a);
+			a.flag.Should().Be(true);
 		});
 
 		// unique to JavaScript version

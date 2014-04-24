@@ -190,8 +190,6 @@
 		var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
 		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
 			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
-		var finalTypeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
-		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 
 		var result;
 		if (VDF.typeImporters_inline[finalTypeName])
@@ -207,19 +205,28 @@
 		else
 		{
 			result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
-			for (var i = 0; i < this.items.length; i++)
-				(<List<any>>result).push(this.items[i].ToObject(finalTypeGenericParameters[0], loadOptions));
-			for (var propName in this.properties)
-				if (result instanceof Dictionary)
-					(<Dictionary<any, any>>result).Set(VDF.typeImporters_inline[finalTypeGenericParameters[0]] ? VDF.typeImporters_inline[finalTypeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(finalTypeGenericParameters[1], loadOptions));
-				else
-					result[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+			this.IntoObject(result, loadOptions);
 		}
 
 		if (result && result.VDFPostDeserialize)
 			result.VDFPostDeserialize();
 
 		return result;
+	}
+	IntoObject(obj: any, loadOptions: VDFLoadOptions)
+	{
+		var finalTypeName = VDF.GetVTypeNameOfObject(obj);
+		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
+			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
+		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
+		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
+		for (var i = 0; i < this.items.length; i++)
+			(<List<any>>obj).push(this.items[i].ToObject(typeGenericParameters[0], loadOptions));
+		for (var propName in this.properties)
+			if (obj instanceof Dictionary)
+				(<Dictionary<any, any>>obj).Set(VDF.typeImporters_inline[typeGenericParameters[0]] ? VDF.typeImporters_inline[typeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(typeGenericParameters[1], loadOptions));
+			else
+				obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
 	}
 }
 VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);

@@ -160,4 +160,5 @@ public static class VDF
 	public static T Deserialize<T>(string vdf, VDFLoadOptions loadOptions = null) { return (T)Deserialize(vdf, typeof(T), loadOptions);}
 	public static object Deserialize(string vdf, VDFLoadOptions loadOptions, Type declaredType = null) { return Deserialize(vdf, declaredType, loadOptions); }
 	public static object Deserialize(string vdf, Type declaredType = null, VDFLoadOptions loadOptions = null) { return VDFLoader.ToVDFNode(vdf, declaredType, loadOptions).ToObject(declaredType, loadOptions); }
+	public static void DeserializeInto(string vdf, object obj, VDFLoadOptions loadOptions = null) { VDFLoader.ToVDFNode(vdf, obj.GetType(), loadOptions).IntoObject(obj, loadOptions); }
 }

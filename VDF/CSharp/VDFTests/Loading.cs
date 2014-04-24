@@ -234,5 +234,12 @@ namespace VDFTests
 			var a = VDF.Deserialize<TypeWithConstructorAsPostDeserializeMethod>("");
 			a.flag.Should().Be(true);
 		}
+		class TypeInstantiatedManuallyThenFilled { public bool flag; }
+		[Fact] void ToObject_Level1_InstantiateTypeManuallyThenFill()
+		{
+			var a = new TypeInstantiatedManuallyThenFilled();
+			VDF.DeserializeInto("flag{true}", a);
+			a.flag.Should().Be(true);
+		}
 	}
 }

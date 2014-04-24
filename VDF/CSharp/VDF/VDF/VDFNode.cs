@@ -163,8 +163,7 @@ public class VDFNode
 		
 		// note; C# 3.5 doesn't have anonymous objects, so if the type isn't specified in the VDF text itself, a declared-type is required
 		Type finalType = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
-		var finalTypeInfo = VDFTypeInfo.Get(finalType);
-
+		
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))
 			result = VDF.typeImporters_inline[finalType](baseValue);
@@ -175,16 +174,7 @@ public class VDFNode
 		else
 		{
 			result = CreateNewInstanceOfType(finalType);
-			for (int i = 0; i < items.Count; i++)
-				if (result is Array)
-					((Array)result).SetValue(items[i].ToObject(finalType.GetElementType(), loadOptions), i);
-				else if (result is IList)
-					((IList)result).Add(items[i].ToObject(finalType.GetGenericArguments()[0], loadOptions));
-			foreach (string propName in properties.Keys)
-				if (result is IDictionary)
-					((IDictionary)result).Add(VDF.typeImporters_inline.ContainsKey(finalType.GetGenericArguments()[0]) ? VDF.typeImporters_inline[finalType.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(finalType.GetGenericArguments()[1], loadOptions));
-				else
-					finalTypeInfo.propInfoByName[propName].SetValue(result, properties[propName].ToObject(finalTypeInfo.propInfoByName[propName].GetPropType(), loadOptions));
+			IntoObject(result, loadOptions);
 		}
 
 		// call post-deserialize constructors before post-deserialize normal methods
@@ -194,5 +184,20 @@ public class VDFNode
 			method.Call(result);
 
 		return result;
+	}
+	public void IntoObject(object obj, VDFLoadOptions loadOptions)
+	{
+		var type = obj.GetType();
+		var typeInfo = VDFTypeInfo.Get(type);
+		for (int i = 0; i < items.Count; i++)
+			if (obj is Array)
+				((Array)obj).SetValue(items[i].ToObject(type.GetElementType(), loadOptions), i);
+			else if (obj is IList)
+				((IList)obj).Add(items[i].ToObject(type.GetGenericArguments()[0], loadOptions));
+		foreach (string propName in properties.Keys)
+			if (obj is IDictionary)
+				((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
+			else
+				typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
 	}
 }

@@ -111,6 +111,7 @@ class VDF
 			{ declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions; }
 		return VDFLoader.ToVDFNode(vdf, declaredTypeName, loadOptions).ToObject(declaredTypeName, loadOptions);
 	}
+	static DeserializeInto(vdf: string, obj: object, loadOptions?: VDFLoadOptions): void { VDFLoader.ToVDFNode(vdf, VDF.GetVTypeNameOfObject(obj), loadOptions).IntoObject(obj, loadOptions); }
 }
 
 // helper classes

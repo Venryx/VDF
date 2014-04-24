@@ -11,9 +11,17 @@ var TypeWithPostDeserializeInitMethod = (function () {
         this.postDeserializeWasCalled = true;
     };
     TypeWithPostDeserializeInitMethod.typeInfo = new VDFTypeInfo(false, {
-        postDeserializeWasCalled: new VDFPropInfo("boolean", true)
+        postDeserializeWasCalled: new VDFPropInfo("bool", true)
     });
     return TypeWithPostDeserializeInitMethod;
+})();
+var TypeInstantiatedManuallyThenFilled = (function () {
+    function TypeInstantiatedManuallyThenFilled() {
+    }
+    TypeInstantiatedManuallyThenFilled.typeInfo = new VDFTypeInfo(false, {
+        flag: new VDFPropInfo("bool", true)
+    });
+    return TypeInstantiatedManuallyThenFilled;
 })();
 var Loading = (function () {
     function Loading() {
@@ -217,6 +225,11 @@ var Loading = (function () {
         test("ToObject_Level1_PostDeserializeInitialization", function () {
             var a = VDF.Deserialize("", "TypeWithPostDeserializeInitMethod");
             a.postDeserializeWasCalled.Should().Be(true);
+        });
+        test("ToObject_Level1_InstantiateTypeManuallyThenFill", function () {
+            var a = new TypeInstantiatedManuallyThenFilled();
+            VDF.DeserializeInto("flag{true}", a);
+            a.flag.Should().Be(true);
         });
 
         // unique to JavaScript version

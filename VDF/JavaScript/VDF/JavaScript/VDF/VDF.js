@@ -103,6 +103,9 @@ var VDF = (function () {
         }
         return VDFLoader.ToVDFNode(vdf, declaredTypeName, loadOptions).ToObject(declaredTypeName, loadOptions);
     };
+    VDF.DeserializeInto = function (vdf, obj, loadOptions) {
+        VDFLoader.ToVDFNode(vdf, VDF.GetVTypeNameOfObject(obj), loadOptions).IntoObject(obj, loadOptions);
+    };
     VDF.typeExporters_inline = {};
     VDF.typeImporters_inline = {};
 
