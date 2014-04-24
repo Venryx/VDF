@@ -156,8 +156,7 @@ public class VDFNode
 	public object ToObject(VDFLoadOptions loadOptions, Type declaredType = null) { return ToObject(declaredType, loadOptions); }
 	public object ToObject(Type declaredType = null, VDFLoadOptions loadOptions = null)
 	{
-		if (loadOptions == null)
-			loadOptions = new VDFLoadOptions();
+		loadOptions = loadOptions ?? new VDFLoadOptions();
 		if (metadata_type == "null") // special case for null-values
 			return null;
 		
@@ -185,8 +184,9 @@ public class VDFNode
 
 		return result;
 	}
-	public void IntoObject(object obj, VDFLoadOptions loadOptions)
+	public void IntoObject(object obj, VDFLoadOptions loadOptions = null)
 	{
+		loadOptions = loadOptions ?? new VDFLoadOptions();
 		var type = obj.GetType();
 		var typeInfo = VDFTypeInfo.Get(type);
 		for (int i = 0; i < items.Count; i++)

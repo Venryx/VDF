@@ -26,8 +26,7 @@ var VDFSaver = (function () {
             declaredTypeName = saveOptions_orDeclaredTypeName;
             saveOptions = declaredTypeName_orSaveOptions;
         }
-        if (saveOptions == null)
-            saveOptions = new VDFSaveOptions();
+        saveOptions = saveOptions || new VDFSaveOptions();
 
         var objNode = new VDFNode();
         var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj);

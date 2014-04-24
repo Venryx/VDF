@@ -199,8 +199,7 @@
             declaredTypeName = loadOptions_orDeclaredTypeName;
             loadOptions = declaredTypeName_orLoadOptions;
         }
-        if (loadOptions == null)
-            loadOptions = new VDFLoadOptions();
+        loadOptions = loadOptions || new VDFLoadOptions();
         if (this.metadata_type == "null")
             return null;
 
@@ -230,6 +229,7 @@
         return result;
     };
     VDFNode.prototype.IntoObject = function (obj, loadOptions) {
+        loadOptions = loadOptions || new VDFLoadOptions();
         var finalTypeName = VDF.GetVTypeNameOfObject(obj);
         if (finalTypeName == null)
             finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");

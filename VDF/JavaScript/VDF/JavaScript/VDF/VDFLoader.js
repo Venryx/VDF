@@ -27,8 +27,7 @@ var VDFLoader = (function () {
             loadOptions = declaredTypeName_orLoadOptions;
         }
         vdfFile = vdfFile.replace(/\r\n/g, "\n");
-        if (!loadOptions)
-            loadOptions = new VDFLoadOptions();
+        loadOptions = loadOptions || new VDFLoadOptions();
 
         var objNode = new VDFNode();
         var objTypeName = declaredTypeName;

@@ -87,7 +87,6 @@ class VDF
 
 	static Serialize(obj: any, saveOptions: VDFSaveOptions, declaredTypeName?: string): string;
 	static Serialize(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions): string;
-	static Serialize(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any): string;
 	static Serialize(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any): string
 	{
 		var declaredTypeName: string;
@@ -100,7 +99,6 @@ class VDF
 	}
 	static Deserialize(vdf: string, loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
 	static Deserialize(vdf: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;
-	static Deserialize(vdf: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any;
 	static Deserialize(vdf: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any
 	{
 		var declaredTypeName: string;

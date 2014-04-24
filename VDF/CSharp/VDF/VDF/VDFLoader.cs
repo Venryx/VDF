@@ -24,8 +24,7 @@ public static class VDFLoader
 	public static VDFNode ToVDFNode(string vdfFile, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_SharedData parentSharedData = null)
 	{
 		vdfFile = vdfFile.Replace("\r\n", "\n");
-		if (loadOptions == null)
-			loadOptions = new VDFLoadOptions();
+		loadOptions = loadOptions ?? new VDFLoadOptions();
 
 		var objNode = new VDFNode();
 		var objType = declaredType;

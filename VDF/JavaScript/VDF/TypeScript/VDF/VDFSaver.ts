@@ -18,7 +18,6 @@ class VDFSaver
 {
 	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean): VDFNode;
 	static ToVDFNode(obj: any, saveOptions?: VDFSaveOptions, declaredTypeName?: string, isGenericParamValue?: boolean): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean): VDFNode;
 	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean): VDFNode
 	{
 		var declaredTypeName: string;
@@ -27,8 +26,7 @@ class VDFSaver
 			{declaredTypeName = declaredTypeName_orSaveOptions; saveOptions = saveOptions_orDeclaredTypeName;}
 		else
 			{declaredTypeName = saveOptions_orDeclaredTypeName; saveOptions = declaredTypeName_orSaveOptions;}
-		if (saveOptions == null)
-			saveOptions = new VDFSaveOptions();
+		saveOptions = saveOptions || new VDFSaveOptions();
 
 		var objNode = new VDFNode();
 		var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj); // at bottom, enums an integer; but consider it of a distinct type

@@ -171,9 +171,8 @@
 		throw new Error("Class \"" + typeName + "\" not found.");
 	}
 
-	ToObject(loadOptions: VDFLoadOptions, declaredTypeName: string): any;
-	ToObject(declaredTypeName: string, loadOptions: VDFLoadOptions): any;
-	ToObject(declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any;
+	ToObject(loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
+	ToObject(declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;
 	ToObject(declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any
 	{
 		var declaredTypeName: string;
@@ -182,8 +181,7 @@
 			{declaredTypeName = declaredTypeName_orLoadOptions; loadOptions = loadOptions_orDeclaredTypeName;}
 		else
 			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
-		if (loadOptions == null)
-			loadOptions = new VDFLoadOptions();
+		loadOptions = loadOptions || new VDFLoadOptions();
 		if (this.metadata_type == "null")
 			return null;
 
@@ -213,8 +211,9 @@
 
 		return result;
 	}
-	IntoObject(obj: any, loadOptions: VDFLoadOptions)
+	IntoObject(obj: any, loadOptions?: VDFLoadOptions)
 	{
+		loadOptions = loadOptions || new VDFLoadOptions();
 		var finalTypeName = VDF.GetVTypeNameOfObject(obj);
 		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
 			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");

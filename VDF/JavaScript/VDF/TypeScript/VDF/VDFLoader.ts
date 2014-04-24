@@ -12,7 +12,6 @@ class VDFLoader
 {
 	static ToVDFNode(vdfFile: string, loadOptions: VDFLoadOptions, declaredTypeName?: string, firstObjTextCharPos?: number, parentSharedData?: VDFLoader_SharedData): VDFNode;
 	static ToVDFNode(vdfFile: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions, firstObjTextCharPos?: number, parentSharedData?: VDFLoader_SharedData): VDFNode;
-	static ToVDFNode(vdfFile: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any, firstObjTextCharPos?: number, parentSharedData?: VDFLoader_SharedData): VDFNode;
 	static ToVDFNode(vdfFile: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any, firstObjTextCharPos: number = 0, parentSharedData?: VDFLoader_SharedData): VDFNode
 	{
 		var declaredTypeName: string;
@@ -22,8 +21,7 @@ class VDFLoader
 		else
 			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
 		vdfFile = vdfFile.replace(/\r\n/g, "\n");
-		if (!loadOptions)
-			loadOptions = new VDFLoadOptions();
+		loadOptions = loadOptions || new VDFLoadOptions();
 
 		var objNode = new VDFNode();
 		var objTypeName = declaredTypeName;

@@ -38,8 +38,7 @@ public static class VDFSaver
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions, Type declaredType = null) { return ToVDFNode(obj, declaredType, saveOptions); }
 	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false)
 	{
-		if (saveOptions == null)
-			saveOptions = new VDFSaveOptions();
+		saveOptions = saveOptions ?? new VDFSaveOptions();
 		
 		var objNode = new VDFNode();
 		Type type = obj != null ? obj.GetType() : null;

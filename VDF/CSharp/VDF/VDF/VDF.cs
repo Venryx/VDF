@@ -78,8 +78,9 @@ public static class VDF
 					return Type.GetType(pair.Key + "." + vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		return null;
 	}
-	public static Type GetTypeByVName(string vTypeName, VDFLoadOptions loadOptions)
+	public static Type GetTypeByVName(string vTypeName, VDFLoadOptions loadOptions = null)
 	{
+		loadOptions = loadOptions ?? new VDFLoadOptions();
 		if (vTypeName == "null")
 			return null;
 		if (loadOptions.typeAliasesByType.Values.Contains(vTypeName))
