@@ -157,11 +157,27 @@ public class VDFNode
 	public object ToObject(Type declaredType = null, VDFLoadOptions loadOptions = null)
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
-		if (metadata_type == "null") // special case for null-values
+
+		var finalMetadata_type = metadata_type;
+		if (finalMetadata_type == "") // empty string, so infer type
+		{
+			if (baseValue == "null")
+				finalMetadata_type = "null";
+			else if (new[] { "true", "false" }.Contains(baseValue))
+				finalMetadata_type = "bool";
+			else if (baseValue.Contains("."))
+				finalMetadata_type = "float";
+			else
+				finalMetadata_type = "int";
+		}
+		else if (finalMetadata_type == null && baseValue != null && declaredType == null) // if no type specified, but it has a base-value and no declared-type is set, infer it to be string
+			finalMetadata_type = "string";
+
+		if (finalMetadata_type == "null") // special case for null-values
 			return null;
-		
+
 		// note; C# 3.5 doesn't have anonymous objects, so if the type isn't specified in the VDF text itself, a declared-type is required
-		Type finalType = metadata_type != null ? VDF.GetTypeByVName(metadata_type, loadOptions) : declaredType;
+		Type finalType = finalMetadata_type != null ? VDF.GetTypeByVName(finalMetadata_type, loadOptions) : declaredType;
 		
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))

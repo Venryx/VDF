@@ -182,10 +182,26 @@
 		else
 			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
 		loadOptions = loadOptions || new VDFLoadOptions();
-		if (this.metadata_type == "null")
+
+		var finalMetadata_type = this.metadata_type;
+		if (finalMetadata_type == "") // empty string, so infer type
+		{
+			if (this.baseValue == "null")
+				finalMetadata_type = "null";
+			else if (["true", "false"].contains(this.baseValue))
+				finalMetadata_type = "bool";
+			else if (this.baseValue.contains("."))
+				finalMetadata_type = "float";
+			else
+				finalMetadata_type = "int";
+		}
+		else if (finalMetadata_type == null && this.baseValue != null && declaredTypeName == null) // if no type specified, but it has a base-value and no declared-type is set, infer it to be string
+			finalMetadata_type = "string";
+
+		if (finalMetadata_type == "null") // special case for null-values
 			return null;
 
-		var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
+		var finalTypeName = finalMetadata_type != null ? finalMetadata_type : declaredTypeName;
 		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
 			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
 

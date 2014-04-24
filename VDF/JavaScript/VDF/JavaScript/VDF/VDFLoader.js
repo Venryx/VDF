@@ -63,17 +63,8 @@ var VDFLoader = (function () {
                         livePropAddNodeTypeInfo = VDF.GetTypeInfo(VDF.GetGenericParametersOfTypeName(objTypeName)[0]); // if primitive, there's no constructor
                     }
                 } else if (token.type == 4 /* MetadataEndMarker */) {
-                    if (objNode.metadata_type == null) {
-                        var peekedNextToken = parser.PeekNextToken();
-                        if (peekedNextToken.text == "null")
-                            objNode.metadata_type = "null";
-                        else if (["true", "false"].contains(peekedNextToken.text))
-                            objNode.metadata_type = "bool";
-                        else if (peekedNextToken.text.contains("."))
-                            objNode.metadata_type = "float";
-                        else
-                            objNode.metadata_type = "int";
-                    }
+                    if (objNode.metadata_type == null)
+                        objNode.metadata_type = "";
                 } else if (token.type == 3 /* Metadata_BaseValue */)
                     if (parser.PeekNextChars(2) == ">>") {
                         objNode.metadata_type = token.text == "," ? "Dictionary[object,object]" : token.text;
@@ -124,8 +115,6 @@ var VDFLoader = (function () {
             return [6 /* DataStartMarker */, 8 /* Data_BaseValue */, 7 /* ItemSeparator */].contains(token.type);
         }).length && !dataIsPoppedOut)
             objNode.PushItem(livePropAddNode);
-        if (objNode.baseValue != null && objNode.metadata_type == null && declaredTypeName == null)
-            objNode.metadata_type = "string";
 
         return objNode;
     };

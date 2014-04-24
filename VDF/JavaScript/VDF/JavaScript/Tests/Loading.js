@@ -71,7 +71,7 @@ var Loading = (function () {
             var a = VDFLoader.ToVDFNode(vdf);
             a.baseValue.Should().Be("Root string.");
             a.items.length.Should().Be(0); // it should assume it's a base-value, unless indicated otherwise
-            a.ToVDF().Should().Be("string>Root string."); // the "string" metadata was inferred while loading
+            a.ToVDF().Should().Be("Root string.");
         });
         test("ToVDFNode_Level0_Metadata_Type", function () {
             var a = VDFLoader.ToVDFNode("string>Root string.");
@@ -238,9 +238,9 @@ var Loading = (function () {
             a["string"].baseValue.Should().Be("Prop value string.");
         });
         test("ToObject_AsObject", function () {
-            var a = VDF.Deserialize("bool{bool>false}int{int>3.5}", "object");
+            var a = VDF.Deserialize("bool{bool>false}float{float>3.5}", "object");
             a.bool.Should().Be(false);
-            a.int.Should().BeExactly(3.5);
+            a.float.Should().BeExactly(3.5);
         });
         test("ToObject_AsObject_NestedList", function () {
             var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}");

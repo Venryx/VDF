@@ -200,10 +200,24 @@
             loadOptions = declaredTypeName_orLoadOptions;
         }
         loadOptions = loadOptions || new VDFLoadOptions();
-        if (this.metadata_type == "null")
+
+        var finalMetadata_type = this.metadata_type;
+        if (finalMetadata_type == "") {
+            if (this.baseValue == "null")
+                finalMetadata_type = "null";
+            else if (["true", "false"].contains(this.baseValue))
+                finalMetadata_type = "bool";
+            else if (this.baseValue.contains("."))
+                finalMetadata_type = "float";
+            else
+                finalMetadata_type = "int";
+        } else if (finalMetadata_type == null && this.baseValue != null && declaredTypeName == null)
+            finalMetadata_type = "string";
+
+        if (finalMetadata_type == "null")
             return null;
 
-        var finalTypeName = this.metadata_type != null ? this.metadata_type : declaredTypeName;
+        var finalTypeName = finalMetadata_type != null ? finalMetadata_type : declaredTypeName;
         if (finalTypeName == null)
             finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
 

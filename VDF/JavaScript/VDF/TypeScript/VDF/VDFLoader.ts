@@ -64,18 +64,8 @@ class VDFLoader
 				}
 				else if (token.type == VDFTokenType.MetadataEndMarker)
 				{
-					if (objNode.metadata_type == null) // if metadata-type text is empty, infer its type
-					{
-						var peekedNextToken = parser.PeekNextToken();
-						if (peekedNextToken.text == "null")
-							objNode.metadata_type = "null";
-						else if (["true", "false"].contains(peekedNextToken.text))
-							objNode.metadata_type = "bool";
-						else if (peekedNextToken.text.contains("."))
-							objNode.metadata_type = "float";
-						else
-							objNode.metadata_type = "int";
-					}
+					if (objNode.metadata_type == null) // if metadata-type text is empty, set metadata-type to an empty string, for type-inference later
+						objNode.metadata_type = "";
 				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
 					if (parser.PeekNextChars(2) == ">>") // if wider-metadata (i.e. metadata for List or Dictionary)
@@ -130,8 +120,6 @@ class VDFLoader
 		// if live-prop-add-node is not obj itself, and block wasn't empty, and data is in-line, (meaning we're adding the items as we pass their last char), add final item
 		if (livePropAddNode != objNode && parser.tokens.filter(token=>[VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator].contains(token.type)).length && !dataIsPoppedOut)
 			objNode.PushItem(livePropAddNode);
-		if (objNode.baseValue != null && objNode.metadata_type == null && declaredTypeName == null) // if base-value, and no type specified, and no declared type set either, infer it to be string
-			objNode.metadata_type = "string";
 
 		return objNode;
 	}
