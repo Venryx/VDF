@@ -206,9 +206,6 @@
 			this.IntoObject(result, loadOptions);
 		}
 
-		if (result && result.VDFPostDeserialize)
-			result.VDFPostDeserialize();
-
 		return result;
 	}
 	IntoObject(obj: any, loadOptions?: VDFLoadOptions)
@@ -226,6 +223,9 @@
 				(<Dictionary<any, any>>obj).Set(VDF.typeImporters_inline[typeGenericParameters[0]] ? VDF.typeImporters_inline[typeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(typeGenericParameters[1], loadOptions));
 			else
 				obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+
+		if (obj && obj.VDFPostDeserialize)
+			obj.VDFPostDeserialize();
 	}
 }
 VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);

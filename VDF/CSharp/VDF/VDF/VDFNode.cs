@@ -176,12 +176,6 @@ public class VDFNode
 			IntoObject(result, loadOptions);
 		}
 
-		// call post-deserialize constructors before post-deserialize normal methods
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfo.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
-			method.Call(result);
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methodInfo.Where(methodInfo => methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
-			method.Call(result);
-
 		return result;
 	}
 	public void IntoObject(object obj, VDFLoadOptions loadOptions = null)
@@ -199,5 +193,11 @@ public class VDFNode
 				((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
 			else
 				typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
+
+		// call post-deserialize constructors before post-deserialize normal methods
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
+			method.Call(obj);
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo => methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
+			method.Call(obj);
 	}
 }
