@@ -100,9 +100,9 @@ class Saving
 		});
 		test("ToVDF_Level0_Metadata_Type_Collapsed", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new List("string"), new VDFSaveOptions(VDFTypeMarking.AssemblyExternal));
+			var a = VDFSaver.ToVDFNode(new List("string"), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("string>>");
-			a = VDFSaver.ToVDFNode(new List("List[string]", new List("string", "1A", "1B", "1C")), new VDFSaveOptions(VDFTypeMarking.AssemblyExternal));
+			a = VDFSaver.ToVDFNode(new List("List[string]", new List("string", "1A", "1B", "1C")), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
 		});
 		test("ToVDF_Level0_EnumDefault", () =>
@@ -154,7 +154,7 @@ class Saving
 		});
 		test("ToVDF_Level1_AnonymousTypeProperties_MarkNoTypes", ()=>
 		{
-			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(VDFTypeMarking.None));
+			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(null, VDFTypeMarking.None));
 			a["Bool"].baseValue.Should().Be("false");
 			a["Int"].baseValue.Should().Be("5");
 			a["Float"].baseValue.Should().Be(".5");
@@ -163,7 +163,7 @@ class Saving
 		});
 		test("ToVDF_Level1_AnonymousTypeProperties_MarkAllTypes", ()=>
 		{
-			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(VDFTypeMarking.AssemblyExternal));
+			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("Bool{>false}Int{>5}Float{>.5}String{Prop value string.}");
 		});
 		test("ToVDF_Level1_PreSerializePreparation", ()=>
@@ -174,7 +174,7 @@ class Saving
 		});
 		test("ToVDF_Level1_TypeProperties_MarkForNone", () =>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(VDFTypeMarking.None));
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a["Bool"].baseValue.Should().Be("true");
 			a["Int"].baseValue.Should().Be("5");
 			a["Float"].baseValue.Should().Be(".5");
@@ -186,17 +186,17 @@ class Saving
 		});
 		test("ToVDF_Level1_TypeProperties_MarkForAssembly", () =>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(VDFTypeMarking.Assembly));
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.Assembly));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
 		});
 		test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternal", () =>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(VDFTypeMarking.AssemblyExternal));
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{>true}Int{>5}Float{>.5}String{Prop value string.}list{string>>2A|2B}nestedList{List[List[string]]>>{string>>1A}}");
 		});
 		test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternalNoCollapse", () =>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(VDFTypeMarking.AssemblyExternalNoCollapse));
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternalNoCollapse));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
 		});
 	}

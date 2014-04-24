@@ -44,27 +44,27 @@
 			var testWorld = Test1.CreateWorld();
 
 			// serialize it, and save it to file
-			var vdf = VDF.Serialize(testWorld, new VDFSaveOptions(VDFTypeMarking.Assembly));
+			var vdf = VDF.Serialize(testWorld, new VDFSaveOptions(null, VDFTypeMarking.Assembly));
 			$("#outputA").val(vdf);
 		});
 		$("#makeOutputB_asWorld").click((event, ui) =>
 		{
 			// load from output-a textbox
 			var vdf = decodeURIComponent($("#outputA").val()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-			var testWorld = VDF.Deserialize(vdf, "World", new VDFLoadOptions());
+			var testWorld = VDF.Deserialize(vdf, "World");
 
 			// reserialize it, and save it to second file, to check data
-			var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(VDFTypeMarking.Assembly));
+			var vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(null, VDFTypeMarking.Assembly));
 			$("#outputB").val(vdf2);
 		});
 		$("#makeOutputB_asObject").click((event, ui) =>
 		{
 			// load from output-a textbox
 			var vdf = decodeURIComponent($("#outputA").val()).replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-			var testObj = VDF.Deserialize(vdf, "object", new VDFLoadOptions());
+			var testObj = VDF.Deserialize(vdf, "object");
 			
 			// reserialize it, and save it to second file, to check data
-			var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions(VDFTypeMarking.Assembly));
+			var vdf2 = VDF.Serialize(testObj, new VDFSaveOptions(null, VDFTypeMarking.Assembly));
 			$("#outputB").val(vdf2);
 		});
 	});

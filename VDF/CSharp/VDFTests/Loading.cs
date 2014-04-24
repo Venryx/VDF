@@ -75,14 +75,14 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata1()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2", new VDFLoadOptions(null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
+			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2", new VDFLoadOptions(null, null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
 			a.metadata_type.Should().Be("SpecialList[int]");
 			a[0].metadata_type.Should().Be(null);
 			a[1].metadata_type.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata2()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2", new VDFLoadOptions(null, new Dictionary<Type, string> { { typeof(SpecialList<>), "SpecialList" } }));
+			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2", new VDFLoadOptions(null, null, new Dictionary<Type, string> { { typeof(SpecialList<>), "SpecialList" } }));
 			a.metadata_type.Should().Be("SpecialList[int]");
 			a[0].metadata_type.Should().Be("int");
 			a[1].metadata_type.Should().Be("int");
@@ -214,26 +214,28 @@ namespace VDFTests
 
 		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
 		[Fact] void ToObject_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
-		class TypeWithPostDeserializeInitMethod
+		class TypeWithPostDeserializeMethod
 		{
 			[VDFProp] public bool flag;
 			[VDFPostDeserialize] void VDFPostDeserialize() { flag = true; }
 		}
 		[Fact] void ToObject_Level1_PostDeserializeMethod()
 		{
-			var a = VDF.Deserialize<TypeWithPostDeserializeInitMethod>("");
+			var a = VDF.Deserialize<TypeWithPostDeserializeMethod>("");
 			a.flag.Should().Be(true);
 		}
+		class TypeWithPostDeserializeMethod_CustomMessageRequired
+		{
+			public bool flag;
+			[VDFPostDeserialize] void VDFPostDeserialize(object message) { if ((string)message == "RequiredMessage") flag = true; }
+		}
+		[Fact] void ToObject_Level1_PostDeserializeConstructor_CustomMessageRequired() { VDF.Deserialize<TypeWithPostDeserializeMethod_CustomMessageRequired>("", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); }
 		class TypeWithConstructorAsPostDeserializeMethod
 		{
 			public bool flag;
 			[VDFPostDeserialize] TypeWithConstructorAsPostDeserializeMethod() { flag = true; }
 		}
-		[Fact] void ToObject_Level1_PostDeserializeConstructor()
-		{
-			var a = VDF.Deserialize<TypeWithConstructorAsPostDeserializeMethod>("");
-			a.flag.Should().Be(true);
-		}
+		[Fact] void ToObject_Level1_PostDeserializeConstructor() { VDF.Deserialize<TypeWithConstructorAsPostDeserializeMethod>("").flag.Should().Be(true); }
 		class TypeInstantiatedManuallyThenFilled { public bool flag; }
 		[Fact] void ToObject_Level1_InstantiateTypeManuallyThenFill()
 		{

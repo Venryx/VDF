@@ -7,9 +7,11 @@
 }
 class VDFSaveOptions
 {
+	message: any;
 	typeMarking: VDFTypeMarking;
-	constructor(typeMarking: VDFTypeMarking = VDFTypeMarking.Assembly)
+	constructor(message?: any, typeMarking: VDFTypeMarking = VDFTypeMarking.Assembly)
 	{
+		this.message = message;
 		this.typeMarking = typeMarking;
 	}
 }
@@ -32,7 +34,7 @@ class VDFSaver
 		var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj); // at bottom, enums an integer; but consider it of a distinct type
 
 		if (obj && obj.VDFPreSerialize)
-			obj.VDFPreSerialize();
+			obj.VDFPreSerialize(saveOptions.message);
 
 		if (obj == null)
 			objNode.baseValue = "null";

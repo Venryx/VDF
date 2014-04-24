@@ -5,12 +5,14 @@ using System.Linq;
 
 public class VDFLoadOptions
 {
+	public object message;
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
 	//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
-	public VDFLoadOptions(Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	public VDFLoadOptions(object message = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
+		this.message = message;
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
 	}

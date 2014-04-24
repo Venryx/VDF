@@ -5,14 +5,23 @@ window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual
 	Loading.Init();
 	window["oldTest"](title, testFunc);
 }*/
-class TypeWithPostDeserializeInitMethod
+class TypeWithPostDeserializeMethod
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
 	{
-		postDeserializeWasCalled: new VDFPropInfo("bool", true)
+		flag: new VDFPropInfo("bool", true)
 	});
-	postDeserializeWasCalled: boolean;
-	VDFPostDeserialize(): void { this.postDeserializeWasCalled = true; }
+	flag: boolean = false;
+	VDFPostDeserialize(): void { this.flag = true; }
+}
+class TypeWithPostDeserializeMethod_CustomMessageRequired
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		flag: new VDFPropInfo("bool", true)
+	});
+	flag: boolean = false;
+	VDFPostDeserialize(message: any): void { if (message == "RequiredMessage") this.flag = true; }
 }
 class TypeInstantiatedManuallyThenFilled
 {
@@ -103,14 +112,14 @@ class Loading
 		});
 		test("ToVDFNode_Level0_ArrayMetadata1", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2", new VDFLoadOptions()); // todo
+			var a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2");
 			a.metadata_type.Should().Be("SpecialList[int]");
 			ok(a[0].metadata_type == null);
 			ok(a[1].metadata_type == null);
 		});
 		test("ToVDFNode_Level0_ArrayMetadata2", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2", new VDFLoadOptions()); // todo
+			var a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2");
 			a.metadata_type.Should().Be("SpecialList[int]");
 			a[0].metadata_type.Should().Be("int");
 			a[1].metadata_type.Should().Be("int");
@@ -237,11 +246,12 @@ class Loading
 
 		test("ToObject_Level0_Bool", ()=>{ VDF.Deserialize("true", "bool").Should().Be(true); });
 		test("ToObject_Level0_Float", ()=>{ VDF.Deserialize("1.5", "float").Should().Be(1.5); });
-		test("ToObject_Level1_PostDeserializeInitialization", ()=>
+		test("ToObject_Level1_PostDeserializeMethod", ()=>
 		{
-			var a = VDF.Deserialize("", "TypeWithPostDeserializeInitMethod");
-			a.postDeserializeWasCalled.Should().Be(true);
+			var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");
+			a.flag.Should().Be(true);
 		});
+		test("ToObject_Level1_PostDeserializeMethod_CustomMessageRequired", ()=>{ VDF.Deserialize("", "TypeWithPostDeserializeMethod_CustomMessageRequired", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); });
 		test("ToObject_Level1_InstantiateTypeManuallyThenFill", ()=>
 		{
 			var a = new TypeInstantiatedManuallyThenFilled();
@@ -252,12 +262,12 @@ class Loading
 		// unique to JavaScript version
 		test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_Object", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(true));
+			var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(null, true));
 			a["string"].baseValue.Should().Be("Prop value string.");
 		});
 		test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_BaseValue", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(true));
+			var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(null, true));
 			a["string"].baseValue.Should().Be("Prop value string.");
 		});
 		test("ToObject_AsObject", ()=>

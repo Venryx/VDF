@@ -40,7 +40,7 @@ namespace SystemMaker
 			var testWorld = TestData.CreateWorld();
 
 			// serialize it, and save it to file
-			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(new[] { typeof(VObject).GetMember("id")[0] }, null, null, namespaceAliasesByName, typeAliasesByType, VDFTypeMarking.Assembly));
+			string vdf = VDF.Serialize(testWorld, new VDFSaveOptions(null, new[] { typeof(VObject).GetMember("id")[0] }, null, null, namespaceAliasesByName, typeAliasesByType, VDFTypeMarking.Assembly));
 			var file = new FileInfo(SavePath.Text);
 			if (!file.Directory.Exists)
 				file.Directory.Create();
@@ -52,10 +52,10 @@ namespace SystemMaker
 			// load from file
 			var file = new FileInfo(LoadPath.Text);
 			string vdf = File.ReadAllText(file.FullName);
-			var testWorld = VDF.Deserialize<World>(vdf, new VDFLoadOptions(namespaceAliasesByName, typeAliasesByType));
+			var testWorld = VDF.Deserialize<World>(vdf, new VDFLoadOptions(null, namespaceAliasesByName, typeAliasesByType));
 
 			// reserialize it, and save it to second file, to check data
-			string vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(new[] { typeof(VObject).GetMember("id")[0] }, null, null, namespaceAliasesByName, typeAliasesByType, VDFTypeMarking.Assembly));
+			string vdf2 = VDF.Serialize(testWorld, new VDFSaveOptions(null, new[] { typeof(VObject).GetMember("id")[0] }, null, null, namespaceAliasesByName, typeAliasesByType, VDFTypeMarking.Assembly));
 			var file2 = new FileInfo(LoadPath.Text.Split(new[] {'.'})[0] + "_Resaved.vdf");
 			if (!file2.Directory.Exists)
 				file2.Directory.Create();

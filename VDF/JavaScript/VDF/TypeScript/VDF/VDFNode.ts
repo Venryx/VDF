@@ -249,7 +249,7 @@
 				obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
 
 		if (obj && obj.VDFPostDeserialize)
-			obj.VDFPostDeserialize();
+			obj.VDFPostDeserialize(loadOptions.message);
 	}
 }
 VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);

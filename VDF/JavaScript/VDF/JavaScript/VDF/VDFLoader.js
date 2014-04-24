@@ -1,6 +1,7 @@
 ﻿var VDFLoadOptions = (function () {
-    function VDFLoadOptions(inferCompatibleTypesForUnknownTypes) {
+    function VDFLoadOptions(message, inferCompatibleTypesForUnknownTypes) {
         if (typeof inferCompatibleTypesForUnknownTypes === "undefined") { inferCompatibleTypesForUnknownTypes = false; }
+        this.message = message;
         this.inferCompatibleTypesForUnknownTypes = inferCompatibleTypesForUnknownTypes;
     }
     return VDFLoadOptions;

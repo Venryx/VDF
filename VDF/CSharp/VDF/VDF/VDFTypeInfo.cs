@@ -142,5 +142,5 @@ public class VDFMethodInfo
 	public bool preSerializeMethod = false;
 	public bool postDeserializeMethod = false;
 
-	public object Call(object objParent, params object[] args) { return memberInfo.Invoke(objParent, args); }
+	public object Call(object objParent, object[] args) { return memberInfo.Invoke(objParent, args); }
 }

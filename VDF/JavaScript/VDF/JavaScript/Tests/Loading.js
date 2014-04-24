@@ -4,16 +4,30 @@ window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual
 Loading.Init();
 window["oldTest"](title, testFunc);
 }*/
-var TypeWithPostDeserializeInitMethod = (function () {
-    function TypeWithPostDeserializeInitMethod() {
+var TypeWithPostDeserializeMethod = (function () {
+    function TypeWithPostDeserializeMethod() {
+        this.flag = false;
     }
-    TypeWithPostDeserializeInitMethod.prototype.VDFPostDeserialize = function () {
-        this.postDeserializeWasCalled = true;
+    TypeWithPostDeserializeMethod.prototype.VDFPostDeserialize = function () {
+        this.flag = true;
     };
-    TypeWithPostDeserializeInitMethod.typeInfo = new VDFTypeInfo(false, {
-        postDeserializeWasCalled: new VDFPropInfo("bool", true)
+    TypeWithPostDeserializeMethod.typeInfo = new VDFTypeInfo(false, {
+        flag: new VDFPropInfo("bool", true)
     });
-    return TypeWithPostDeserializeInitMethod;
+    return TypeWithPostDeserializeMethod;
+})();
+var TypeWithPostDeserializeMethod_CustomMessageRequired = (function () {
+    function TypeWithPostDeserializeMethod_CustomMessageRequired() {
+        this.flag = false;
+    }
+    TypeWithPostDeserializeMethod_CustomMessageRequired.prototype.VDFPostDeserialize = function (message) {
+        if (message == "RequiredMessage")
+            this.flag = true;
+    };
+    TypeWithPostDeserializeMethod_CustomMessageRequired.typeInfo = new VDFTypeInfo(false, {
+        flag: new VDFPropInfo("bool", true)
+    });
+    return TypeWithPostDeserializeMethod_CustomMessageRequired;
 })();
 var TypeInstantiatedManuallyThenFilled = (function () {
     function TypeInstantiatedManuallyThenFilled() {
@@ -101,13 +115,13 @@ var Loading = (function () {
             a.items.length.Should().Be(0);
         });
         test("ToVDFNode_Level0_ArrayMetadata1", function () {
-            var a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2", new VDFLoadOptions());
+            var a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2");
             a.metadata_type.Should().Be("SpecialList[int]");
             ok(a[0].metadata_type == null);
             ok(a[1].metadata_type == null);
         });
         test("ToVDFNode_Level0_ArrayMetadata2", function () {
-            var a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2", new VDFLoadOptions());
+            var a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2");
             a.metadata_type.Should().Be("SpecialList[int]");
             a[0].metadata_type.Should().Be("int");
             a[1].metadata_type.Should().Be("int");
@@ -222,9 +236,12 @@ var Loading = (function () {
         test("ToObject_Level0_Float", function () {
             VDF.Deserialize("1.5", "float").Should().Be(1.5);
         });
-        test("ToObject_Level1_PostDeserializeInitialization", function () {
-            var a = VDF.Deserialize("", "TypeWithPostDeserializeInitMethod");
-            a.postDeserializeWasCalled.Should().Be(true);
+        test("ToObject_Level1_PostDeserializeMethod", function () {
+            var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");
+            a.flag.Should().Be(true);
+        });
+        test("ToObject_Level1_PostDeserializeMethod_CustomMessageRequired", function () {
+            VDF.Deserialize("", "TypeWithPostDeserializeMethod_CustomMessageRequired", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false);
         });
         test("ToObject_Level1_InstantiateTypeManuallyThenFill", function () {
             var a = new TypeInstantiatedManuallyThenFilled();
@@ -234,11 +251,11 @@ var Loading = (function () {
 
         // unique to JavaScript version
         test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_Object", function () {
-            var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(true));
+            var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(null, true));
             a["string"].baseValue.Should().Be("Prop value string.");
         });
         test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_BaseValue", function () {
-            var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(true));
+            var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(null, true));
             a["string"].baseValue.Should().Be("Prop value string.");
         });
         test("ToObject_AsObject", function () {

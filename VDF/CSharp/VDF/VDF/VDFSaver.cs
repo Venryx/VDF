@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 
 public enum VDFTypeMarking
 {
@@ -14,6 +13,7 @@ public enum VDFTypeMarking
 }
 public class VDFSaveOptions
 {
+	public object message;
 	public List<MemberInfo> includePropsL3;
 	public List<MemberInfo> excludePropsL4;
 	public List<MemberInfo> includePropsL5;
@@ -21,8 +21,9 @@ public class VDFSaveOptions
 	public Dictionary<Type, string> typeAliasesByType;
 	public VDFTypeMarking typeMarking;
 
-	public VDFSaveOptions(IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null, VDFTypeMarking typeMarking = VDFTypeMarking.Assembly)
+	public VDFSaveOptions(object message = null, IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null, VDFTypeMarking typeMarking = VDFTypeMarking.Assembly)
 	{
+		this.message = message;
 		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
 		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
 		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
@@ -45,7 +46,7 @@ public static class VDFSaver
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
-				method.Call(obj);
+				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[]{saveOptions.message} : new object[0]);
 
 		if (type == null)
 			objNode.baseValue = "null";

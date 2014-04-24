@@ -6,8 +6,9 @@
     VDFTypeMarking[VDFTypeMarking["AssemblyExternalNoCollapse"] = 3] = "AssemblyExternalNoCollapse";
 })(VDFTypeMarking || (VDFTypeMarking = {}));
 var VDFSaveOptions = (function () {
-    function VDFSaveOptions(typeMarking) {
+    function VDFSaveOptions(message, typeMarking) {
         if (typeof typeMarking === "undefined") { typeMarking = 1 /* Assembly */; }
+        this.message = message;
         this.typeMarking = typeMarking;
     }
     return VDFSaveOptions;
@@ -32,7 +33,7 @@ var VDFSaver = (function () {
         var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj);
 
         if (obj && obj.VDFPreSerialize)
-            obj.VDFPreSerialize();
+            obj.VDFPreSerialize(saveOptions.message);
 
         if (obj == null)
             objNode.baseValue = "null";
