@@ -1,9 +1,9 @@
 ﻿class VDFLoadOptions
 {
-	loadUnknownTypesAsAnonymous: boolean;
-	constructor(loadUnknownTypesAsAnonymous: boolean = false)
+	inferCompatibleTypesForUnknownTypes: boolean;
+	constructor(inferCompatibleTypesForUnknownTypes: boolean = false)
 	{
-		this.loadUnknownTypesAsAnonymous = loadUnknownTypesAsAnonymous;
+		this.inferCompatibleTypesForUnknownTypes = inferCompatibleTypesForUnknownTypes;
 	}
 }
 

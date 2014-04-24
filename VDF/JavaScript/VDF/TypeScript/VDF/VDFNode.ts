@@ -161,15 +161,12 @@
 			return null;
 		var genericParameters = VDF.GetGenericParametersOfTypeName(typeName);
 		if (typeName.startsWith("List["))
-			return eval("new List(\"" + genericParameters[0] + "\")");
+			return new List(genericParameters[0]);
 		if (typeName.startsWith("Dictionary["))
-			return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
-		if (window[typeName] instanceof Function) // if class found
-			return new window[typeName];
-		else if (loadOptions.loadUnknownTypesAsAnonymous)
-			return {};
-		throw new Error("Class \"" + typeName + "\" not found.");
+			return new Dictionary(genericParameters[0], genericParameters[1]);
+		return new window[typeName];
 	}
+	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.propertyCount ? "object" : (node.items.length ? "List[object]" : "string"); }
 
 	ToObject(loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
 	ToObject(declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;
@@ -195,15 +192,26 @@
 			else
 				finalMetadata_type = "int";
 		}
-		else if (finalMetadata_type == null && this.baseValue != null && declaredTypeName == null) // if no type specified, but it has a base-value and no declared-type is set, infer it to be string
+		else if (finalMetadata_type == null && this.baseValue != null && declaredTypeName == null) // if no metadata-type, but it has a base-value and no declared-type is set, infer it to be string
 			finalMetadata_type = "string";
 
 		if (finalMetadata_type == "null") // special case for null-values
 			return null;
 
 		var finalTypeName = finalMetadata_type != null ? finalMetadata_type : declaredTypeName;
-		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
-			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
+		if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName))
+			finalTypeName = "number";
+		else if (finalTypeName == "char")
+			finalTypeName = "string";
+
+		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
+			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
+		var finalTypeName_root = finalTypeName.contains("[") ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
+		if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && !["bool", "number", "string"].contains(finalTypeName_root)) // if type was specified, but the type doesn't exist
+			if (loadOptions.inferCompatibleTypesForUnknownTypes) // and user allows inference-of-compatible-types-for-unknown-types (final-type must be something)
+				finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
+			else // otherwise, throw an error, because we can't go on without a final-type
+				throw new Error("Type \"" + finalMetadata_type + "\" not found.");
 
 		var result;
 		if (VDF.typeImporters_inline[finalTypeName])
@@ -212,9 +220,9 @@
 			result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.baseValue);
 		else if (finalTypeName == "bool")
 			result = this.baseValue == "true" ? true : false;
-		else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName)) // if number
+		else if (finalTypeName == "number")
 			result = parseFloat(this.baseValue);
-		else if (["string", "char"].contains(finalTypeName))
+		else if (finalTypeName == "string")
 			result = this.baseValue;
 		else
 		{
@@ -228,8 +236,8 @@
 	{
 		loadOptions = loadOptions || new VDFLoadOptions();
 		var finalTypeName = VDF.GetVTypeNameOfObject(obj);
-		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final type must be something)
-			finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
+		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
+			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
 		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
 		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 		for (var i = 0; i < this.items.length; i++)

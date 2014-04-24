@@ -179,14 +179,13 @@
             return null;
         var genericParameters = VDF.GetGenericParametersOfTypeName(typeName);
         if (typeName.startsWith("List["))
-            return eval("new List(\"" + genericParameters[0] + "\")");
+            return new List(genericParameters[0]);
         if (typeName.startsWith("Dictionary["))
-            return eval("new Dictionary(\"" + genericParameters[0] + "\",\"" + genericParameters[1] + "\")");
-        if (window[typeName] instanceof Function)
-            return new window[typeName];
-        else if (loadOptions.loadUnknownTypesAsAnonymous)
-            return {};
-        throw new Error("Class \"" + typeName + "\" not found.");
+            return new Dictionary(genericParameters[0], genericParameters[1]);
+        return new window[typeName];
+    };
+    VDFNode.GetCompatibleTypeNameForNode = function (node) {
+        return node.propertyCount ? "object" : (node.items.length ? "List[object]" : "string");
     };
 
     VDFNode.prototype.ToObject = function (declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName) {
@@ -218,8 +217,19 @@
             return null;
 
         var finalTypeName = finalMetadata_type != null ? finalMetadata_type : declaredTypeName;
+        if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName))
+            finalTypeName = "number";
+        else if (finalTypeName == "char")
+            finalTypeName = "string";
+
         if (finalTypeName == null)
-            finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
+            finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
+        var finalTypeName_root = finalTypeName.contains("[") ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
+        if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && !["bool", "number", "string"].contains(finalTypeName_root))
+            if (loadOptions.inferCompatibleTypesForUnknownTypes)
+                finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
+            else
+                throw new Error("Type \"" + finalMetadata_type + "\" not found.");
 
         var result;
         if (VDF.typeImporters_inline[finalTypeName])
@@ -228,9 +238,9 @@
             result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.baseValue);
         else if (finalTypeName == "bool")
             result = this.baseValue == "true" ? true : false;
-        else if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName))
+        else if (finalTypeName == "number")
             result = parseFloat(this.baseValue);
-        else if (["string", "char"].contains(finalTypeName))
+        else if (finalTypeName == "string")
             result = this.baseValue;
         else {
             result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
@@ -243,7 +253,7 @@
         loadOptions = loadOptions || new VDFLoadOptions();
         var finalTypeName = VDF.GetVTypeNameOfObject(obj);
         if (finalTypeName == null)
-            finalTypeName = this.propertyCount ? "object" : (this.items.length ? "List[object]" : "string");
+            finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
         var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
         var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
         for (var i = 0; i < this.items.length; i++)

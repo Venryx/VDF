@@ -233,8 +233,12 @@ var Loading = (function () {
         });
 
         // unique to JavaScript version
-        test("ToVDFNode_Level0_UnknownTypeAsAnonymous", function () {
+        test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_Object", function () {
             var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(true));
+            a["string"].baseValue.Should().Be("Prop value string.");
+        });
+        test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_BaseValue", function () {
+            var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(true));
             a["string"].baseValue.Should().Be("Prop value string.");
         });
         test("ToObject_AsObject", function () {

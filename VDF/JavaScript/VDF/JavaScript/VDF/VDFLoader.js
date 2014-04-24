@@ -1,7 +1,7 @@
 ﻿var VDFLoadOptions = (function () {
-    function VDFLoadOptions(loadUnknownTypesAsAnonymous) {
-        if (typeof loadUnknownTypesAsAnonymous === "undefined") { loadUnknownTypesAsAnonymous = false; }
-        this.loadUnknownTypesAsAnonymous = loadUnknownTypesAsAnonymous;
+    function VDFLoadOptions(inferCompatibleTypesForUnknownTypes) {
+        if (typeof inferCompatibleTypesForUnknownTypes === "undefined") { inferCompatibleTypesForUnknownTypes = false; }
+        this.inferCompatibleTypesForUnknownTypes = inferCompatibleTypesForUnknownTypes;
     }
     return VDFLoadOptions;
 })();
