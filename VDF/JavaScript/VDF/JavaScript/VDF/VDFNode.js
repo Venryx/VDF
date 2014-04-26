@@ -125,7 +125,7 @@
                 else if (this.properties[propName].items.filter(function (item) {
                     return item.popOutToOwnLine;
                 }).length)
-                    builder.Append(propName + "{#" + this.properties[propName].GetInLineItemText() + "}");
+                    builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "#}");
                 else
                     builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 

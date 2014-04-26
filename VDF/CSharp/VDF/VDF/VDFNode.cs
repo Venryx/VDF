@@ -96,7 +96,7 @@ public class VDFNode
 				if (properties[propName].popOutToOwnLine)
 					builder.Append(propName + "{#}");
 				else if (properties[propName].items.Exists(item=>item.popOutToOwnLine))
-					builder.Append(propName + "{#" + properties[propName].GetInLineItemText() + "}");
+					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "#}");
 				else
 					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
 
