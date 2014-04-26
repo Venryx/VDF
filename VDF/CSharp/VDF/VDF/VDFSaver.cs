@@ -100,17 +100,20 @@ public static class VDFSaver
 					continue;
 
 				VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions); // if obj is an anonymous type, considers its props' declared-types to be 'object'
-				if (propInfo.popDataOutOfLine)
+				if (propInfo.popOutData)
 				{
-					if (propValue != null) // just assume that ">null" should go inline; there's almost always no point in popping it out
-					{
+					propValueNode.popOutToOwnLine = true;
+					if (popOutGroupsAdded > 0)
+						propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
+					popOutGroupsAdded++;
+				}
+				if (propInfo.popOutItemData && propValue != null) // ">null" should go inline; there's almost always no point in popping it out
+				{
 						foreach (VDFNode propValueNodeItem in propValueNode.items)
 							propValueNodeItem.popOutToOwnLine = true;
 						if (popOutGroupsAdded > 0 && propValueNode.items.Count > 0)
 							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-						propValueNode.items.Insert(0, new VDFNode{baseValue = "#"}); // add in-line marker, indicating that items are popped-out
 						popOutGroupsAdded++;
-					}
 				}
 				objNode.properties.Add(propName, propValueNode);
 			}

@@ -79,6 +79,21 @@ namespace VDFTests
 			a["strings2"].items.Count.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
 		}
+		class TypeWithList_PopOutData { [VDFProp(popOutData = true)] List<string> list = new List<string>{"A", "B"}; }
+		[Fact] void ToVDF_Level1_ListItems_PopOutData()
+		{
+			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutData>(new TypeWithList_PopOutData());
+			a.ToVDF().Should().Be(@"list{#}
+	A|B".Replace("\r", ""));
+		}
+		class TypeWithList_PopOutItemData { [VDFProp(popOutItemData = true)] List<string> list = new List<string> { "A", "B" }; }
+		[Fact] void ToVDF_Level1_ListItems_PopOutItemData()
+		{
+			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutItemData>(new TypeWithList_PopOutItemData());
+			a.ToVDF().Should().Be(@"list{#}
+	A
+	B".Replace("\r", ""));
+		}
 		[Fact] void ToVDF_Level1_ListItems_Null()
 		{
 			var a = VDFSaver.ToVDFNode(new List<string>{null});

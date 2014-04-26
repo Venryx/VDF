@@ -93,7 +93,11 @@ public class VDFNode
 		}
 		else
 			foreach (string propName in properties.Keys)
-				if (!properties[propName].popOutToOwnLine)
+				if (properties[propName].popOutToOwnLine)
+					builder.Append(propName + "{#}");
+				else if (properties[propName].items.Exists(item=>item.popOutToOwnLine))
+					builder.Append(propName + "{#" + properties[propName].GetInLineItemText() + "}");
+				else
 					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
 
 		if (isListItem && isList)

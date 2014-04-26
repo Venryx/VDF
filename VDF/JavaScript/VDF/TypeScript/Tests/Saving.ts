@@ -9,7 +9,7 @@ class TypeWithEmptyStringProp
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
 	{
-		emptyString: new VDFPropInfo("string", null, null, false)
+		emptyString: new VDFPropInfo("string", null, null, null, false)
 	});
 	emptyString: string = "";
 }
@@ -24,6 +24,22 @@ class TypeWithNullProps
 	obj: any;
 	strings: List<string>;
 	strings2: List<string> = new List<string>("string");
+}
+class TypeWithList_PopOutData
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		list: new VDFPropInfo("List[string]", true, true)
+	});
+	list: List<string> = new List("string", "A", "B");
+}
+class TypeWithList_PopOutItemData
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		list: new VDFPropInfo("List[string]", true, false, true)
+	});
+	list: List<string> = new List("string", "A", "B");
 }
 class TypeWithPreSerializePrepMethod
 {
@@ -137,6 +153,19 @@ class Saving
 			equal(a["strings2"].baseValue, null); // it's a List, so it shouldn't have a base-value
 			a["strings2"].items.length.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
+		});
+		test("ToVDF_Level1_ListItems_PopOutData", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutData(), "TypeWithList_PopOutData");
+			a.ToVDF().Should().Be("list{#}\n\
+	A|B");
+		});
+		test("ToVDF_Level1_ListItems_PopOutItemData", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutItemData(), "TypeWithList_PopOutItemData");
+			a.ToVDF().Should().Be("list{#}\n\
+	A\n\
+	B");
 		});
 		test("ToVDF_Level1_ListItems_Null", ()=>
 		{

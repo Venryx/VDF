@@ -94,7 +94,11 @@
 		}
 		else
 			for (var propName in this.properties)
-				if (!this.properties[propName].popOutToOwnLine)
+				if (this.properties[propName].popOutToOwnLine)
+					builder.Append(propName + "{#}");
+				else if (this.properties[propName].items.filter(item=>item.popOutToOwnLine).length)
+					builder.Append(propName + "{#" + this.properties[propName].GetInLineItemText() + "}");
+				else
 					builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
 
 		if (this.isListItem && this.isList)

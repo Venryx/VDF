@@ -9,7 +9,7 @@ var TypeWithEmptyStringProp = (function () {
         this.emptyString = "";
     }
     TypeWithEmptyStringProp.typeInfo = new VDFTypeInfo(false, {
-        emptyString: new VDFPropInfo("string", null, null, false)
+        emptyString: new VDFPropInfo("string", null, null, null, false)
     });
     return TypeWithEmptyStringProp;
 })();
@@ -23,6 +23,24 @@ var TypeWithNullProps = (function () {
         strings2: new VDFPropInfo("List[string]", true)
     });
     return TypeWithNullProps;
+})();
+var TypeWithList_PopOutData = (function () {
+    function TypeWithList_PopOutData() {
+        this.list = new List("string", "A", "B");
+    }
+    TypeWithList_PopOutData.typeInfo = new VDFTypeInfo(false, {
+        list: new VDFPropInfo("List[string]", true, true)
+    });
+    return TypeWithList_PopOutData;
+})();
+var TypeWithList_PopOutItemData = (function () {
+    function TypeWithList_PopOutItemData() {
+        this.list = new List("string", "A", "B");
+    }
+    TypeWithList_PopOutItemData.typeInfo = new VDFTypeInfo(false, {
+        list: new VDFPropInfo("List[string]", true, false, true)
+    });
+    return TypeWithList_PopOutItemData;
 })();
 var TypeWithPreSerializePrepMethod = (function () {
     function TypeWithPreSerializePrepMethod() {
@@ -146,6 +164,17 @@ var Saving = (function () {
             equal(a["strings2"].baseValue, null); // it's a List, so it shouldn't have a base-value
             a["strings2"].items.length.Should().Be(0);
             a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
+        });
+        test("ToVDF_Level1_ListItems_PopOutData", function () {
+            var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutData(), "TypeWithList_PopOutData");
+            a.ToVDF().Should().Be("list{#}\n\
+	A|B");
+        });
+        test("ToVDF_Level1_ListItems_PopOutItemData", function () {
+            var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutItemData(), "TypeWithList_PopOutItemData");
+            a.ToVDF().Should().Be("list{#}\n\
+	A\n\
+	B");
         });
         test("ToVDF_Level1_ListItems_Null", function () {
             var a = VDFSaver.ToVDFNode(new List("string", null));

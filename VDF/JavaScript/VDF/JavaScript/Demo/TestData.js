@@ -89,8 +89,8 @@ var VObject = (function () {
     VObject.typeInfo = new VDFTypeInfo(false, {
         id: new VDFPropInfo("Guid", true),
         name: new VDFPropInfo("string", true),
-        duties: new VDFPropInfo("List[Duty]", true, true, false),
-        children: new VDFPropInfo("List[VObject]", true, true, false)
+        duties: new VDFPropInfo("List[Duty]", true, false, true, false),
+        children: new VDFPropInfo("List[VObject]", true, false, true, false)
     });
     return VObject;
 })();
@@ -176,7 +176,7 @@ var HoldDuties = (function (_super) {
     };
     HoldDuties.typeInfo = new VDFTypeInfo(false, {
         dutiesEnabledWhen: new VDFPropInfo("string", true),
-        duties: new VDFPropInfo("List[Duty]", true, true, false)
+        duties: new VDFPropInfo("List[Duty]", true, false, true, false)
     });
     return HoldDuties;
 })(Duty);

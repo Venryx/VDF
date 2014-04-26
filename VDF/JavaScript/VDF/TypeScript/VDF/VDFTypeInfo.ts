@@ -17,13 +17,15 @@ class VDFPropInfo
 {
 	propVTypeName: string;
 	includeL2: boolean;
-	popDataOutOfLine: boolean;
+	popOutData: boolean;
+	popOutItemData: boolean;
 	writeEmptyValue: boolean;
-	constructor(propType: string, includeL2?: boolean, popDataOutOfLine?: boolean, writeEmptyValue: boolean = true)
+	constructor(propType: string, includeL2?: boolean, popOutData?: boolean, popOutItemData?: boolean, writeEmptyValue: boolean = true)
 	{
 		this.propVTypeName = propType;
 		this.includeL2 = includeL2;
-		this.popDataOutOfLine = popDataOutOfLine;
+		this.popOutData = popOutData;
+		this.popOutItemData = popOutItemData;
 		this.writeEmptyValue = writeEmptyValue;
 	}
 
