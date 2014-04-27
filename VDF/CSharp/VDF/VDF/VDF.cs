@@ -123,7 +123,7 @@ public static class VDF
 
 		if (type.IsGenericType)
 		{
-			var rootType = Type.GetType(type.FullName.Substring(0, type.FullName.IndexOf("[")));
+			var rootType = type.GetGenericTypeDefinition();
 			if (saveOptions.typeAliasesByType.ContainsKey(rootType))
 				return saveOptions.typeAliasesByType[rootType] + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
 
