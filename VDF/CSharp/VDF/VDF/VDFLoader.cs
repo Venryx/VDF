@@ -20,7 +20,7 @@ public class VDFLoadOptions
 
 public static class VDFLoader
 {
-	public class VDFLoader_LineInfo { public int fromLinePoppedOutCount; }
+	public class VDFLoader_LineInfo { public int fromLinePoppedOutGroupCount; }
 	public static VDFNode ToVDFNode<T>(string vdfFile, VDFLoadOptions loadOptions = null) { return ToVDFNode(vdfFile, typeof(T), loadOptions); }
 	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(vdfFile, declaredType, loadOptions); }
 	public static VDFNode ToVDFNode(string vdfFile, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_LineInfo lineInfo = null)
@@ -94,13 +94,13 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutCount);
+						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutGroupCount);
 						if (typeof(IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
 							foreach (int pos in poppedOutPropValueItemTextPositions)
 								objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos));
 						else
 							objNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
-						lineInfo.fromLinePoppedOutCount++;
+						lineInfo.fromLinePoppedOutGroupCount++;
 						dataIsPoppedOut = true;
 					}
 					else

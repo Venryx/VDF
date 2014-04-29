@@ -9,7 +9,7 @@
 	}
 }
 
-class VDFLoader_LineInfo { fromLinePoppedOutCount: number = 0; }
+class VDFLoader_LineInfo { fromLinePoppedOutGroupCount: number = 0; }
 class VDFLoader
 {
 	static ToVDFNode(vdfFile: string, loadOptions: VDFLoadOptions, declaredTypeName?: string): VDFNode;
@@ -91,13 +91,13 @@ class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutCount);
+						var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutGroupCount);
 						if ((objTypeName != null && objTypeName.startsWith("List[")) || poppedOutPropValueItemTextPositions.length > 1) // if known to be a List, either by type-marking or inference
 							for (var i in poppedOutPropValueItemTextPositions)
 								objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
 						else
 							objNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
-						lineInfo.fromLinePoppedOutCount++;
+						lineInfo.fromLinePoppedOutGroupCount++;
 						dataIsPoppedOut = true;
 					}
 					else

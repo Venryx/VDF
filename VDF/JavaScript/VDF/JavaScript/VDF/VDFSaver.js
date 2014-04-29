@@ -16,14 +16,15 @@ var VDFSaveOptions = (function () {
 
 var VDFSaver_LineInfo = (function () {
     function VDFSaver_LineInfo() {
-        this.fromLinePoppedOutCount = 0;
+        this.fromLinePoppedOutGroupCount = 0;
     }
     return VDFSaver_LineInfo;
 })();
 var VDFSaver = (function () {
     function VDFSaver() {
     }
-    VDFSaver.ToVDFNode = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName, isGenericParamValue, lineInfo) {
+    VDFSaver.ToVDFNode = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName, isGenericParamValue, lineInfo, popOutItemData) {
+        if (typeof popOutItemData === "undefined") { popOutItemData = false; }
         var declaredTypeName;
         var saveOptions;
         if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions) {
@@ -59,17 +60,19 @@ var VDFSaver = (function () {
             objNode.isList = true;
             var objAsList = obj;
             for (var i = 0; i < objAsList.length; i++) {
-                var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true);
+                var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true, popOutItemData ? new VDFSaver_LineInfo() : lineInfo);
                 itemValueNode.isListItem = true;
                 if (i > 0)
                     itemValueNode.isListItem_nonFirst = true;
+                if (popOutItemData)
+                    itemValueNode.popOutToOwnLine = true;
                 objNode.PushItem(itemValueNode);
             }
         } else if (objVTypeName && objVTypeName.startsWith("Dictionary[")) {
             objNode.isDictionary = true;
             var objAsDictionary = obj;
             for (var i in objAsDictionary.keys)
-                objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
+                objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true, lineInfo).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true, lineInfo));
         } else if (typeof obj == "object") {
             var isAnonymousType = obj.constructor == {}.constructor || obj.constructor == object;
             var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
@@ -97,19 +100,17 @@ var VDFSaver = (function () {
                     continue;
 
                 // if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-                var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo);
+                var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
                 if (propInfo.popOutData) {
                     propValueNode.popOutToOwnLine = true;
-                    if (lineInfo.fromLinePoppedOutCount > 0)
+                    if (lineInfo.fromLinePoppedOutGroupCount > 0)
                         propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-                    lineInfo.fromLinePoppedOutCount++;
+                    lineInfo.fromLinePoppedOutGroupCount++;
                 }
                 if (propInfo.popOutItemData && propValue != null) {
-                    for (var i in propValueNode.items)
-                        propValueNode.items[i].popOutToOwnLine = true;
-                    if (lineInfo.fromLinePoppedOutCount > 0 && propValueNode.items.length > 0)
+                    if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.length > 0)
                         propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-                    lineInfo.fromLinePoppedOutCount++;
+                    lineInfo.fromLinePoppedOutGroupCount++;
                 }
                 objNode.SetProperty(propName, propValueNode);
             }

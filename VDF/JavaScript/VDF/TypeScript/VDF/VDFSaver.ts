@@ -16,12 +16,12 @@ class VDFSaveOptions
 	}
 }
 
-class VDFSaver_LineInfo { fromLinePoppedOutCount: number = 0; }
+class VDFSaver_LineInfo { fromLinePoppedOutGroupCount: number = 0; }
 class VDFSaver
 {
 	static ToVDFNode(obj: any, saveOptions?: VDFSaveOptions, declaredTypeName?: string): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo): VDFNode
+	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo, popOutItemData?: boolean): VDFNode;
+	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo, popOutItemData: boolean = false): VDFNode
 	{
 		var declaredTypeName: string;
 		var saveOptions: VDFSaveOptions;
@@ -57,10 +57,12 @@ class VDFSaver
 			var objAsList = <List<any>>obj;
 			for (var i = 0; i < objAsList.length; i++)
 			{
-				var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true);
+				var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true, popOutItemData ? new VDFSaver_LineInfo() : lineInfo);
 				itemValueNode.isListItem = true;
 				if (i > 0)
 					itemValueNode.isListItem_nonFirst = true;
+				if (popOutItemData)
+					itemValueNode.popOutToOwnLine = true;
 				objNode.PushItem(itemValueNode);
 			}
 		}
@@ -69,7 +71,7 @@ class VDFSaver
 			objNode.isDictionary = true;
 			var objAsDictionary = <Dictionary<any, any>>obj;
 			for (var i in objAsDictionary.keys)
-				objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
+				objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true, lineInfo).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true, lineInfo));
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
 		{
@@ -100,21 +102,19 @@ class VDFSaver
 					continue;
 				
 				// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-				var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo);
+				var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
 				if (propInfo.popOutData)
 				{
 					propValueNode.popOutToOwnLine = true;
-					if (lineInfo.fromLinePoppedOutCount > 0)
+					if (lineInfo.fromLinePoppedOutGroupCount > 0)
 						propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-					lineInfo.fromLinePoppedOutCount++;
+					lineInfo.fromLinePoppedOutGroupCount++;
 				}
-				if (propInfo.popOutItemData && propValue != null) // ">null" should go inline; there's almost always no point in popping it out
+				if (propInfo.popOutItemData && propValue != null)
 				{
-					for (var i in propValueNode.items)
-						propValueNode.items[i].popOutToOwnLine = true;
-					if (lineInfo.fromLinePoppedOutCount > 0 && propValueNode.items.length > 0)
+					if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.length > 0)
 						propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-					lineInfo.fromLinePoppedOutCount++;
+					lineInfo.fromLinePoppedOutGroupCount++;
 				}
 				objNode.SetProperty(propName, propValueNode);
 			}
