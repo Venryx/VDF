@@ -69,6 +69,32 @@ class TypeWithMixOfProps
 	nestedList = new List<List<string>>("List[string]", new List<string>("string", "1A"));
 }
 enum Enum1 { _IsEnum, A, B, C }
+class Level1
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		level2: new VDFPropInfo("Level2", true)
+	});
+	level2: Level2 = new Level2();
+}
+class Level2
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		level3_first: new VDFPropInfo("Level3", true),
+		level3_second: new VDFPropInfo("Level3", true)
+	});
+	level3_first: Level3 = new Level3();
+	level3_second: Level3 = new Level3();
+}
+class Level3
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false,
+	{
+		message: new VDFPropInfo("string", true, true)
+	});
+	message: string = "DeepString";
+}
 class Saving
 {
 	static initialized: boolean;
@@ -227,6 +253,13 @@ class Saving
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternalNoCollapse));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
+		});
+		test("ToVDF_Level3_DeepNestedPoppedOutData", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(null, VDFTypeMarking.None));
+			a.ToVDF().Should().Be("level2{level3_first{message{#}}level3_second{message{#}}}\n\
+	DeepString\n\
+	#DeepString".replace(/\r/g, ""));
 		});
 	}
 }

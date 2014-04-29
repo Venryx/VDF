@@ -233,6 +233,18 @@ var Loading = (function () {
             a["ages"][0].baseValue.Should().Be("10");
             a["ages"][1].baseValue.Should().Be("20");
         });
+        test("ToVDFNode_Level5_DeepNestedPoppedOutData", function () {
+            var vdf = "\
+Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VObjectRoot}children{VObject>>#}}}Test2{vObjectRoot{VObject>name{VObjectRoot}children{VObject>>#}}}}\n\
+	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}\n\
+	#id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}";
+            var livePackNode = VDFLoader.ToVDFNode(vdf, new VDFLoadOptions(null, true));
+            livePackNode["worlds"]["Test1"].vObjectRoot.children[0].id.baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
+            livePackNode["worlds"]["Test2"].vObjectRoot.children[0].id.baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
+            var livePack = livePackNode.ToObject(new VDFLoadOptions(null, true));
+            livePack.worlds["Test1"].vObjectRoot.children[0].id.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
+            livePack.worlds["Test2"].vObjectRoot.children[0].id.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
+        });
 
         test("ToObject_Level0_Bool", function () {
             VDF.Deserialize("true", "bool").Should().Be(true);

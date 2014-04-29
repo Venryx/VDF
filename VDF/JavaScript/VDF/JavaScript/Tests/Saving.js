@@ -79,6 +79,35 @@ var Enum1;
     Enum1[Enum1["B"] = 2] = "B";
     Enum1[Enum1["C"] = 3] = "C";
 })(Enum1 || (Enum1 = {}));
+var Level1 = (function () {
+    function Level1() {
+        this.level2 = new Level2();
+    }
+    Level1.typeInfo = new VDFTypeInfo(false, {
+        level2: new VDFPropInfo("Level2", true)
+    });
+    return Level1;
+})();
+var Level2 = (function () {
+    function Level2() {
+        this.level3_first = new Level3();
+        this.level3_second = new Level3();
+    }
+    Level2.typeInfo = new VDFTypeInfo(false, {
+        level3_first: new VDFPropInfo("Level3", true),
+        level3_second: new VDFPropInfo("Level3", true)
+    });
+    return Level2;
+})();
+var Level3 = (function () {
+    function Level3() {
+        this.message = "DeepString";
+    }
+    Level3.typeInfo = new VDFTypeInfo(false, {
+        message: new VDFPropInfo("string", true, true)
+    });
+    return Level3;
+})();
 var Saving = (function () {
     function Saving() {
     }
@@ -227,6 +256,12 @@ var Saving = (function () {
         test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternalNoCollapse", function () {
             var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, 3 /* AssemblyExternalNoCollapse */));
             a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
+        });
+        test("ToVDF_Level3_DeepNestedPoppedOutData", function () {
+            var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(null, 0 /* None */));
+            a.ToVDF().Should().Be("level2{level3_first{message{#}}level3_second{message{#}}}\n\
+	DeepString\n\
+	#DeepString".replace(/\r/g, ""));
         });
     };
     return Saving;

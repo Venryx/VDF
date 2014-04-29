@@ -14,10 +14,16 @@ var VDFSaveOptions = (function () {
     return VDFSaveOptions;
 })();
 
+var VDFSaver_LineInfo = (function () {
+    function VDFSaver_LineInfo() {
+        this.fromLinePoppedOutCount = 0;
+    }
+    return VDFSaver_LineInfo;
+})();
 var VDFSaver = (function () {
     function VDFSaver() {
     }
-    VDFSaver.ToVDFNode = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName, isGenericParamValue) {
+    VDFSaver.ToVDFNode = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName, isGenericParamValue, lineInfo) {
         var declaredTypeName;
         var saveOptions;
         if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions) {
@@ -34,6 +40,8 @@ var VDFSaver = (function () {
 
         if (obj && obj.VDFPreSerialize)
             obj.VDFPreSerialize(saveOptions.message);
+
+        lineInfo = lineInfo || new VDFSaver_LineInfo();
 
         if (obj == null)
             objNode.baseValue = "null";
@@ -65,7 +73,6 @@ var VDFSaver = (function () {
         } else if (typeof obj == "object") {
             var isAnonymousType = obj.constructor == {}.constructor || obj.constructor == object;
             var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
-            var popOutGroupsAdded = 0;
 
             // special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
             var oldObj = obj;
@@ -89,19 +96,20 @@ var VDFSaver = (function () {
                 if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
                     continue;
 
-                var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions);
+                // if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
+                var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo);
                 if (propInfo.popOutData) {
                     propValueNode.popOutToOwnLine = true;
-                    if (popOutGroupsAdded > 0)
+                    if (lineInfo.fromLinePoppedOutCount > 0)
                         propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-                    popOutGroupsAdded++;
+                    lineInfo.fromLinePoppedOutCount++;
                 }
                 if (propInfo.popOutItemData && propValue != null) {
                     for (var i in propValueNode.items)
                         propValueNode.items[i].popOutToOwnLine = true;
-                    if (popOutGroupsAdded > 0 && propValueNode.items.length > 0)
+                    if (lineInfo.fromLinePoppedOutCount > 0 && propValueNode.items.length > 0)
                         propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-                    popOutGroupsAdded++;
+                    lineInfo.fromLinePoppedOutCount++;
                 }
                 objNode.SetProperty(propName, propValueNode);
             }

@@ -16,11 +16,12 @@ class VDFSaveOptions
 	}
 }
 
+class VDFSaver_LineInfo { fromLinePoppedOutCount: number = 0; }
 class VDFSaver
 {
-	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean): VDFNode;
-	static ToVDFNode(obj: any, saveOptions?: VDFSaveOptions, declaredTypeName?: string, isGenericParamValue?: boolean): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean): VDFNode
+	static ToVDFNode(obj: any, saveOptions?: VDFSaveOptions, declaredTypeName?: string): VDFNode;
+	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo): VDFNode;
+	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo): VDFNode
 	{
 		var declaredTypeName: string;
 		var saveOptions: VDFSaveOptions;
@@ -35,6 +36,8 @@ class VDFSaver
 
 		if (obj && obj.VDFPreSerialize)
 			obj.VDFPreSerialize(saveOptions.message);
+
+		lineInfo = lineInfo || new VDFSaver_LineInfo();
 
 		if (obj == null)
 			objNode.baseValue = "null";
@@ -72,7 +75,6 @@ class VDFSaver
 		{
 			var isAnonymousType = obj.constructor == (<any>{}).constructor || obj.constructor == object; // if true anonymous object, or if VDF-anonymous-object
 			var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // if not specified: if anon type, include all props, otherwise, use default values
-			var popOutGroupsAdded = 0;
 
 			// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
 			var oldObj = obj;
@@ -97,21 +99,22 @@ class VDFSaver
 				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
 				
-				var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions); // if obj is an anonymous type, considers its props' declared-types to be 'object'
+				// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
+				var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo);
 				if (propInfo.popOutData)
 				{
 					propValueNode.popOutToOwnLine = true;
-					if (popOutGroupsAdded > 0)
+					if (lineInfo.fromLinePoppedOutCount > 0)
 						propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-					popOutGroupsAdded++;
+					lineInfo.fromLinePoppedOutCount++;
 				}
 				if (propInfo.popOutItemData && propValue != null) // ">null" should go inline; there's almost always no point in popping it out
 				{
 					for (var i in propValueNode.items)
 						propValueNode.items[i].popOutToOwnLine = true;
-					if (popOutGroupsAdded > 0 && propValueNode.items.length > 0)
+					if (lineInfo.fromLinePoppedOutCount > 0 && propValueNode.items.length > 0)
 						propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-					popOutGroupsAdded++;
+					lineInfo.fromLinePoppedOutCount++;
 				}
 				objNode.SetProperty(propName, propValueNode);
 			}

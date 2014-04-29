@@ -20,10 +20,10 @@ public class VDFLoadOptions
 
 public static class VDFLoader
 {
-	public class VDFLoader_SharedData { public int poppedOutPropValueCount; }
-	public static VDFNode ToVDFNode<T>(string vdfFile, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_SharedData parentSharedData = null) { return ToVDFNode(vdfFile, typeof(T), loadOptions, firstObjTextCharPos, parentSharedData); }
-	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, Type declaredType = null, int firstObjTextCharPos = 0, VDFLoader_SharedData parentSharedData = null) { return ToVDFNode(vdfFile, declaredType, loadOptions, firstObjTextCharPos, parentSharedData); }
-	public static VDFNode ToVDFNode(string vdfFile, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_SharedData parentSharedData = null)
+	public class VDFLoader_LineInfo { public int fromLinePoppedOutCount; }
+	public static VDFNode ToVDFNode<T>(string vdfFile, VDFLoadOptions loadOptions = null) { return ToVDFNode(vdfFile, typeof(T), loadOptions); }
+	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(vdfFile, declaredType, loadOptions); }
+	public static VDFNode ToVDFNode(string vdfFile, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_LineInfo lineInfo = null)
 	{
 		vdfFile = vdfFile.Replace("\r\n", "\n");
 		loadOptions = loadOptions ?? new VDFLoadOptions();
@@ -35,7 +35,8 @@ public static class VDFLoader
 		var livePropAddNode = objType != null && typeof(IList).IsAssignableFrom(objType) ? new VDFNode() : objNode; // if list, create a new node for holding the about-to-be-reached props
 		var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDFTypeInfo.Get(objType.IsGenericType ? objType.GetGenericArguments()[0] : typeof(object)) : (objType != null ? VDFTypeInfo.Get(objType) : null);
 
-		var sharedData = new VDFLoader_SharedData();
+		lineInfo = lineInfo ?? new VDFLoader_LineInfo();
+		
 		int depth = 0;
 		bool dataIsPoppedOut = false;
 		string livePropName = null;
@@ -93,13 +94,13 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
+						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutCount);
 						if (typeof(IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
 							foreach (int pos in poppedOutPropValueItemTextPositions)
-								objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos, sharedData));
+								objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos));
 						else
-							objNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0], sharedData);
-						parentSharedData.poppedOutPropValueCount++;
+							objNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
+						lineInfo.fromLinePoppedOutCount++;
 						dataIsPoppedOut = true;
 					}
 					else
@@ -109,11 +110,11 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.DataStartMarker)
 					if (livePropName != null)
 						if (typeof(IDictionary).IsAssignableFrom(objType)) // dictionary key-value-pair
-							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, objType.GetGenericArguments()[0], loadOptions, parser.nextCharPos, sharedData));
+							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, objType.GetGenericArguments()[0], loadOptions, parser.nextCharPos, lineInfo));
 						else // property
-							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, sharedData));
+							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, lineInfo));
 					else // if data of an in-list-list (at depth 0, which we are at, these are only ever for obj) (note; no need to set live-prop-add-node-type-info, because we know both obj and item have no properties, and so line above is unaffected by it)
-						livePropAddNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : typeof(IList), loadOptions, parser.nextCharPos, sharedData);
+						livePropAddNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : typeof(IList), loadOptions, parser.nextCharPos, lineInfo);
 				else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
 					livePropName = null;
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)

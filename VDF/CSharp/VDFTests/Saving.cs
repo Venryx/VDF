@@ -171,5 +171,15 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions{typeMarking = VDFTypeMarking.AssemblyExternalNoCollapse});
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
 		}
+		class Level1 { [VDFProp] Level2 level2 = new Level2(); }
+		class Level2 { [VDFProp] Level3 level3_first = new Level3(); [VDFProp] Level3 level3_second = new Level3(); }
+		class Level3 { [VDFProp(true, true)] string message = "DeepString"; }
+		[Fact] void ToVDF_Level3_DeepNestedPoppedOutData()
+		{
+			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
+			a.ToVDF().Should().Be(@"level2{level3_first{message{#}}level3_second{message{#}}}
+	DeepString
+	#DeepString".Replace("\r", ""));
+		}
 	}
 }

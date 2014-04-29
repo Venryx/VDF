@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using SystemMaker;
 using FluentAssertions;
 using Xunit;
 
@@ -215,6 +216,15 @@ namespace VDFTests
 			a["names"][1].baseValue.Should().Be("Bob");
 			a["ages"][0].baseValue.Should().Be("10");
 			a["ages"][1].baseValue.Should().Be("20");
+		}
+		[Fact] void ToVDFNode_Level5_DeepNestedPoppedOutData()
+		{
+			var vdf = @"name{Main}worlds{string,object>>Test1{vObjectRoot{object>name{VObjectRoot}children{object>>#}}}Test2{vObjectRoot{object>name{VObjectRoot}children{object>>#}}}}
+	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}
+	#id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}";
+			var livePackNode = VDFLoader.ToVDFNode(vdf);
+			livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
+			livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
 		}
 
 		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }

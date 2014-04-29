@@ -35,9 +35,10 @@ public class VDFSaveOptions
 
 public static class VDFSaver
 {
+	public class VDFSaver_LineInfo { public int fromLinePoppedOutCount; }
 	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions saveOptions = null) { return ToVDFNode(obj, typeof(T), saveOptions); }
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions, Type declaredType = null) { return ToVDFNode(obj, declaredType, saveOptions); }
-	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false)
+	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false, VDFSaver_LineInfo lineInfo = null)
 	{
 		saveOptions = saveOptions ?? new VDFSaveOptions();
 		
@@ -47,6 +48,8 @@ public static class VDFSaver
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
 				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[]{saveOptions.message} : new object[0]);
+
+		lineInfo = lineInfo ?? new VDFSaver_LineInfo();
 
 		if (type == null)
 			objNode.baseValue = "null";
@@ -83,7 +86,6 @@ public static class VDFSaver
 		else // an object, with properties
 		{
 			var typeInfo = VDFTypeInfo.Get(type);
-			int popOutGroupsAdded = 0;
 			foreach (string propName in typeInfo.propInfoByName.Keys)
 			{
 				VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
@@ -99,21 +101,22 @@ public static class VDFSaver
 				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
 					continue;
 
-				VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions); // if obj is an anonymous type, considers its props' declared-types to be 'object'
+				// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
+				VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions, false, propInfo.popOutData ? null : lineInfo);
 				if (propInfo.popOutData)
 				{
 					propValueNode.popOutToOwnLine = true;
-					if (popOutGroupsAdded > 0)
+					if (lineInfo.fromLinePoppedOutCount > 0)
 						propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-					popOutGroupsAdded++;
+					lineInfo.fromLinePoppedOutCount++;
 				}
 				if (propInfo.popOutItemData && propValue != null) // ">null" should go inline; there's almost always no point in popping it out
 				{
-						foreach (VDFNode propValueNodeItem in propValueNode.items)
-							propValueNodeItem.popOutToOwnLine = true;
-						if (popOutGroupsAdded > 0 && propValueNode.items.Count > 0)
-							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-						popOutGroupsAdded++;
+					foreach (VDFNode propValueNodeItem in propValueNode.items)
+						propValueNodeItem.popOutToOwnLine = true;
+					if (lineInfo.fromLinePoppedOutCount > 0 && propValueNode.items.Count > 0)
+						propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
+					lineInfo.fromLinePoppedOutCount++;
 				}
 				objNode.properties.Add(propName, propValueNode);
 			}

@@ -9,12 +9,12 @@
 	}
 }
 
-class VDFLoader_SharedData { poppedOutPropValueCount: number = 0; }
+class VDFLoader_LineInfo { fromLinePoppedOutCount: number = 0; }
 class VDFLoader
 {
-	static ToVDFNode(vdfFile: string, loadOptions: VDFLoadOptions, declaredTypeName?: string, firstObjTextCharPos?: number, parentSharedData?: VDFLoader_SharedData): VDFNode;
-	static ToVDFNode(vdfFile: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions, firstObjTextCharPos?: number, parentSharedData?: VDFLoader_SharedData): VDFNode;
-	static ToVDFNode(vdfFile: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any, firstObjTextCharPos: number = 0, parentSharedData?: VDFLoader_SharedData): VDFNode
+	static ToVDFNode(vdfFile: string, loadOptions: VDFLoadOptions, declaredTypeName?: string): VDFNode;
+	static ToVDFNode(vdfFile: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions, firstObjTextCharPos?: number, lineInfo?: VDFLoader_LineInfo): VDFNode;
+	static ToVDFNode(vdfFile: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any, firstObjTextCharPos: number = 0, lineInfo?: VDFLoader_LineInfo): VDFNode
 	{
 		var declaredTypeName: string;
 		var loadOptions: VDFLoadOptions;
@@ -32,7 +32,8 @@ class VDFLoader
 		var livePropAddNode = objTypeName != null && objTypeName.startsWith("List[") ? new VDFNode() : objNode; // if list, create a new node for holding the about-to-be-reached props
 		var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDF.GetTypeInfo(VDF.GetGenericParametersOfTypeName(objTypeName)[0]) : (objTypeName != null ? VDF.GetTypeInfo(objTypeName) : null);
 
-		var sharedData = new VDFLoader_SharedData();
+		lineInfo = lineInfo || new VDFLoader_LineInfo();
+
 		var depth = 0;
 		var dataIsPoppedOut = false;
 		var livePropName: string = null;
@@ -90,13 +91,13 @@ class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, parentSharedData.poppedOutPropValueCount);
+						var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutCount);
 						if ((objTypeName != null && objTypeName.startsWith("List[")) || poppedOutPropValueItemTextPositions.length > 1) // if known to be a List, either by type-marking or inference
 							for (var i in poppedOutPropValueItemTextPositions)
-								objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i], sharedData));
+								objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
 						else
-							objNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0], sharedData);
-						parentSharedData.poppedOutPropValueCount++;
+							objNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
+						lineInfo.fromLinePoppedOutCount++;
 						dataIsPoppedOut = true;
 					}
 					else
@@ -106,11 +107,11 @@ class VDFLoader
 				else if (token.type == VDFTokenType.DataStartMarker)
 					if (livePropName != null) // if data of a prop
 						if (objTypeName && objTypeName.startsWith("Dictionary[")) // dictionary key-value-pair
-							livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, sharedData));
+							livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, lineInfo));
 						else // property
-							livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, sharedData));
+							livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, lineInfo));
 					else // if data of an in-list-list (at depth 0, which we are at, these are only ever for obj) (note; no need to set live-prop-add-node-type-info, because we know both obj and item have no properties, and so line above is unaffected by it)
-						livePropAddNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, sharedData);
+						livePropAddNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, lineInfo);
 				else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
 					livePropName = null;
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
