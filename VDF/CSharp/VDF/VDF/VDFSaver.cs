@@ -55,6 +55,8 @@ public static class VDFSaver
 			objNode.baseValue = "null";
 		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = VDF.typeExporters_inline[type](obj);
+		else if (type.IsGenericType && VDF.typeExporters_inline.ContainsKey(type.GetGenericTypeDefinition()))
+			objNode.baseValue = VDF.typeExporters_inline[type.GetGenericTypeDefinition()](obj);
 		else if (type.IsEnum)
 			objNode.baseValue = obj.ToString();
 		else if (type == typeof(bool))

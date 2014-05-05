@@ -19,6 +19,9 @@ namespace VDFTests
 			});
 		}
 
+		// ToVDF
+		// ==================
+
 		[Fact] void ToVDF_Level0_BaseValue()
 		{
 			var a = new VDFNode();
@@ -171,6 +174,7 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions{typeMarking = VDFTypeMarking.AssemblyExternalNoCollapse});
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
 		}
+
 		class Level1 { [VDFProp] Level2 level2 = new Level2(); }
 		class Level2 { [VDFProp] Level3 level3_first = new Level3(); [VDFProp] Level3 level3_second = new Level3(); }
 		class Level3 { [VDFProp(true, true)] string message = "DeepString"; }
@@ -180,6 +184,17 @@ namespace VDFTests
 			a.ToVDF().Should().Be(@"level2{level3_first{message{#}}level3_second{message{#}}}
 	DeepString
 	#DeepString".Replace("\r", ""));
+		}
+
+		// unique to C# version
+		// ==================
+
+		class SpecialList2<T> : List<T> {}
+		[Fact] void ToVDF_Level1_SpecialListItems()
+		{
+			VDF.RegisterTypeExporter_Inline(typeof(SpecialList2<>), obj=>"You'll never see the items!"); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
+			var a = new SpecialList2<string>{"A", "B", "C"};
+			VDF.Serialize<SpecialList2<string>>(a).Should().Be("You'll never see the items!");
 		}
 	}
 }

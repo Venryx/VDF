@@ -22,6 +22,9 @@ namespace VDFTests
 				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
 			});
 		}
+
+		// ToVDFNode
+		// ==================
 		
 		[Fact] void ToVDFNode_Level0_Comment()
 		{
@@ -217,6 +220,7 @@ namespace VDFTests
 			a["ages"][0].baseValue.Should().Be("10");
 			a["ages"][1].baseValue.Should().Be("20");
 		}
+
 		[Fact] void ToVDFNode_Level5_DeepNestedPoppedOutData()
 		{
 			var vdf = @"name{Main}worlds{string,object>>Test1{vObjectRoot{object>name{VObjectRoot}children{object>>#}}}Test2{vObjectRoot{object>name{VObjectRoot}children{object>>#}}}}
@@ -227,6 +231,9 @@ namespace VDFTests
 			livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
 		}
 
+		// ToObject
+		// ==================
+
 		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
 		[Fact] void ToObject_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
 		class TypeWithPostDeserializeMethod
@@ -234,6 +241,7 @@ namespace VDFTests
 			[VDFProp] public bool flag;
 			[VDFPostDeserialize] void VDFPostDeserialize() { flag = true; }
 		}
+
 		[Fact] void ToObject_Level1_PostDeserializeMethod()
 		{
 			var a = VDF.Deserialize<TypeWithPostDeserializeMethod>("");
@@ -260,10 +268,18 @@ namespace VDFTests
 		}
 
 		// unique to C# version
+		// ==================
+
 		[Fact] void ToVDFNode_Level1_PropLoadError_DuplicateDictionaryKeys()
 		{
 			Action act = ()=>VDFLoader.ToVDFNode("scores{Dan{0}Dan{1}}");
 			act.ShouldThrow<ArgumentException>().WithMessage("*same key*");
+		}
+		class SpecialList3<T> : List<T> {}
+		[Fact] void ToVDFNode_Level1_SpecialListItems()
+		{
+			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), obj=>new SpecialList3<string>{"Obvious first-item data."}); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
+			VDF.Deserialize<SpecialList3<string>>("String that doesn't matter.").Should().BeEquivalentTo(new SpecialList3<string>{"Obvious first-item data."});
 		}
 	}
 }

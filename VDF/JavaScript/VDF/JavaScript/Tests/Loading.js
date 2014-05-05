@@ -71,6 +71,8 @@ var Loading = (function () {
     };
 
     Loading.RunTests = function () {
+        // ToVDFNode
+        // ==================
         test("ToVDFNode_Level0_Comment", function () {
             var a = VDFLoader.ToVDFNode("// comment\n\
 			Root string.");
@@ -246,6 +248,8 @@ Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VOb
             livePack.worlds["Test2"].vObjectRoot.children[0].id.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
         });
 
+        // ToObject
+        // ==================
         test("ToObject_Level0_Bool", function () {
             VDF.Deserialize("true", "bool").Should().Be(true);
         });
@@ -266,6 +270,7 @@ Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VOb
         });
 
         // unique to JavaScript version
+        // ==================
         test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_Object", function () {
             var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(null, true));
             a["string"].baseValue.Should().Be("Prop value string.");

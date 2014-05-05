@@ -186,6 +186,8 @@ public class VDFNode
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))
 			result = VDF.typeImporters_inline[finalType](baseValue);
+		else if (finalType.IsGenericType && VDF.typeImporters_inline.ContainsKey(finalType.GetGenericTypeDefinition()))
+			result = VDF.typeImporters_inline[finalType.GetGenericTypeDefinition()](baseValue);
 		else if (finalType.IsEnum)
 			result = Enum.Parse(finalType, baseValue);
 		else if (finalType.IsPrimitive || finalType == typeof(string))

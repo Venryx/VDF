@@ -59,6 +59,9 @@ class Loading
 
 	static RunTests()
 	{
+		// ToVDFNode
+		// ==================
+
 		test("ToVDFNode_Level0_Comment", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("// comment\n\
@@ -262,6 +265,9 @@ Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VOb
 			livePack.worlds["Test2"].vObjectRoot.children[0].id.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
 		});
 
+		// ToObject
+		// ==================
+
 		test("ToObject_Level0_Bool", ()=>{ VDF.Deserialize("true", "bool").Should().Be(true); });
 		test("ToObject_Level0_Float", ()=>{ VDF.Deserialize("1.5", "float").Should().Be(1.5); });
 		test("ToObject_Level1_PostDeserializeMethod", ()=>
@@ -278,6 +284,8 @@ Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VOb
 		});
 
 		// unique to JavaScript version
+		// ==================
+
 		test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_Object", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(null, true));
