@@ -41,13 +41,15 @@ public static class VDF
 		};
 
 		// initialize exporters/importers for some common types
-		RegisterTypeExporter_Inline<Color>(color => color.Name);
-		RegisterTypeImporter_Inline<Color>(str => Color.FromName(str));
-		RegisterTypeExporter_Inline<Guid>(id => id.ToString());
-		RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
+		RegisterTypeExporter_Inline<Color>(color=>color.Name);
+		RegisterTypeImporter_Inline<Color>(str=>Color.FromName(str));
+		RegisterTypeExporter_Inline<Guid>(id=>id.ToString());
+		RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
 	}
-	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { typeExporters_inline[typeof(T)] = obj => exporter((T)obj); }
-	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { typeImporters_inline[typeof(T)] = str => importer(str); }
+	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { RegisterTypeExporter_Inline(typeof(T), obj=>exporter((T)obj)); }
+	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { RegisterTypeImporter_Inline(typeof(T), str=>importer(str)); }
+	public static void RegisterTypeExporter_Inline(Type type, Func<object, string> exporter) { typeExporters_inline[type] = exporter; }
+	public static void RegisterTypeImporter_Inline(Type type, Func<string, object> importer) { typeImporters_inline[type] = importer; }
 
 	// v-name examples: "List[string]", "System.Collections.Generic.List[string]"
 	static int GetGenericParamsCountOfVName(string vName)
