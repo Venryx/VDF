@@ -271,7 +271,7 @@
                 else
                     obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
             } catch (ex) {
-                throw new Error("Error loading key-value-pair or property '" + propName + "'.\n\nBase error) " + ex.message);
+                throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n");
             }
 
         if (obj && obj.VDFPostDeserialize)

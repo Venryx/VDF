@@ -115,7 +115,7 @@ var VDFSaver = (function () {
                     }
                     objNode.SetProperty(propName, propValueNode);
                 } catch (ex) {
-                    throw new Error("Error saving property '" + propName + "'.\n\nBase error) " + ex.message);
+                    throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n");
                 }
         }
 

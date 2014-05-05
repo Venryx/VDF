@@ -119,7 +119,7 @@ class VDFSaver
 					}
 					objNode.SetProperty(propName, propValueNode);
 				}
-				catch(ex) { throw new Error("Error saving property '" + propName + "'.\n\nBase error) " + ex.message); }
+				catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"); }
 		}
 
 		// do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)
