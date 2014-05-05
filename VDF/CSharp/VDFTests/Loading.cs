@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using SystemMaker;
 using FluentAssertions;
 using Xunit;
@@ -276,10 +277,15 @@ namespace VDFTests
 			act.ShouldThrow<ArgumentException>().WithMessage("*same key*");
 		}
 		class SpecialList3<T> : List<T> {}
-		[Fact] void ToVDFNode_Level1_SpecialListItems()
+		[Fact] void ToVDFNode_Level1_SpecialListItem()
 		{
 			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), obj=>new SpecialList3<string>{"Obvious first-item data."}); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
 			VDF.Deserialize<SpecialList3<string>>("String that doesn't matter.").Should().BeEquivalentTo(new SpecialList3<string>{"Obvious first-item data."});
+		}
+		[Fact] void ToVDFNode_Level1_SpecialListItem_GenericTypeArgs()
+		{
+			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), (obj, genericArgs)=>new SpecialList3<string>{"Obvious first-item data; of type: " + genericArgs.First().Name.ToLower()}); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
+			VDF.Deserialize<SpecialList3<string>>("String that doesn't matter.").Should().BeEquivalentTo(new SpecialList3<string>{"Obvious first-item data; of type: string"});
 		}
 	}
 }

@@ -185,9 +185,9 @@ public class VDFNode
 		
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))
-			result = VDF.typeImporters_inline[finalType](baseValue);
+			result = VDF.typeImporters_inline[finalType](baseValue, finalType.GetGenericArguments().ToList());
 		else if (finalType.IsGenericType && VDF.typeImporters_inline.ContainsKey(finalType.GetGenericTypeDefinition()))
-			result = VDF.typeImporters_inline[finalType.GetGenericTypeDefinition()](baseValue);
+			result = VDF.typeImporters_inline[finalType.GetGenericTypeDefinition()](baseValue, finalType.GetGenericArguments().ToList());
 		else if (finalType.IsEnum)
 			result = Enum.Parse(finalType, baseValue);
 		else if (finalType.IsPrimitive || finalType == typeof(string))
@@ -214,7 +214,7 @@ public class VDFNode
 			try
 			{
 				if (obj is IDictionary)
-					((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
+					((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList()) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
 				else
 					typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
 			}

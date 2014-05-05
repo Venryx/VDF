@@ -21,7 +21,7 @@ public class VDFException : Exception
 public static class VDF
 {
 	public static Dictionary<Type, Func<object, string>> typeExporters_inline = new Dictionary<Type, Func<object, string>>();
-	public static Dictionary<Type, Func<string, object>> typeImporters_inline = new Dictionary<Type, Func<string, object>>();
+	public static Dictionary<Type, Func<string, List<Type>, object>> typeImporters_inline = new Dictionary<Type, Func<string, List<Type>, object>>();
 
 	// for use with VDFSaveOptions
 	public static MemberInfo AnyMember = typeof(VDF).GetMember("AnyMember")[0];
@@ -47,9 +47,10 @@ public static class VDF
 		RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
 	}
 	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { RegisterTypeExporter_Inline(typeof(T), obj=>exporter((T)obj)); }
-	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { RegisterTypeImporter_Inline(typeof(T), str=>importer(str)); }
+	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { RegisterTypeImporter_Inline(typeof(T), (str, genericArgs)=>importer(str)); }
 	public static void RegisterTypeExporter_Inline(Type type, Func<object, string> exporter) { typeExporters_inline[type] = exporter; }
-	public static void RegisterTypeImporter_Inline(Type type, Func<string, object> importer) { typeImporters_inline[type] = importer; }
+	public static void RegisterTypeImporter_Inline(Type type, Func<string, object> importer) { typeImporters_inline[type] = (str, genericArgs)=>importer(str); }
+	public static void RegisterTypeImporter_Inline(Type type, Func<string, List<Type>, object> importer) { typeImporters_inline[type] = importer; }
 
 	// v-name examples: "List[string]", "System.Collections.Generic.List[string]"
 	static int GetGenericParamsCountOfVName(string vName)
