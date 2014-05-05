@@ -209,10 +209,14 @@ public class VDFNode
 			else if (obj is IList)
 				((IList)obj).Add(items[i].ToObject(type.GetGenericArguments()[0], loadOptions));
 		foreach (string propName in properties.Keys)
-			if (obj is IDictionary)
-				((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
-			else
-				typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
+			try
+			{
+				if (obj is IDictionary)
+					((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
+				else
+					typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
+			}
+			catch (Exception ex) { throw new VDFException("Error loading key-value-pair or property '" + propName + "'.", ex); }
 
 		// call post-deserialize constructors before post-deserialize normal methods
 		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))

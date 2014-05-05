@@ -85,35 +85,38 @@ var VDFSaver = (function () {
             for (var propName in oldObj)
                 obj[propName] = oldObj[propName];
 
-            for (var propName in obj) {
-                if (typeof obj[propName] == "function")
-                    continue;
+            for (var propName in obj)
+                try  {
+                    if (typeof obj[propName] == "function")
+                        continue;
 
-                var propInfo = typeInfo.propInfoByName[propName] || new VDFPropInfo("object");
-                var include = typeInfo.props_includeL1;
-                include = propInfo.includeL2 != null ? propInfo.includeL2 : include;
-                if (!include)
-                    continue;
+                    var propInfo = typeInfo.propInfoByName[propName] || new VDFPropInfo("object");
+                    var include = typeInfo.props_includeL1;
+                    include = propInfo.includeL2 != null ? propInfo.includeL2 : include;
+                    if (!include)
+                        continue;
 
-                var propValue = obj[propName];
-                if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
-                    continue;
+                    var propValue = obj[propName];
+                    if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
+                        continue;
 
-                // if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-                var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
-                if (propInfo.popOutData) {
-                    propValueNode.popOutToOwnLine = true;
-                    if (lineInfo.fromLinePoppedOutGroupCount > 0)
-                        propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-                    lineInfo.fromLinePoppedOutGroupCount++;
+                    // if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
+                    var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
+                    if (propInfo.popOutData) {
+                        propValueNode.popOutToOwnLine = true;
+                        if (lineInfo.fromLinePoppedOutGroupCount > 0)
+                            propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
+                        lineInfo.fromLinePoppedOutGroupCount++;
+                    }
+                    if (propInfo.popOutItemData && propValue != null) {
+                        if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.length > 0)
+                            propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
+                        lineInfo.fromLinePoppedOutGroupCount++;
+                    }
+                    objNode.SetProperty(propName, propValueNode);
+                } catch (ex) {
+                    throw new Error("Error saving property '" + propName + "'.\n\nBase error) " + ex.message);
                 }
-                if (propInfo.popOutItemData && propValue != null) {
-                    if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.length > 0)
-                        propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-                    lineInfo.fromLinePoppedOutGroupCount++;
-                }
-                objNode.SetProperty(propName, propValueNode);
-            }
         }
 
         // do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)

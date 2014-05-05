@@ -89,37 +89,39 @@ public static class VDFSaver
 		{
 			var typeInfo = VDFTypeInfo.Get(type);
 			foreach (string propName in typeInfo.propInfoByName.Keys)
-			{
-				VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-				bool include = typeInfo.props_includeL1;
-				include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
-				include = saveOptions.includePropsL3.Contains(propInfo.memberInfo) || saveOptions.includePropsL3.Contains(VDF.AnyMember) ? true : include;
-				include = saveOptions.excludePropsL4.Contains(propInfo.memberInfo) || saveOptions.excludePropsL4.Contains(VDF.AnyMember) ? false : include;
-				include = saveOptions.includePropsL5.Contains(propInfo.memberInfo) || saveOptions.includePropsL5.Contains(VDF.AnyMember) ? true : include;
-				if (!include)
-					continue;
-
-				object propValue = propInfo.GetValue(obj);
-				if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
-					continue;
-
-				// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-				VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
-				if (propInfo.popOutData)
+				try
 				{
-					propValueNode.popOutToOwnLine = true;
-					if (lineInfo.fromLinePoppedOutGroupCount > 0)
-						propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-					lineInfo.fromLinePoppedOutGroupCount++;
+					VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
+					bool include = typeInfo.props_includeL1;
+					include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
+					include = saveOptions.includePropsL3.Contains(propInfo.memberInfo) || saveOptions.includePropsL3.Contains(VDF.AnyMember) ? true : include;
+					include = saveOptions.excludePropsL4.Contains(propInfo.memberInfo) || saveOptions.excludePropsL4.Contains(VDF.AnyMember) ? false : include;
+					include = saveOptions.includePropsL5.Contains(propInfo.memberInfo) || saveOptions.includePropsL5.Contains(VDF.AnyMember) ? true : include;
+					if (!include)
+						continue;
+
+					object propValue = propInfo.GetValue(obj);
+					if (propInfo.IsXValueEmpty(propValue) && !propInfo.writeEmptyValue)
+						continue;
+
+					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
+					VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof (object), saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
+					if (propInfo.popOutData)
+					{
+						propValueNode.popOutToOwnLine = true;
+						if (lineInfo.fromLinePoppedOutGroupCount > 0)
+							propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
+						lineInfo.fromLinePoppedOutGroupCount++;
+					}
+					if (propInfo.popOutItemData && propValue != null)
+					{
+						if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.Count > 0)
+							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
+						lineInfo.fromLinePoppedOutGroupCount++;
+					}
+					objNode.properties.Add(propName, propValueNode);
 				}
-				if (propInfo.popOutItemData && propValue != null)
-				{
-					if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.Count > 0)
-						propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-					lineInfo.fromLinePoppedOutGroupCount++;
-				}
-				objNode.properties.Add(propName, propValueNode);
-			}
+				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
 		}
 
 		// do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)

@@ -248,7 +248,7 @@ class Loading
 			a["ages"][0].baseValue.Should().Be("10");
 			a["ages"][1].baseValue.Should().Be("20");
 		});
-		test("ToVDFNode_Level5_DeepNestedPoppedOutData", () =>
+		test("ToVDFNode_Level5_DeepNestedPoppedOutData", ()=>
 		{
 			var vdf = "\
 Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VObjectRoot}children{VObject>>#}}}Test2{vObjectRoot{VObject>name{VObjectRoot}children{VObject>>#}}}}\n\

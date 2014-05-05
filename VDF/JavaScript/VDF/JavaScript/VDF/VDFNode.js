@@ -265,10 +265,14 @@
         for (var i = 0; i < this.items.length; i++)
             obj.push(this.items[i].ToObject(typeGenericParameters[0], loadOptions));
         for (var propName in this.properties)
-            if (obj instanceof Dictionary)
-                obj.Set(VDF.typeImporters_inline[typeGenericParameters[0]] ? VDF.typeImporters_inline[typeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(typeGenericParameters[1], loadOptions));
-            else
-                obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+            try  {
+                if (obj instanceof Dictionary)
+                    obj.Set(VDF.typeImporters_inline[typeGenericParameters[0]] ? VDF.typeImporters_inline[typeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(typeGenericParameters[1], loadOptions));
+                else
+                    obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+            } catch (ex) {
+                throw new Error("Error loading key-value-pair or property '" + propName + "'.\n\nBase error) " + ex.message);
+            }
 
         if (obj && obj.VDFPostDeserialize)
             obj.VDFPostDeserialize(loadOptions.message);

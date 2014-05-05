@@ -4,8 +4,20 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography;
 
+public class VDFException : Exception
+{
+	string message;
+	Exception innerException;
+	public VDFException(string message, Exception innerException)
+	{
+		this.message = message;
+		this.innerException = innerException;
+	}
+	public override string ToString() { return innerException + (innerException.ToString().EndsWith("\n==================") ? "" : "\n==================") + "\nRethrownAs) " + message + "\n" + base.StackTrace + "\n=================="; }
+	public override string Message { get { return ToString(); } }
+	public override string StackTrace { get { return ""; } }
+}
 public static class VDF
 {
 	public static Dictionary<Type, Func<object, string>> typeExporters_inline = new Dictionary<Type, Func<object, string>>();

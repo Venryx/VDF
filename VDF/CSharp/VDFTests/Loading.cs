@@ -258,5 +258,12 @@ namespace VDFTests
 			VDF.DeserializeInto("flag{true}", a);
 			a.flag.Should().Be(true);
 		}
+
+		// unique to C# version
+		[Fact] void ToVDFNode_Level1_PropLoadError_DuplicateDictionaryKeys()
+		{
+			Action act = ()=>VDFLoader.ToVDFNode("scores{Dan{0}Dan{1}}");
+			act.ShouldThrow<ArgumentException>().WithMessage("*same key*");
+		}
 	}
 }
