@@ -214,7 +214,14 @@ public class VDFNode
 			try
 			{
 				if (obj is IDictionary)
-					((IDictionary)obj).Add(VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]) ? VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList()) : propName, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
+				{
+					object key = propName; // in most cases, the Dictionary's in-code key-type will be a string, so we can just use the in-VDF raw-key-string directly
+					if (VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]))
+						key = VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
+					else if (type.GetGenericArguments()[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0].GetGenericTypeDefinition()))
+						key = VDF.typeImporters_inline[type.GetGenericArguments()[0].GetGenericTypeDefinition()](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
+					((IDictionary)obj).Add(key, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
+				}
 				else
 					typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
 			}
