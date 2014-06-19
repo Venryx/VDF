@@ -108,11 +108,11 @@ public class VDFNode
 	static string RawDataStringToFinalized(string rawDataStr)
 	{
 		string result = rawDataStr;
-		if (rawDataStr.Contains(">") || rawDataStr.Contains("}"))
+		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || rawDataStr.Contains("@@"))
 			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
-				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "|@@";
+				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
 			else
-				result = "@@" + new Regex("@@(?=\n|}|$)").Replace(rawDataStr, "@@@") + "@@";
+				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "@@";
 		return result;
 	}
 	public string GetPoppedOutItemText()

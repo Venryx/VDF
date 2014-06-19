@@ -111,9 +111,9 @@
 		var result = rawDataStr;
 		if (rawDataStr.contains(">") || rawDataStr.contains("}"))
 			if (rawDataStr.endsWith("@") || rawDataStr.endsWith("|"))
-				result = "@@" + rawDataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "|@@";
+				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
 			else
-				result = "@@" + rawDataStr.replace(/@@(?=\n|}|$)/g, "@@@") + "@@";
+				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
 		return result;
 	}
 	GetPoppedOutItemText(): string

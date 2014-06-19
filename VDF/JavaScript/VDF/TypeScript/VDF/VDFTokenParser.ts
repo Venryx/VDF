@@ -143,7 +143,7 @@ class VDFTokenParser
 		{
 			if ((result[result.length - 2] == '@' || result[result.length - 2] == '|') && result.endsWith("|"))
 				result = result.substring(0, result.length - 1); // chop off last char, as it was just added by the serializer for separation
-			result = result.replace(/@@@(?=\n|}|$)/g, "@@"); // remove extra '@' char added to all troublesome (before-end-of-line-or-end-bracket-or-end-of-string) two-at-signs char-segments
+			result = result.replace(/@(@{2,})/g, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
 		}
 		return result;
 	}

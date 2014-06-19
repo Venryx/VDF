@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
 using SystemMaker;
 using FluentAssertions;
 using Xunit;
@@ -147,6 +148,13 @@ namespace VDFTests
 		{
 			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
 			a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
+		}
+		[Fact] void ToVDFNode_Level1_VDFWithVDFWithVDF()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("level1{@@level2{@@@level3{Base string.}@@@}@@}");
+			a["level1"].baseValue.Should().Be("level2{@@level3{Base string.}@@}");
+			VDFLoader.ToVDFNode(a["level1"])["level2"].baseValue.Should().Be("level3{Base string.}");
+			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"])["level2"])["level3"].baseValue.Should().Be("Base string.");
 		}
 		[Fact] void ToVDFNode_Level1_PoppedOutBaseValue()
 		{

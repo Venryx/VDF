@@ -181,6 +181,13 @@ class Loading
 			var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
 			a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
 		});
+		test("ToVDFNode_Level1_VDFWithVDFWithVDF", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("level1{@@level2{@@@level3{Base string.}@@@}@@}");
+			a["level1"].baseValue.Should().Be("level2{@@level3{Base string.}@@}");
+			VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue.Should().Be("level3{Base string.}");
+			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue)["level3"].baseValue.Should().Be("Base string.");
+		});
 		test("ToVDFNode_Level1_PoppedOutBaseValue", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("name{#}\n\
