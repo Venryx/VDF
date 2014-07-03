@@ -110,6 +110,11 @@ namespace VDFTests
 			a["key 1"].baseValue.Should().Be("value 1");
 			a["key 2"].baseValue.Should().Be("value 2");
 		}
+		[Fact] void ToVDFNode_Level0_InferDepth2()
+		{
+			var a = VDF.Deserialize<List<object>>(">>>false");
+			a[0].Should().Be(false);
+		}
 
 		[Fact] void ToVDFNode_Level1_BaseValuesWithImplicitCasting()
 		{

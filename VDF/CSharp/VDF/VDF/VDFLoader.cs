@@ -70,7 +70,9 @@ public static class VDFLoader
 				}
 				else if (token.type == VDFTokenType.MetadataEndMarker)
 				{
-					if (objNode.metadata_type == null) // if metadata-type text is empty, set metadata-type to an empty string, for type-inference later
+					if (objNode != livePropAddNode && livePropAddNode.metadata_type == null) // if live-prop-add-node metadata-type text is empty, set metadata-type to an empty string, for type-inference later
+						livePropAddNode.metadata_type = "";
+					else if (objNode.metadata_type == null) // if metadata-type text is empty, set metadata-type to an empty string, for type-inference later
 						objNode.metadata_type = "";
 				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
@@ -89,7 +91,7 @@ public static class VDFLoader
 					else
 					{
 						livePropAddNode.metadata_type = token.text;
-						livePropAddNodeTypeInfo = VDFTypeInfo.Get(VDF.GetTypeByVName(token.text, loadOptions));
+						livePropAddNodeTypeInfo = VDFTypeInfo.Get(VDF.GetTypeByVName(token.text, loadOptions)); // todo; fix issue where type is 'null'
 					}
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")

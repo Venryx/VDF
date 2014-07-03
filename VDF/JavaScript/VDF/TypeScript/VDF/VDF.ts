@@ -229,7 +229,7 @@ class List<T>
 	reverse() :T[] { return this.modifyInnerListWithCall(Array.prototype.reverse); }
 	shift(): T { return this.modifyInnerListWithCall(Array.prototype.shift); }
 	sort(compareFn?: (a: T, b: T) => number): T[] { return this.modifyInnerListWithCall(Array.prototype.sort, [compareFn]); }
-	splice(start: number, deleteCount?: number, ...items: T[]): T[] { return this.modifyInnerListWithCall(Array.prototype.splice, (<Array<any>>[start, deleteCount]).concat(items)); }
+	splice(start: number, deleteCount?: number, ...items: T[]): T[] { return this.modifyInnerListWithCall(Array.prototype.splice, deleteCount != null ? (<Array<any>>[start, deleteCount]).concat(items) : [start]); }
 	unshift(...items: T[]): number { return this.modifyInnerListWithCall(Array.prototype.unshift, items); }
 	concat(...args) { return Array.prototype.concat.apply(this.innerArray, args); }
 	join(...args) { return Array.prototype.join.apply(this.innerArray, args); }

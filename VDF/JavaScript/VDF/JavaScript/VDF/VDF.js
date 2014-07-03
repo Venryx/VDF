@@ -277,7 +277,7 @@ var List = (function () {
         for (var _i = 0; _i < (arguments.length - 2); _i++) {
             items[_i] = arguments[_i + 2];
         }
-        return this.modifyInnerListWithCall(Array.prototype.splice, [start, deleteCount].concat(items));
+        return this.modifyInnerListWithCall(Array.prototype.splice, deleteCount != null ? [start, deleteCount].concat(items) : [start]);
     };
     List.prototype.unshift = function () {
         var items = [];
