@@ -65,7 +65,9 @@ var VDFLoader = (function () {
                         livePropAddNodeTypeInfo = VDF.GetTypeInfo(VDF.GetGenericParametersOfTypeName(objTypeName)[0]); // if primitive, there's no constructor
                     }
                 } else if (token.type == 4 /* MetadataEndMarker */) {
-                    if (objNode.metadata_type == null)
+                    if (objNode != livePropAddNode && livePropAddNode.metadata_type == null)
+                        livePropAddNode.metadata_type = "";
+                    else if (objNode.metadata_type == null)
                         objNode.metadata_type = "";
                 } else if (token.type == 3 /* Metadata_BaseValue */)
                     if (parser.PeekNextChars(2) == ">>") {

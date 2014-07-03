@@ -144,6 +144,11 @@ class Loading
 			a["key 1"].baseValue.Should().Be("value 1");
 			a["key 2"].baseValue.Should().Be("value 2");
 		});
+		test("ToVDFNode_Level0_InferDepth2", ()=>
+		{
+			var a = VDF.Deserialize(">>>false", "List[object]");
+			a[0].Should().Be(false);
+		});
 
 		test("ToVDFNode_Level1_BaseValuesWithExplicitCasting", ()=>
 		{

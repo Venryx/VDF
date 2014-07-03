@@ -67,7 +67,9 @@ class VDFLoader
 				}
 				else if (token.type == VDFTokenType.MetadataEndMarker)
 				{
-					if (objNode.metadata_type == null) // if metadata-type text is empty, set metadata-type to an empty string, for type-inference later
+					if (objNode != livePropAddNode && livePropAddNode.metadata_type == null) // if live-prop-add-node metadata-type text is empty, set metadata-type to an empty string, for type-inference later
+						livePropAddNode.metadata_type = "";
+					else if (objNode.metadata_type == null) // if metadata-type text is empty, set metadata-type to an empty string, for type-inference later
 						objNode.metadata_type = "";
 				}
 				else if (token.type == VDFTokenType.Metadata_BaseValue)
