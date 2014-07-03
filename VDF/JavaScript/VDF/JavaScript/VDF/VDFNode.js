@@ -216,7 +216,7 @@
                 finalMetadata_type = "float";
             else
                 finalMetadata_type = "int";
-        } else if (finalMetadata_type == null && this.baseValue != null && declaredTypeName == null)
+        } else if (finalMetadata_type == null && this.baseValue != null && (declaredTypeName == null || declaredTypeName == "object"))
             finalMetadata_type = "string";
 
         if (finalMetadata_type == "null")

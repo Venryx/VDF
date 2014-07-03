@@ -146,6 +146,10 @@ var Loading = (function () {
             var a = VDF.Deserialize(">>>false", "List[object]");
             a[0].Should().Be(false);
         });
+        test("ToVDFNode_Level0_InferUnmarkedTypeToBeString", function () {
+            var a = VDF.Deserialize(">>SimpleString", "List[object]");
+            a[0].Should().Be("SimpleString");
+        });
 
         test("ToVDFNode_Level1_BaseValuesWithExplicitCasting", function () {
             var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");

@@ -174,7 +174,7 @@ public class VDFNode
 			else
 				finalMetadata_type = "int";
 		}
-		else if (finalMetadata_type == null && baseValue != null && declaredType == null) // if no type specified, but it has a base-value and no declared-type is set, infer it to be string
+		else if (finalMetadata_type == null && baseValue != null && (declaredType == null || declaredType == typeof(object))) // if no type specified, but it has a base-value and no declared-type is set (or declared type is object), infer it to be string
 			finalMetadata_type = "string";
 
 		if (finalMetadata_type == "null") // special case for null-values

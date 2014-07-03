@@ -149,6 +149,11 @@ class Loading
 			var a = VDF.Deserialize(">>>false", "List[object]");
 			a[0].Should().Be(false);
 		});
+		test("ToVDFNode_Level0_InferUnmarkedTypeToBeString", ()=>
+		{
+			var a = VDF.Deserialize(">>SimpleString", "List[object]");
+			a[0].Should().Be("SimpleString");
+		});
 
 		test("ToVDFNode_Level1_BaseValuesWithExplicitCasting", ()=>
 		{

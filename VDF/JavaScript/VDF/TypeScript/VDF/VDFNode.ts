@@ -196,7 +196,7 @@
 			else
 				finalMetadata_type = "int";
 		}
-		else if (finalMetadata_type == null && this.baseValue != null && declaredTypeName == null) // if no metadata-type, but it has a base-value and no declared-type is set, infer it to be string
+		else if (finalMetadata_type == null && this.baseValue != null && (declaredTypeName == null || declaredTypeName == "object")) // if no type specified, but it has a base-value and no declared-type is set (or declared type is object), infer it to be string
 			finalMetadata_type = "string";
 
 		if (finalMetadata_type == "null") // special case for null-values
