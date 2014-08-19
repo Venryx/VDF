@@ -109,7 +109,7 @@
 	static RawDataStringToFinalized(rawDataStr: string): string
 	{
 		var result = rawDataStr;
-		if (rawDataStr.contains(">") || rawDataStr.contains("}"))
+		if (rawDataStr.contains(">") || rawDataStr.contains("}") || rawDataStr.contains("@@") || rawDataStr.contains("\n"))
 			if (rawDataStr.endsWith("@") || rawDataStr.endsWith("|"))
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
 			else

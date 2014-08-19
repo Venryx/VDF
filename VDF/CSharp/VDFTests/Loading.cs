@@ -120,6 +120,11 @@ namespace VDFTests
 			var a = VDF.Deserialize<List<object>>(">>SimpleString");
 			a[0].Should().Be("SimpleString");
 		}
+		[Fact] void ToVDFNode_Level0_MultilineString()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("@@This is a\nmultiline string\nof three lines in total.@@");
+			a.baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
+		}
 
 		[Fact] void ToVDFNode_Level1_BaseValuesWithImplicitCasting()
 		{

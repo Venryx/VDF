@@ -108,7 +108,7 @@ public class VDFNode
 	static string RawDataStringToFinalized(string rawDataStr)
 	{
 		string result = rawDataStr;
-		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || rawDataStr.Contains("@@"))
+		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || rawDataStr.Contains("@@") || rawDataStr.Contains("\n"))
 			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
 				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
 			else

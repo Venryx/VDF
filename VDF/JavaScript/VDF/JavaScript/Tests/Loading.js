@@ -150,6 +150,10 @@ var Loading = (function () {
             var a = VDF.Deserialize(">>SimpleString", "List[object]");
             a[0].Should().Be("SimpleString");
         });
+        test("ToVDFNode_Level0_MultilineString", function () {
+            var a = VDFLoader.ToVDFNode("@@This is a\nmultiline string\nof three lines in total.@@");
+            a.baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
+        });
 
         test("ToVDFNode_Level1_BaseValuesWithExplicitCasting", function () {
             var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");

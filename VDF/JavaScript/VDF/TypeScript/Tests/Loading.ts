@@ -154,6 +154,11 @@ class Loading
 			var a = VDF.Deserialize(">>SimpleString", "List[object]");
 			a[0].Should().Be("SimpleString");
 		});
+		test("ToVDFNode_Level0_MultilineString", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("@@This is a\nmultiline string\nof three lines in total.@@");
+			a.baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
+		});
 
 		test("ToVDFNode_Level1_BaseValuesWithExplicitCasting", ()=>
 		{

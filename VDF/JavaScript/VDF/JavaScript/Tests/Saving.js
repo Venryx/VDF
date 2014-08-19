@@ -169,6 +169,10 @@ var Saving = (function () {
             var a = VDFSaver.ToVDFNode(1 /* A */, "Enum1");
             a.ToVDF().Should().Be("A");
         });
+        test("ToVDF_Level0_MultilineString", function () {
+            var a = VDFSaver.ToVDFNode("This is a\nmultiline string\nof three lines in total.", "string");
+            a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
+        });
 
         test("ToVDF_Level1_BaseValues", function () {
             var a = new VDFNode();

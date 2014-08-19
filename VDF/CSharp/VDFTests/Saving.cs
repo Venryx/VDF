@@ -52,6 +52,11 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode<Enum1>(Enum1.A);
 			a.ToVDF().Should().Be("A");
 		}
+		[Fact] void ToVDF_Level0_MultilineString()
+		{
+			var a = VDFSaver.ToVDFNode<string>("This is a\nmultiline string\nof three lines in total.");
+			a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
+		}
 
 		[Fact] void ToVDF_Level1_BaseValues()
 		{
