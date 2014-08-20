@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 public class VDFLoadOptions
 {
@@ -36,7 +37,7 @@ public static class VDFLoader
 		var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDFTypeInfo.Get(objType.IsGenericType ? objType.GetGenericArguments()[0] : typeof(object)) : (objType != null ? VDFTypeInfo.Get(objType) : null);
 
 		lineInfo = lineInfo ?? new VDFLoader_LineInfo();
-		
+
 		int depth = 0;
 		bool dataIsPoppedOut = false;
 		string livePropName = null;
@@ -62,7 +63,7 @@ public static class VDFLoader
 				{
 					objNode.metadata_type = objNode.metadata_type ?? "List[object]"; // if metadata-type text is empty, infer it to mean "List[object]"
 					objType = VDF.GetTypeByVName(objNode.metadata_type, loadOptions);
-					if (objType != null && typeof (IList).IsAssignableFrom(objType)) // if obj is List (as opposed to Dictionary)
+					if (objType != null && typeof(IList).IsAssignableFrom(objType)) // if obj is List (as opposed to Dictionary)
 					{
 						livePropAddNode = new VDFNode(); // we found out we're a list, so create a new item-node to hold the about-to-be-reached props
 						livePropAddNodeTypeInfo = VDFTypeInfo.Get(objType.GetGenericArguments()[0]);
@@ -96,7 +97,7 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutGroupCount);
+						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
 						if (typeof(IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
 							foreach (int pos in poppedOutPropValueItemTextPositions)
 								objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos));
@@ -126,7 +127,7 @@ public static class VDFLoader
 				depth++;
 		}
 		// if live-prop-add-node is not obj itself, and block wasn't empty, and data is in-line, (meaning we're adding the items as we pass their last char), add final item
-		if (livePropAddNode != objNode && parser.tokens.Any(token=>new[]{VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator}.Contains(token.type)) && !dataIsPoppedOut)
+		if (livePropAddNode != objNode && parser.tokens.Any(token => new[] { VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator }.Contains(token.type)) && !dataIsPoppedOut)
 			objNode.items.Add(livePropAddNode);
 
 		return objNode;
@@ -182,9 +183,23 @@ public static class VDFLoader
 
 		int poppedOutChildDatasReached = 0;
 		int indentsOnThisLine = 0;
+		bool inLiteralMarkers = false;
 		for (int i = searchStartPos; i < vdfFile.Length; i++)
 		{
+			char? lastChar = i > 0 ? vdfFile[i - 1] : (char?)null;
 			char ch = vdfFile[i];
+			char? nextChar = i < vdfFile.Length - 1 ? vdfFile[i + 1] : (char?)null;
+			char? nextNextChar = i < vdfFile.Length - 2 ? vdfFile[i + 2] : (char?)null;
+
+			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
+			{
+				inLiteralMarkers = !inLiteralMarkers;
+				i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker
+				continue; // skip processing of literal-marker
+			}
+			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
+				continue;
+
 			if (ch == '\n')
 				indentsOnThisLine = 0;
 			else if (ch == '\t')
@@ -204,7 +219,7 @@ public static class VDFLoader
 				else
 					break; // last line, so break
 			}
-			else if (indentsOnThisLine <= parentIndentDepth) // we've reached a peer of the parent, so break
+			else if (indentsOnThisLine <= parentIndentDepth && poppedOutChildDatasReached > 0) // if we've reached a peer of the parent, break
 				break;
 		}
 

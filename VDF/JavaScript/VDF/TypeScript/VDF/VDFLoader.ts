@@ -93,7 +93,7 @@ class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutGroupCount);
+						var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
 						if ((objTypeName != null && objTypeName.startsWith("List[")) || poppedOutPropValueItemTextPositions.length > 1) // if known to be a List, either by type-marking or inference
 							for (var i in poppedOutPropValueItemTextPositions)
 								objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
@@ -179,9 +179,23 @@ class VDFLoader
 
 		var poppedOutChildDatasReached = 0;
 		var indentsOnThisLine = 0;
+		var inLiteralMarkers = false;
 		for (var i = searchStartPos; i < vdfFile.length; i++)
 		{
+			var lastChar = i > 0 ? vdfFile[i - 1] : null;
 			var ch = vdfFile[i];
+			var nextChar = i < vdfFile.length - 1 ? vdfFile[i + 1] : null;
+			var nextNextChar = i < vdfFile.length - 2 ? vdfFile[i + 2] : null;
+
+			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
+			{
+				inLiteralMarkers = !inLiteralMarkers;
+				i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker
+				continue; // skip processing of literal-marker
+			}
+			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
+				continue;
+
 			if (ch == '\n')
 				indentsOnThisLine = 0;
 			else if (ch == '\t')
@@ -201,7 +215,7 @@ class VDFLoader
 				else
 					break; // last line, so break
 			}
-			else if (indentsOnThisLine <= parentIndentDepth) // we've reached a peer of the parent, so break
+			else if (indentsOnThisLine <= parentIndentDepth && poppedOutChildDatasReached > 0) // if we've reached a peer of the parent, break
 				break;
 		}
 

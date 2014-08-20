@@ -85,7 +85,7 @@ var VDFLoader = (function () {
                     }
                 else if (token.type == 8 /* Data_BaseValue */)
                     if (token.text == "#") {
-                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), VDFLoader.FindNextLineBreakCharPos(vdfFile, parser.nextCharPos) + 1, lineInfo.fromLinePoppedOutGroupCount);
+                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
                         if ((objTypeName != null && objTypeName.startsWith("List[")) || poppedOutPropValueItemTextPositions.length > 1)
                             for (var i in poppedOutPropValueItemTextPositions)
                                 objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
@@ -167,8 +167,21 @@ var VDFLoader = (function () {
 
         var poppedOutChildDatasReached = 0;
         var indentsOnThisLine = 0;
+        var inLiteralMarkers = false;
         for (var i = searchStartPos; i < vdfFile.length; i++) {
+            var lastChar = i > 0 ? vdfFile[i - 1] : null;
             var ch = vdfFile[i];
+            var nextChar = i < vdfFile.length - 1 ? vdfFile[i + 1] : null;
+            var nextNextChar = i < vdfFile.length - 2 ? vdfFile[i + 2] : null;
+
+            if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) {
+                inLiteralMarkers = !inLiteralMarkers;
+                i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker
+                continue;
+            }
+            if (inLiteralMarkers)
+                continue;
+
             if (ch == '\n')
                 indentsOnThisLine = 0;
             else if (ch == '\t')
@@ -186,7 +199,7 @@ var VDFLoader = (function () {
                     i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
                 else
                     break;
-            } else if (indentsOnThisLine <= parentIndentDepth)
+            } else if (indentsOnThisLine <= parentIndentDepth && poppedOutChildDatasReached > 0)
                 break;
         }
 

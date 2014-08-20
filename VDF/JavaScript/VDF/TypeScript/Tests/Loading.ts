@@ -273,12 +273,32 @@ class Loading
 			a["ages"][0].baseValue.Should().Be("10");
 			a["ages"][1].baseValue.Should().Be("20");
 		});
+		test("ToVDFNode_Level1_MultilineStringThenProperties", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("text{@@This is a\n\
+multiline string\n\
+of three lines in total.@@}bool{>true}");
+			a["text"].baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
+			a["bool"].AsBool.Should().Be(true);
+		});
+		test("ToVDFNode_Level1_MultilineStringWithIndentsThenChildData", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("childTexts{#}text{@@This is a\n\
+	multiline string\n\
+	of three lines in total.@@}\n\
+	text1\n\
+	text2");
+			a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
+			a["childTexts"][0].baseValue.Should().Be("text1");
+			a["childTexts"][1].baseValue.Should().Be("text2");
+		});
+
 		test("ToVDFNode_Level5_DeepNestedPoppedOutData", ()=>
 		{
 			var vdf = "\
-Pack>name{Main}Scenarios>worlds{string,World>>Test1{vObjectRoot{VObject>name{VObjectRoot}children{VObject>>#}}}Test2{vObjectRoot{VObject>name{VObjectRoot}children{VObject>>#}}}}\n\
+name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children{>>#}}}Test2{vObjectRoot{name{VObjectRoot}children{>>#}}}}\n\
 	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}\n\
-	#id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}";
+	#id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}".trim();
 			var livePackNode = VDFLoader.ToVDFNode(vdf, new VDFLoadOptions(null, true));
 			livePackNode["worlds"]["Test1"].vObjectRoot.children[0].id.baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
 			livePackNode["worlds"]["Test2"].vObjectRoot.children[0].id.baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
