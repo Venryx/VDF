@@ -40,8 +40,9 @@ var VDFTokenParser = (function () {
             var ch = this.vdf[i];
             var nextChar = i < this.vdf.length - 1 ? this.vdf[i + 1] : null;
             var nextNextChar = i < this.vdf.length - 2 ? this.vdf[i + 2] : null;
+            var nextNextNextChar = i < this.vdf.length - 3 ? this.vdf[i + 3] : null;
 
-            if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) {
+            if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || (nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) {
                 tokenTextBuilder = new StringBuilder(VDFTokenParser.FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
                 inLiteralMarkers = !inLiteralMarkers;
                 i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker

@@ -103,6 +103,8 @@ public static class VDF
 		if (loadOptions.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
 			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[]{'`'})[0];
 		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vTypeName), loadOptions);
+		if (rootType == null)
+			throw new Exception("Could not find type \"" + rootName + "\".");
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();

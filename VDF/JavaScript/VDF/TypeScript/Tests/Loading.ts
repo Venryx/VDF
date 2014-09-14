@@ -105,6 +105,19 @@ class Loading
 			a[1]["name"].AsString.Should().Be("Bob");
 			a[1]["age"].AsInt.Should().Be(60);
 		});
+		test("ToVDFNode_Level0_ArrayItems_Literals", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("first|@@second\n\
+which is on two lines@@|@@third\n\
+which is on\n\
+three lines@@", "List[string]");
+			a[0].AsString.Should().Be("first");
+			a[1].AsString.Should().Be("second\n\
+which is on two lines");
+			a[2].AsString.Should().Be("third\n\
+which is on\n\
+three lines");
+		});
 		test("ToVDFNode_Level0_ArrayItems_Empty", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("|", "List[object]");

@@ -57,8 +57,9 @@ public class VDFTokenParser
 			char ch = vdf[i];
 			char? nextChar = i < vdf.Length - 1 ? vdf[i + 1] : (char?)null;
 			char? nextNextChar = i < vdf.Length - 2 ? vdf[i + 2] : (char?)null;
+			char? nextNextNextChar = i < vdf.Length - 3 ? vdf[i + 3] : (char?)null;
 
-			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
+			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || (nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
 			{
 				tokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
 				inLiteralMarkers = !inLiteralMarkers;

@@ -71,6 +71,19 @@ namespace VDFTests
 			((string)a[1]["name"]).Should().Be("Bob");
 			((int)a[1]["age"]).Should().Be(60);
 		}
+		[Fact] void ToVDFNode_Level0_ArrayItems_Literals()
+		{
+			VDFNode a = VDFLoader.ToVDFNode<List<string>>(@"first|@@second
+which is on two lines@@|@@third
+which is on
+three lines@@");
+			((string)a[0]).Should().Be("first");
+			((string)a[1]).Should().Be(@"second
+which is on two lines".Replace("\r", ""));
+			((string)a[2]).Should().Be(@"third
+which is on
+three lines".Replace("\r", ""));
+		}
 		[Fact] void ToVDFNode_Level0_ArrayItems_Empty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<IList>("|");
