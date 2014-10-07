@@ -129,10 +129,10 @@ class VDFTokenParser
 	}
 	PeekNextChars(charsToPeek: number = 1): string { return this.vdf.substring(this.nextCharPos, Math.min(this.nextCharPos + charsToPeek, this.vdf.length)); }
 
-	static FindNextLineBreakCharPos(vdfFile: string, searchStartPos: number): number
+	static FindNextLineBreakCharPos(text: string, searchStartPos: number): number
 	{
-		for (var i = searchStartPos; i < vdfFile.length; i++)
-			if (vdfFile[i] == '\n')
+		for (var i = searchStartPos; i < text.length; i++)
+			if (text[i] == '\n')
 				return i;
 		return -1;
 	}

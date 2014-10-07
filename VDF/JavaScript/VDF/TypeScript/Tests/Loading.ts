@@ -322,7 +322,8 @@ name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children{>>#}
 
 		// ToObject
 		// ==================
-
+		
+		test("ToObject_Level0_EmptyString", ()=>{ VDF.Deserialize("").Should().Be(""); });
 		test("ToObject_Level0_Bool", ()=>{ VDF.Deserialize("true", "bool").Should().Be(true); });
 		test("ToObject_Level0_Float", ()=>{ VDF.Deserialize("1.5", "float").Should().Be(1.5); });
 		test("ToObject_Level1_PostDeserializeMethod", ()=>

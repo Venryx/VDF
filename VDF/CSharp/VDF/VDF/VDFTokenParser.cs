@@ -124,10 +124,10 @@ public class VDFTokenParser
 	}
 	public string PeekNextChars(int charsToPeek = 1) { return vdf.Substring(nextCharPos, Math.Min(charsToPeek, vdf.Length - nextCharPos)); }
 
-	static int FindNextLineBreakCharPos(string vdfFile, int searchStartPos)
+	static int FindNextLineBreakCharPos(string text, int searchStartPos)
 	{
-		for (int i = searchStartPos; i < vdfFile.Length; i++)
-			if (vdfFile[i] == '\n')
+		for (int i = searchStartPos; i < text.Length; i++)
+			if (text[i] == '\n')
 				return i;
 		return -1;
 	}

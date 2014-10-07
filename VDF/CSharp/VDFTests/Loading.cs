@@ -87,8 +87,8 @@ three lines".Replace("\r", ""));
 		[Fact] void ToVDFNode_Level0_ArrayItems_Empty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<IList>("|");
-			a[0].baseValue.Should().Be(null);
-			a[1].baseValue.Should().Be(null);
+			a[0].baseValue.Should().Be("");
+			a[1].baseValue.Should().Be("");
 		}
 		[Fact] void ToVDFNode_Level0_ArrayItems_None()
 		{
@@ -211,17 +211,17 @@ three lines".Replace("\r", ""));
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
 			a[0][0].baseValue.Should().Be("1A");
-			a[0][1].baseValue.Should().Be(null);
+			a[0][1].baseValue.Should().Be("");
 			a[1][0].baseValue.Should().Be("2A");
-			a[1][1].baseValue.Should().Be(null);
+			a[1][1].baseValue.Should().Be("");
 		}
 		[Fact] void ToVDFNode_Level1_ArrayItemsInArrayItems_BothEmpty()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{|}|{|}");
-			a[0][0].baseValue.Should().Be(null);
-			a[0][1].baseValue.Should().Be(null);
-			a[1][0].baseValue.Should().Be(null);
-			a[1][1].baseValue.Should().Be(null);
+			a[0][0].baseValue.Should().Be("");
+			a[0][1].baseValue.Should().Be("");
+			a[1][0].baseValue.Should().Be("");
+			a[1][1].baseValue.Should().Be("");
 		}
 		[Fact] void ToVDFNode_Level1_DictionaryItems()
 		{
@@ -290,6 +290,7 @@ of three lines in total.@@}bool{>true}");
 		// ToObject
 		// ==================
 
+		[Fact] void ToObject_Level0_EmptyString() { VDF.Deserialize("").Should().Be(""); }
 		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
 		[Fact] void ToObject_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
 		class TypeWithPostDeserializeMethod
@@ -298,6 +299,7 @@ of three lines in total.@@}bool{>true}");
 			[VDFPostDeserialize] void VDFPostDeserialize() { flag = true; }
 		}
 
+		[Fact] void ToObject_Level1_EmptyStringInList() { VDF.Deserialize<List<string>>("text1|")[1].Should().Be(""); }
 		[Fact] void ToObject_Level1_PostDeserializeMethod()
 		{
 			var a = VDF.Deserialize<TypeWithPostDeserializeMethod>("");

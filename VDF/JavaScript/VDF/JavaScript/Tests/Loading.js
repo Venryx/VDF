@@ -298,6 +298,9 @@ name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children{>>#}
 
         // ToObject
         // ==================
+        test("ToObject_Level0_EmptyString", function () {
+            VDF.Deserialize("").Should().Be("");
+        });
         test("ToObject_Level0_Bool", function () {
             VDF.Deserialize("true", "bool").Should().Be(true);
         });

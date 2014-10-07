@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,16 +22,16 @@ public class VDFLoadOptions
 public static class VDFLoader
 {
 	public class VDFLoader_LineInfo { public int fromLinePoppedOutGroupCount; }
-	public static VDFNode ToVDFNode<T>(string vdfFile, VDFLoadOptions loadOptions = null) { return ToVDFNode(vdfFile, typeof(T), loadOptions); }
-	public static VDFNode ToVDFNode(string vdfFile, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(vdfFile, declaredType, loadOptions); }
-	public static VDFNode ToVDFNode(string vdfFile, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_LineInfo lineInfo = null)
+	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions loadOptions = null) { return ToVDFNode(text, typeof(T), loadOptions); }
+	public static VDFNode ToVDFNode(string text, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(text, declaredType, loadOptions); }
+	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_LineInfo lineInfo = null)
 	{
-		vdfFile = vdfFile.Replace("\r\n", "\n");
+		text = (text ?? "").Replace("\r\n", "\n");
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
 		var objNode = new VDFNode();
 		var objType = declaredType;
-		if (objType == null && FindNextDepthXItemSeparatorCharPos(vdfFile, firstObjTextCharPos, 0) != -1) // if obj-data has item-separators (of its depth-level), we can infer that it's a List
+		if (objType == null && FindNextDepthXItemSeparatorCharPos(text, firstObjTextCharPos, 0) != -1) // if obj-data has item-separators (of its depth-level), we can infer that it's a List
 			objType = typeof(IList);
 		var livePropAddNode = objType != null && typeof(IList).IsAssignableFrom(objType) ? new VDFNode() : objNode; // if list, create a new node for holding the about-to-be-reached props
 		var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDFTypeInfo.Get(objType.IsGenericType ? objType.GetGenericArguments()[0] : typeof(object)) : (objType != null ? VDFTypeInfo.Get(objType) : null);
@@ -42,7 +42,7 @@ public static class VDFLoader
 		bool dataIsPoppedOut = false;
 		string livePropName = null;
 
-		var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
+		var parser = new VDFTokenParser(text, firstObjTextCharPos);
 		while (parser.MoveNextToken())
 		{
 			VDFToken token = parser.tokens.Last();
@@ -97,12 +97,12 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.Data_BaseValue)
 					if (token.text == "#")
 					{
-						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(vdfFile, FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
+						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(text, FindIndentDepthOfLineContainingCharPos(text, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
 						if (typeof(IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
 							foreach (int pos in poppedOutPropValueItemTextPositions)
-								objNode.items.Add(ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos));
+								objNode.items.Add(ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos));
 						else
-							objNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
+							objNode = ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
 						lineInfo.fromLinePoppedOutGroupCount++;
 						dataIsPoppedOut = true;
 					}
@@ -113,11 +113,11 @@ public static class VDFLoader
 				else if (token.type == VDFTokenType.DataStartMarker)
 					if (livePropName != null)
 						if (typeof(IDictionary).IsAssignableFrom(objType)) // dictionary key-value-pair
-							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, objType.GetGenericArguments()[0], loadOptions, parser.nextCharPos, lineInfo));
+							livePropAddNode.properties.Add(livePropName, ToVDFNode(text, objType.GetGenericArguments()[0], loadOptions, parser.nextCharPos, lineInfo));
 						else // property
-							livePropAddNode.properties.Add(livePropName, ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, lineInfo));
+							livePropAddNode.properties.Add(livePropName, ToVDFNode(text, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, lineInfo));
 					else // if data of an in-list-list (at depth 0, which we are at, these are only ever for obj) (note; no need to set live-prop-add-node-type-info, because we know both obj and item have no properties, and so line above is unaffected by it)
-						livePropAddNode = ToVDFNode(vdfFile, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : typeof(IList), loadOptions, parser.nextCharPos, lineInfo);
+						livePropAddNode = ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : typeof(IList), loadOptions, parser.nextCharPos, lineInfo);
 				else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
 					livePropName = null;
 				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
@@ -127,28 +127,33 @@ public static class VDFLoader
 				depth++;
 		}
 		// if live-prop-add-node is not obj itself, and block wasn't empty, and data is in-line, (meaning we're adding the items as we pass their last char), add final item
-		if (livePropAddNode != objNode && parser.tokens.Any(token => new[] { VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator }.Contains(token.type)) && !dataIsPoppedOut)
+		if (livePropAddNode != objNode && parser.tokens.Any(token=>new[] {VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator}.Contains(token.type)) && !dataIsPoppedOut)
 			objNode.items.Add(livePropAddNode);
+		// special cases
+		if (typeof (IList).IsAssignableFrom(objType) || objNode.items.Count > 1) // if known to be a List
+			foreach(VDFNode item in objNode.items) // todo; break point
+		else if (parser.tokens.Any(a=>a.type == VDFTokenType.Data_BaseValue))
+			objNode.baseValue = "";
 
 		return objNode;
 	}
 
-	static int FindNextDepthXCharYPos(string vdfFile, int searchStartPos, int targetDepth, char ch, char depthStartChar, char depthEndChar)
+	static int FindNextDepthXCharYPos(string text, int searchStartPos, int targetDepth, char ch, char depthStartChar, char depthEndChar)
 	{
 		int depth = 0;
-		for (int i = searchStartPos; i < vdfFile.Length && depth >= 0; i++)
-			if (vdfFile[i] == depthStartChar)
+		for (int i = searchStartPos; i < text.Length && depth >= 0; i++)
+			if (text[i] == depthStartChar)
 				depth++;
-			else if (vdfFile[i] == ch && depth == targetDepth)
+			else if (text[i] == ch && depth == targetDepth)
 				return i;
-			else if (vdfFile[i] == depthEndChar)
+			else if (text[i] == depthEndChar)
 				depth--;
 		return -1;
 	}
-	static int FindNextDepthXItemSeparatorCharPos(string vdfFile, int searchStartPos, int targetDepth)
+	static int FindNextDepthXItemSeparatorCharPos(string text, int searchStartPos, int targetDepth)
 	{
 		int depth = 0;
-		var parser = new VDFTokenParser(vdfFile, searchStartPos);
+		var parser = new VDFTokenParser(text, searchStartPos);
 		while (parser.MoveNextToken() && depth >= 0) // use parser, so we don't have to deal with special '|' symbol usage, for separating '@@' literal-markers from the end of a troublesome string (i.e. "Bad string.@@")
 			if (parser.tokens.Last().type == VDFTokenType.DataStartMarker)
 				depth++;
@@ -162,34 +167,34 @@ public static class VDFLoader
 			}
 		return -1;
 	}
-	static int FindIndentDepthOfLineContainingCharPos(string vdfFile, int charPos)
+	static int FindIndentDepthOfLineContainingCharPos(string text, int charPos)
 	{
 		int lineIndentDepth = 0;
-		for (int i = charPos - 1; i > 0 && vdfFile[i] != '\n'; i--)
-			if (vdfFile[i] == '\t')
+		for (int i = charPos - 1; i > 0 && text[i] != '\n'; i--)
+			if (text[i] == '\t')
 				lineIndentDepth++;
 		return lineIndentDepth;
 	}
-	static int FindNextLineBreakCharPos(string vdfFile, int searchStartPos)
+	static int FindNextLineBreakCharPos(string text, int searchStartPos)
 	{
-		for (int i = searchStartPos; i < vdfFile.Length; i++)
-			if (vdfFile[i] == '\n')
+		for (int i = searchStartPos; i < text.Length; i++)
+			if (text[i] == '\n')
 				return i;
 		return -1;
 	}
-	static List<int> FindPoppedOutChildTextPositions(string vdfFile, int parentIndentDepth, int searchStartPos, int poppedOutChildDataIndex)
+	static List<int> FindPoppedOutChildTextPositions(string text, int parentIndentDepth, int searchStartPos, int poppedOutChildDataIndex)
 	{
 		var result = new List<int>();
 
 		int poppedOutChildDatasReached = 0;
 		int indentsOnThisLine = 0;
 		bool inLiteralMarkers = false;
-		for (int i = searchStartPos; i < vdfFile.Length; i++)
+		for (int i = searchStartPos; i < text.Length; i++)
 		{
-			char? lastChar = i > 0 ? vdfFile[i - 1] : (char?)null;
-			char ch = vdfFile[i];
-			char? nextChar = i < vdfFile.Length - 1 ? vdfFile[i + 1] : (char?)null;
-			char? nextNextChar = i < vdfFile.Length - 2 ? vdfFile[i + 2] : (char?)null;
+			char? lastChar = i > 0 ? text[i - 1] : (char?)null;
+			char ch = text[i];
+			char? nextChar = i < text.Length - 1 ? text[i + 1] : (char?)null;
+			char? nextNextChar = i < text.Length - 2 ? text[i + 2] : (char?)null;
 
 			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
 			{
@@ -213,7 +218,7 @@ public static class VDFLoader
 				if (poppedOutChildDatasReached > poppedOutChildDataIndex + 1) // we just finished processing the given popped-out child-data, so break
 					break;
 
-				int nextLineBreakCharPos = FindNextLineBreakCharPos(vdfFile, i);
+				int nextLineBreakCharPos = FindNextLineBreakCharPos(text, i);
 				if (nextLineBreakCharPos != -1)
 					i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
 				else

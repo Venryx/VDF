@@ -167,7 +167,7 @@ public class VDFNode
 		{
 			if (baseValue == "null")
 				finalMetadata_type = "null";
-			else if (new[] { "true", "false" }.Contains(baseValue))
+			else if (new[] {"true", "false"}.Contains(baseValue))
 				finalMetadata_type = "bool";
 			else if (baseValue.Contains("."))
 				finalMetadata_type = "float";

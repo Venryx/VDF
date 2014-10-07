@@ -235,7 +235,7 @@ class Saving
 			a["preSerializeWasCalled"].AsBool.Should().Be(true);
 			a.ToVDF().Should().Be("TypeWithPreSerializePrepMethod>preSerializeWasCalled{true}");
 		});
-		test("ToVDF_Level1_TypeProperties_MarkForNone", () =>
+		test("ToVDF_Level1_TypeProperties_MarkForNone", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a["Bool"].baseValue.Should().Be("true");
@@ -247,17 +247,17 @@ class Saving
 			a["nestedList"][0][0].baseValue.Should().Be("1A");
 			a.ToVDF().Should().Be("Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
 		});
-		test("ToVDF_Level1_TypeProperties_MarkForAssembly", () =>
+		test("ToVDF_Level1_TypeProperties_MarkForAssembly", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.Assembly));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
 		});
-		test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternal", () =>
+		test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternal", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{>true}Int{>5}Float{>.5}String{Prop value string.}list{string>>2A|2B}nestedList{List[List[string]]>>{string>>1A}}");
 		});
-		test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternalNoCollapse", () =>
+		test("ToVDF_Level1_TypeProperties_MarkForAssemblyExternalNoCollapse", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternalNoCollapse));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");

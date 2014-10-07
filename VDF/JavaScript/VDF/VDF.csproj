@@ -207,7 +207,7 @@
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptOutDir>C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\JavaScript</TypeScriptOutDir>
+    <TypeScriptOutDir>C:\Projects\Visual C#\VDF\VDF\JavaScript\VDF\JavaScript</TypeScriptOutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptTarget>ES5</TypeScriptTarget>
