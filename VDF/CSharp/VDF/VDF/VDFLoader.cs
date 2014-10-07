@@ -24,116 +24,169 @@ public static class VDFLoader
 	public class VDFLoader_LineInfo { public int fromLinePoppedOutGroupCount; }
 	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions loadOptions = null) { return ToVDFNode(text, typeof(T), loadOptions); }
 	public static VDFNode ToVDFNode(string text, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(text, declaredType, loadOptions); }
-	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null, int firstObjTextCharPos = 0, VDFLoader_LineInfo lineInfo = null)
+	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null, int objTextPos = 0, VDFLoader_LineInfo lineInfo = null)
 	{
 		text = (text ?? "").Replace("\r\n", "\n");
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
-		var objNode = new VDFNode();
-		var objType = declaredType;
-		if (objType == null && FindNextDepthXItemSeparatorCharPos(text, firstObjTextCharPos, 0) != -1) // if obj-data has item-separators (of its depth-level), we can infer that it's a List
-			objType = typeof(IList);
-		var livePropAddNode = objType != null && typeof(IList).IsAssignableFrom(objType) ? new VDFNode() : objNode; // if list, create a new node for holding the about-to-be-reached props
-		var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDFTypeInfo.Get(objType.IsGenericType ? objType.GetGenericArguments()[0] : typeof(object)) : (objType != null ? VDFTypeInfo.Get(objType) : null);
-
-		lineInfo = lineInfo ?? new VDFLoader_LineInfo();
-
+		// pre-parse all the tokens for our depth level
+		var parser = new VDFTokenParser(text, objTextPos);
 		int depth = 0;
-		bool dataIsPoppedOut = false;
-		string livePropName = null;
-
-		var parser = new VDFTokenParser(text, firstObjTextCharPos);
+		var tokensAtDepth0 = new List<VDFToken>();
 		while (parser.MoveNextToken())
 		{
 			VDFToken token = parser.tokens.Last();
 			if (token.type == VDFTokenType.DataEndMarker)
-				depth--;
-
-			if (depth < 0)
-				break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
-			if (depth == 0)
 			{
-				if (token.type == VDFTokenType.ItemSeparator)
-				{
-					objNode.items.Add(livePropAddNode);
-					livePropAddNode = new VDFNode();
-				}
-
-				if (token.type == VDFTokenType.WiderMetadataEndMarker) // if end of wider-metadata (i.e. end of metadata for List or Dictionary)
-				{
-					objNode.metadata_type = objNode.metadata_type ?? "List[object]"; // if metadata-type text is empty, infer it to mean "List[object]"
-					objType = VDF.GetTypeByVName(objNode.metadata_type, loadOptions);
-					if (objType != null && typeof(IList).IsAssignableFrom(objType)) // if obj is List (as opposed to Dictionary)
-					{
-						livePropAddNode = new VDFNode(); // we found out we're a list, so create a new item-node to hold the about-to-be-reached props
-						livePropAddNodeTypeInfo = VDFTypeInfo.Get(objType.GetGenericArguments()[0]);
-					}
-				}
-				else if (token.type == VDFTokenType.MetadataEndMarker)
-				{
-					if (objNode != livePropAddNode && livePropAddNode.metadata_type == null) // if live-prop-add-node metadata-type text is empty, set metadata-type to an empty string, for type-inference later
-						livePropAddNode.metadata_type = "";
-					else if (objNode.metadata_type == null) // if metadata-type text is empty, set metadata-type to an empty string, for type-inference later
-						objNode.metadata_type = "";
-				}
-				else if (token.type == VDFTokenType.Metadata_BaseValue)
-					if (parser.PeekNextChars(2) == ">>") // if wider-metadata (i.e. metadata for List or Dictionary)
-					{
-						objNode.metadata_type = token.text == "," ? "Dictionary[object,object]" : token.text;
-						objNode.metadata_type = FindNextDepthXCharYPos(objNode.metadata_type, 0, 0, ',', '[', ']') != -1 ? "Dictionary[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has generic-params without root-type, infer root type to be "Dictionary"
-						objNode.metadata_type = !objNode.metadata_type.Contains("[") ? "List[" + objNode.metadata_type + "]" : objNode.metadata_type; // if has no generic-params, infer root type to be "List"
-						objType = VDF.GetTypeByVName(objNode.metadata_type, loadOptions);
-						if (objType != null && typeof(IList).IsAssignableFrom(objType)) // if obj is List (as opposed to Dictionary)
-						{
-							livePropAddNode = new VDFNode(); // we found out we're a list, so create a new item-node to hold the about-to-be-reached props
-							livePropAddNodeTypeInfo = VDFTypeInfo.Get(objType.GetGenericArguments()[0]);
-						}
-					}
-					else
-					{
-						livePropAddNode.metadata_type = token.text;
-						livePropAddNodeTypeInfo = VDFTypeInfo.Get(VDF.GetTypeByVName(token.text, loadOptions)); // todo; fix issue where type is 'null'
-					}
-				else if (token.type == VDFTokenType.Data_BaseValue)
-					if (token.text == "#")
-					{
-						List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(text, FindIndentDepthOfLineContainingCharPos(text, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
-						if (typeof(IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
-							foreach (int pos in poppedOutPropValueItemTextPositions)
-								objNode.items.Add(ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, pos));
-						else
-							objNode = ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
-						lineInfo.fromLinePoppedOutGroupCount++;
-						dataIsPoppedOut = true;
-					}
-					else
-						livePropAddNode.baseValue = token.text;
-				else if (token.type == VDFTokenType.Data_PropName)
-					livePropName = token.text;
-				else if (token.type == VDFTokenType.DataStartMarker)
-					if (livePropName != null)
-						if (typeof(IDictionary).IsAssignableFrom(objType)) // dictionary key-value-pair
-							livePropAddNode.properties.Add(livePropName, ToVDFNode(text, objType.GetGenericArguments()[0], loadOptions, parser.nextCharPos, lineInfo));
-						else // property
-							livePropAddNode.properties.Add(livePropName, ToVDFNode(text, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName.ContainsKey(livePropName) ? livePropAddNodeTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, parser.nextCharPos, lineInfo));
-					else // if data of an in-list-list (at depth 0, which we are at, these are only ever for obj) (note; no need to set live-prop-add-node-type-info, because we know both obj and item have no properties, and so line above is unaffected by it)
-						livePropAddNode = ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof(object)) : typeof(IList), loadOptions, parser.nextCharPos, lineInfo);
-				else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
-					livePropName = null;
-				else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
-					break;
+				depth--;
+				if (depth < 0)
+					break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			}
+			if (depth == 0)
+				tokensAtDepth0.Add(token);
 			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
 		}
-		// if live-prop-add-node is not obj itself, and block wasn't empty, and data is in-line, (meaning we're adding the items as we pass their last char), add final item
-		if (livePropAddNode != objNode && parser.tokens.Any(token=>new[] {VDFTokenType.DataStartMarker, VDFTokenType.Data_BaseValue, VDFTokenType.ItemSeparator}.Contains(token.type)) && !dataIsPoppedOut)
-			objNode.items.Add(livePropAddNode);
-		// special cases
-		if (typeof (IList).IsAssignableFrom(objType) || objNode.items.Count > 1) // if known to be a List
-			foreach(VDFNode item in objNode.items) // todo; break point
-		else if (parser.tokens.Any(a=>a.type == VDFTokenType.Data_BaseValue))
-			objNode.baseValue = "";
+
+		// if we can tell it's a List, update the tokens-at-depth-0 list to not include the for-item tokens
+		// ('depth' is increased not only by '{' chars, but also inferred/virtual '{' chars to the left and right of item vdf-text)
+		var hasDepth0DataBlocks = false;
+		var hasDictionaryMetadata = tokensAtDepth0.Any(a=>FindNextDepthXCharYPos(text, objTextPos, 1, ',', '[', ']') != -1 || FindNextDepthXCharYPos(text, objTextPos, 0, ',', '[', ']') != -1);
+		var hasListMetadata = !hasDictionaryMetadata && tokensAtDepth0.Any(a=>a.type == VDFTokenType.WiderMetadataEndMarker || a.type == VDFTokenType.ItemSeparator);
+		if (typeof(IList).IsAssignableFrom(declaredType) || hasListMetadata)
+		{
+			tokensAtDepth0 = new List<VDFToken>();
+
+			VDFToken widerMetadataEndMarkerToken = null;
+			if (parser.tokens.Count >= 2 && parser.tokens[0].type == VDFTokenType.Metadata_BaseValue && parser.tokens[1].type == VDFTokenType.WiderMetadataEndMarker)
+				widerMetadataEndMarkerToken = parser.tokens[1];
+			else if (parser.tokens.Count >= 1 && parser.tokens[0].type == VDFTokenType.WiderMetadataEndMarker)
+				widerMetadataEndMarkerToken = parser.tokens[0];
+			VDFToken firstNonMetadataGroupToken = widerMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a => a.position > widerMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
+
+			depth = 0;
+			for (var i = 0; i < parser.tokens.Count; i++)
+			{
+				var previousToken = i > 0 ? parser.tokens[i - 1] : null;
+				var token = parser.tokens[i];
+				if (token.type == VDFTokenType.DataEndMarker)
+				{
+					depth--;
+					if (depth < 0)
+						break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
+				}
+				else if (token.type == VDFTokenType.ItemSeparator)
+				{
+					if (!hasDepth0DataBlocks && depth == 1 && previousToken != null && previousToken.type != VDFTokenType.ItemSeparator) // if there's an inferred/virtual '}' char before us
+						depth--;
+				}
+				else if (token.type != VDFTokenType.DataStartMarker && depth == 0 && (firstNonMetadataGroupToken == token || (previousToken != null && previousToken.type == VDFTokenType.ItemSeparator))) // if there's an inferred/virtual '{' char before us
+					depth++;
+				if (depth == 0)
+					tokensAtDepth0.Add(token);
+				if (token.type == VDFTokenType.DataStartMarker)
+				{
+					if (depth == 0)
+						hasDepth0DataBlocks = true;
+					depth++;
+				}
+			}
+		}
+
+		var objNode = new VDFNode();
+		// parse only metadata (and item-separators) to try to determine the type
+		for (int i = 0; i < tokensAtDepth0.Count; i++)
+		{
+			var token = tokensAtDepth0[i];
+			var nextToken = tokensAtDepth0.Count > i + 1 ? tokensAtDepth0[i + 1] : null;
+			if (token.type == VDFTokenType.WiderMetadataEndMarker)
+				objNode.metadata_type = objNode.metadata_type ?? "System.Collections.IList";
+			else if (token.type == VDFTokenType.MetadataEndMarker && objNode.metadata_type == null)
+				objNode.metadata_type = ""; // set to an empty string, for type-inference later
+			else if (token.type == VDFTokenType.Metadata_BaseValue)
+				if (nextToken.type == VDFTokenType.WiderMetadataEndMarker)
+					if (FindNextDepthXCharYPos(token.text, 0, 1, ',', '[', ']') != -1) // e.g. "Dictionary[string,object]>>"
+						objNode.metadata_type = token.text;
+					else if (FindNextDepthXCharYPos(token.text, 0, 0, ',', '[', ']') != -1) // e.g. "string,object>>"
+						objNode.metadata_type = "Dictionary[" + token.text + "]";
+					else if (token.text == ",")
+						objNode.metadata_type = "System.Collections.IDictionary";
+					else if (token.text.Contains("[")) // e.g. "List[string]>>"
+						objNode.metadata_type = token.text;
+					else // e.g. "string>>"
+						objNode.metadata_type = "List[" + token.text + "]";
+				else
+					objNode.metadata_type = token.text;
+			else if (token.type == VDFTokenType.ItemSeparator)
+				objNode.metadata_type = objNode.metadata_type ?? "System.Collections.IList";
+		}
+
+		Type objType = declaredType;
+		if (objNode.metadata_type != null && objNode.metadata_type.Length > 0)
+		{
+			var fromMetadataType = VDF.GetTypeByVName(objNode.metadata_type, loadOptions);
+			if (objType == null || objType.IsAssignableFrom(fromMetadataType)) // if there is no declared type, or the from-metadata type is more specific than the declared type
+				objType = fromMetadataType;
+		}
+		if (objType == null)
+			objType = typeof(string); // string is the default/fallback type
+		var objTypeInfo = VDFTypeInfo.Get(objType);
+
+		// if List, try to parse our items
+		if (typeof(IList).IsAssignableFrom(objType))
+		{
+			var firstPosAfterObjText = parser.tokens.Count > 0 ? parser.tokens.Last().position + parser.tokens.Last().rawText.Length : 0;
+
+			var firstDepth1Token = parser.tokens.FirstOrDefault(a => !tokensAtDepth0.Contains(a));
+			var lastDepth0MetadataEndMarkerToken = parser.tokens.LastOrDefault(a=>a.type == VDFTokenType.MetadataEndMarker || a.type == VDFTokenType.WiderMetadataEndMarker);
+			var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.Length : 0);
+			var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker) : tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.ItemSeparator);
+			var firstItemText = text.Substring(firstItemTextPos, (firstItemEnderToken != null ? firstItemEnderToken.position : firstPosAfterObjText) - firstItemTextPos);
+			if (firstItemEnderToken != null || firstItemText.Length > 0) // (if there's an item separator or depth-0-data-end-marker, we can go ahead and infer that a zero-length sub-section represents an actual object)
+				objNode.items.Add(ToVDFNode(firstItemText, objType != null && objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions));
+
+			foreach (VDFToken token in tokensAtDepth0)
+				if (token.type == VDFTokenType.ItemSeparator)
+				{
+					var itemTextPos = token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0);
+					var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == (hasDepth0DataBlocks ? VDFTokenType.DataEndMarker : VDFTokenType.ItemSeparator) && a.position >= itemTextPos);
+					var itemText = text.Substring(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : firstPosAfterObjText) - itemTextPos);
+					objNode.items.Add(ToVDFNode(itemText, objType != null && objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions));
+				}
+		}
+
+		// parse keys-and-values/properties (depending on whether we're a Dictionary or not)
+		string livePropName = null;
+		lineInfo = lineInfo ?? new VDFLoader_LineInfo();
+		foreach(VDFToken token in tokensAtDepth0)
+			if (token.type == VDFTokenType.Data_PropName)
+				livePropName = token.text;
+			else if (token.type == VDFTokenType.DataStartMarker)
+				if (livePropName != null)
+					if (typeof(IDictionary).IsAssignableFrom(objType)) // dictionary key-value-pair
+						objNode.properties.Add(livePropName, ToVDFNode(text, objType.GetGenericArguments()[0], loadOptions, token.position + token.text.Length, lineInfo));
+					else // property
+						objNode.properties.Add(livePropName, ToVDFNode(text, objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(livePropName) ? objTypeInfo.propInfoByName[livePropName].GetPropType() : null, loadOptions, token.position + token.text.Length, lineInfo));
+			else if (token.type == VDFTokenType.DataEndMarker && livePropName != null) // end of in-list-list item-data-block, or property-data-block
+				livePropName = null;
+			else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
+				break;
+
+		// parse base-value (if applicable)
+		foreach (VDFToken token in tokensAtDepth0)
+			if (token.type == VDFTokenType.Data_BaseValue)
+				if (token.text == "#")
+				{
+					List<int> poppedOutPropValueItemTextPositions = FindPoppedOutChildTextPositions(text, FindIndentDepthOfLineContainingCharPos(text, objTextPos), token.position + token.text.Length, lineInfo.fromLinePoppedOutGroupCount);
+					if (typeof (IList).IsAssignableFrom(objType) || poppedOutPropValueItemTextPositions.Count > 1) // if known to be a List, either by type-marking or inference
+						foreach (int pos in poppedOutPropValueItemTextPositions)
+							objNode.items.Add(ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof (object)) : null, loadOptions, pos));
+					else
+						objNode = ToVDFNode(text, declaredType != null ? (declaredType.IsGenericType ? declaredType.GetGenericArguments()[0] : typeof (object)) : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
+					lineInfo.fromLinePoppedOutGroupCount++;
+				}
+				else
+					objNode.baseValue = token.text;
 
 		return objNode;
 	}
@@ -150,7 +203,7 @@ public static class VDFLoader
 				depth--;
 		return -1;
 	}
-	static int FindNextDepthXItemSeparatorCharPos(string text, int searchStartPos, int targetDepth)
+	/*static int FindNextDepthXItemSeparatorCharPos(string text, int searchStartPos, int targetDepth)
 	{
 		int depth = 0;
 		var parser = new VDFTokenParser(text, searchStartPos);
@@ -158,7 +211,7 @@ public static class VDFLoader
 			if (parser.tokens.Last().type == VDFTokenType.DataStartMarker)
 				depth++;
 			else if (parser.tokens.Last().type == VDFTokenType.ItemSeparator && depth == targetDepth)
-				return parser.nextCharPos - 1;
+				return parser.nextCharPos - 1; /*is this correct?*#/
 			else if (parser.tokens.Last().type == VDFTokenType.DataEndMarker)
 			{
 				depth--;
@@ -166,7 +219,7 @@ public static class VDFLoader
 					break;
 			}
 		return -1;
-	}
+	}*/
 	static int FindIndentDepthOfLineContainingCharPos(string text, int charPos)
 	{
 		int lineIndentDepth = 0;

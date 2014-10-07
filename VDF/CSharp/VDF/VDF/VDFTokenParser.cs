@@ -11,7 +11,8 @@ public enum VDFTokenType
 	WiderMetadataEndMarker,
 	Metadata_BaseValue,
 	MetadataEndMarker,
-	//LiteralMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
+	//LiteralStartMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
+	//LiteralEndMarker
 	Data_PropName,
 	DataStartMarker,
 	ItemSeparator,
@@ -24,21 +25,25 @@ public enum VDFTokenType
 public class VDFToken
 {
 	public VDFTokenType type;
+	public int position;
+	public string rawText;
 	public string text;
-	public VDFToken(VDFTokenType type, string text)
+	public VDFToken(VDFTokenType type, int position, string rawText, string text)
 	{
 		this.type = type;
+		this.position = position;
+		this.rawText = rawText;
 		this.text = text;
 	}
 }
 public class VDFTokenParser
 {
-	string vdf;
+	string text;
 	public int nextCharPos;
 	public List<VDFToken> tokens;
-	public VDFTokenParser(string vdf, int firstCharPos)
+	public VDFTokenParser(string text, int firstCharPos)
 	{
-		this.vdf = vdf;
+		this.text = text;
 		nextCharPos = firstCharPos;
 		tokens = new List<VDFToken>();
 	}
@@ -46,37 +51,53 @@ public class VDFTokenParser
 	public bool MoveNextToken()
 	{
 		var tokenType = VDFTokenType.None;
+		var tokenRawTextBuilder = new StringBuilder();
 		var tokenTextBuilder = new StringBuilder();
 
 		bool inLiteralMarkers = false;
 
-		int i = nextCharPos;
-		for (; i < vdf.Length && tokenType == VDFTokenType.None; i++)
+		var firstCharPos = nextCharPos;
+		for (int i = nextCharPos; i < text.Length && tokenType == VDFTokenType.None; i++, nextCharPos++)
 		{
-			char? lastChar = i > 0 ? vdf[i - 1] : (char?)null;
-			char ch = vdf[i];
-			char? nextChar = i < vdf.Length - 1 ? vdf[i + 1] : (char?)null;
-			char? nextNextChar = i < vdf.Length - 2 ? vdf[i + 2] : (char?)null;
-			char? nextNextNextChar = i < vdf.Length - 3 ? vdf[i + 3] : (char?)null;
+			char? lastChar = i - 1 >= 0 ? text[i - 1] : (char?)null;
+			char ch = text[i];
+			char? nextChar = i + 1 < text.Length ? text[i + 1] : (char?)null;
+			char? nextNextChar = i + 2 < text.Length ? text[i + 2] : (char?)null;
+			char? nextNextNextChar = i + 3 < text.Length ? text[i + 3] : (char?)null;
 
-			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || (nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
+			var grabExtraCharsAsOwnAndSkipTheirProcessing = (Action<int, bool>)((number, addToNormalBuilder)=>
 			{
-				tokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
-				inLiteralMarkers = !inLiteralMarkers;
-				i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker
-				if (!inLiteralMarkers) // if literal-block ended, return chars as Data_BaseValue token
-					tokenType = VDFTokenType.Data_BaseValue;
-				continue;
+				tokenRawTextBuilder.Append(text.Substring(i + 1, number));
+				if (addToNormalBuilder)
+					tokenTextBuilder.Append(text.Substring(i + 1, number));
+				i += number;
+				nextCharPos += number;
+			});
+
+			tokenRawTextBuilder.Append(ch);
+			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
+			{
+				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
+				inLiteralMarkers = true;
 			}
-			tokenTextBuilder.Append(ch);
-			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
+			else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // if first char of literal-end-marker
+			{
+				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
+				tokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
+				inLiteralMarkers = false;
+				tokenType = VDFTokenType.Data_BaseValue; // cause the return of chars as Data_BaseValue token
+			}
+			else
+				tokenTextBuilder.Append(ch);
+
+			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until literal-end-marker is reached
 				continue;
 
 			if (ch == '>')
 				if (nextChar == '>')
 				{
 					tokenType = VDFTokenType.WiderMetadataEndMarker;
-					i++;
+					grabExtraCharsAsOwnAndSkipTheirProcessing(1, true);
 				}
 				else
 					tokenType = VDFTokenType.MetadataEndMarker;
@@ -90,7 +111,8 @@ public class VDFTokenParser
 				else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
 				{
 					tokenType = VDFTokenType.InLineComment;
-					i = FindNextLineBreakCharPos(vdf, i + 2); // since rest of line is comment, skip to first char of next line
+					var newNextCharPos = FindNextLineBreakCharPos(text, i + 2); // since rest of line is comment, skip to first char of next line
+					grabExtraCharsAsOwnAndSkipTheirProcessing(newNextCharPos - (i + 1), true);
 				}
 				//else if (ch == '\t')
 				//	tokenType = VDFTokenType.Indent;
@@ -105,12 +127,13 @@ public class VDFTokenParser
 				else if (nextChar == '}' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
 					tokenType = VDFTokenType.Data_BaseValue;
 		}
-		nextCharPos = i;
 
-		var token = tokenType != VDFTokenType.None ? new VDFToken(tokenType, tokenTextBuilder.ToString()) : null;
-		if (token != null)
-			tokens.Add(token);
-		return token != null;
+		if (tokenType == VDFTokenType.None)
+			return false;
+
+		var token = new VDFToken(tokenType, firstCharPos, tokenRawTextBuilder.ToString(), tokenTextBuilder.ToString());
+		tokens.Add(token);
+		return true;
 	}
 	public VDFToken PeekNextToken()
 	{
@@ -122,7 +145,7 @@ public class VDFTokenParser
 			return tokens.Last();
 		return null;
 	}
-	public string PeekNextChars(int charsToPeek = 1) { return vdf.Substring(nextCharPos, Math.Min(charsToPeek, vdf.Length - nextCharPos)); }
+	//public string PeekNextChars(int charsToPeek = 1) { return text.Substring(nextCharPos, Math.Min(charsToPeek, text.Length - nextCharPos)); }
 
 	static int FindNextLineBreakCharPos(string text, int searchStartPos)
 	{

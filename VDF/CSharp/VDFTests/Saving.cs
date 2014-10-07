@@ -19,10 +19,10 @@ namespace VDFTests
 			});
 		}
 
-		// ToVDF
-		// ==================
+		// from VDFNode
+		// ==========
 
-		[Fact] void ToVDF_Level0_BaseValue()
+		[Fact] void FromVDFNode_Level0_BaseValue()
 		{
 			var a = new VDFNode();
 			a.baseValue = "Root string.";
@@ -32,14 +32,14 @@ namespace VDFTests
 			a[0] = new VDFNode {baseValue = "Root string also."};
 			a.ToVDF().Should().Be("Root string also.");
 		}
-		[Fact] void ToVDF_Level0_Metadata_Type()
+		[Fact] void FromVDFNode_Level0_Metadata_Type()
 		{
 			var a = new VDFNode();
 			a.metadata_type = "string";
 			a.baseValue = "Root string.";
 			a.ToVDF().Should().Be("string>Root string.");
 		}
-		[Fact] void ToVDF_Level0_Metadata_Type_Collapsed()
+		[Fact] void FromVDFNode_Level0_Metadata_Type_Collapsed()
 		{
 			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions{typeMarking = VDFTypeMarking.AssemblyExternal});
 			a.ToVDF().Should().Be("string>>");
@@ -47,18 +47,18 @@ namespace VDFTests
 			a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
 		}
 		enum Enum1 { A, B, C }
-		[Fact] void ToVDF_Level0_EnumDefault()
+		[Fact] void FromVDFNode_Level0_EnumDefault()
 		{
 			var a = VDFSaver.ToVDFNode<Enum1>(Enum1.A);
 			a.ToVDF().Should().Be("A");
 		}
-		[Fact] void ToVDF_Level0_MultilineString()
+		[Fact] void FromVDFNode_Level0_MultilineString()
 		{
 			var a = VDFSaver.ToVDFNode<string>("This is a\nmultiline string\nof three lines in total.");
 			a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
 		}
 
-		[Fact] void ToVDF_Level1_BaseValues()
+		[Fact] void FromVDFNode_Level1_BaseValues()
 		{
 			var a = new VDFNode();
 			a["bool"] = new VDFNode {baseValue = "false"};
@@ -67,11 +67,18 @@ namespace VDFTests
 			a["string"] = new VDFNode {baseValue = "Prop value string."};
 			a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		}
-		[Fact] void ToVDF_Level1_BaseValuesThatNeedEscaping()
+		[Fact] void FromVDFNode_Level1_BaseValuesThatNeedEscaping()
 		{
 			var a = new VDFNode{baseValue = "string>In-string VDF data."};
 			a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
 		}
+
+		// from object
+		// ==========
+
+		[Fact] void FromVDFNode_Level0_Null() { VDF.Serialize(null).Should().Be(">null"); }
+		[Fact] void FromVDFNode_Level0_EmptyString() { VDF.Serialize("").Should().Be(">empty"); }
+
 		class TypeWithEmptyStringProp { [VDFProp(writeEmptyValue = false)] string emptyString = ""; }
 		[Fact] void ToVDF_Level1_IgnoreEmptyString() { VDF.Serialize<TypeWithEmptyStringProp>(new TypeWithEmptyStringProp()).Should().Be(""); }
 		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
@@ -192,12 +199,12 @@ namespace VDFTests
 		}
 
 		// unique to C# version
-		// ==================
+		// ==========
 
 		class SpecialList2<T> : List<T> {}
 		[Fact] void ToVDF_Level1_SpecialListItems()
 		{
-			VDF.RegisterTypeExporter_Inline(typeof(SpecialList2<>), obj=>"You'll never see the items!"); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
+			VDF.RegisterTypeExporter_Inline(typeof(SpecialList2<>), obj=>"You'll never see the items!"); // (example of where exporters/importers that can output/input VDFNode's would be helpful)
 			var a = new SpecialList2<string>{"A", "B", "C"};
 			VDF.Serialize<SpecialList2<string>>(a).Should().Be("You'll never see the items!");
 		}

@@ -53,6 +53,8 @@ public static class VDFSaver
 
 		if (type == null)
 			objNode.baseValue = "null";
+		else if (type == typeof(string) && (string)obj == "")
+			objNode.baseValue = "empty";
 		else if (VDF.typeExporters_inline.ContainsKey(type))
 			objNode.baseValue = VDF.typeExporters_inline[type](obj);
 		else if (type.IsGenericType && VDF.typeExporters_inline.ContainsKey(type.GetGenericTypeDefinition()))
@@ -132,10 +134,13 @@ public static class VDFSaver
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj is IDictionary); // if dictionary (i.e. indistinguishable from prop-set)
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue); // we're a non-generics-based value (i.e. we have no value-default-type specified)
 		markType = markType || (new[]{VDFTypeMarking.AssemblyExternal, VDFTypeMarking.Assembly}.Contains(saveOptions.typeMarking) && (obj == null || obj.GetType() != declaredType)); // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
-		objNode.metadata_type = markType ? VDF.GetVNameOfType(obj != null ? obj.GetType() : null, saveOptions) : null;
+		if (obj == null || (type == typeof(string) && (string)obj == ""))
+			objNode.metadata_type = "";
+		else
+			objNode.metadata_type = markType ? VDF.GetVNameOfType(obj != null ? obj.GetType() : null, saveOptions) : null;
 		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
 		{
-			var collapseMap = new Dictionary<string, string> {{"string", null}, {"null", ""}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
+			var collapseMap = new Dictionary<string, string> {{"string", null}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
 			if (objNode.metadata_type != null && collapseMap.ContainsKey(objNode.metadata_type))
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
 			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params

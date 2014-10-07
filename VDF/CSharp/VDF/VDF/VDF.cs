@@ -9,12 +9,17 @@ public class VDFException : Exception
 {
 	string message;
 	Exception innerException;
-	public VDFException(string message, Exception innerException)
+	public VDFException(string message, Exception innerException = null)
 	{
 		this.message = message;
 		this.innerException = innerException;
 	}
-	public override string ToString() { return innerException + (innerException.ToString().EndsWith("\n==================") ? "" : "\n==================") + "\nRethrownAs) " + message + "\n" + base.StackTrace + "\n=================="; }
+	public override string ToString()
+	{
+		if (innerException != null)
+			return innerException + (innerException.ToString().EndsWith("\n==================") ? "" : "\n==================") + "\nRethrownAs) " + message + "\n" + base.StackTrace + "\n==================";
+		return message + "\n" + base.StackTrace + "\n==================";
+	}
 	public override string Message { get { return ToString(); } }
 	public override string StackTrace { get { return ""; } }
 }
@@ -95,16 +100,16 @@ public static class VDF
 		if (vTypeName == "null")
 			return null;
 		if (loadOptions.typeAliasesByType.Values.Contains(vTypeName))
-			return loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
+			return loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == vTypeName).Key;
 		if (builtInTypeAliasesByType.Values.Contains(vTypeName))
-			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
+			return builtInTypeAliasesByType.FirstOrDefault(pair => pair.Value == vTypeName).Key;
 
 		var rootName = vTypeName.Contains("[") ? vTypeName.Substring(0, vTypeName.IndexOf("[")) : vTypeName;
 		if (loadOptions.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
-			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[]{'`'})[0];
+			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == rootName).Key.FullName.Split(new[] { '`' })[0];
 		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vTypeName), loadOptions);
 		if (rootType == null)
-			throw new Exception("Could not find type \"" + rootName + "\".");
+			throw new VDFException("Could not find type \"" + rootName + "\".");
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();
@@ -129,8 +134,6 @@ public static class VDF
 
 	public static string GetVNameOfType(Type type, VDFSaveOptions saveOptions)
 	{
-		if (type == null)
-			return "null";
 		if (saveOptions.typeAliasesByType.ContainsKey(type))
 			return saveOptions.typeAliasesByType[type];
 		if (builtInTypeAliasesByType.ContainsKey(type))

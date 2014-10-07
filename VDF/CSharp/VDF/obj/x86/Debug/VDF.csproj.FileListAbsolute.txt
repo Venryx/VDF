@@ -15,3 +15,4 @@ C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Main.resource
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.exe
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csprojResolveAssemblyReference.cache

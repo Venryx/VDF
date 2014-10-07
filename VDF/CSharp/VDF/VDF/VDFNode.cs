@@ -163,25 +163,35 @@ public class VDFNode
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
 		var finalMetadata_type = metadata_type;
-		if (finalMetadata_type == "") // empty string, so infer type
+		if (finalMetadata_type == "") // empty string for metadata_type, so infer type
 		{
 			if (baseValue == "null")
-				finalMetadata_type = "null";
-			else if (new[] {"true", "false"}.Contains(baseValue))
+				return null;
+			if (baseValue == "empty")
+				return "";
+			if (new[] {"true", "false"}.Contains(baseValue))
 				finalMetadata_type = "bool";
 			else if (baseValue.Contains("."))
 				finalMetadata_type = "float";
 			else
 				finalMetadata_type = "int";
 		}
-		else if (finalMetadata_type == null && baseValue != null && (declaredType == null || declaredType == typeof(object))) // if no type specified, but it has a base-value and no declared-type is set (or declared type is object), infer it to be string
-			finalMetadata_type = "string";
+		else if (finalMetadata_type == "System.Collections.IList")
+			finalMetadata_type = "List[object]";
+		else if (finalMetadata_type == "System.Collections.IDictionary")
+			finalMetadata_type = "Dictionary[object,object]";
 
-		if (finalMetadata_type == "null") // special case for null-values
-			return null;
-
-		// note; C# 3.5 doesn't have anonymous objects, so if the type isn't specified in the VDF text itself, a declared-type is required
-		Type finalType = finalMetadata_type != null ? VDF.GetTypeByVName(finalMetadata_type, loadOptions) : declaredType;
+		// note; C# 3.5 doesn't have anonymous objects, so we can't replicate the infer-compatible-types-for-unknown-types option that we have in the JS version
+		// if the type isn't specified in the VDF text itself, or as a declared type, infer that it's a string (string is the default type)
+		Type finalType = declaredType;
+		if (finalMetadata_type != null && finalMetadata_type.Length > 0)
+		{
+			var fromMetadataType = VDF.GetTypeByVName(finalMetadata_type, loadOptions);
+			if (finalType == null || finalType.IsAssignableFrom(fromMetadataType)) // if there is no declared type, or the from-metadata type is more specific than the declared type
+				finalType = fromMetadataType;
+		}
+		if (finalType == null)
+			finalType = typeof(string); // string is the default/fallback type
 		
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))
@@ -195,32 +205,34 @@ public class VDFNode
 		else
 		{
 			result = CreateNewInstanceOfType(finalType);
-			IntoObject(result, loadOptions);
+			IntoObject(result, loadOptions, (declaredType != null && declaredType.IsGenericType) || (metadata_type != "System.Collections.IList" && metadata_type != "System.Collections.IDictionary"));
 		}
 
 		return result;
 	}
-	public void IntoObject(object obj, VDFLoadOptions loadOptions = null)
+	public void IntoObject(object obj, VDFLoadOptions loadOptions = null, bool useTypeGenericArguments = true)
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
+
 		var type = obj.GetType();
 		var typeInfo = VDFTypeInfo.Get(type);
 		for (int i = 0; i < items.Count; i++)
 			if (obj is Array)
 				((Array)obj).SetValue(items[i].ToObject(type.GetElementType(), loadOptions), i);
 			else if (obj is IList)
-				((IList)obj).Add(items[i].ToObject(type.GetGenericArguments()[0], loadOptions));
+				((IList)obj).Add(items[i].ToObject(useTypeGenericArguments ? type.GetGenericArguments()[0] : null, loadOptions));
 		foreach (string propName in properties.Keys)
 			try
 			{
 				if (obj is IDictionary)
 				{
 					object key = propName; // in most cases, the Dictionary's in-code key-type will be a string, so we can just use the in-VDF raw-key-string directly
-					if (VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]))
-						key = VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
-					else if (type.GetGenericArguments()[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0].GetGenericTypeDefinition()))
-						key = VDF.typeImporters_inline[type.GetGenericArguments()[0].GetGenericTypeDefinition()](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
-					((IDictionary)obj).Add(key, properties[propName].ToObject(type.GetGenericArguments()[1], loadOptions));
+					if (useTypeGenericArguments)
+						if (VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]))
+							key = VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
+						else if (type.GetGenericArguments()[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0].GetGenericTypeDefinition()))
+							key = VDF.typeImporters_inline[type.GetGenericArguments()[0].GetGenericTypeDefinition()](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
+					((IDictionary)obj).Add(key, properties[propName].ToObject(useTypeGenericArguments ? type.GetGenericArguments()[1] : null, loadOptions));
 				}
 				else
 					typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeInfo.propInfoByName[propName].GetPropType(), loadOptions));
