@@ -286,9 +286,10 @@ messages:{object,object>>
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");
+			a["messages"].properties.Count.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
-			a["names"]["title2"].baseValue.Should().Be("message2");
-			a["otherPropertiy"].baseValue.Should().Be("false");
+			a["messages"]["title2"].baseValue.Should().Be("message2");
+			a["otherProperty"].baseValue.Should().Be("false");
 		}
 
 		[Fact] void ToVDFNode_Level1_MultilineStringThenProperty()
