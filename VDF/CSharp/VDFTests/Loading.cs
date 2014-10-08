@@ -196,21 +196,6 @@ three lines".Replace("\r", ""));
 			VDFLoader.ToVDFNode(a["level1"])["level2"].baseValue.Should().Be("level3{Base string.}");
 			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"])["level2"])["level3"].baseValue.Should().Be("Base string.");
 		}
-		[Fact] void ToVDFNode_Level1_PoppedOutBaseValue()
-		{
-			VDFNode a = VDFLoader.ToVDFNode(@"name{#}
-	Dan");
-			a["name"].baseValue.Should().Be("Dan");
-		}
-		[Fact] void ToVDFNode_Level1_PoppedOutNodes()
-		{
-			VDFNode a = VDFLoader.ToVDFNode(@"names{#}
-	Dan
-	Bob");
-			a["names"][0].baseValue.Should().Be("Dan");
-			a["names"][1].baseValue.Should().Be("Bob");
-		}
-		[Fact]
 		void ToVDFNode_Level1_ArraysInArrays()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|{3A}");
@@ -258,12 +243,22 @@ three lines".Replace("\r", ""));
 			a["vertexColors"]["1,8,9.5435"].baseValue.Should().Be("Gray");
 			a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");
 		}
-		[Fact] void ToVDFNode_Level1_PoppedOutItemGroups() // each 'group' is actually just the value-data of one of the parent's properties
+
+		[Fact] void ToVDFNode_Level1_PoppedOutChildren()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"names{#}ages{#}
+			VDFNode a = VDFLoader.ToVDFNode(@"names:
+	Dan
+	Bob");
+			a["names"][0].baseValue.Should().Be("Dan");
+			a["names"][1].baseValue.Should().Be("Bob");
+		}
+		[Fact] void ToVDFNode_Level1_PoppedOutChildren_MultipleGroups() // each 'group' is actually just the value-data of one of the parent's properties
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"names:
 	Dan
 	Bob
-	#10
+^ages:
+	10
 	20");
 			a["names"][0].baseValue.Should().Be("Dan");
 			a["names"][1].baseValue.Should().Be("Bob");
@@ -278,23 +273,26 @@ of three lines in total.@@}bool{>true}");
 			a["text"].baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
 			((bool)a["bool"]).Should().Be(true);
 		}
-		[Fact] void ToVDFNode_Level1_MultilineStringWithIndentsThenChildData()
+		[Fact] void ToVDFNode_Level1_MultilineStringWithChildrenThenProperties()
 		{
-			var a = VDFLoader.ToVDFNode(@"childTexts{#}text{@@This is a
-	multiline string
-	of three lines in total.@@}
+			var a = VDFLoader.ToVDFNode(@"childTexts:
 	text1
-	text2");
-			a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
+	text2
+^text{@@This is a
+	multiline string
+	of three lines in total.@@}");
 			a["childTexts"][0].baseValue.Should().Be("text1");
 			a["childTexts"][1].baseValue.Should().Be("text2");
+			a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
 		}
 
 		[Fact] void ToVDFNode_Level5_DeepNestedPoppedOutData()
 		{
-			var vdf = @"name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children{>>#}}}Test2{vObjectRoot{name{VObjectRoot}children{>>#}}}}
+			var vdf = @"name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children:>>
 	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}
-	#id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}";
+}}Test2{vObjectRoot{name{VObjectRoot}children:>>
+	id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}
+}}}";
 			var livePackNode = VDFLoader.ToVDFNode(vdf);
 			livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
 			livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");

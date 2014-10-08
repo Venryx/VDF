@@ -44,14 +44,12 @@ public class VDFTypeInfo
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute
 {
 	public bool includeL2;
-	public bool popOutData;
-	public bool popOutItemData;
+	public bool popOutChildren;
 	public bool writeEmptyValue;
-	public VDFProp(bool includeL2 = true, bool popOutData = false, bool popOutItemData = false, bool writeEmptyValue = true)
+	public VDFProp(bool includeL2 = true, bool popOutChildren = false, bool popOutItemData = false, bool writeEmptyValue = true)
 	{
 		this.includeL2 = includeL2;
-		this.popOutData = popOutData;
-		this.popOutItemData = popOutItemData;
+		this.popOutChildren = popOutChildren;
 		this.writeEmptyValue = writeEmptyValue;
 	}
 }
@@ -78,8 +76,7 @@ public class VDFPropInfo
 		if (propTag != null)
 		{
 			result.includeL2 = propTag.includeL2;
-			result.popOutData = propTag.popOutData;
-			result.popOutItemData = propTag.popOutItemData;
+			result.popOutChildren = propTag.popOutChildren;
 			result.writeEmptyValue = propTag.writeEmptyValue;
 		}
 		return result;
@@ -87,8 +84,7 @@ public class VDFPropInfo
 
 	public MemberInfo memberInfo;
 	public bool? includeL2;
-	public bool popOutData;
-	public bool popOutItemData;
+	public bool popOutChildren;
 	public bool writeEmptyValue = true;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }

@@ -109,15 +109,8 @@ public static class VDFSaver
 						continue;
 
 					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-					VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof (object), saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
-					if (propInfo.popOutData)
-					{
-						propValueNode.popOutToOwnLine = true;
-						if (lineInfo.fromLinePoppedOutGroupCount > 0)
-							propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-						lineInfo.fromLinePoppedOutGroupCount++;
-					}
-					if (propInfo.popOutItemData && propValue != null)
+					VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof (object), saveOptions, false, lineInfo, propInfo.popOutChildren);
+					if (propInfo.popOutChildren && propValue != null)
 					{
 						if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.Count > 0)
 							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;

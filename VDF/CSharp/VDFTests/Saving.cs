@@ -94,18 +94,11 @@ namespace VDFTests
 			a["strings2"].items.Count.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
 		}
-		class TypeWithList_PopOutData { [VDFProp(popOutData = true)] List<string> list = new List<string>{"A", "B"}; }
-		[Fact] void ToVDF_Level1_ListItems_PopOutData()
-		{
-			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutData>(new TypeWithList_PopOutData());
-			a.ToVDF().Should().Be(@"list{#}
-	A|B".Replace("\r", ""));
-		}
-		class TypeWithList_PopOutItemData { [VDFProp(popOutItemData = true)] List<string> list = new List<string> { "A", "B" }; }
-		[Fact] void ToVDF_Level1_ListItems_PopOutItemData()
+		class TypeWithList_PopOutItemData { [VDFProp(popOutChildren = true)] List<string> list = new List<string>{"A", "B"}; }
+		[Fact] void ToVDF_Level1_ListItems_PoppedOutChildren()
 		{
 			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutItemData>(new TypeWithList_PopOutItemData());
-			a.ToVDF().Should().Be(@"list{#}
+			a.ToVDF().Should().Be(@"list:
 	A
 	B".Replace("\r", ""));
 		}
@@ -189,13 +182,17 @@ namespace VDFTests
 
 		class Level1 { [VDFProp] Level2 level2 = new Level2(); }
 		class Level2 { [VDFProp] Level3 level3_first = new Level3(); [VDFProp] Level3 level3_second = new Level3(); }
-		class Level3 { [VDFProp(true, true)] string message = "DeepString"; }
-		[Fact] void ToVDF_Level3_DeepNestedPoppedOutData()
+		class Level3 { [VDFProp(true, true)] List<string> messages = new List<string>{"DeepString1", "DeepString2"}; }
+		[Fact] void ToVDF_Level3_DeepNestedPoppedOutChildren()
 		{
 			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
-			a.ToVDF().Should().Be(@"level2{level3_first{message{#}}level3_second{message{#}}}
-	DeepString
-	#DeepString".Replace("\r", ""));
+			a.ToVDF().Should().Be(@"level2{level3_first{messages:
+	DeepString1
+	DeepString2
+}level3_second{messages:
+	DeepString1
+	DeepString2
+}}".Replace("\r", ""));
 		}
 
 		// unique to C# version

@@ -9,14 +9,16 @@ public enum VDFTokenType
 	None,
 	PoppedOutNodeMarker,
 	WiderMetadataEndMarker,
-	Metadata_BaseValue,
+	MetadataBaseValue,
 	MetadataEndMarker,
 	//LiteralStartMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
 	//LiteralEndMarker
-	Data_PropName,
+	DataPropName,
 	DataStartMarker,
+	PoppedOutDataStartMarker,
+	PoppedOutDataEndMarker,
 	ItemSeparator,
-	Data_BaseValue,
+	DataBaseValue,
 	DataEndMarker,
 	LineBreak,
 	InLineComment,
@@ -85,7 +87,7 @@ public class VDFTokenParser
 				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
 				tokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
 				inLiteralMarkers = false;
-				tokenType = VDFTokenType.Data_BaseValue; // cause the return of chars as Data_BaseValue token
+				tokenType = VDFTokenType.DataBaseValue; // cause the return of chars as DataBaseValue token
 			}
 			else
 				tokenTextBuilder.Append(ch);
@@ -105,27 +107,30 @@ public class VDFTokenParser
 				tokenType = VDFTokenType.DataStartMarker;
 			else if (ch == '}')
 				tokenType = VDFTokenType.DataEndMarker;
-			else // non-bracket char
-				if (ch == '\n')
-					tokenType = VDFTokenType.LineBreak;
-				else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
-				{
-					tokenType = VDFTokenType.InLineComment;
-					var newNextCharPos = FindNextLineBreakCharPos(text, i + 2); // since rest of line is comment, skip to first char of next line
-					grabExtraCharsAsOwnAndSkipTheirProcessing(newNextCharPos - (i + 1), true);
-				}
-				//else if (ch == '\t')
-				//	tokenType = VDFTokenType.Indent;
-				else if (ch == '#' && lastChar == '\t')
-					tokenType = VDFTokenType.PoppedOutNodeMarker;
-				else if (ch == '|')
-					tokenType = VDFTokenType.ItemSeparator;
-				else if (nextChar == '>')
-					tokenType = VDFTokenType.Metadata_BaseValue;
-				else if (nextChar == '{')
-					tokenType = VDFTokenType.Data_PropName;
-				else if (nextChar == '}' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
-					tokenType = VDFTokenType.Data_BaseValue;
+			else if (ch == ':')
+				tokenType = VDFTokenType.PoppedOutDataStartMarker;
+			else if (ch == '^')
+				tokenType = VDFTokenType.PoppedOutDataEndMarker;
+			else if (ch == '\n')
+				tokenType = VDFTokenType.LineBreak;
+			else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
+			{
+				tokenType = VDFTokenType.InLineComment;
+				var newNextCharPos = FindNextLineBreakCharPos(text, i + 2); // since rest of line is comment, skip to first char of next line
+				grabExtraCharsAsOwnAndSkipTheirProcessing(newNextCharPos - (i + 1), true);
+			}
+			//else if (ch == '\t')
+			//	tokenType = VDFTokenType.Indent;
+			else if (ch == '#' && lastChar == '\t')
+				tokenType = VDFTokenType.PoppedOutNodeMarker;
+			else if (ch == '|')
+				tokenType = VDFTokenType.ItemSeparator;
+			else if (nextChar == '>')
+				tokenType = VDFTokenType.MetadataBaseValue;
+			else if (nextChar == '{' || nextChar == ':')
+				tokenType = VDFTokenType.DataPropName;
+			else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
+				tokenType = VDFTokenType.DataBaseValue;
 		}
 
 		if (tokenType == VDFTokenType.None)
@@ -135,7 +140,7 @@ public class VDFTokenParser
 		tokens.Add(token);
 		return true;
 	}
-	public VDFToken PeekNextToken()
+	/*public VDFToken PeekNextToken()
 	{
 		var oldPos = nextCharPos;
 		var oldTokenCount = tokens.Count;
@@ -145,7 +150,7 @@ public class VDFTokenParser
 			return tokens.Last();
 		return null;
 	}
-	//public string PeekNextChars(int charsToPeek = 1) { return text.Substring(nextCharPos, Math.Min(charsToPeek, text.Length - nextCharPos)); }
+	public string PeekNextChars(int charsToPeek = 1) { return text.Substring(nextCharPos, Math.Min(charsToPeek, text.Length - nextCharPos)); }*/
 
 	static int FindNextLineBreakCharPos(string text, int searchStartPos)
 	{
