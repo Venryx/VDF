@@ -221,9 +221,11 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
 			a.ToVDF().Should().Be(@"level2{level3_first{messages:
 	DeepString1
-	DeepString2}level3_second{messages:
+	DeepString2
+}level3_second{messages:
 	DeepString1
-	DeepString2}}".Replace("\r", ""));
+	DeepString2
+}}".Replace("\r", ""));
 		}
 
 		class T4_Level1 { [VDFProp] T4_Level2 level2 = new T4_Level2(); }
@@ -245,7 +247,8 @@ namespace VDFTests
 	messages:
 		text1
 		text2
-	^otherProperty{false}}level3_second{level4s:
+	^otherProperty{false}
+}level3_second{level4s:
 	messages:
 		text1
 		text2
@@ -253,7 +256,8 @@ namespace VDFTests
 	messages:
 		text1
 		text2
-	^otherProperty{false}}}".Replace("\r", ""));
+	^otherProperty{false}
+}}".Replace("\r", ""));
 		}
 
 		// unique to C# version

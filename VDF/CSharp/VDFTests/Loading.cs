@@ -267,10 +267,25 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level1_DictionaryPoppedOut()
 		{
+/*
+Written As:
+
+messages:object,object>>
+	title1{message1}
+	title2{message2}
+^otherProperty{false}
+
+Parsed As:
+
+messages:{object,object>>
+{	title1{message1}}
+{	title2{message2}}
+}^otherProperty{false}
+ */
 			VDFNode a = VDFLoader.ToVDFNode(@"messages:object,object>>
 	title1{message1}
 	title2{message2}
-^otherProperty{false}}");
+^otherProperty{false}");
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["names"]["title2"].baseValue.Should().Be("message2");
 			a["otherPropertiy"].baseValue.Should().Be("false");

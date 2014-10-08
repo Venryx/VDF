@@ -44,20 +44,25 @@ public static class VDFLoader
 				if (depth < 0)
 					break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
 			}
-			if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
+
+			if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us
 			{
 				depth++;
-				inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position);
+				inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
 			}
+			if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
+				depth++;
 			else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us
 			{
 				depth--;
 				inPoppedOutBlockAtIndent = -1;
 			}
+
 			if (depth == 0)
 				tokensAtDepth0.Add(token);
 			else if (depth == 1)
 				tokensAtDepth1.Add(token);
+
 			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
 		}
@@ -73,16 +78,20 @@ public static class VDFLoader
 		// if we can tell it's a List, update the tokens-at-depth-0 list to not include the for-item tokens
 		// ('depth' is increased not only by '{' chars, but also inferred/virtual '{' chars to the left and right of item vdf-text)
 		var hasDepth0DataBlocks = false;
-		var inferredDictionary = tokensAtDepth0.Any(a=>FindNextDepthXCharYPos(text, objTextPos, 1, ',', '[', ']') != -1 || FindNextDepthXCharYPos(text, objTextPos, 0, ',', '[', ']') != -1);
-		var inferredList = false;
 		var hasWiderMetadata = firstWiderMetadataToken != null && (firstPropNameToken == null || firstWiderMetadataToken.position < firstPropNameToken.position);
 		var hasListOrDictionaryChildren = firstLineBreakToken != null && (firstPropNameToken == null || firstLineBreakToken.position < firstPropNameToken.position) && (firstBaseValueToken == null || firstLineBreakToken.position < firstBaseValueToken.position);
 		hasListOrDictionaryChildren = hasListOrDictionaryChildren || tokensAtDepth0.Any(a=>a.type == VDFTokenType.ItemSeparator);
-		if ((hasWiderMetadata || hasListOrDictionaryChildren) && !inferredDictionary)
-			inferredList = true;
+
+		var inferredDictionary = false;
+		var inferredList = false;
+		if ((hasWiderMetadata || hasListOrDictionaryChildren))
+			if (tokensAtDepth0.Any(a=>FindNextDepthXCharYPos(text, objTextPos, 1, ',', '[', ']') != -1 || FindNextDepthXCharYPos(text, objTextPos, 0, ',', '[', ']') != -1))
+				inferredDictionary = true;
+			else
+				inferredList = true;
 		var inlineItems = firstLineBreakToken == null || parser.tokens.IndexOf(firstLineBreakToken) >= 4;
 
-		if (typeof(IList).IsAssignableFrom(declaredType) || inferredList)
+		if (typeof(IList).IsAssignableFrom(declaredType) || inferredList || typeof(IDictionary).IsAssignableFrom(declaredType) || inferredDictionary)
 		{
 			tokensAtDepth0 = new List<VDFToken>();
 			tokensAtDepth1 = new List<VDFToken>();
@@ -115,17 +124,19 @@ public static class VDFLoader
 						depth++;
 				}
 				else
-					if (firstNonMetadataGroupToken != token && token.type == VDFTokenType.LineBreak) // if inferred a virtual '}' char before us
+					if (firstNonMetadataGroupToken != token && firstLineBreakToken != token && token.type == VDFTokenType.LineBreak) // if inferred a virtual '}' char before us
 						depth--;
 					else if (token.type != VDFTokenType.LineBreak && depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
 						depth++;
 
-				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
+				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us
 				{
 					depth++;
-					inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position);
+					inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
 				}
-				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1)
+				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
+					depth++;
+				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us
 				{
 					depth--;
 					inPoppedOutBlockAtIndent = -1;
@@ -237,17 +248,17 @@ public static class VDFLoader
 					propValueType = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(token.text) ? objTypeInfo.propInfoByName[token.text].GetPropType() : null;
 				objNode.properties.Add(token.text, ToVDFNode(text, propValueType, loadOptions, next3Tokens[1].position));
 			}
-			//else if (typeof(IDictionary).IsAssignableFrom(objType) && tokensAtDepth0.Contains(token) && token.type == VDFTokenType.PoppedOutDataEndMarker)
-			//	break;
+			else if (typeof(IDictionary).IsAssignableFrom(objType) && tokensAtDepth0.Contains(token) && token.type == VDFTokenType.PoppedOutDataEndMarker)
+				break;
 			//else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 			//	break;
 		}
 
 		// if Dictionary, parse popped-out-blocks of Dictionary
-		/*if (typeof(IDictionary).IsAssignableFrom(objType))
+		if (typeof(IDictionary).IsAssignableFrom(objType))
 		{
 			var firstPoppedOutDataStartMarker = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.PoppedOutDataStartMarker);
-			if (firstPoppedOutDataStartMarker != null && (firstPropNameToken == null || firstPoppedOutDataStartMarker.position < firstPropNameToken.position))
+			/*if (firstPoppedOutDataStartMarker != null && (firstPropNameToken == null || firstPoppedOutDataStartMarker.position < firstPropNameToken.position))
 				foreach (var token in tokensAtDepth0)
 				{
 					if (token.type != VDFTokenType.PoppedOutDataStartMarker && token.type != VDFTokenType.LineBreak && token2.position > token.position)
@@ -255,8 +266,8 @@ public static class VDFLoader
 							objNode.properties.Add(token.text, ToVDFNode(text, objType.GetGenericArguments()[0], loadOptions, token.position, lineInfo));
 						else
 							break;
-				}
-		}*/
+				}*/
+		}
 
 		// parse base-value (if applicable)
 		if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))

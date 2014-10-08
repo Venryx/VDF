@@ -71,6 +71,7 @@ public class VDFNode
 	public bool popOutChildren;
 	public bool isFirstItemOfNonFirstPopOutGroup;
 	public bool isListItem;
+	public bool hasDanglingIndentation;
 	static string RawDataStringToFinalized(string rawDataStr)
 	{
 		string result = rawDataStr;
@@ -96,32 +97,57 @@ public class VDFNode
 		if (baseValue != null)
 			builder.Append(RawDataStringToFinalized(baseValue));
 		else if (items.Count > 0)
+		{
 			for (var i = 0; i < items.Count; i++)
 			{
+				var lastItem = i > 0 ? items[i - 1] : null;
 				var item = items[i];
+
+				if (lastItem != null && lastItem.hasDanglingIndentation)
+				{
+					builder.Append("\n");
+					lastItem.hasDanglingIndentation = false;
+				}
+
 				if (popOutChildren)
 				{
 					var lines = item.ToVDF().Split(new[] { '\n' });
-					lines = lines.Select(a => "\t" + a).ToArray();
+					lines = lines.Select(a=>"\t" + a).ToArray();
 					builder.Append("\n" + String.Join("\n", lines));
 				}
 				else
 					builder.Append((i > 0 ? "|" : "") + item.ToVDF());
 			}
+		}
 		else
 		{
 			string lastPropName = null;
 			foreach (string propName in properties.Keys)
 			{
+				var lastPropValue = lastPropName != null ? properties[lastPropName] : null;
 				var propValue = properties[propName];
-				if (lastPropName != null && properties[lastPropName].popOutChildren)
-					builder.Append("\n^");
+
+				if (lastPropValue != null && lastPropValue.hasDanglingIndentation)
+				{
+					builder.Append("\n");
+					lastPropValue.hasDanglingIndentation = false;
+					if (lastPropValue.popOutChildren)
+						builder.Append("^");
+				}
 
 				string propNameAndValueVDF;
 				if (propValue.popOutChildren)
 					propNameAndValueVDF = propName + ":" + propValue.ToVDF();
 				else
-					propNameAndValueVDF = propName + "{" + propValue.ToVDF() + "}";
+				{
+					var propValueVDF = propValue.ToVDF();
+					if (propValue.hasDanglingIndentation)
+					{
+						propValueVDF += "\n";
+						propValue.hasDanglingIndentation = false;
+					}
+					propNameAndValueVDF = propName + "{" + propValueVDF + "}";
+				}
 				if (popOutChildren)
 				{
 					var lines = propNameAndValueVDF.Split(new[] {'\n'});
@@ -138,6 +164,18 @@ public class VDFNode
 
 		if (isListItem && isList)
 			builder.Append("}");
+
+		hasDanglingIndentation = (popOutChildren && (items.Count > 0 || properties.Count > 0));
+		if (items.Any(a=>a.hasDanglingIndentation))
+		{
+			hasDanglingIndentation = true;
+			items.First(a=>a.hasDanglingIndentation).hasDanglingIndentation = false; // we've taken it as our own
+		}
+		else if (properties.Values.Any(a=>a.hasDanglingIndentation))
+		{
+			hasDanglingIndentation = true;
+			properties.Values.First(a=>a.hasDanglingIndentation).hasDanglingIndentation = false; // we've taken it as our own
+		}
 
 		return builder.ToString();
 	}
