@@ -187,7 +187,7 @@ namespace VDFTests
 				{"title1", "message1"},
 				{"title2", "message2"}
 			};
-			[VDFProp] bool otherProperty = false;
+			[VDFProp] bool otherProperty = true;
 		}
 		[Fact] void ToVDF_Level1_DictionaryPoppedOutThenBool()
 		{
@@ -195,14 +195,32 @@ namespace VDFTests
 			a.ToVDF().Should().Be(@"messages:
 	title1{message1}
 	title2{message2}
-^otherProperty{false}".Replace("\r", ""));
+^otherProperty{true}".Replace("\r", ""));
+		}
+		[VDFType(popOutChildren: true)] class ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+		{
+			[VDFProp(popOutChildren: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			{
+				{"title1", "message1"},
+				{"title2", "message2"}
+			};
+			[VDFProp] bool otherProperty = true;
+		}
+		[Fact] void ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool()
+		{
+			var a = VDFSaver.ToVDFNode(new ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
+			a.ToVDF().Should().Be(@"
+	messages:
+		title1{message1}
+		title2{message2}
+	otherProperty{true}".Replace("\r", ""));
 		}
 
 		class T1_Level1 { [VDFProp] T1_Level2 level2 = new T1_Level2(); }
 		class T1_Level2
 		{
 			[VDFProp(true, true)] List<string> messages = new List<string> { "DeepString1", "DeepString2" };
-			[VDFProp] bool otherProperty = false;
+			[VDFProp] bool otherProperty = true;
 		}
 		[Fact] void ToVDF_Level2_Object_ArrayPoppedOutThenBool()
 		{
@@ -210,7 +228,7 @@ namespace VDFTests
 			a.ToVDF().Should().Be(@"level2{messages:
 	DeepString1
 	DeepString2
-^otherProperty{false}}".Replace("\r", ""));
+^otherProperty{true}}".Replace("\r", ""));
 		}
 
 		class Level1 { [VDFProp] Level2 level2 = new Level2(); }

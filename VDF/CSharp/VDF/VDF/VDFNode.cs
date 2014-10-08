@@ -128,12 +128,15 @@ public class VDFNode
 				var propValue = properties[propName];
 
 				if (lastPropValue != null && lastPropValue.hasDanglingIndentation)
-				{
-					builder.Append("\n");
-					lastPropValue.hasDanglingIndentation = false;
-					if (lastPropValue.popOutChildren)
-						builder.Append("^");
-				}
+					if (popOutChildren) // if we're popping out this current child, we can ignore adding a marker for it, because it's supposed to be on its own line
+						lastPropValue.hasDanglingIndentation = false;
+					else
+					{
+						builder.Append("\n");
+						lastPropValue.hasDanglingIndentation = false;
+						if (lastPropValue.popOutChildren)
+							builder.Append("^");
+					}
 
 				string propNameAndValueVDF;
 				if (propValue.popOutChildren)

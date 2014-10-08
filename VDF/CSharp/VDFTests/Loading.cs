@@ -365,6 +365,27 @@ of three lines in total.@@}bool{>true}");
 			VDF.DeserializeInto("flag{true}", a);
 			a.flag.Should().Be(true);
 		}
+		[VDFType(popOutChildren: true)] class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+		{
+			[VDFProp(popOutChildren: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
+			{
+				{"title1", "message1"},
+				{"title2", "message2"}
+			};
+			[VDFProp] public bool otherProperty;
+		}
+		[Fact] void ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool()
+		{
+			var a = VDF.Deserialize<ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1>(@"
+	messages:
+		title1{message1}
+		title2{message2}
+	otherProperty{true}");
+			a.messages.Count.Should().Be(2);
+			a.messages["title1"].Should().Be("message1");
+			a.messages["title2"].Should().Be("message2");
+			a.otherProperty.Should().Be(true);
+		}
 
 		// unique to C# version
 		// ==========

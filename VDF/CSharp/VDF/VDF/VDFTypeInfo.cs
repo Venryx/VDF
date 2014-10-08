@@ -7,7 +7,12 @@ using System.Reflection;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute
 {
 	public bool includePropsL1;
-	public VDFType(bool includePropsL1) { this.includePropsL1 = includePropsL1; }
+	public bool popOutChildren;
+	public VDFType(bool includePropsL1 = false, bool popOutChildren = false)
+	{
+		this.includePropsL1 = includePropsL1;
+		this.popOutChildren = popOutChildren;
+	}
 }
 public class VDFTypeInfo
 {
@@ -32,11 +37,15 @@ public class VDFTypeInfo
 		if (type.Name.StartsWith("<>")) // if anonymous type, include all props, by default
 			result.props_includeL1 = true;
 		if (typeTag != null)
+		{
 			result.props_includeL1 = typeTag.includePropsL1;
+			result.popOutChildren = typeTag.popOutChildren;
+		}
 		return result;
 	}
 
 	public bool props_includeL1 = false; // by default, use an opt-in approach
+	public bool popOutChildren = false;
 	public Dictionary<string, VDFPropInfo> propInfoByName = new Dictionary<string, VDFPropInfo>();
 	public List<VDFMethodInfo> methodInfo = new List<VDFMethodInfo>();
 }

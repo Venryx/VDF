@@ -43,6 +43,7 @@ public static class VDFSaver
 		
 		var objNode = new VDFNode();
 		Type type = obj != null ? obj.GetType() : null;
+		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null;
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
@@ -84,7 +85,7 @@ public static class VDFSaver
 		}
 		else // an object, with properties
 		{
-			var typeInfo = VDFTypeInfo.Get(type);
+			
 			foreach (string propName in typeInfo.propInfoByName.Keys)
 				try
 				{
@@ -128,6 +129,9 @@ public static class VDFSaver
 			if (objNode.metadata_type != null && ((objNode.metadata_type.StartsWith("List[") && !objNode.metadata_type.Substring(5).Contains("[")) || objNode.metadata_type.StartsWith("Dictionary[")))
 				objNode.metadata_type = objNode.metadata_type.StartsWith("List[") ? objNode.metadata_type.Substring(5, objNode.metadata_type.Length - 6) : objNode.metadata_type.Substring(11, objNode.metadata_type.Length - 12);
 		}
+
+		if (typeInfo != null && typeInfo.popOutChildren)
+			objNode.popOutChildren = true;
 
 		return objNode;
 	}
