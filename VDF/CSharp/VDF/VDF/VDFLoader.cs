@@ -237,6 +237,8 @@ public static class VDFLoader
 					propValueType = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(token.text) ? objTypeInfo.propInfoByName[token.text].GetPropType() : null;
 				objNode.properties.Add(token.text, ToVDFNode(text, propValueType, loadOptions, next3Tokens[1].position));
 			}
+			//else if (typeof(IDictionary).IsAssignableFrom(objType) && tokensAtDepth0.Contains(token) && token.type == VDFTokenType.PoppedOutDataEndMarker)
+			//	break;
 			//else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
 			//	break;
 		}

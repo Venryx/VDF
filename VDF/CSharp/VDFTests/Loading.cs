@@ -244,7 +244,7 @@ three lines".Replace("\r", ""));
 			a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");
 		}
 
-		[Fact] void ToVDFNode_Level1_PoppedOutChildren()
+		[Fact] void ToVDFNode_Level1_ArrayPoppedOut()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@"names:
 	Dan
@@ -252,7 +252,7 @@ three lines".Replace("\r", ""));
 			a["names"][0].baseValue.Should().Be("Dan");
 			a["names"][1].baseValue.Should().Be("Bob");
 		}
-		[Fact] void ToVDFNode_Level1_PoppedOutChildren_MultipleGroups() // each 'group' is actually just the value-data of one of the parent's properties
+		[Fact] void ToVDFNode_Level1_ArraysPoppedOut() // each 'group' is actually just the value-data of one of the parent's properties
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@"names:
 	Dan
@@ -265,7 +265,18 @@ three lines".Replace("\r", ""));
 			a["ages"][0].baseValue.Should().Be("10");
 			a["ages"][1].baseValue.Should().Be("20");
 		}
-		[Fact] void ToVDFNode_Level1_MultilineStringThenProperties()
+		[Fact] void ToVDFNode_Level1_DictionaryPoppedOut()
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"messages:object,object>>
+	title1{message1}
+	title2{message2}
+^otherProperty{false}}");
+			a["messages"]["title1"].baseValue.Should().Be("message1");
+			a["names"]["title2"].baseValue.Should().Be("message2");
+			a["otherPropertiy"].baseValue.Should().Be("false");
+		}
+
+		[Fact] void ToVDFNode_Level1_MultilineStringThenProperty()
 		{
 			var a = VDFLoader.ToVDFNode(@"text{@@This is a
 multiline string
@@ -273,7 +284,7 @@ of three lines in total.@@}bool{>true}");
 			a["text"].baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
 			((bool)a["bool"]).Should().Be(true);
 		}
-		[Fact] void ToVDFNode_Level1_MultilineStringWithChildrenThenProperties()
+		[Fact] void ToVDFNode_Level1_ArrayPoppedOutThenMultilineString()
 		{
 			var a = VDFLoader.ToVDFNode(@"childTexts:
 	text1

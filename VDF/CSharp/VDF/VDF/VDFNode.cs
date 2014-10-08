@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms.VisualStyles;
 
 public class VDFNode
 {
@@ -67,10 +68,9 @@ public class VDFNode
 
 	public bool isList;
 	public bool isDictionary;
-	public bool popOutToOwnLine;
+	public bool popOutChildren;
 	public bool isFirstItemOfNonFirstPopOutGroup;
 	public bool isListItem;
-	public bool isListItem_nonFirst;
 	static string RawDataStringToFinalized(string rawDataStr)
 	{
 		string result = rawDataStr;
@@ -86,8 +86,8 @@ public class VDFNode
 		var builder = new StringBuilder();
 		if (isFirstItemOfNonFirstPopOutGroup)
 			builder.Append("#");
-		if (isListItem_nonFirst && !popOutToOwnLine)
-			builder.Append("|");
+		//if (isListItem_nonFirst && !popOutToOwnLine)
+		//	builder.Append("|");
 		if (isListItem && isList)
 			builder.Append("{");
 		if (metadata_type != null)
@@ -96,38 +96,42 @@ public class VDFNode
 		if (baseValue != null)
 			builder.Append(RawDataStringToFinalized(baseValue));
 		else if (items.Count > 0)
-			foreach (VDFNode item in items)
+			for (var i = 0; i < items.Count; i++)
 			{
-				var itemLines = item.ToVDF().Split(new[]{'\n'});
-				if (item.popOutToOwnLine)
-					itemLines = itemLines.Select(a=>"\t" + a).ToArray();
-				builder.Append((item.popOutToOwnLine ? "\n" : "") + String.Join("\n", itemLines));
+				var item = items[i];
+				if (popOutChildren)
+				{
+					var lines = item.ToVDF().Split(new[] { '\n' });
+					lines = lines.Select(a => "\t" + a).ToArray();
+					builder.Append("\n" + String.Join("\n", lines));
+				}
+				else
+					builder.Append((i > 0 ? "|" : "") + item.ToVDF());
 			}
 		else
 		{
 			string lastPropName = null;
 			foreach (string propName in properties.Keys)
 			{
-				if (lastPropName != null && properties[lastPropName].items.Any(a=>a.popOutToOwnLine))
+				var propValue = properties[propName];
+				if (lastPropName != null && properties[lastPropName].popOutChildren)
 					builder.Append("\n^");
 
-				if (properties[propName].items.Any(a=>a.popOutToOwnLine))
-					builder.Append(propName + ":" + properties[propName].ToVDF());
+				string propNameAndValueVDF;
+				if (propValue.popOutChildren)
+					propNameAndValueVDF = propName + ":" + propValue.ToVDF();
 				else
+					propNameAndValueVDF = propName + "{" + propValue.ToVDF() + "}";
+				if (popOutChildren)
 				{
-					var propLastChildDescendents_depth3 = new List<VDFNode>{properties[propName]};
-					while (propLastChildDescendents_depth3.Count > 0 && propLastChildDescendents_depth3.Count < 3)
-					{
-						if (propLastChildDescendents_depth3.Last().items.Count > 0)
-							propLastChildDescendents_depth3.Add(propLastChildDescendents_depth3.Last().items.Last());
-						else if (propLastChildDescendents_depth3.Last().properties.Count > 0)
-							propLastChildDescendents_depth3.Add(propLastChildDescendents_depth3.Last().properties.Values.Last());
-						else
-							break;
-					}
-
-					builder.Append(propName + "{" + properties[propName].ToVDF() + (propLastChildDescendents_depth3.Any(a=>a.popOutToOwnLine) ? "\n" : "") + "}");
+					var lines = propNameAndValueVDF.Split(new[] {'\n'});
+					lines = lines.Select(a=>"\t" + a).ToArray();
+					propNameAndValueVDF = "\n" + String.Join("\n", lines);
+					builder.Append(propNameAndValueVDF);
 				}
+				else
+					builder.Append(propNameAndValueVDF);
+
 				lastPropName = propName;
 			}
 		}

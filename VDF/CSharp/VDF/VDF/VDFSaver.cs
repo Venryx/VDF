@@ -37,7 +37,7 @@ public static class VDFSaver
 {
 	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions saveOptions = null) { return ToVDFNode(obj, typeof(T), saveOptions); }
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions, Type declaredType = null) { return ToVDFNode(obj, declaredType, saveOptions); }
-	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false, bool popOutChildren = false)
+	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false)
 	{
 		saveOptions = saveOptions ?? new VDFSaveOptions();
 		
@@ -72,10 +72,6 @@ public static class VDFSaver
 			{
 				VDFNode itemValueNode = ToVDFNode(objAsList[i], type.GetGenericArguments()[0], saveOptions, true);
 				itemValueNode.isListItem = true;
-				if (i > 0)
-					itemValueNode.isListItem_nonFirst = true;
-				if (popOutChildren)
-					itemValueNode.popOutToOwnLine = true;
 				objNode.items.Add(itemValueNode);
 			}
 		}
@@ -106,7 +102,9 @@ public static class VDFSaver
 						continue;
 
 					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-					objNode.properties.Add(propName, ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof (object), saveOptions, false, propInfo.popOutChildren));
+					var propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions);
+					propValueNode.popOutChildren = propInfo.popOutChildren;
+					objNode.properties.Add(propName, propValueNode);
 				}
 				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
 		}
