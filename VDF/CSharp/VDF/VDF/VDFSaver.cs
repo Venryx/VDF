@@ -35,10 +35,9 @@ public class VDFSaveOptions
 
 public static class VDFSaver
 {
-	public class VDFSaver_LineInfo { public int fromLinePoppedOutGroupCount; }
 	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions saveOptions = null) { return ToVDFNode(obj, typeof(T), saveOptions); }
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions saveOptions, Type declaredType = null) { return ToVDFNode(obj, declaredType, saveOptions); }
-	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false, VDFSaver_LineInfo lineInfo = null, bool popOutItemData = false)
+	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions saveOptions = null, bool isGenericParamValue = false, bool popOutChildren = false)
 	{
 		saveOptions = saveOptions ?? new VDFSaveOptions();
 		
@@ -48,8 +47,6 @@ public static class VDFSaver
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
 				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[]{saveOptions.message} : new object[0]);
-
-		lineInfo = lineInfo ?? new VDFSaver_LineInfo();
 
 		if (type == null)
 			objNode.baseValue = "null";
@@ -73,11 +70,11 @@ public static class VDFSaver
 			var objAsList = (IList)obj;
 			for (int i = 0; i < objAsList.Count; i++)
 			{
-				VDFNode itemValueNode = ToVDFNode(objAsList[i], type.GetGenericArguments()[0], saveOptions, true, popOutItemData ? new VDFSaver_LineInfo() : lineInfo);
+				VDFNode itemValueNode = ToVDFNode(objAsList[i], type.GetGenericArguments()[0], saveOptions, true);
 				itemValueNode.isListItem = true;
 				if (i > 0)
 					itemValueNode.isListItem_nonFirst = true;
-				if (popOutItemData)
+				if (popOutChildren)
 					itemValueNode.popOutToOwnLine = true;
 				objNode.items.Add(itemValueNode);
 			}
@@ -87,7 +84,7 @@ public static class VDFSaver
 			objNode.isDictionary = true;
 			var objAsDictionary = (IDictionary)obj;
 			foreach (object key in objAsDictionary.Keys)
-				objNode.properties.Add(ToVDFNode(key, type.GetGenericArguments()[0], saveOptions, true, lineInfo), ToVDFNode(objAsDictionary[key], type.GetGenericArguments()[1], saveOptions, true, lineInfo));
+				objNode.properties.Add(ToVDFNode(key, type.GetGenericArguments()[0], saveOptions, true), ToVDFNode(objAsDictionary[key], type.GetGenericArguments()[1], saveOptions, true));
 		}
 		else // an object, with properties
 		{
@@ -109,14 +106,7 @@ public static class VDFSaver
 						continue;
 
 					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-					VDFNode propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof (object), saveOptions, false, lineInfo, propInfo.popOutChildren);
-					if (propInfo.popOutChildren && propValue != null)
-					{
-						if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.Count > 0)
-							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-						lineInfo.fromLinePoppedOutGroupCount++;
-					}
-					objNode.properties.Add(propName, propValueNode);
+					objNode.properties.Add(propName, ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof (object), saveOptions, false, propInfo.popOutChildren));
 				}
 				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
 		}

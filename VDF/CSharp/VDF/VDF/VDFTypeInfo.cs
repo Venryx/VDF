@@ -46,7 +46,7 @@ public class VDFTypeInfo
 	public bool includeL2;
 	public bool popOutChildren;
 	public bool writeEmptyValue;
-	public VDFProp(bool includeL2 = true, bool popOutChildren = false, bool popOutItemData = false, bool writeEmptyValue = true)
+	public VDFProp(bool includeL2 = true, bool popOutChildren = false, bool writeEmptyValue = true)
 	{
 		this.includeL2 = includeL2;
 		this.popOutChildren = popOutChildren;

@@ -71,7 +71,17 @@ public class VDFNode
 	public bool isFirstItemOfNonFirstPopOutGroup;
 	public bool isListItem;
 	public bool isListItem_nonFirst;
-	public string GetInLineItemText()
+	static string RawDataStringToFinalized(string rawDataStr)
+	{
+		string result = rawDataStr;
+		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || rawDataStr.Contains("@@") || rawDataStr.Contains("\n"))
+			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
+				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
+			else
+				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "@@";
+		return result;
+	}
+	public string ToVDF()
 	{
 		var builder = new StringBuilder();
 		if (isFirstItemOfNonFirstPopOutGroup)
@@ -86,64 +96,46 @@ public class VDFNode
 		if (baseValue != null)
 			builder.Append(RawDataStringToFinalized(baseValue));
 		else if (items.Count > 0)
-		{
 			foreach (VDFNode item in items)
-				if (!item.popOutToOwnLine)
-					builder.Append(item.GetInLineItemText());
-		}
+			{
+				var itemLines = item.ToVDF().Split(new[]{'\n'});
+				if (item.popOutToOwnLine)
+					itemLines = itemLines.Select(a=>"\t" + a).ToArray();
+				builder.Append((item.popOutToOwnLine ? "\n" : "") + String.Join("\n", itemLines));
+			}
 		else
+		{
+			string lastPropName = null;
 			foreach (string propName in properties.Keys)
-				if (properties[propName].popOutToOwnLine)
-					builder.Append(propName + "{#}");
-				else if (properties[propName].items.Exists(item=>item.popOutToOwnLine))
-					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "#}");
+			{
+				if (lastPropName != null && properties[lastPropName].items.Any(a=>a.popOutToOwnLine))
+					builder.Append("\n^");
+
+				if (properties[propName].items.Any(a=>a.popOutToOwnLine))
+					builder.Append(propName + ":" + properties[propName].ToVDF());
 				else
-					builder.Append(propName + "{" + properties[propName].GetInLineItemText() + "}");
+				{
+					var propLastChildDescendents_depth3 = new List<VDFNode>{properties[propName]};
+					while (propLastChildDescendents_depth3.Count > 0 && propLastChildDescendents_depth3.Count < 3)
+					{
+						if (propLastChildDescendents_depth3.Last().items.Count > 0)
+							propLastChildDescendents_depth3.Add(propLastChildDescendents_depth3.Last().items.Last());
+						else if (propLastChildDescendents_depth3.Last().properties.Count > 0)
+							propLastChildDescendents_depth3.Add(propLastChildDescendents_depth3.Last().properties.Values.Last());
+						else
+							break;
+					}
+
+					builder.Append(propName + "{" + properties[propName].ToVDF() + (propLastChildDescendents_depth3.Any(a=>a.popOutToOwnLine) ? "\n" : "") + "}");
+				}
+				lastPropName = propName;
+			}
+		}
 
 		if (isListItem && isList)
 			builder.Append("}");
 
 		return builder.ToString();
-	}
-	static string RawDataStringToFinalized(string rawDataStr)
-	{
-		string result = rawDataStr;
-		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || rawDataStr.Contains("@@") || rawDataStr.Contains("\n"))
-			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
-				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
-			else
-				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "@@";
-		return result;
-	}
-	public string GetPoppedOutItemText()
-	{
-		var lines = new List<string>();
-		if (popOutToOwnLine)
-			lines.Add(GetInLineItemText());
-		foreach (VDFNode item in items)
-		{
-			string poppedOutText = item.GetPoppedOutItemText();
-			if (poppedOutText.Length > 0)
-				foreach (string line in poppedOutText.Split(new[] {'\n'}))
-					lines.Add(line);
-		}
-		foreach (string propName in properties.Keys)
-		{
-			VDFNode propValueNode = properties[propName];
-			string poppedOutText = propValueNode.GetPoppedOutItemText();
-			if (poppedOutText.Length > 0)
-				foreach (string line in poppedOutText.Split(new[] {'\n'}))
-					lines.Add(line);
-		}
-		var builder = new StringBuilder();
-		for (int i = 0; i < lines.Count; i++)
-			builder.Append(i == 0 ? "" : "\n").Append(popOutToOwnLine ? "\t" : "").Append(lines[i]); // line-breaks + indents + data
-		return builder.ToString();
-	}
-	public string ToVDF()
-	{
-		string poppedOutItemText = GetPoppedOutItemText();
-		return GetInLineItemText() + (poppedOutItemText.Length > 0 ? "\n" + poppedOutItemText : "");
 	}
 
 	// loading

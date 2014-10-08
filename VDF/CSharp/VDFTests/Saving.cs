@@ -180,10 +180,25 @@ namespace VDFTests
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
 		}
 
+		class Level1_1 { [VDFProp] Level2_1 level2 = new Level2_1(); }
+		class Level2_1
+		{
+			[VDFProp(true, true)] List<string> messages = new List<string> { "DeepString1", "DeepString2" };
+			[VDFProp] bool otherProperty = false;
+		}
+		[Fact] void ToVDF_Level2_Simple_PoppedOutChildrenThenProperties()
+		{
+			var a = VDFSaver.ToVDFNode(new Level1_1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
+			a.ToVDF().Should().Be(@"level2{messages:
+	DeepString1
+	DeepString2
+^otherProperty{false}}".Replace("\r", ""));
+		}
+
 		class Level1 { [VDFProp] Level2 level2 = new Level2(); }
 		class Level2 { [VDFProp] Level3 level3_first = new Level3(); [VDFProp] Level3 level3_second = new Level3(); }
 		class Level3 { [VDFProp(true, true)] List<string> messages = new List<string>{"DeepString1", "DeepString2"}; }
-		[Fact] void ToVDF_Level3_DeepNestedPoppedOutChildren()
+		[Fact] void ToVDF_Level3_Simple_Children_PoppedOutChildren()
 		{
 			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
 			a.ToVDF().Should().Be(@"level2{level3_first{messages:
@@ -192,6 +207,38 @@ namespace VDFTests
 }level3_second{messages:
 	DeepString1
 	DeepString2
+}}".Replace("\r", ""));
+		}
+
+		class T4_Level1 { [VDFProp] T4_Level2 level2 = new T4_Level2(); }
+		class T4_Level2 { [VDFProp] T4_Level3 level3_first = new T4_Level3(); [VDFProp] T4_Level3 level3_second = new T4_Level3(); }
+		class T4_Level3 { [VDFProp(true, true)] List<T4_Level4> level4s = new List<T4_Level4>{new T4_Level4(), new T4_Level4()}; }
+		class T4_Level4
+		{
+			[VDFProp(true, true)] List<string> messages = new List<string>{"text1", "text2"};
+			[VDFProp] bool otherProperty = false;
+		}
+		[Fact] void ToVDF_Level4_Simple_Children_PoppedOutChildren_PoppedOutChildrenThenProperty()
+		{
+			var a = VDFSaver.ToVDFNode(new T4_Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
+			a.ToVDF().Should().Be(@"level2{level3_first{level4s:
+	messages:
+		text1
+		text2
+	^otherProperty{false}
+	messages:
+		text1
+		text2
+	^otherProperty{false}
+}level3_second{level4s:
+	messages:
+		text1
+		text2
+	^otherProperty{false}
+	messages:
+		text1
+		text2
+	^otherProperty{false}
 }}".Replace("\r", ""));
 		}
 
