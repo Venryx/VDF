@@ -8,8 +8,8 @@ var TypeWithEmptyStringProp = (function () {
     function TypeWithEmptyStringProp() {
         this.emptyString = "";
     }
-    TypeWithEmptyStringProp.typeInfo = new VDFTypeInfo(false, {
-        emptyString: new VDFPropInfo("string", null, null, null, false)
+    TypeWithEmptyStringProp.typeInfo = new VDFTypeInfo(false, false, {
+        emptyString: new VDFPropInfo("string", true, false, false)
     });
     return TypeWithEmptyStringProp;
 })();
@@ -17,28 +17,19 @@ var TypeWithNullProps = (function () {
     function TypeWithNullProps() {
         this.strings2 = new List("string");
     }
-    TypeWithNullProps.typeInfo = new VDFTypeInfo(false, {
-        obj: new VDFPropInfo("object", true),
-        strings: new VDFPropInfo("List[string]", true),
-        strings2: new VDFPropInfo("List[string]", true)
+    TypeWithNullProps.typeInfo = new VDFTypeInfo(false, false, {
+        obj: new VDFPropInfo("object"),
+        strings: new VDFPropInfo("List[string]"),
+        strings2: new VDFPropInfo("List[string]")
     });
     return TypeWithNullProps;
-})();
-var TypeWithList_PopOutData = (function () {
-    function TypeWithList_PopOutData() {
-        this.list = new List("string", "A", "B");
-    }
-    TypeWithList_PopOutData.typeInfo = new VDFTypeInfo(false, {
-        list: new VDFPropInfo("List[string]", true, true)
-    });
-    return TypeWithList_PopOutData;
 })();
 var TypeWithList_PopOutItemData = (function () {
     function TypeWithList_PopOutItemData() {
         this.list = new List("string", "A", "B");
     }
-    TypeWithList_PopOutItemData.typeInfo = new VDFTypeInfo(false, {
-        list: new VDFPropInfo("List[string]", true, false, true)
+    TypeWithList_PopOutItemData.typeInfo = new VDFTypeInfo(false, false, {
+        list: new VDFPropInfo("List[string]", true, true)
     });
     return TypeWithList_PopOutItemData;
 })();
@@ -48,8 +39,8 @@ var TypeWithPreSerializePrepMethod = (function () {
     TypeWithPreSerializePrepMethod.prototype.VDFPreSerialize = function () {
         this.preSerializeWasCalled = true;
     };
-    TypeWithPreSerializePrepMethod.typeInfo = new VDFTypeInfo(false, {
-        preSerializeWasCalled: new VDFPropInfo("bool", true)
+    TypeWithPreSerializePrepMethod.typeInfo = new VDFTypeInfo(false, false, {
+        preSerializeWasCalled: new VDFPropInfo("bool")
     });
     return TypeWithPreSerializePrepMethod;
 })();
@@ -62,13 +53,13 @@ var TypeWithMixOfProps = (function () {
         this.list = new List("string", "2A", "2B");
         this.nestedList = new List("List[string]", new List("string", "1A"));
     }
-    TypeWithMixOfProps.typeInfo = new VDFTypeInfo(false, {
-        Bool: new VDFPropInfo("bool", true),
-        Int: new VDFPropInfo("int", true),
-        Float: new VDFPropInfo("float", true),
-        String: new VDFPropInfo("string", true),
-        list: new VDFPropInfo("List[string]", true),
-        nestedList: new VDFPropInfo("List[List[string]]", true)
+    TypeWithMixOfProps.typeInfo = new VDFTypeInfo(false, false, {
+        Bool: new VDFPropInfo("bool"),
+        Int: new VDFPropInfo("int"),
+        Float: new VDFPropInfo("float"),
+        String: new VDFPropInfo("string"),
+        list: new VDFPropInfo("List[string]"),
+        nestedList: new VDFPropInfo("List[List[string]]")
     });
     return TypeWithMixOfProps;
 })();
@@ -79,12 +70,57 @@ var Enum1;
     Enum1[Enum1["B"] = 2] = "B";
     Enum1[Enum1["C"] = 3] = "C";
 })(Enum1 || (Enum1 = {}));
+
+var ToVDF_Level1_Object_DictionaryPoppedOutThenBool_Class1 = (function () {
+    function ToVDF_Level1_Object_DictionaryPoppedOutThenBool_Class1() {
+        this.messages = new Dictionary("string", "string", ["title1", "message1"], ["title2", "message2"]);
+        this.otherProperty = true;
+    }
+    ToVDF_Level1_Object_DictionaryPoppedOutThenBool_Class1.typeInfo = new VDFTypeInfo(false, false, {
+        messages: new VDFPropInfo("Dictionary[string,string]", true, true),
+        otherProperty: new VDFPropInfo("bool")
+    });
+    return ToVDF_Level1_Object_DictionaryPoppedOutThenBool_Class1;
+})();
+var ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
+    function ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
+        this.messages = new Dictionary("string", "string", ["title1", "message1"], ["title2", "message2"]);
+        this.otherProperty = true;
+    }
+    ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1.typeInfo = new VDFTypeInfo(false, true, {
+        messages: new VDFPropInfo("Dictionary[string,string]", true, true),
+        otherProperty: new VDFPropInfo("bool")
+    });
+    return ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1;
+})();
+
+var T1_Level1 = (function () {
+    function T1_Level1() {
+        this.level2 = new T1_Level2();
+    }
+    T1_Level1.typeInfo = new VDFTypeInfo(false, false, {
+        level2: new VDFPropInfo("T1_Level2")
+    });
+    return T1_Level1;
+})();
+var T1_Level2 = (function () {
+    function T1_Level2() {
+        this.messages = new List("string", "DeepString1", "DeepString2");
+        this.otherProperty = true;
+    }
+    T1_Level2.typeInfo = new VDFTypeInfo(false, false, {
+        messages: new VDFPropInfo("Dictionary[string,string]", true, true),
+        otherProperty: new VDFPropInfo("bool")
+    });
+    return T1_Level2;
+})();
+
 var Level1 = (function () {
     function Level1() {
         this.level2 = new Level2();
     }
-    Level1.typeInfo = new VDFTypeInfo(false, {
-        level2: new VDFPropInfo("Level2", true)
+    Level1.typeInfo = new VDFTypeInfo(false, false, {
+        level2: new VDFPropInfo("Level2")
     });
     return Level1;
 })();
@@ -93,21 +129,63 @@ var Level2 = (function () {
         this.level3_first = new Level3();
         this.level3_second = new Level3();
     }
-    Level2.typeInfo = new VDFTypeInfo(false, {
-        level3_first: new VDFPropInfo("Level3", true),
-        level3_second: new VDFPropInfo("Level3", true)
+    Level2.typeInfo = new VDFTypeInfo(false, false, {
+        level3_first: new VDFPropInfo("Level3"),
+        level3_second: new VDFPropInfo("Level3")
     });
     return Level2;
 })();
 var Level3 = (function () {
     function Level3() {
-        this.message = "DeepString";
+        this.messages = new List("string", "DeepString1", "DeepString2");
     }
-    Level3.typeInfo = new VDFTypeInfo(false, {
-        message: new VDFPropInfo("string", true, true)
+    Level3.typeInfo = new VDFTypeInfo(false, false, {
+        messages: new VDFPropInfo("List[string]", true, true)
     });
     return Level3;
 })();
+
+var T4_Level1 = (function () {
+    function T4_Level1() {
+        this.level2 = new T4_Level2();
+    }
+    T4_Level1.typeInfo = new VDFTypeInfo(false, false, {
+        level2: new VDFPropInfo("T4_Level2_level2")
+    });
+    return T4_Level1;
+})();
+var T4_Level2 = (function () {
+    function T4_Level2() {
+        this.level3_first = new T4_Level3();
+        this.level3_second = new T4_Level3();
+    }
+    T4_Level2.typeInfo = new VDFTypeInfo(false, false, {
+        level3_first: new VDFPropInfo("T4_Level3"),
+        level3_second: new VDFPropInfo("T4_Level3")
+    });
+    return T4_Level2;
+})();
+var T4_Level3 = (function () {
+    function T4_Level3() {
+        this.level4s = new List("T4_Level4", new T4_Level4(), new T4_Level4());
+    }
+    T4_Level3.typeInfo = new VDFTypeInfo(false, false, {
+        level4s: new VDFPropInfo("List[T4_Level4]", true, true)
+    });
+    return T4_Level3;
+})();
+var T4_Level4 = (function () {
+    function T4_Level4() {
+        this.messages = new List("string", "text1", "text2");
+        this.otherProperty = false;
+    }
+    T4_Level4.typeInfo = new VDFTypeInfo(false, false, {
+        messages: new VDFPropInfo("List[string]", true, true),
+        otherProperty: new VDFPropInfo("bool")
+    });
+    return T4_Level4;
+})();
+
 var Saving = (function () {
     function Saving() {
     }
@@ -142,9 +220,9 @@ var Saving = (function () {
     };
 
     Saving.RunTests = function () {
-        // ToVDF
-        // ==================
-        test("ToVDF_Level0_BaseValue", function () {
+        // from VDFNode
+        // ==========
+        test("FromVDFNode_Level0_BaseValue", function () {
             var a = new VDFNode();
             a.baseValue = "Root string.";
             a.ToVDF().Should().Be("Root string.");
@@ -153,28 +231,28 @@ var Saving = (function () {
             a[0] = new VDFNode("Root string also.");
             a.ToVDF().Should().Be("Root string also.");
         });
-        test("ToVDF_Level0_Metadata_Type", function () {
+        test("FromVDFNode_Level0_Metadata_Type", function () {
             var a = new VDFNode();
             a.metadata_type = "string";
             a.baseValue = "Root string.";
             a.ToVDF().Should().Be("string>Root string.");
         });
-        test("ToVDF_Level0_Metadata_Type_Collapsed", function () {
+        test("FromVDFNode_Level0_Metadata_Type_Collapsed", function () {
             var a = VDFSaver.ToVDFNode(new List("string"), new VDFSaveOptions(null, 2 /* AssemblyExternal */));
             a.ToVDF().Should().Be("string>>");
             a = VDFSaver.ToVDFNode(new List("List[string]", new List("string", "1A", "1B", "1C")), new VDFSaveOptions(null, 2 /* AssemblyExternal */));
             a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
         });
-        test("ToVDF_Level0_EnumDefault", function () {
+        test("FromVDFNode_Level0_EnumDefault", function () {
             var a = VDFSaver.ToVDFNode(1 /* A */, "Enum1");
             a.ToVDF().Should().Be("A");
         });
-        test("ToVDF_Level0_MultilineString", function () {
+        test("FromVDFNode_Level0_MultilineString", function () {
             var a = VDFSaver.ToVDFNode("This is a\nmultiline string\nof three lines in total.", "string");
             a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
         });
 
-        test("ToVDF_Level1_BaseValues", function () {
+        test("FromVDFNode_Level1_BaseValues", function () {
             var a = new VDFNode();
             a["bool"] = new VDFNode("false");
             a["int"] = new VDFNode("5");
@@ -182,10 +260,20 @@ var Saving = (function () {
             a["string"] = new VDFNode("Prop value string.");
             a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
         });
-        test("ToVDF_Level1_BaseValuesThatNeedEscaping", function () {
+        test("FromVDFNode_Level1_BaseValuesThatNeedEscaping", function () {
             var a = new VDFNode("string>In-string VDF data.");
             a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
         });
+
+        // from object
+        // ==========
+        test("FromVDFNode_Level0_Null", function () {
+            VDF.Serialize(null).Should().Be(">null");
+        });
+        test("FromVDFNode_Level0_EmptyString", function () {
+            VDF.Serialize("").Should().Be(">empty");
+        });
+
         test("ToVDF_Level1_IgnoreEmptyString", function () {
             VDF.Serialize(new TypeWithEmptyStringProp(), "TypeWithEmptyStringProp").Should().Be("");
         });
@@ -200,16 +288,11 @@ var Saving = (function () {
             a["strings2"].items.length.Should().Be(0);
             a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
         });
-        test("ToVDF_Level1_ListItems_PopOutData", function () {
-            var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutData(), "TypeWithList_PopOutData");
-            a.ToVDF().Should().Be("list{#}\n\
-	A|B");
-        });
-        test("ToVDF_Level1_ListItems_PopOutItemData", function () {
+        test("ToVDF_Level1_ListItems_PoppedOutChildren", function () {
             var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutItemData(), "TypeWithList_PopOutItemData");
-            a.ToVDF().Should().Be("list{#}\n\
+            a.ToVDF().Should().Be("list:\n\
 	A\n\
-	B");
+	B".replace(/\r/g, ""));
         });
         test("ToVDF_Level1_ListItems_Null", function () {
             var a = VDFSaver.ToVDFNode(new List("string", null));
@@ -263,11 +346,63 @@ var Saving = (function () {
             var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, 3 /* AssemblyExternalNoCollapse */));
             a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
         });
-        test("ToVDF_Level3_DeepNestedPoppedOutData", function () {
+
+        test("ToVDF_Level1_DictionaryPoppedOutThenBool", function () {
+            var a = VDFSaver.ToVDFNode(new ToVDF_Level1_Object_DictionaryPoppedOutThenBool_Class1(), new VDFSaveOptions(null, 0 /* None */));
+            a.ToVDF().Should().Be("messages:\n\
+	title1{message1}\n\
+	title2{message2}\n\
+^otherProperty{true}".replace(/\r/g, ""));
+        });
+        test("ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", function () {
+            var a = VDFSaver.ToVDFNode(new ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1(), new VDFSaveOptions(null, 0 /* None */));
+            a.ToVDF().Should().Be("\n\
+	messages:\n\
+		title1{message1}\n\
+		title2{message2}\n\
+	otherProperty{true}".replace(/\r/g, ""));
+        });
+
+        test("ToVDF_Level2_Object_ArrayPoppedOutThenBool", function () {
+            var a = VDFSaver.ToVDFNode(new T1_Level1(), new VDFSaveOptions(null, 0 /* None */));
+            a.ToVDF().Should().Be("level2{messages:\n\
+	DeepString1\n\
+	DeepString2\n\
+^otherProperty{true}}".replace(/\r/g, ""));
+        });
+
+        test("ToVDF_Level3_Object_Array_ArrayPoppedOut", function () {
             var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(null, 0 /* None */));
-            a.ToVDF().Should().Be("level2{level3_first{message{#}}level3_second{message{#}}}\n\
-	DeepString\n\
-	#DeepString".replace(/\r/g, ""));
+            a.ToVDF().Should().Be("level2{level3_first{messages:\n\
+	DeepString1\n\
+	DeepString2\n\
+}level3_second{messages:\n\
+	DeepString1\n\
+	DeepString2\n\
+}}".replace(/\r/g, ""));
+        });
+
+        test("ToVDF_Level4_Object_Array_ArrayPoppedOut_ArrayPoppedOutThenBool", function () {
+            var a = VDFSaver.ToVDFNode(new T4_Level1(), new VDFSaveOptions(null, 0 /* None */));
+            a.ToVDF().Should().Be("level2{level3_first{level4s:\n\
+	messages:\n\
+		text1\n\
+		text2\n\
+	^otherProperty{false}\n\
+	messages:\n\
+		text1\n\
+		text2\n\
+	^otherProperty{false}\n\
+}level3_second{level4s:\n\
+	messages:\n\
+		text1\n\
+		text2\n\
+	^otherProperty{false}\n\
+	messages:\n\
+		text1\n\
+		text2\n\
+	^otherProperty{false}\n\
+}}".replace(/\r/g, ""));
         });
     };
     return Saving;

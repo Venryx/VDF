@@ -1,4 +1,4 @@
-var VDFLoadOptions = (function () {
+﻿var VDFLoadOptions = (function () {
     function VDFLoadOptions(message, inferCompatibleTypesForUnknownTypes) {
         if (typeof inferCompatibleTypesForUnknownTypes === "undefined") { inferCompatibleTypesForUnknownTypes = false; }
         this.message = message;
@@ -16,7 +16,7 @@ var VDFLoader_LineInfo = (function () {
 var VDFLoader = (function () {
     function VDFLoader() {
     }
-    VDFLoader.ToVDFNode = function (text, declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName, firstObjTextCharPos, lineInfo) {
+    VDFLoader.ToVDFNode = function (vdfFile, declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName, firstObjTextCharPos, lineInfo) {
         if (typeof firstObjTextCharPos === "undefined") { firstObjTextCharPos = 0; }
         var declaredTypeName;
         var loadOptions;
@@ -27,12 +27,12 @@ var VDFLoader = (function () {
             declaredTypeName = loadOptions_orDeclaredTypeName;
             loadOptions = declaredTypeName_orLoadOptions;
         }
-        text = (text || "").replace(/\r\n/g, "\n");
+        vdfFile = vdfFile.replace(/\r\n/g, "\n");
         loadOptions = loadOptions || new VDFLoadOptions();
 
         var objNode = new VDFNode();
         var objTypeName = declaredTypeName;
-        if (objTypeName == null && VDFLoader.FindNextDepthXItemSeparatorCharPos(text, firstObjTextCharPos, 0) != -1)
+        if (objTypeName == null && VDFLoader.FindNextDepthXItemSeparatorCharPos(vdfFile, firstObjTextCharPos, 0) != -1)
             objTypeName = "List[object]";
         var livePropAddNode = objTypeName != null && objTypeName.startsWith("List[") ? new VDFNode() : objNode;
         var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDF.GetTypeInfo(VDF.GetGenericParametersOfTypeName(objTypeName)[0]) : (objTypeName != null ? VDF.GetTypeInfo(objTypeName) : null);
@@ -43,7 +43,7 @@ var VDFLoader = (function () {
         var dataIsPoppedOut = false;
         var livePropName = null;
 
-        var parser = new VDFTokenParser(text, firstObjTextCharPos);
+        var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
         while (parser.MoveNextToken()) {
             var token = parser.tokens[parser.tokens.length - 1];
             if (token.type == 9 /* DataEndMarker */)
@@ -85,12 +85,12 @@ var VDFLoader = (function () {
                     }
                 else if (token.type == 8 /* Data_BaseValue */)
                     if (token.text == "#") {
-                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(text, VDFLoader.FindIndentDepthOfLineContainingCharPos(text, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
+                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
                         if ((objTypeName != null && objTypeName.startsWith("List[")) || poppedOutPropValueItemTextPositions.length > 1)
                             for (var i in poppedOutPropValueItemTextPositions)
-                                objNode.PushItem(VDFLoader.ToVDFNode(text, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
+                                objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
                         else
-                            objNode = VDFLoader.ToVDFNode(text, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
+                            objNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
                         lineInfo.fromLinePoppedOutGroupCount++;
                         dataIsPoppedOut = true;
                     } else
@@ -100,11 +100,11 @@ var VDFLoader = (function () {
                 else if (token.type == 6 /* DataStartMarker */)
                     if (livePropName != null)
                         if (objTypeName && objTypeName.startsWith("Dictionary["))
-                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(text, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, lineInfo));
+                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, lineInfo));
                         else
-                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(text, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, lineInfo));
+                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, lineInfo));
                     else
-                        livePropAddNode = VDFLoader.ToVDFNode(text, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, lineInfo);
+                        livePropAddNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, lineInfo);
                 else if (token.type == 9 /* DataEndMarker */ && livePropName != null)
                     livePropName = null;
                 else if (token.type == 10 /* LineBreak */)
@@ -119,26 +119,24 @@ var VDFLoader = (function () {
             return [6 /* DataStartMarker */, 8 /* Data_BaseValue */, 7 /* ItemSeparator */].contains(token.type);
         }).length && !dataIsPoppedOut)
             objNode.PushItem(livePropAddNode);
-        if (text == "")
-            objNode.baseValue = "";
 
         return objNode;
     };
 
-    VDFLoader.FindNextDepthXCharYPos = function (text, searchStartPos, targetDepth, ch, depthStartChar, depthEndChar) {
+    VDFLoader.FindNextDepthXCharYPos = function (vdfFile, searchStartPos, targetDepth, ch, depthStartChar, depthEndChar) {
         var depth = 0;
-        for (var i = searchStartPos; i < text.length && depth >= 0; i++)
-            if (text[i] == depthStartChar)
+        for (var i = searchStartPos; i < vdfFile.length && depth >= 0; i++)
+            if (vdfFile[i] == depthStartChar)
                 depth++;
-            else if (text[i] == ch && depth == targetDepth)
+            else if (vdfFile[i] == ch && depth == targetDepth)
                 return i;
-            else if (text[i] == depthEndChar)
+            else if (vdfFile[i] == depthEndChar)
                 depth--;
         return -1;
     };
-    VDFLoader.FindNextDepthXItemSeparatorCharPos = function (text, searchStartPos, targetDepth) {
+    VDFLoader.FindNextDepthXItemSeparatorCharPos = function (vdfFile, searchStartPos, targetDepth) {
         var depth = 0;
-        var parser = new VDFTokenParser(text, searchStartPos);
+        var parser = new VDFTokenParser(vdfFile, searchStartPos);
         while (parser.MoveNextToken() && depth >= 0)
             if (parser.tokens[parser.tokens.length - 1].type == 6 /* DataStartMarker */)
                 depth++;
@@ -151,30 +149,30 @@ var VDFLoader = (function () {
             }
         return -1;
     };
-    VDFLoader.FindIndentDepthOfLineContainingCharPos = function (text, charPos) {
+    VDFLoader.FindIndentDepthOfLineContainingCharPos = function (vdfFile, charPos) {
         var lineIndentDepth = 0;
-        for (var i = charPos - 1; i > 0 && text[i] != '\n'; i--)
-            if (text[i] == '\t')
+        for (var i = charPos - 1; i > 0 && vdfFile[i] != '\n'; i--)
+            if (vdfFile[i] == '\t')
                 lineIndentDepth++;
         return lineIndentDepth;
     };
-    VDFLoader.FindNextLineBreakCharPos = function (text, searchStartPos) {
-        for (var i = searchStartPos; i < text.length; i++)
-            if (text[i] == '\n')
+    VDFLoader.FindNextLineBreakCharPos = function (vdfFile, searchStartPos) {
+        for (var i = searchStartPos; i < vdfFile.length; i++)
+            if (vdfFile[i] == '\n')
                 return i;
         return -1;
     };
-    VDFLoader.FindPoppedOutChildTextPositions = function (text, parentIndentDepth, searchStartPos, poppedOutChildDataIndex) {
+    VDFLoader.FindPoppedOutChildTextPositions = function (vdfFile, parentIndentDepth, searchStartPos, poppedOutChildDataIndex) {
         var result = new Array();
 
         var poppedOutChildDatasReached = 0;
         var indentsOnThisLine = 0;
         var inLiteralMarkers = false;
-        for (var i = searchStartPos; i < text.length; i++) {
-            var lastChar = i > 0 ? text[i - 1] : null;
-            var ch = text[i];
-            var nextChar = i < text.length - 1 ? text[i + 1] : null;
-            var nextNextChar = i < text.length - 2 ? text[i + 2] : null;
+        for (var i = searchStartPos; i < vdfFile.length; i++) {
+            var lastChar = i > 0 ? vdfFile[i - 1] : null;
+            var ch = vdfFile[i];
+            var nextChar = i < vdfFile.length - 1 ? vdfFile[i + 1] : null;
+            var nextNextChar = i < vdfFile.length - 2 ? vdfFile[i + 2] : null;
 
             if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) {
                 inLiteralMarkers = !inLiteralMarkers;
@@ -196,7 +194,7 @@ var VDFLoader = (function () {
                 if (poppedOutChildDatasReached > poppedOutChildDataIndex + 1)
                     break;
 
-                var nextLineBreakCharPos = VDFLoader.FindNextLineBreakCharPos(text, i);
+                var nextLineBreakCharPos = VDFLoader.FindNextLineBreakCharPos(vdfFile, i);
                 if (nextLineBreakCharPos != -1)
                     i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
                 else

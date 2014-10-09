@@ -1,4 +1,4 @@
-interface Object { GetTypeName(): string; GetType(): string; }
+﻿interface Object { GetTypeName(): string; GetType(): string; }
 module VDF_SetUp
 {
 	Object.defineProperty(Object.prototype, "GetTypeName", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
@@ -181,9 +181,9 @@ class EnumValue
 	}
 	toString() { return this.stringValue; }
 
-	static IsEnum(typeName: string): boolean { return window[enumTypeName][stringValue]; }
-	static GetEnumIntForStringValue(enumTypeName: string, stringValue: string) { return window[enumTypeName][intValue]; }
-	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return window[enumTypeName][intValue]; }
+	static IsEnum(typeName: string): boolean { return eval("window['" + typeName + "'] && " + typeName + "['_IsEnum'] === 0"); }
+	static GetEnumIntForStringValue(enumTypeName: string, stringValue: string) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); }
+	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 class List<T>
 {
