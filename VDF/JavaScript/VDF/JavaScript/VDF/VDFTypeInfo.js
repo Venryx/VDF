@@ -3,6 +3,10 @@
         this.props_includeL1 = props_includeL1;
         this.propInfoByName = propInfoByPropName || {};
     }
+    VDFTypeInfo.Get = function (vTypeName) {
+        return (window[vTypeName] || {}).typeInfo;
+    };
+
     VDFTypeInfo.prototype.SetPropInfo = function (propName, propInfo) {
         this.propInfoByName[propName] = propInfo;
     };

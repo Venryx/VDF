@@ -35,8 +35,9 @@ class VDFLoader
 
 		var depth = 0;
 		var tokensNotInDataMarkers = new List<VDFToken>("VDFToken");
-		foreach (VDFToken token in parser.tokens)
+		for (var i in parser.tokens.indexes())
 		{
+			var token = parser.tokens[i];
 			if (token.type == VDFTokenType.DataEndMarker)
 				depth--;
 			if (depth == 0)
@@ -46,8 +47,8 @@ class VDFLoader
 		}
 		var isInlineList = tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.ItemSeparator);
 
-		VDFToken objMetadataBaseValueToken = null;
-		VDFToken objMetadataEndMarkerToken = null;
+		var objMetadataBaseValueToken: VDFToken = null;
+		var objMetadataEndMarkerToken: VDFToken = null;
 		if (isInlineList)
 		{
 			if (tokensNotInDataMarkers.Count >= 2 && tokensNotInDataMarkers[1].type == VDFTokenType.WiderMetadataEndMarker)
@@ -67,16 +68,16 @@ class VDFLoader
 			else if (tokensNotInDataMarkers.Count >= 1 && (tokensNotInDataMarkers[0].type == VDFTokenType.WiderMetadataEndMarker || tokensNotInDataMarkers[0].type == VDFTokenType.MetadataEndMarker))
 				objMetadataEndMarkerToken = tokensNotInDataMarkers[0];
 
-		string objTypeStr = null;
+		var objTypeStr: string = null;
 		if (objMetadataBaseValueToken != null)
 		{
 			objTypeStr = objMetadataBaseValueToken.text;
 
 			// do some expanding of obj-type-str (if applicable)
-			if (objMetadataEndMarkerToken.type == VDFTokenType.WiderMetadataEndMarker && !objTypeStr.Contains("["))
+			if (objMetadataEndMarkerToken.type == VDFTokenType.WiderMetadataEndMarker && objTypeStr.indexOf("[") == -1)
 				if (objTypeStr == ",")
 					objTypeStr = "System.Collections.IDictionary";
-				else if (FindNextDepthXCharYPos(objTypeStr, 0, 0, ',', '[', ']') != -1) // e.g. "string,object>>"
+				else if (VDFLoader.FindNextDepthXCharYPos(objTypeStr, 0, 0, ',', '[', ']') != -1) // e.g. "string,object>>"
 					objTypeStr = "Dictionary[" + objTypeStr + "]";
 				else // e.g. "string>>"
 					objTypeStr = "List[" + objTypeStr + "]";
@@ -94,16 +95,12 @@ class VDFLoader
 			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.DataPropName) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak))
 				objTypeStr = "System.Collections.IList";
 
-		Type objType = declaredType;
-		if (objTypeStr != null && objTypeStr.Length > 0)
-		{
-			var fromMetadataType = VDF.GetTypeByVName(objTypeStr, loadOptions);
-			if (objType == null || objType.IsAssignableFrom(fromMetadataType)) // if there is no declared type, or the from-metadata type is more specific than the declared type
-				objType = fromMetadataType;
-		}
-		if (objType == null)
-			objType = typeof(string); // string is the default/fallback type (note, though, that if the below code finds properties, it'll just add them to the VDFNode anyway)
-		var objTypeInfo = VDFTypeInfo.Get(objType);
+		var objTypeName = declaredTypeName;
+		if (objTypeStr != null && objTypeStr.length > 0)
+			objTypeName = objTypeStr; // note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
+		if (objTypeName == null)
+			objTypeName = "string"; // string is the default/fallback type (note, though, that if the below code finds properties, it'll just add them to the VDFNode anyway)
+		var objTypeInfo = VDFTypeInfo.Get(objTypeName);
 
 		// calculate token depths
 		// ==========

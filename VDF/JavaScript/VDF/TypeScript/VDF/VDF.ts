@@ -36,7 +36,6 @@ class VDF
 	static RegisterTypeImporter_Inline<T>(type: string, importer: Function) { VDF.typeImporters_inline[type] = importer; }
 
 	static GetType(vTypeName: string) { return window[vTypeName]; }
-	static GetTypeInfo(vTypeName: string) { return (window[vTypeName] || {}).typeInfo; }
 	static GetVTypeNameOfObject(obj)
 	{
 		if (obj.constructor == (<any>{}).constructor || obj.constructor == object) // if true anonymous object, or if VDF-anonymous-object
@@ -188,15 +187,6 @@ class List<T>
 	private innerArray: any[];
 	realVTypeName: string;
 	itemType: string;
-	get length()
-	{
-		//return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
-		var highestIndex = -1;
-		for (var propName in this)
-			if (parseInt(propName) == propName && parseInt(propName) > highestIndex) // if integer key
-				highestIndex = parseInt(propName);
-		return highestIndex + 1;
-	}
 	constructor(itemType: string, ...items: T[])
 	{
 		VDFUtils.SetUpStashFields(this, "innerArray", "realVTypeName", "itemType");
@@ -206,13 +196,19 @@ class List<T>
 			this.push(items[i]);
 		this.itemType = itemType;
 	}
+	
+	// Array standard property replications
+	get length()
+	{
+		//return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
+		var highestIndex = -1;
+		for (var propName in this)
+			if (parseInt(propName) == propName && parseInt(propName) > highestIndex) // if integer key
+				highestIndex = parseInt(propName);
+		return highestIndex + 1;
+	}
 
-	pushAll(items: Array<T>) { for (var i = 0; i < items.length; i++) this.push(items[i]); }
-	remove(item: T) { this.splice(this.indexOf(item), 1); }
-
-	// create wrappers for the inner-array's standard functions, making them callable from the List object itself
-	// ==================
-
+	// Array standard functions replications
 	private modifyInnerListWithCall(func, args?: any[])
 	{
 		for (var i = 0; i < this.innerArray.length; i++)
@@ -243,6 +239,37 @@ class List<T>
 	map(...args) { return Array.prototype.map.apply(this.innerArray, args); }
 	reduce(...args) { return Array.prototype.reduce.apply(this.innerArray, args); }
 	reduceRight(...args) { return Array.prototype.reduceRight.apply(this.innerArray, args); }
+
+	// new functions
+	indexes()
+	{
+		var result = {};
+		for (var i = 0; i < this.length; i++)
+			result[i] = this[i];
+		return result;
+	}
+	Count
+	Add(...items): number { return this.push(items); }
+	AddRange(items: Array<T>)
+	{
+		for (var i = 0; i < items.length; i++)
+			this.push(items[i]);
+	}
+	Remove(item: T) { this.splice(this.indexOf(item), 1); }
+	Any(matchFunc)
+	{
+		for (var i in this.indexes())
+			if (matchFunc(this[i]))
+				return true;
+		return false;
+	}
+	All(matchFunc)
+	{
+		for (var i in this.indexes())
+			if (!matchFunc(this[i]))
+				return false;
+		return true;
+	}
 }
 VDFUtils.MakePropertiesNonEnumerable(List.prototype, true);
 class Dictionary<K, V>

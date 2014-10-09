@@ -31,9 +31,6 @@ var VDF = (function () {
     VDF.GetType = function (vTypeName) {
         return window[vTypeName];
     };
-    VDF.GetTypeInfo = function (vTypeName) {
-        return (window[vTypeName] || {}).typeInfo;
-    };
     VDF.GetVTypeNameOfObject = function (obj) {
         if (obj.constructor == {}.constructor || obj.constructor == object)
             return null;
@@ -221,6 +218,7 @@ var List = (function () {
         this.itemType = itemType;
     }
     Object.defineProperty(List.prototype, "length", {
+        // Array standard property replications
         get: function () {
             //return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
             var highestIndex = -1;
@@ -233,16 +231,7 @@ var List = (function () {
         configurable: true
     });
 
-    List.prototype.pushAll = function (items) {
-        for (var i = 0; i < items.length; i++)
-            this.push(items[i]);
-    };
-    List.prototype.remove = function (item) {
-        this.splice(this.indexOf(item), 1);
-    };
-
-    // create wrappers for the inner-array's standard functions, making them callable from the List object itself
-    // ==================
+    // Array standard functions replications
     List.prototype.modifyInnerListWithCall = function (func, args) {
         for (var i = 0; i < this.innerArray.length; i++)
             delete this[i];
@@ -381,6 +370,41 @@ var List = (function () {
             args[_i] = arguments[_i + 0];
         }
         return Array.prototype.reduceRight.apply(this.innerArray, args);
+    };
+
+    // new functions
+    List.prototype.indexes = function () {
+        var result = {};
+        for (var i = 0; i < this.length; i++)
+            result[i] = this[i];
+        return result;
+    };
+
+    List.prototype.Add = function () {
+        var items = [];
+        for (var _i = 0; _i < (arguments.length - 0); _i++) {
+            items[_i] = arguments[_i + 0];
+        }
+        return this.push(items);
+    };
+    List.prototype.AddRange = function (items) {
+        for (var i = 0; i < items.length; i++)
+            this.push(items[i]);
+    };
+    List.prototype.Remove = function (item) {
+        this.splice(this.indexOf(item), 1);
+    };
+    List.prototype.Any = function (matchFunc) {
+        for (var i in this.indexes())
+            if (matchFunc(this[i]))
+                return true;
+        return false;
+    };
+    List.prototype.All = function (matchFunc) {
+        for (var i in this.indexes())
+            if (!matchFunc(this[i]))
+                return false;
+        return true;
     };
     return List;
 })();

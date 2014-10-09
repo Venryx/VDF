@@ -1,5 +1,7 @@
 ﻿class VDFTypeInfo
 {
+	static Get(vTypeName: string) { return (window[vTypeName] || {}).typeInfo; }
+
 	props_includeL1: boolean;
 	propInfoByName: Object;
 	constructor(props_includeL1?: boolean, propInfoByPropName?: Object)
