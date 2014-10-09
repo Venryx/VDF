@@ -7,17 +7,11 @@
     return VDFLoadOptions;
 })();
 
-var VDFLoader_LineInfo = (function () {
-    function VDFLoader_LineInfo() {
-        this.fromLinePoppedOutGroupCount = 0;
-    }
-    return VDFLoader_LineInfo;
-})();
 var VDFLoader = (function () {
     function VDFLoader() {
     }
-    VDFLoader.ToVDFNode = function (vdfFile, declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName, firstObjTextCharPos, lineInfo) {
-        if (typeof firstObjTextCharPos === "undefined") { firstObjTextCharPos = 0; }
+    VDFLoader.ToVDFNode = function (text, declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName, objIndent) {
+        if (typeof objIndent === "undefined") { objIndent = 0; }
         var declaredTypeName;
         var loadOptions;
         if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions) {
@@ -27,12 +21,12 @@ var VDFLoader = (function () {
             declaredTypeName = loadOptions_orDeclaredTypeName;
             loadOptions = declaredTypeName_orLoadOptions;
         }
-        vdfFile = vdfFile.replace(/\r\n/g, "\n");
+        text = (text || "").replace(/\r\n/g, "\n");
         loadOptions = loadOptions || new VDFLoadOptions();
 
         var objNode = new VDFNode();
         var objTypeName = declaredTypeName;
-        if (objTypeName == null && VDFLoader.FindNextDepthXItemSeparatorCharPos(vdfFile, firstObjTextCharPos, 0) != -1)
+        if (objTypeName == null && VDFLoader.FindNextDepthXItemSeparatorCharPos(text, firstObjTextCharPos, 0) != -1)
             objTypeName = "List[object]";
         var livePropAddNode = objTypeName != null && objTypeName.startsWith("List[") ? new VDFNode() : objNode;
         var livePropAddNodeTypeInfo = livePropAddNode != objNode ? VDF.GetTypeInfo(VDF.GetGenericParametersOfTypeName(objTypeName)[0]) : (objTypeName != null ? VDF.GetTypeInfo(objTypeName) : null);
@@ -43,7 +37,7 @@ var VDFLoader = (function () {
         var dataIsPoppedOut = false;
         var livePropName = null;
 
-        var parser = new VDFTokenParser(vdfFile, firstObjTextCharPos);
+        var parser = new VDFTokenParser(text, firstObjTextCharPos);
         while (parser.MoveNextToken()) {
             var token = parser.tokens[parser.tokens.length - 1];
             if (token.type == 9 /* DataEndMarker */)
@@ -85,12 +79,12 @@ var VDFLoader = (function () {
                     }
                 else if (token.type == 8 /* Data_BaseValue */)
                     if (token.text == "#") {
-                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(vdfFile, VDFLoader.FindIndentDepthOfLineContainingCharPos(vdfFile, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
+                        var poppedOutPropValueItemTextPositions = VDFLoader.FindPoppedOutChildTextPositions(text, VDFLoader.FindIndentDepthOfLineContainingCharPos(text, firstObjTextCharPos), parser.nextCharPos, lineInfo.fromLinePoppedOutGroupCount);
                         if ((objTypeName != null && objTypeName.startsWith("List[")) || poppedOutPropValueItemTextPositions.length > 1)
                             for (var i in poppedOutPropValueItemTextPositions)
-                                objNode.PushItem(VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
+                                objNode.PushItem(VDFLoader.ToVDFNode(text, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[i]));
                         else
-                            objNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
+                            objNode = VDFLoader.ToVDFNode(text, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : null, loadOptions, poppedOutPropValueItemTextPositions[0]);
                         lineInfo.fromLinePoppedOutGroupCount++;
                         dataIsPoppedOut = true;
                     } else
@@ -100,11 +94,11 @@ var VDFLoader = (function () {
                 else if (token.type == 6 /* DataStartMarker */)
                     if (livePropName != null)
                         if (objTypeName && objTypeName.startsWith("Dictionary["))
-                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, lineInfo));
+                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(text, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, parser.nextCharPos, lineInfo));
                         else
-                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(vdfFile, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, lineInfo));
+                            livePropAddNode.SetProperty(livePropName, VDFLoader.ToVDFNode(text, livePropAddNodeTypeInfo != null && livePropAddNodeTypeInfo.propInfoByName[livePropName] ? livePropAddNodeTypeInfo.propInfoByName[livePropName].propVTypeName : null, loadOptions, parser.nextCharPos, lineInfo));
                     else
-                        livePropAddNode = VDFLoader.ToVDFNode(vdfFile, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, lineInfo);
+                        livePropAddNode = VDFLoader.ToVDFNode(text, declaredTypeName != null ? (VDF.GetGenericParametersOfTypeName(declaredTypeName)[0] || "object") : "List[object]", loadOptions, parser.nextCharPos, lineInfo);
                 else if (token.type == 9 /* DataEndMarker */ && livePropName != null)
                     livePropName = null;
                 else if (token.type == 10 /* LineBreak */)

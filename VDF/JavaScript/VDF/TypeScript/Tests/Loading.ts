@@ -11,8 +11,16 @@ class TypeWithPostDeserializeMethod
 	{
 		flag: new VDFPropInfo("bool")
 	});
-	flag: boolean = false;
+	flag = false;
 	VDFPostDeserialize(): void { this.flag = true; }
+}
+class TypeInstantiatedManuallyThenFilled
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
+	{
+		flag: new VDFPropInfo("bool")
+	});
+	flag: boolean;
 }
 class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 {
@@ -22,7 +30,7 @@ class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class
 		otherProperty: new VDFPropInfo("bool")
 	});
 
-	messages: Dictionary<string, string> = new Dictionary<string, string>();
+	messages = new Dictionary<string, string>();
 	otherProperty: boolean;
 }
 
@@ -32,36 +40,12 @@ class TypeWithPostDeserializeMethod_CustomMessageRequired
 	{
 		flag: new VDFPropInfo("bool", true)
 	});
-	flag: boolean = false;
+	flag = false;
 	VDFPostDeserialize(message: any): void { if (message == "RequiredMessage") this.flag = true; }
 }
 
 class Loading
 {
-	static initialized: boolean;
-	static Init()
-	{
-		if (this.initialized)
-			return;
-		this.initialized = true;
-		Object.prototype._AddFunction_Inline = function Should()
-		{
-			return 0 || // fix for auto-semicolon-insertion
-			{
-				Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-				BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
-			};
-		};
-		VDF.RegisterTypeExporter_Inline("Guid", id => id.ToString());
-		VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
-		VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);
-		VDF.RegisterTypeImporter_Inline("Vector3", str =>
-		{
-			var parts: Array<string> = str.split(',');
-			return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
-		});
-	}
-
 	static RunTests()
 	{
 		// to VDFNode
@@ -271,7 +255,7 @@ three lines");
 		});
 		test("ToVDFNode_Level1_Dictionary_TypesInferredFromGenerics", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("HoldMesh>vertexColors{Dictionary[Vector3,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}");
+			var a = VDFLoader.ToVDFNode("vertexColors{Dictionary[string,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}");
 			a["vertexColors"]["9,4,2.5"].baseValue.Should().Be("Black");
 			a["vertexColors"]["1,8,9.5435"].baseValue.Should().Be("Gray");
 			a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");

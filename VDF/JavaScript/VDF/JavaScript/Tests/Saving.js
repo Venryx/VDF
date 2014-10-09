@@ -189,36 +189,6 @@ var T4_Level4 = (function () {
 var Saving = (function () {
     function Saving() {
     }
-    Saving.Init = function () {
-        if (this.initialized)
-            return;
-        this.initialized = true;
-        Object.prototype._AddFunction_Inline = function Should() {
-            var _this = this;
-            return 0 || {
-                Be: function (value, message) {
-                    equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
-                },
-                BeExactly: function (value, message) {
-                    strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
-                }
-            };
-        };
-        VDF.RegisterTypeExporter_Inline("Guid", function (id) {
-            return id.ToString();
-        });
-        VDF.RegisterTypeImporter_Inline("Guid", function (str) {
-            return new Guid(str);
-        });
-        VDF.RegisterTypeExporter_Inline("Vector3", function (point) {
-            return point.x + "," + point.y + "," + point.z;
-        });
-        VDF.RegisterTypeImporter_Inline("Vector3", function (str) {
-            var parts = str.split(',');
-            return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
-        });
-    };
-
     Saving.RunTests = function () {
         // from VDFNode
         // ==========

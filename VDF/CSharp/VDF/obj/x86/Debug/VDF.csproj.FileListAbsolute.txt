@@ -11,7 +11,6 @@ C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.pdb
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.exe.config
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.exe
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.pdb
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Main.resources
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.exe

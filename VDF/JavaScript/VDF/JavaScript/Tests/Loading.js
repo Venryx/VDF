@@ -11,11 +11,30 @@ var TypeWithPostDeserializeMethod = (function () {
     TypeWithPostDeserializeMethod.prototype.VDFPostDeserialize = function () {
         this.flag = true;
     };
-    TypeWithPostDeserializeMethod.typeInfo = new VDFTypeInfo(false, {
-        flag: new VDFPropInfo("bool", true)
+    TypeWithPostDeserializeMethod.typeInfo = new VDFTypeInfo(false, false, {
+        flag: new VDFPropInfo("bool")
     });
     return TypeWithPostDeserializeMethod;
 })();
+var TypeInstantiatedManuallyThenFilled = (function () {
+    function TypeInstantiatedManuallyThenFilled() {
+    }
+    TypeInstantiatedManuallyThenFilled.typeInfo = new VDFTypeInfo(false, false, {
+        flag: new VDFPropInfo("bool")
+    });
+    return TypeInstantiatedManuallyThenFilled;
+})();
+var ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
+    function ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
+        this.messages = new Dictionary();
+    }
+    ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1.typeInfo = new VDFTypeInfo(false, false, {
+        messages: new VDFPropInfo("Dictionary[string,string]"),
+        otherProperty: new VDFPropInfo("bool")
+    });
+    return ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1;
+})();
+
 var TypeWithPostDeserializeMethod_CustomMessageRequired = (function () {
     function TypeWithPostDeserializeMethod_CustomMessageRequired() {
         this.flag = false;
@@ -24,55 +43,18 @@ var TypeWithPostDeserializeMethod_CustomMessageRequired = (function () {
         if (message == "RequiredMessage")
             this.flag = true;
     };
-    TypeWithPostDeserializeMethod_CustomMessageRequired.typeInfo = new VDFTypeInfo(false, {
+    TypeWithPostDeserializeMethod_CustomMessageRequired.typeInfo = new VDFTypeInfo(false, false, {
         flag: new VDFPropInfo("bool", true)
     });
     return TypeWithPostDeserializeMethod_CustomMessageRequired;
 })();
-var TypeInstantiatedManuallyThenFilled = (function () {
-    function TypeInstantiatedManuallyThenFilled() {
-    }
-    TypeInstantiatedManuallyThenFilled.typeInfo = new VDFTypeInfo(false, {
-        flag: new VDFPropInfo("bool", true)
-    });
-    return TypeInstantiatedManuallyThenFilled;
-})();
+
 var Loading = (function () {
     function Loading() {
     }
-    Loading.Init = function () {
-        if (this.initialized)
-            return;
-        this.initialized = true;
-        Object.prototype._AddFunction_Inline = function Should() {
-            var _this = this;
-            return 0 || {
-                Be: function (value, message) {
-                    equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
-                },
-                BeExactly: function (value, message) {
-                    strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
-                }
-            };
-        };
-        VDF.RegisterTypeExporter_Inline("Guid", function (id) {
-            return id.ToString();
-        });
-        VDF.RegisterTypeImporter_Inline("Guid", function (str) {
-            return new Guid(str);
-        });
-        VDF.RegisterTypeExporter_Inline("Vector3", function (point) {
-            return point.x + "," + point.y + "," + point.z;
-        });
-        VDF.RegisterTypeImporter_Inline("Vector3", function (str) {
-            var parts = str.split(',');
-            return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
-        });
-    };
-
     Loading.RunTests = function () {
-        // ToVDFNode
-        // ==================
+        // to VDFNode
+        // ==========
         test("ToVDFNode_Level0_Comment", function () {
             var a = VDFLoader.ToVDFNode("// comment\n\
 			Root string.");
@@ -97,19 +79,24 @@ var Loading = (function () {
             var a = VDFLoader.ToVDFNode("string>Root string.");
             a.metadata_type.Should().Be("string");
         });
-        test("ToVDFNode_Level0_ArrayItems", function () {
+        test("ToVDFNode_Level0_Array", function () {
             var a = VDFLoader.ToVDFNode("Root string 1.|Root string 2.");
             a[0].baseValue.Should().Be("Root string 1.");
             a[1].baseValue.Should().Be("Root string 2.");
         });
-        test("ToVDFNode_Level0_ArrayItems_Objects", function () {
+        test("ToVDFNode_Level0_Array_ExplicitStartAndEndMarkers", function () {
+            var a = VDFLoader.ToVDFNode("{Root string 1.}|{Root string 2.}", "IList");
+            a[0].baseValue.Should().Be("Root string 1.");
+            a[1].baseValue.Should().Be("Root string 2.");
+        });
+        test("ToVDFNode_Level0_Array_Objects", function () {
             var a = VDFLoader.ToVDFNode("name{Dan}age{50}|name{Bob}age{60}", "List[object]");
             a[0]["name"].AsString.Should().Be("Dan");
             a[0]["age"].AsInt.Should().Be(50);
             a[1]["name"].AsString.Should().Be("Bob");
             a[1]["age"].AsInt.Should().Be(60);
         });
-        test("ToVDFNode_Level0_ArrayItems_Literals", function () {
+        test("ToVDFNode_Level0_Array_Literals", function () {
             var a = VDFLoader.ToVDFNode("first|@@second\n\
 which is on two lines@@|@@third\n\
 which is on\n\
@@ -121,12 +108,12 @@ which is on two lines");
 which is on\n\
 three lines");
         });
-        test("ToVDFNode_Level0_ArrayItems_Empty", function () {
+        test("ToVDFNode_Level0_Array_Empty", function () {
             var a = VDFLoader.ToVDFNode("|", "List[object]");
             ok(a[0].baseValue == null);
             ok(a[1].baseValue == null);
         });
-        test("ToVDFNode_Level0_ArrayItems_None", function () {
+        test("ToVDFNode_Level0_Array_None", function () {
             var a = VDFLoader.ToVDFNode("", "List[object]");
             a.items.length.Should().Be(0);
             a = VDFLoader.ToVDFNode(">>");
@@ -155,12 +142,16 @@ three lines");
             a["key 2"].baseValue.Should().Be("value 2");
         });
         test("ToVDFNode_Level0_InferDepth2", function () {
-            var a = VDF.Deserialize(">>>false", "List[object]");
+            var a = VDF.Deserialize(">>>false", "IList");
             a[0].Should().Be(false);
         });
         test("ToVDFNode_Level0_InferUnmarkedTypeToBeString", function () {
-            var a = VDF.Deserialize(">>SimpleString", "List[object]");
+            var a = VDF.Deserialize(">>SimpleString", "IList");
             a[0].Should().Be("SimpleString");
+        });
+        test("ToVDFNode_Level0_KeepDeclaredType", function () {
+            var a = VDF.Deserialize(">>SimpleString", "List[object]");
+            a[0].GetType().Should().Be(typeof (object));
         });
         test("ToVDFNode_Level0_MultilineString", function () {
             var a = VDFLoader.ToVDFNode("@@This is a\nmultiline string\nof three lines in total.@@");
@@ -204,105 +195,154 @@ three lines");
             VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue.Should().Be("level3{Base string.}");
             VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue)["level3"].baseValue.Should().Be("Base string.");
         });
-        test("ToVDFNode_Level1_PoppedOutBaseValue", function () {
-            var a = VDFLoader.ToVDFNode("name{#}\n\
-	Dan");
-            a["name"].baseValue.Should().Be("Dan");
-        });
-        test("ToVDFNode_Level1_PoppedOutNodes", function () {
-            var a = VDFLoader.ToVDFNode("names{#}\n\
-	Dan\n\
-	Bob");
-            a["names"][0].baseValue.Should().Be("Dan");
-            a["names"][1].baseValue.Should().Be("Bob");
-        });
-        test("ToVDFNode_Level1_ArrayItemsInArrayItems", function () {
+        test("ToVDFNode_Level1_ArraysInArrays", function () {
             var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|{3A}");
             a[0][0].baseValue.Should().Be("1A");
             a[0][1].baseValue.Should().Be("1B");
             a[1][0].baseValue.Should().Be("2A");
             a[1][1].baseValue.Should().Be("2B");
-            a[2][0].baseValue.Should().Be("3A");
+            a[2].baseValue.Should().Be("3A");
         });
-        test("ToVDFNode_Level1_ArrayItemsInArrayItems_ValueEmpty", function () {
+        test("ToVDFNode_Level1_ArraysInArrays_SecondsEmpty", function () {
             var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
             a[0][0].baseValue.Should().Be("1A");
             ok(a[0][1].baseValue == null);
             a[1][0].baseValue.Should().Be("2A");
             ok(a[1][1].baseValue == null);
         });
-        test("ToVDFNode_Level1_ArrayItemsInArrayItems_BothEmpty", function () {
+        test("ToVDFNode_Level1_ArraysInArrays_FirstsAndSecondsEmpty", function () {
             var a = VDFLoader.ToVDFNode("{|}|{|}");
             ok(a[0][0].baseValue == null);
             ok(a[0][1].baseValue == null);
             ok(a[1][0].baseValue == null);
             ok(a[1][1].baseValue == null);
         });
-        test("ToVDFNode_Level1_DictionaryItems", function () {
+        test("ToVDFNode_Level1_Dictionary", function () {
             var a = VDFLoader.ToVDFNode("key1{value1}key2{value2}");
             a["key1"].baseValue.Should().Be("value1");
             a["key2"].baseValue.Should().Be("value2");
         });
-        test("ToVDFNode_Level1_DictionaryItems_Complex", function () {
+        test("ToVDFNode_Level1_Dictionary_Complex", function () {
             var a = VDFLoader.ToVDFNode("uiPrefs{toolOptions{@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{>null}size{7}}@@}liveTool{Select}}");
             a["uiPrefs"]["toolOptions"].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{>null}size{7}}");
             a["uiPrefs"]["liveTool"].baseValue.Should().Be("Select");
         });
-        test("ToVDFNode_Level1_DictionaryItems_TypesInferredFromGenerics", function () {
-            var a = VDFLoader.ToVDFNode("HoldMesh>vertexColors{Dictionary[Vector3,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}");
+        test("ToVDFNode_Level1_Dictionary_TypesInferredFromGenerics", function () {
+            var a = VDFLoader.ToVDFNode("vertexColors{Dictionary[string,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}");
             a["vertexColors"]["9,4,2.5"].baseValue.Should().Be("Black");
             a["vertexColors"]["1,8,9.5435"].baseValue.Should().Be("Gray");
             a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");
         });
-        test("ToVDFNode_Level1_PoppedOutItemGroups", function () {
-            var a = VDFLoader.ToVDFNode("names{#}ages{#}\n\
+
+        // note: if only one item (when parsed as List), assume by default obj is an object; if more than one, assume by default obj is a List or Dictionary
+        test("ToVDFNode_Level1_ArrayPoppedOut", function () {
+            var a = VDFLoader.ToVDFNode("names:\n\
+	Dan\n\
+	Bob");
+            a["names"][0].baseValue.Should().Be("Dan");
+            a["names"][1].baseValue.Should().Be("Bob");
+        });
+        test("ToVDFNode_Level1_ArraysPoppedOut", function () {
+            var a = VDFLoader.ToVDFNode("names:\n\
 	Dan\n\
 	Bob\n\
-	#10\n\
+^ages:\n\
+	10\n\
 	20");
             a["names"][0].baseValue.Should().Be("Dan");
             a["names"][1].baseValue.Should().Be("Bob");
             a["ages"][0].baseValue.Should().Be("10");
             a["ages"][1].baseValue.Should().Be("20");
         });
-        test("ToVDFNode_Level1_MultilineStringThenProperties", function () {
+        test("ToVDFNode_Level1_InferredDictionaryPoppedOut", function () {
+            var a = VDFLoader.ToVDFNode("messages:\n\
+	title1{message1}\n\
+	title2{message2}\n\
+^otherProperty{false}");
+            a["messages"].properties.Count.Should().Be(2);
+            a["messages"]["title1"].baseValue.Should().Be("message1");
+            a["messages"]["title2"].baseValue.Should().Be("message2");
+            a["otherProperty"].baseValue.Should().Be("false");
+        });
+        test("ToVDFNode_Level1_DictionaryPoppedOut", function () {
+            /*
+            Written As:
+            
+            messages:,>>
+            title1{message1}
+            title2{message2}
+            ^otherProperty{false}
+            
+            Parsed As:
+            
+            messages:{,>>
+            title1{message1}
+            title2{message2}
+            }^otherProperty{false}
+            */
+            var a = VDFLoader.ToVDFNode("messages:,>>\n\
+	title1{message1}\n\
+	title2{message2}\n\
+^otherProperty{false}");
+            a["messages"].properties.Count.Should().Be(2);
+            a["messages"]["title1"].baseValue.Should().Be("message1");
+            a["messages"]["title2"].baseValue.Should().Be("message2");
+            a["otherProperty"].baseValue.Should().Be("false");
+        });
+
+        test("ToVDFNode_Level1_MultilineStringThenProperty", function () {
             var a = VDFLoader.ToVDFNode("text{@@This is a\n\
 multiline string\n\
 of three lines in total.@@}bool{>true}");
             a["text"].baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
             a["bool"].AsBool.Should().Be(true);
         });
-        test("ToVDFNode_Level1_MultilineStringWithIndentsThenChildData", function () {
-            var a = VDFLoader.ToVDFNode("childTexts{#}text{@@This is a\n\
-	multiline string\n\
-	of three lines in total.@@}\n\
+        test("ToVDFNode_Level1_ArrayPoppedOutThenMultilineString", function () {
+            var a = VDFLoader.ToVDFNode("childTexts:\n\
 	text1\n\
-	text2");
-            a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
+	text2\n\
+^text{@@This is a\n\
+	multiline string\n\
+	of three lines in total.@@}");
             a["childTexts"][0].baseValue.Should().Be("text1");
             a["childTexts"][1].baseValue.Should().Be("text2");
+            a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
         });
 
         test("ToVDFNode_Level5_DeepNestedPoppedOutData", function () {
-            var vdf = "\
-name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children{>>#}}}Test2{vObjectRoot{name{VObjectRoot}children{>>#}}}}\n\
+            var vdf = "name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children:>>\n\
 	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}\n\
-	#id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}".trim();
-            var livePackNode = VDFLoader.ToVDFNode(vdf, new VDFLoadOptions(null, true));
-            livePackNode["worlds"]["Test1"].vObjectRoot.children[0].id.baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
-            livePackNode["worlds"]["Test2"].vObjectRoot.children[0].id.baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
-            var livePack = livePackNode.ToObject(new VDFLoadOptions(null, true));
-            livePack.worlds["Test1"].vObjectRoot.children[0].id.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
-            livePack.worlds["Test2"].vObjectRoot.children[0].id.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
+}}Test2{vObjectRoot{name{VObjectRoot}children:>>\n\
+	id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}\n\
+}}}";
+            var livePackNode = VDFLoader.ToVDFNode(vdf);
+            livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
+            livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
         });
 
-        // ToObject
+        // to object
         // ==================
+        test("ToObject_Level0_Null", function () {
+            VDF.Deserialize(">null").Should().Be(null);
+        });
+        test("ToObject_Level0_Nothing", function () {
+            VDF.Deserialize("").Should().Be(null);
+        });
+        test("ToObject_Level0_Nothing_TypeSpecified", function () {
+            VDF.Deserialize("string>").Should().Be(null);
+        });
+        test("ToObject_Level0_EmptyString", function () {
+            VDF.Deserialize(">empty").Should().Be("");
+        });
         test("ToObject_Level0_Bool", function () {
             VDF.Deserialize("true", "bool").Should().Be(true);
         });
         test("ToObject_Level0_Float", function () {
             VDF.Deserialize("1.5", "float").Should().Be(1.5);
+        });
+
+        test("ToObject_Level1_EmptyStringInList", function () {
+            VDF.Deserialize("text1|", "List[string]")[1].Should().Be(null);
         });
         test("ToObject_Level1_PostDeserializeMethod", function () {
             var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");
@@ -315,6 +355,17 @@ name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children{>>#}
             var a = new TypeInstantiatedManuallyThenFilled();
             VDF.DeserializeInto("flag{true}", a);
             a.flag.Should().Be(true);
+        });
+        test("ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", function () {
+            var a = VDF.Deserialize("\n\
+	messages:\n\
+		title1{message1}\n\
+		title2{message2}\n\
+	otherProperty{true}", "ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1");
+            a.messages.Count.Should().Be(2);
+            a.messages["title1"].Should().Be("message1");
+            a.messages["title2"].Should().Be("message2");
+            a.otherProperty.Should().Be(true);
         });
 
         // unique to JavaScript version

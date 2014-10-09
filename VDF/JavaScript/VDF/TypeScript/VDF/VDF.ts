@@ -39,8 +39,6 @@ class VDF
 	static GetTypeInfo(vTypeName: string) { return (window[vTypeName] || {}).typeInfo; }
 	static GetVTypeNameOfObject(obj)
 	{
-		if (obj == null)
-			return "null";
 		if (obj.constructor == (<any>{}).constructor || obj.constructor == object) // if true anonymous object, or if VDF-anonymous-object
 			return null; // return null, as the name would not be usable (note; this may not actually be true; should test it sometime)
 		var rawType = typeof obj;

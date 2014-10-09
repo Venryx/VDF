@@ -13,18 +13,6 @@ namespace VDFTests
 {
 	public class Loading
 	{
-		static Loading()
-		{
-			VDF.RegisterTypeExporter_Inline<Guid>(id=>id.ToString());
-			VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
-			VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
-			VDF.RegisterTypeImporter_Inline<Vector3>(str=>
-			{
-				string[] parts = str.Split(new[] {','});
-				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
-			});
-		}
-
 		// to VDFNode
 		// ==========
 		
@@ -235,7 +223,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level1_Dictionary_TypesInferredFromGenerics()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("HoldMesh>vertexColors{Dictionary[Vector3,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}", new VDFLoadOptions
+			VDFNode a = VDFLoader.ToVDFNode("vertexColors{Dictionary[string,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}", new VDFLoadOptions
 			{
 				typeAliasesByType = new Dictionary<Type, string> {{typeof(Color), "Color"}}
 			});
@@ -370,7 +358,7 @@ of three lines in total.@@}bool{>true}");
 			[VDFPostDeserialize] TypeWithConstructorAsPostDeserializeMethod() { flag = true; }
 		}
 		[Fact] void ToObject_Level1_PostDeserializeConstructor() { VDF.Deserialize<TypeWithConstructorAsPostDeserializeMethod>("").flag.Should().Be(true); }
-		class TypeInstantiatedManuallyThenFilled { public bool flag; }
+		class TypeInstantiatedManuallyThenFilled { [VDFProp] public bool flag; }
 		[Fact] void ToObject_Level1_InstantiateTypeManuallyThenFill()
 		{
 			var a = new TypeInstantiatedManuallyThenFilled();

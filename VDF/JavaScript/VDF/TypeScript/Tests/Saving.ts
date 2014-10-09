@@ -11,7 +11,7 @@ class TypeWithEmptyStringProp
 	{
 		emptyString: new VDFPropInfo("string", true, false, false)
 	});
-	emptyString: string = "";
+	emptyString = "";
 }
 class TypeWithNullProps
 {
@@ -21,9 +21,9 @@ class TypeWithNullProps
 		strings: new VDFPropInfo("List[string]"),
 		strings2: new VDFPropInfo("List[string]")
 	});
-	obj: any;
+	obj;
 	strings: List<string>;
-	strings2: List<string> = new List<string>("string");
+	strings2 = new List<string>("string");
 }
 class TypeWithList_PopOutItemData
 {
@@ -31,7 +31,7 @@ class TypeWithList_PopOutItemData
 	{
 		list: new VDFPropInfo("List[string]", true, true)
 	});
-	list: List<string> = new List("string", "A", "B");
+	list = new List("string", "A", "B");
 }
 class TypeWithPreSerializePrepMethod
 {
@@ -53,12 +53,12 @@ class TypeWithMixOfProps
 		list: new VDFPropInfo("List[string]"),
 		nestedList: new VDFPropInfo("List[List[string]]"),
 	});
-	Bool: boolean = true;
-	Int: number = 5;
-	Float: number = .5;
-	String: string = "Prop value string.";
-	list: List<string> = new List<string>("string", "2A", "2B");
-	nestedList: List<List<string>> = new List<List<string>>("List[string]", new List<string>("string", "1A"));
+	Bool = true;
+	Int = 5;
+	Float = .5;
+	String = "Prop value string.";
+	list = new List<string>("string", "2A", "2B");
+	nestedList = new List<List<string>>("List[string]", new List<string>("string", "1A"));
 }
 enum Enum1 { _IsEnum, A, B, C }
 
@@ -69,8 +69,8 @@ class ToVDF_Level1_Object_DictionaryPoppedOutThenBool_Class1
 		messages: new VDFPropInfo("Dictionary[string,string]", true, true),
 		otherProperty: new VDFPropInfo("bool")
 	});
-	messages: Dictionary<string, string> = new Dictionary<string, string>("string", "string", ["title1", "message1"], ["title2", "message2"]);
-	otherProperty: boolean = true;
+	messages = new Dictionary<string, string>("string", "string", ["title1", "message1"], ["title2", "message2"]);
+	otherProperty = true;
 }
 class ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 {
@@ -79,8 +79,8 @@ class ToVDF_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		messages: new VDFPropInfo("Dictionary[string,string]", true, true),
 		otherProperty: new VDFPropInfo("bool")
 	});
-	messages: Dictionary<string, string> = new Dictionary<string, string>("string", "string", ["title1", "message1"], ["title2", "message2"]);
-	otherProperty: boolean = true;
+	messages = new Dictionary<string, string>("string", "string", ["title1", "message1"], ["title2", "message2"]);
+	otherProperty = true;
 }
 
 class T1_Level1
@@ -89,7 +89,7 @@ class T1_Level1
 	{
 		level2: new VDFPropInfo("T1_Level2")
 	});
-	level2: T1_Level2 = new T1_Level2();
+	level2 = new T1_Level2();
 }
 class T1_Level2
 {
@@ -98,8 +98,8 @@ class T1_Level2
 		messages: new VDFPropInfo("Dictionary[string,string]", true, true),
 		otherProperty: new VDFPropInfo("bool")
 	});
-	messages: List<string> = new List<string>("string", "DeepString1", "DeepString2");
-	otherProperty: boolean = true;
+	messages = new List<string>("string", "DeepString1", "DeepString2");
+	otherProperty = true;
 }
 
 class Level1
@@ -108,7 +108,7 @@ class Level1
 	{
 		level2: new VDFPropInfo("Level2")
 	});
-	level2: Level2 = new Level2();
+	level2 = new Level2();
 }
 class Level2
 {
@@ -117,8 +117,8 @@ class Level2
 		level3_first: new VDFPropInfo("Level3"),
 		level3_second: new VDFPropInfo("Level3")
 	});
-	level3_first: Level3 = new Level3();
-	level3_second: Level3 = new Level3();
+	level3_first = new Level3();
+	level3_second = new Level3();
 }
 class Level3
 {
@@ -126,7 +126,7 @@ class Level3
 	{
 		messages: new VDFPropInfo("List[string]", true, true)
 	});
-	messages: List<string> = new List<string>("string", "DeepString1", "DeepString2");
+	messages = new List<string>("string", "DeepString1", "DeepString2");
 }
 
 class T4_Level1
@@ -135,7 +135,7 @@ class T4_Level1
 	{
 		level2: new VDFPropInfo("T4_Level2_level2")
 	});
-	level2: T4_Level2 = new T4_Level2();
+	level2 = new T4_Level2();
 }
 class T4_Level2
 {
@@ -144,8 +144,8 @@ class T4_Level2
 		level3_first: new VDFPropInfo("T4_Level3"),
 		level3_second: new VDFPropInfo("T4_Level3")
 	});
-	level3_first: T4_Level3 = new T4_Level3();
-	level3_second: T4_Level3 = new T4_Level3();
+	level3_first = new T4_Level3();
+	level3_second = new T4_Level3();
 }
 class T4_Level3
 {
@@ -153,7 +153,7 @@ class T4_Level3
 	{
 		level4s: new VDFPropInfo("List[T4_Level4]", true, true)
 	});
-	level4s: List<T4_Level4> = new List<T4_Level4>("T4_Level4", new T4_Level4(), new T4_Level4());
+	level4s = new List<T4_Level4>("T4_Level4", new T4_Level4(), new T4_Level4());
 }
 class T4_Level4
 {
@@ -162,36 +162,12 @@ class T4_Level4
 		messages: new VDFPropInfo("List[string]", true, true),
 		otherProperty: new VDFPropInfo("bool")
 	});
-	messages: List<string> = new List<string>("string", "text1", "text2");
-	otherProperty: boolean = false;
+	messages = new List<string>("string", "text1", "text2");
+	otherProperty = false;
 }
 
 class Saving
 {
-	static initialized: boolean;
-	static Init()
-	{
-		if (this.initialized)
-			return;
-		this.initialized = true;
-		Object.prototype._AddFunction_Inline = function Should()
-		{
-			return 0 || // fix for auto-semicolon-insertion
-			{
-				Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-				BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
-			};
-		};
-		VDF.RegisterTypeExporter_Inline("Guid", id => id.ToString());
-		VDF.RegisterTypeImporter_Inline("Guid", str => new Guid(str));
-		VDF.RegisterTypeExporter_Inline("Vector3", point => point.x + "," + point.y + "," + point.z);
-		VDF.RegisterTypeImporter_Inline("Vector3", str =>
-		{
-			var parts: Array<string> = str.split(',');
-			return new Vector3(parseFloat(parts[0]), parseFloat(parts[1]), parseFloat(parts[2]));
-		});
-	}
-
 	static RunTests()
 	{
 		// from VDFNode
