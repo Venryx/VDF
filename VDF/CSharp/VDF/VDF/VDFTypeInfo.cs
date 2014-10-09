@@ -32,7 +32,7 @@ public class VDFTypeInfo
 				result.propInfoByName[field.Name] = VDFPropInfo.Get(field);
 		foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 			result.propInfoByName[property.Name] = VDFPropInfo.Get(property);
-		foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(member => member is MethodBase)) // include constructors
+		foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where(member=>member is MethodBase)) // include constructors
 			result.methodInfo.Add(VDFMethodInfo.Get(method));
 		if (type.Name.StartsWith("<>")) // if anonymous type, include all props, by default
 			result.props_includeL1 = true;

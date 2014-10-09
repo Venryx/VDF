@@ -47,7 +47,7 @@ public static class VDFLoader
 			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
 		}
-		var isInlineList = tokensNotInDataMarkers.Any(a => a.type == VDFTokenType.ItemSeparator);
+		var isInlineList = tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.ItemSeparator);
 
 		VDFToken objMetadataBaseValueToken = null;
 		VDFToken objMetadataEndMarkerToken = null;
@@ -186,13 +186,12 @@ public static class VDFLoader
 
 		// if List, parse items
 		if (typeof(IList).IsAssignableFrom(objType))
-		{
 			if (isInlineList)
 			{
 				var firstDepth1Token = tokensAtDepth1.FirstOrDefault();
 				var lastDepth0MetadataEndMarkerToken = parser.tokens.LastOrDefault(a=>a.type == VDFTokenType.MetadataEndMarker || a.type == VDFTokenType.WiderMetadataEndMarker);
 				var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.Length : 0);
-				var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(a => a.type == VDFTokenType.DataEndMarker) : tokensAtDepth0.FirstOrDefault(a => a.type == VDFTokenType.ItemSeparator);
+				var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker) : tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.ItemSeparator);
 				var firstItemText = text.Substring(firstItemTextPos, (firstItemEnderToken != null ? firstItemEnderToken.position : text.Length) - firstItemTextPos);
 				if (firstItemEnderToken != null || firstItemText.Length > 0) // (if there's an item separator or depth-0-data-end-marker, we can go ahead and infer that a zero-length sub-section represents an actual object)
 					objNode.items.Add(ToVDFNode(firstItemText, objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
@@ -201,7 +200,7 @@ public static class VDFLoader
 					if (token.type == VDFTokenType.ItemSeparator)
 					{
 						var itemTextPos = token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0);
-						var itemEnderToken = tokensAtDepth0.FirstOrDefault(a => a.type == (hasDepth0DataBlocks ? VDFTokenType.DataEndMarker : VDFTokenType.ItemSeparator) && a.position >= itemTextPos);
+						var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == (hasDepth0DataBlocks ? VDFTokenType.DataEndMarker : VDFTokenType.ItemSeparator) && a.position >= itemTextPos);
 						var itemText = text.Substring(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.Length) - itemTextPos);
 						objNode.items.Add(ToVDFNode(itemText, objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
 					}
@@ -220,7 +219,6 @@ public static class VDFLoader
 						else
 							break;
 				}
-		}
 
 		// parse keys-and-values/properties (depending on whether we're a Dictionary)
 		for (int i = 0; i < parser.tokens.Count; i++)

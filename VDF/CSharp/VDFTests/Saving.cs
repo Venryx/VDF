@@ -9,12 +9,12 @@ namespace VDFTests
 	{
 		static Saving()
 		{
-			VDF.RegisterTypeExporter_Inline<Guid>(id => id.ToString());
-			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid(str));
-			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
-			VDF.RegisterTypeImporter_Inline<Vector3>(str =>
+			VDF.RegisterTypeExporter_Inline<Guid>(id=>id.ToString());
+			VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
+			VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
+			VDF.RegisterTypeImporter_Inline<Vector3>(str=>
 			{
-				string[] parts = str.Split(new[] { ',' });
+				string[] parts = str.Split(new[] {','});
 				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
 			});
 		}
@@ -41,7 +41,7 @@ namespace VDFTests
 		}
 		[Fact] void FromVDFNode_Level0_Metadata_Type_Collapsed()
 		{
-			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions{typeMarking = VDFTypeMarking.AssemblyExternal});
+			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions {typeMarking = VDFTypeMarking.AssemblyExternal});
 			a.ToVDF().Should().Be("string>>");
 			a = VDFSaver.ToVDFNode(new List<List<string>> {new List<string> {"1A", "1B", "1C"}}, new VDFSaveOptions {typeMarking = VDFTypeMarking.AssemblyExternal});
 			a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed

@@ -12,12 +12,12 @@ namespace SystemMaker
 		static Dictionary<string, string> namespaceAliasesByName; 
 		static Main()
 		{
-			VDF.RegisterTypeExporter_Inline<Guid>(id => ""); //id.ToString());
-			VDF.RegisterTypeImporter_Inline<Guid>(str => new Guid()); //new Guid(str)
-			VDF.RegisterTypeExporter_Inline<Vector3>(point => point.x + "," + point.y + "," + point.z);
-			VDF.RegisterTypeImporter_Inline<Vector3>(str =>
+			VDF.RegisterTypeExporter_Inline<Guid>(id=>""); //id.ToString());
+			VDF.RegisterTypeImporter_Inline<Guid>(str=>new Guid()); //new Guid(str)
+			VDF.RegisterTypeExporter_Inline<Vector3>(point=>point.x + "," + point.y + "," + point.z);
+			VDF.RegisterTypeImporter_Inline<Vector3>(str=>
 			{
-				string[] parts = str.Split(new[] { ',' });
+				string[] parts = str.Split(new[] {','});
 				return new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
 			});
 

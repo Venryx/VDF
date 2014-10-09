@@ -277,9 +277,9 @@ public class VDFNode
 			catch (Exception ex) { throw new VDFException("Error loading key-value-pair or property '" + propName + "'.", ex); }
 
 		// call post-deserialize constructors before post-deserialize normal methods
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo => methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
-			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[]{loadOptions.message} : new object[0]);
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo => methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
-			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[]{ loadOptions.message } : new object[0]);
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
+			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message} : new object[0]);
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
+			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message } : new object[0]);
 	}
 }

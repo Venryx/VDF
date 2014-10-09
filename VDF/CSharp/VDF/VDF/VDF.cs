@@ -74,9 +74,9 @@ public static class VDF
 	static Type GetTypeByVNameRoot(string vNameRoot, int genericsParams, VDFLoadOptions loadOptions)
 	{
 		if (loadOptions.typeAliasesByType.Values.Contains(vNameRoot))
-			return loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == vNameRoot).Key;
+			return loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vNameRoot).Key;
 		if (builtInTypeAliasesByType.Values.Contains(vNameRoot))
-			return builtInTypeAliasesByType.FirstOrDefault(pair => pair.Value == vNameRoot).Key;
+			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vNameRoot).Key;
 
 		var result = Type.GetType(vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		if (result != null)
@@ -100,13 +100,13 @@ public static class VDF
 		if (vTypeName == "null")
 			return null;
 		if (loadOptions.typeAliasesByType.Values.Contains(vTypeName))
-			return loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == vTypeName).Key;
+			return loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
 		if (builtInTypeAliasesByType.Values.Contains(vTypeName))
-			return builtInTypeAliasesByType.FirstOrDefault(pair => pair.Value == vTypeName).Key;
+			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
 
 		var rootName = vTypeName.Contains("[") ? vTypeName.Substring(0, vTypeName.IndexOf("[")) : vTypeName;
 		if (loadOptions.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
-			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair => pair.Value == rootName).Key.FullName.Split(new[] { '`' })[0];
+			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[] {'`'})[0];
 		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vTypeName), loadOptions);
 		if (rootType == null)
 			throw new VDFException("Could not find type \"" + rootName + "\".");
@@ -151,10 +151,10 @@ public static class VDF
 			rootTypeName = rootTypeName.Contains("+") ? rootTypeName.Substring(rootTypeName.IndexOf("+") + 1) : rootTypeName; // remove assembly name, if specified in string (may want to ensure this doesn't break anything)
 			if (typeof(IList).IsAssignableFrom(rootType)) // if type 'List' or a derivative, collapse its v-type-name to 'List', since that is how we handle it
 				rootTypeName = "List";
-			else if (typeof (Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
+			else if (typeof(Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
 				rootTypeName = "Dictionary";
 
-			string result = rootTypeName + "[" + String.Join(",", type.GetGenericArguments().Select(type2 => GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
+			string result = rootTypeName + "[" + String.Join(",", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, saveOptions)).ToArray()) + "]";
 			foreach (KeyValuePair<string, string> pair in saveOptions.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
 				if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'['})[0].Contains("."))
 					result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
