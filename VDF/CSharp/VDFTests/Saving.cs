@@ -97,6 +97,7 @@ namespace VDFTests
 			a[0].baseValue.Should().Be("null");
 			a.ToVDF().Should().Be("string>>>null");
 		}
+		[Fact] void FromObject_Level1_StringAndArraysInArray() { VDF.Serialize(new List<object> {"text", new List<string> {"a", "b"}}).Should().Be(">>{text}|{string>>a|b}"); }
 		[Fact] void FromObject_Level1_DictionaryValues_Null()
 		{
 			var dictionary = new Dictionary<string, string>();

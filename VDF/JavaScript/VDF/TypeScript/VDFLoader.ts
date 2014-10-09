@@ -92,7 +92,8 @@ class VDFLoader
 		if (objTypeStr == null)
 			if (isInlineList)
 				objTypeStr = "IList";
-			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.DataPropName) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak))
+			//else if (tokensNotInDataMarkers.All(a=> a.type != VDFTokenType.DataPropName) && tokensNotInDataMarkers.Any(a=> a.type == VDFTokenType.LineBreak))
+			else if (tokensNotInDataMarkers.All(a=> a.type != VDFTokenType.PoppedOutDataStartMarker) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak))
 				objTypeStr = "IList";
 
 		var objTypeName = declaredTypeName;
@@ -199,19 +200,16 @@ class VDFLoader
 				}
 			}
 			else
-				for (var i = 0; i < tokensAtDepth1.Count; i++)
+				for (var i = 0; i < tokensAtDepth0.Count; i++)
 				{
-					var token: VDFToken = tokensAtDepth1[i];
-					if (token.type != VDFTokenType.PoppedOutDataStartMarker && token.type != VDFTokenType.LineBreak && token.position > 0)
-						if (VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) == objIndent + 1)
-						{
-							var itemTextPos = token.position + (objIndent + 1);
-							var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak && a.position >= itemTextPos);
-							var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
-							objNode.AddItem(VDFLoader.ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent + 1));
-						}
-						else
-							break;
+					var token: VDFToken = tokensAtDepth0[i];
+					if (token.type == VDFTokenType.LineBreak && tokensAtDepth1.Any(a=>a.position > token.position) && tokensAtDepth1.FirstOrDefault(a=>a.position > token.position).text.indexOf("\t") == 0)
+					{
+						var itemTextPos: number = tokensAtDepth1.FirstOrDefault(a=>a.position > token.position).position + (objIndent + 1);
+						var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak && a.position >= itemTextPos);
+						var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
+						objNode.AddItem(VDFLoader.ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent + 1));
+					}
 				}
 
 		// parse keys-and-values/properties (depending on whether we're a Dictionary)

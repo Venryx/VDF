@@ -208,6 +208,13 @@ three lines".Replace("\r", ""));
 			a[1][0].baseValue.Should().Be(null);
 			a[1][1].baseValue.Should().Be(null);
 		}
+		[Fact] void ToVDFNode_Level1_StringAndArraysInArrays()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("{text}|{2A|}");
+			a[0].baseValue.Should().Be("text");
+			a[1][0].baseValue.Should().Be("2A");
+			a[1][1].baseValue.Should().Be(null);
+		}
 		[Fact] void ToVDFNode_Level1_Dictionary()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("key1{value1}key2{value2}");
@@ -255,7 +262,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level1_InferredDictionaryPoppedOut()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"messages:
+			VDFNode a = VDFLoader.ToVDFNode(@"messages:,>>
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");

@@ -89,8 +89,6 @@
 			builder.Append("#");
 		//if (this.isListItem_nonFirst && !this.popOutToOwnLine)
 		//	builder.Append("|");
-		if (this.isListItem && this.isList)
-			builder.Append("{");
 		if (this.metadata_type != null)
 			builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
 		
@@ -98,6 +96,7 @@
 			builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue));
 		else if (this.items.length > 0)
 		{
+			var hasListItem = this.items.filter(a=>a.isList).length;
 			for (var i = 0; i < this.items.length; i++)
 			{
 				var lastItem = i > 0 ? this.items[i - 1] : null;
@@ -117,7 +116,7 @@
 					builder.Append("\n" + lines.join("\n"));
 				}
 				else
-					builder.Append((i > 0 ? "|" : "") + item.ToVDF());
+					builder.Append((i > 0 ? "|" : "") + (hasListItem ? "{" : "") + item.ToVDF() + (hasListItem ? "}" : ""));
 			}
 		}
 		else
@@ -166,9 +165,6 @@
 				lastPropName = propName;
 			}
 		}
-
-		if (this.isListItem && this.isList)
-			builder.Append("}");
 
 		this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.propertyCount > 0));
 		if (this.items.filter(a=>a.hasDanglingIndentation).length > 0)

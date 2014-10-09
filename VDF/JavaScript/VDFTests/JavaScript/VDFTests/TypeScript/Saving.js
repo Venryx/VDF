@@ -287,6 +287,9 @@ var Saving = (function () {
             a[0].baseValue.Should().Be("null");
             a.ToVDF().Should().Be("string>>>null");
         });
+        test("FromObject_Level1_StringAndArraysInArray", function () {
+            return VDF.Serialize(new List("object", "text", new List("string", "a", "b"))).Should().Be(">>{text}|{string>>a|b}");
+        });
         test("FromObject_Level1_DictionaryValues_Null", function () {
             var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));
             a["key1"].metadata_type.Should().Be("");

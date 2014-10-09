@@ -88,8 +88,6 @@ public class VDFNode
 			builder.Append("#");
 		//if (isListItem_nonFirst && !popOutToOwnLine)
 		//	builder.Append("|");
-		if (isListItem && isList)
-			builder.Append("{");
 		if (metadata_type != null)
 			builder.Append(isList || isDictionary ? metadata_type.Replace(" ", "") + ">>" : metadata_type.Replace(" ", "") + ">");
 
@@ -97,6 +95,7 @@ public class VDFNode
 			builder.Append(RawDataStringToFinalized(baseValue));
 		else if (items.Count > 0)
 		{
+			var hasListItem = items.Any(a=>a.isList);
 			for (var i = 0; i < items.Count; i++)
 			{
 				var lastItem = i > 0 ? items[i - 1] : null;
@@ -115,7 +114,7 @@ public class VDFNode
 					builder.Append("\n" + String.Join("\n", lines));
 				}
 				else
-					builder.Append((i > 0 ? "|" : "") + item.ToVDF());
+					builder.Append((i > 0 ? "|" : "") + (hasListItem ? "{" : "") + item.ToVDF() + (hasListItem ? "}" : ""));
 			}
 		}
 		else
@@ -163,9 +162,6 @@ public class VDFNode
 				lastPropName = propName;
 			}
 		}
-
-		if (isListItem && isList)
-			builder.Append("}");
 
 		hasDanglingIndentation = (popOutChildren && (items.Count > 0 || properties.Count > 0));
 		if (items.Any(a=>a.hasDanglingIndentation))

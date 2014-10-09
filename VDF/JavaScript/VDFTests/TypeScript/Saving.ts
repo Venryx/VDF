@@ -272,6 +272,7 @@ class Saving
 			a[0].baseValue.Should().Be("null");
 			a.ToVDF().Should().Be("string>>>null");
 		});
+		test("FromObject_Level1_StringAndArraysInArray", ()=>VDF.Serialize(new List<object>("object", "text", new List<string>("string", "a", "b"))).Should().Be(">>{text}|{string>>a|b}"));
 		test("FromObject_Level1_DictionaryValues_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));

@@ -258,6 +258,13 @@ three lines");
 			ok(a[1][0].baseValue == null);
 			ok(a[1][1].baseValue == null);
 		});
+		test("ToVDFNode_Level1_StringAndArraysInArrays", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("{text}|{2A|}");
+			a[0].baseValue.Should().Be("text");
+			a[1][0].baseValue.Should().Be("2A");
+			ok(a[1][1].baseValue == null);
+		});
 		test("ToVDFNode_Level1_Dictionary", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("key1{value1}key2{value2}");
@@ -302,7 +309,7 @@ three lines");
 		});
 		test("ToVDFNode_Level1_InferredDictionaryPoppedOut", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("messages:\n\
+			var a = VDFLoader.ToVDFNode("messages:,>>\n\
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
@@ -435,6 +442,43 @@ of three lines in total.@@}bool{>true}");
 		{
 			var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}", new VDFLoadOptions(null, true));
 			a["children"].length.Should().Be(3);
+		});
+
+
+		test("ToVDFNode_Level2_ComplexPoppedOutItems", ()=>
+		{
+			var a = VDF.Deserialize("id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:>>\n\
+	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}\n\
+	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}\n\
+	id{e97f8ee1-320c-4aef-9343-3317accb015b}typeName{Crate}name{Crate}pivotPoint_unit{0,0.625,0}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}", new VDFLoadOptions(true, true));
+			a.parts.Count.Should().Be(3);
+		});
+		test("ToVDFNode_Level2_ComplexPoppedOutItemsThenBool", ()=>
+		{
+			var a = VDF.Deserialize("id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:\n\
+	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}\n\
+	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}\n\
+	id{52854b70-c200-478f-bcd2-c69a03cd808f}typeName{Wheel}name{FrontLeftWheel}pivotPoint_unit{-0.5,0.5,0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}\n\
+	id{971e394c-b440-4fee-99fd-dceff732cd1e}typeName{Wheel}name{BackRightWheel}pivotPoint_unit{0.5,0.5,-0.875}anchorNormal{1,0,0}scale{1,1,1}controller{false}\n\
+	id{77d30d72-9845-4b22-8e95-5ba6e29963b9}typeName{Wheel}name{FrontRightWheel}pivotPoint_unit{0.5,0.5,0.875}anchorNormal{1,0,0}scale{1,1,1}controller{false}\n\
+	id{21ca2a80-6860-4de3-9894-b896ec77ef9e}typeName{Wheel}name{BackLeftWheel}pivotPoint_unit{-0.5,0.5,-0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}\n\
+	id{eea2623a-86d3-4368-b4e0-576956b3ef1d}typeName{Wood}name{BackBar}pivotPoint_unit{-0.4375,0.4375,-0.8125}anchorNormal{0,0,-1}scale{1,0.25,0.25}controller{false}\n\
+	id{f1edc5a1-d544-4993-bdad-11167704a1e1}typeName{MachineGun}name{Gun1}pivotPoint_unit{0,0.625,0.875}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}\n\
+	id{e97f8ee1-320c-4aef-9343-3317accb015b}typeName{Crate}name{Crate}pivotPoint_unit{0,0.625,0}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}\n\
+^tasksScriptText{@@Grab Flag\n\
+	(Crate ensure contains an EnemyFlag) ensure is false\n\
+	targetFlag be EnemyFlag_OnEnemyGround [objectRefreshInterval: infinity] [lifetime: infinity]\n\
+	targetFlag set tag `taken`\n\
+	FrontLeftWheel turn to targetFlag [with: FrontRightWheel]\n\
+	FrontLeftWheel roll forward\n\
+	FrontRightWheel roll forward\n\
+	BackLeftWheel roll forward\n\
+	BackRightWheel roll forward\n\
+	targetFlag put into Crate\n\
+Shoot at Enemy Vehicle\n\
+	Gun1 aim at EnemyVehicle_NonBroken\n\
+	Gun1 fire@@}", new VDFLoadOptions(true, true));
+			a.parts.Count.Should().Be(9);
 		});
 	}
 }

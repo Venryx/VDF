@@ -117,14 +117,15 @@
 
         //if (this.isListItem_nonFirst && !this.popOutToOwnLine)
         //	builder.Append("|");
-        if (this.isListItem && this.isList)
-            builder.Append("{");
         if (this.metadata_type != null)
             builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
 
         if (this.baseValue != null)
             builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue));
         else if (this.items.length > 0) {
+            var hasListItem = this.items.filter(function (a) {
+                return a.isList;
+            }).length;
             for (var i = 0; i < this.items.length; i++) {
                 var lastItem = i > 0 ? this.items[i - 1] : null;
                 var item = this.items[i];
@@ -140,7 +141,7 @@
                         lines[i2] = "\t" + lines[i2];
                     builder.Append("\n" + lines.join("\n"));
                 } else
-                    builder.Append((i > 0 ? "|" : "") + item.ToVDF());
+                    builder.Append((i > 0 ? "|" : "") + (hasListItem ? "{" : "") + item.ToVDF() + (hasListItem ? "}" : ""));
             }
         } else {
             var lastPropName = null;
@@ -181,9 +182,6 @@
                 lastPropName = propName;
             }
         }
-
-        if (this.isListItem && this.isList)
-            builder.Append("}");
 
         this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.propertyCount > 0));
         if (this.items.filter(function (a) {
