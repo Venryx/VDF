@@ -16,12 +16,11 @@ class VDFSaveOptions
 	}
 }
 
-class VDFSaver_LineInfo { fromLinePoppedOutGroupCount: number = 0; }
 class VDFSaver
 {
 	static ToVDFNode(obj: any, saveOptions?: VDFSaveOptions, declaredTypeName?: string): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo, popOutItemData?: boolean): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean, lineInfo?: VDFSaver_LineInfo, popOutItemData: boolean = false): VDFNode
+	static ToVDFNode(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions, isGenericParamValue?: boolean): VDFNode;
+	static ToVDFNode(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any, isGenericParamValue?: boolean): VDFNode
 	{
 		var declaredTypeName: string;
 		var saveOptions: VDFSaveOptions;
@@ -33,6 +32,8 @@ class VDFSaver
 
 		var objNode = new VDFNode();
 		var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj); // at bottom, enums an integer; but consider it of a distinct type
+		var isAnonymousType = obj.constructor == (<any>{}).constructor || obj.constructor == object; // if true anonymous object, or if VDF-anonymous-object
+		var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // (if not specified: if anon type, include all props, otherwise, use default values)
 
 		if (obj && obj.VDFPreSerialize)
 			obj.VDFPreSerialize(saveOptions.message);
@@ -41,6 +42,8 @@ class VDFSaver
 
 		if (obj == null)
 			objNode.baseValue = "null";
+		else if (objVTypeName == "string" && obj == "")
+			objNode.baseValue = "empty";
 		else if (VDF.typeExporters_inline[objVTypeName])
 			objNode.baseValue = VDF.typeExporters_inline[objVTypeName](obj);
 		else if (EnumValue.IsEnum(objVTypeName)) // if enum value (at bottom, an integer; but we can get the nice-name based on type info)
@@ -57,12 +60,8 @@ class VDFSaver
 			var objAsList = <List<any>>obj;
 			for (var i = 0; i < objAsList.length; i++)
 			{
-				var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true, popOutItemData ? new VDFSaver_LineInfo() : lineInfo);
+				var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true);
 				itemValueNode.isListItem = true;
-				if (i > 0)
-					itemValueNode.isListItem_nonFirst = true;
-				if (popOutItemData)
-					itemValueNode.popOutToOwnLine = true;
 				objNode.AddItem(itemValueNode);
 			}
 		}
@@ -71,13 +70,10 @@ class VDFSaver
 			objNode.isDictionary = true;
 			var objAsDictionary = <Dictionary<any, any>>obj;
 			for (var i in objAsDictionary.keys)
-				objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true, lineInfo).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true, lineInfo));
+				objNode.SetProperty(VDFSaver.ToVDFNode(objAsDictionary.keys[i], objAsDictionary.keyType, saveOptions, true).AsString, VDFSaver.ToVDFNode(objAsDictionary.Get(objAsDictionary.keys[i]), objAsDictionary.valueType, saveOptions, true));
 		}
 		else if (typeof obj == "object") //obj.GetTypeName() == "Object") // an object, with properties
 		{
-			var isAnonymousType = obj.constructor == (<any>{}).constructor || obj.constructor == object; // if true anonymous object, or if VDF-anonymous-object
-			var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // if not specified: if anon type, include all props, otherwise, use default values
-
 			// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
 			var oldObj = obj;
 			obj = {};
@@ -103,20 +99,8 @@ class VDFSaver
 						continue;
 				
 					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
-					var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions, false, propInfo.popOutData ? null : lineInfo, propInfo.popOutItemData);
-					if (propInfo.popOutData)
-					{
-						propValueNode.popOutToOwnLine = true;
-						if (lineInfo.fromLinePoppedOutGroupCount > 0)
-							propValueNode.isFirstItemOfNonFirstPopOutGroup = true;
-						lineInfo.fromLinePoppedOutGroupCount++;
-					}
-					if (propInfo.popOutItemData && propValue != null)
-					{
-						if (lineInfo.fromLinePoppedOutGroupCount > 0 && propValueNode.items.length > 0)
-							propValueNode.items[0].isFirstItemOfNonFirstPopOutGroup = true;
-						lineInfo.fromLinePoppedOutGroupCount++;
-					}
+					var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions);
+					propValueNode.popOutChildren = propInfo.popOutChildren;
 					objNode.SetProperty(propName, propValueNode);
 				}
 				catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"); }
@@ -128,16 +112,22 @@ class VDFSaver
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof Dictionary); // if dictionary (i.e. indistinguishable from prop-set)
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue); // we're a non-generics-based value (i.e. we have no value-default-type specified)
 		markType = markType || ([VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal].contains(saveOptions.typeMarking) && (obj == null || objVTypeName != declaredTypeName)); // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
-		objNode.metadata_type = markType ? objVTypeName : null;
+		if (obj == null || (objVTypeName == "string" && obj == ""))
+			objNode.metadata_type = "";
+		else
+			objNode.metadata_type = markType ? objVTypeName : null;
 		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
 		{
-			var collapseMap = {"string": null, "null": "", "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": ""};
+			var collapseMap = {"string": null, "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": ""};
 			if (objNode.metadata_type != null && collapseMap[objNode.metadata_type] !== undefined)
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
 			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params
 			if (objNode.metadata_type != null && ((objNode.metadata_type.startsWith("List[") && !objNode.metadata_type.substring(5).contains("[")) || objNode.metadata_type.startsWith("Dictionary[")))
 				objNode.metadata_type = objNode.metadata_type.startsWith("List[") ? objNode.metadata_type.substring(5, objNode.metadata_type.length - 1) : objNode.metadata_type.substring(11, objNode.metadata_type.length - 1);
 		}
+
+		if (typeInfo != null && typeInfo.popOutChildren)
+			objNode.popOutChildren = true;
 
 		return objNode;
 	}
