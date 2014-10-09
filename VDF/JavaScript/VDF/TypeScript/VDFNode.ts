@@ -302,7 +302,7 @@
 				{
 					var key: any = propName; // in most cases, the Dictionary's in-code key-type will be a string, so we can just use the in-VDF raw-key-string directly
 					if (typeGenericArgumentsAreReal)
-						if (VDF.typeImporters_inline[typeGenericParameters[0]]) // porting-note: apparently the JS version doesn't support the full type-importer-inline system (no generics passed to importer-func's)
+						if (VDF.typeImporters_inline[typeGenericParameters[0]]) // porting-note: the JS version doesn't let you register importer-func's for generic-type-definitions
 							key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
 					(<Dictionary<any, any>>obj).Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[1], loadOptions));
 				}
