@@ -280,7 +280,7 @@
 		else
 		{
 			result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
-			this.IntoObject(result, loadOptions, (declaredTypeName != null && (declaredTypeName.indexOf("List[") == 0 || declaredTypeName.indexOf("Dictionary[") == 0)) || (metadata_type != "IList" && metadata_type != "IDictionary"));
+			this.IntoObject(result, loadOptions, (declaredTypeName != null && (declaredTypeName.indexOf("List[") == 0 || declaredTypeName.indexOf("Dictionary[") == 0)) || (this.metadata_type != "IList" && this.metadata_type != "IDictionary"));
 		}
 
 		return result;
@@ -292,7 +292,7 @@
 		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
 			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
 		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
-		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
+		var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
 		for (var i = 0; i < this.items.length; i++)
 			(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[0], loadOptions));
 		for (var propName in this.properties)

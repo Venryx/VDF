@@ -17,95 +17,6 @@
     <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="JavaScript\Tests\Packages\General\QUnit 1.14.0.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\AUTHORS.txt" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\globalize.culture.de-DE.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\globalize.culture.ja-JP.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\globalize.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\jquery.mousewheel.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\jshint.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\qunit.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\qunit.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\Gruntfile.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\MIT-LICENSE.txt" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\animated-overlay.gif" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_flat_75_ffffff_40x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_glass_75_dadada_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-icons_222222_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-icons_454545_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-icons_888888_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery-ui.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.accordion.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.all.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.autocomplete.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.base.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.button.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.core.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.datepicker.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.dialog.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.menu.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.progressbar.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.resizable.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.selectable.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.slider.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.spinner.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.tabs.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.theme.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\base\jquery.ui.tooltip.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\animated-overlay.gif" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_diagonals-thick_18_b81900_40x40.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_diagonals-thick_20_666666_40x40.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_flat_10_000000_40x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_glass_100_f6f6f6_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_glass_100_fdf5ce_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_gloss-wave_35_f6a828_500x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_highlight-soft_100_eeeeee_1x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-bg_highlight-soft_75_ffe45c_1x100.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-icons_222222_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-icons_228ef1_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-icons_ef8c08_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-icons_ffd27a_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\images\ui-icons_ffffff_256x240.png" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery-ui.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.accordion.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.all.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.autocomplete.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.base.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.button.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.core.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.datepicker.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.dialog.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.menu.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.progressbar.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.resizable.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.selectable.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.slider.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.spinner.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.tabs.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.theme.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\themes\ui-lightness\jquery.ui.tooltip.css" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\JQueryUI1.10.3.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\JQueryUIContextMenu.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\JQueryUIMenuBar.js" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\JQueryUIOthers.js" />
-    <Content Include="JavaScript\Tests\Packages\JQuery\JQuery1.9.1.js" />
-    <Content Include="JavaScript\Tests\Packages\JQuery\JQueryNodeListener.js" />
-    <Content Include="JavaScript\Tests\Packages\JQuery\JQueryOthers.js" />
-    <Content Include="JavaScript\Tests\Packages\JQuery\JQueryResize.js" />
-    <Content Include="JavaScript\Tests\Packages\V\VDebug.js" />
-    <Content Include="JavaScript\Tests\Packages\V\VFileBrowser.js" />
-    <Content Include="JavaScript\Tests\Packages\V\VMessageBox.js" />
-    <Content Include="JavaScript\Tests\Packages\General\QUnit 1.14.0.js" />
-    <Content Include="JavaScript\Tests\Main.html" />
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -118,7 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
-    <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\README.md" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -126,7 +36,9 @@
       <DependentUpon>web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="JavaScript\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

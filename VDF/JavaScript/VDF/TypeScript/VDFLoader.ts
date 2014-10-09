@@ -37,7 +37,7 @@ class VDFLoader
 		var tokensNotInDataMarkers = new List<VDFToken>("VDFToken");
 		for (var i = 0; i < parser.tokens.length; i++)
 		{
-			var token = parser.tokens[i];
+			var token: VDFToken = parser.tokens[i];
 			if (token.type == VDFTokenType.DataEndMarker)
 				depth--;
 			if (depth == 0)
@@ -120,7 +120,7 @@ class VDFLoader
 		for (var i = 0; i < parser.tokens.Count; i++)
 		{
 			var lastToken = i > 0 ? parser.tokens[i - 1] : null;
-			var token = parser.tokens[i];
+			var token: VDFToken = parser.tokens[i];
 
 			if (token.type == VDFTokenType.DataEndMarker)
 				depth--;
@@ -176,13 +176,13 @@ class VDFLoader
 			{
 				var firstDepth1Token = tokensAtDepth1.FirstOrDefault();
 				var lastDepth0MetadataEndMarkerToken = parser.tokens.LastOrDefault(a=>a.type == VDFTokenType.MetadataEndMarker || a.type == VDFTokenType.WiderMetadataEndMarker);
-				var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.Length : 0);
+				var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.length : 0);
 				var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker) : tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.ItemSeparator);
 				var firstItemText = text.substr(firstItemTextPos, (firstItemEnderToken != null ? firstItemEnderToken.position : text.length) - firstItemTextPos);
 				if (firstItemEnderToken != null || firstItemText.length > 0) // (if there's an item separator or depth-0-data-end-marker, we can go ahead and infer that a zero-length sub-section represents an actual object)
 					objNode.AddItem(VDFLoader.ToVDFNode(firstItemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent));
 
-				for (var i in tokensAtDepth0.indexes())
+				for (var i = 0; i < tokensAtDepth0.Count; i++)
 				{
 					var token: VDFToken = tokensAtDepth0[i];
 					if (token.type == VDFTokenType.ItemSeparator)
@@ -195,7 +195,7 @@ class VDFLoader
 				}
 			}
 			else
-				for (var i in tokensAtDepth1.indexes())
+				for (var i = 0; i < tokensAtDepth1.Count; i++)
 				{
 					var token: VDFToken = tokensAtDepth1[i];
 					if (token.type != VDFTokenType.PoppedOutDataStartMarker && token.type != VDFTokenType.LineBreak && token.position > 0)
@@ -213,7 +213,7 @@ class VDFLoader
 		// parse keys-and-values/properties (depending on whether we're a Dictionary)
 		for (var i = 0; i < parser.tokens.Count; i++)
 		{
-			var token = parser.tokens[i];
+			var token: VDFToken = parser.tokens[i];
 			var next3Tokens = parser.tokens.GetRange(i + 1, Math.min(3, parser.tokens.Count - (i + 1)));
 
 			if (token.type == VDFTokenType.DataPropName && tokensAtDepth0.Contains(token))

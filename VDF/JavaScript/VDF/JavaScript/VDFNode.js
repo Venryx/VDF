@@ -262,18 +262,17 @@
         else if (finalTypeName == "char")
             finalTypeName = "string";
 
-        // if the type isn't specified in the VDF text itself or as a declared type, and infer-compatible-types-for-unknown-types is not enabled, infer that it's a string (string is the default type)
-        if (finalTypeName == null && !loadOptions.inferCompatibleTypesForUnknownTypes)
+        if (loadOptions.inferCompatibleTypesForUnknownTypes)
+            if (finalTypeName != null) {
+                var finalTypeName_root = finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
+                if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1)
+                    finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
+            } else
+                finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
+        else if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1)
+            throw new Error("Type \"" + finalMetadata_type + "\" not found.");
+        else if (finalTypeName == null)
             finalTypeName = "string"; // string is the default/fallback type
-
-        if (finalTypeName == null)
-            finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
-        var finalTypeName_root = finalTypeName.contains("[") ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
-        if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && !["bool", "number", "string"].contains(finalTypeName_root))
-            if (loadOptions.inferCompatibleTypesForUnknownTypes)
-                finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
-            else
-                throw new Error("Type \"" + finalMetadata_type + "\" not found.");
 
         var result;
         if (VDF.typeImporters_inline[finalTypeName])
@@ -288,26 +287,31 @@
             result = this.baseValue;
         else {
             result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
-            this.IntoObject(result, loadOptions);
+            this.IntoObject(result, loadOptions, (declaredTypeName != null && (declaredTypeName.indexOf("List[") == 0 || declaredTypeName.indexOf("Dictionary[") == 0)) || (this.metadata_type != "IList" && this.metadata_type != "IDictionary"));
         }
 
         return result;
     };
-    VDFNode.prototype.IntoObject = function (obj, loadOptions) {
+    VDFNode.prototype.IntoObject = function (obj, loadOptions, typeGenericArgumentsAreReal) {
+        if (typeof typeGenericArgumentsAreReal === "undefined") { typeGenericArgumentsAreReal = true; }
         loadOptions = loadOptions || new VDFLoadOptions();
         var finalTypeName = VDF.GetVTypeNameOfObject(obj);
         if (finalTypeName == null)
             finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
         var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
-        var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
+        var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
         for (var i = 0; i < this.items.length; i++)
-            obj.push(this.items[i].ToObject(typeGenericParameters[0], loadOptions));
+            obj.push(this.items[i].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[0], loadOptions));
         for (var propName in this.properties)
             try  {
-                if (obj instanceof Dictionary)
-                    obj.Set(VDF.typeImporters_inline[typeGenericParameters[0]] ? VDF.typeImporters_inline[typeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(typeGenericParameters[1], loadOptions));
-                else
-                    obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+                if (obj instanceof Dictionary) {
+                    var key = propName;
+                    if (typeGenericArgumentsAreReal)
+                        if (VDF.typeImporters_inline[typeGenericParameters[0]])
+                            key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
+                    obj.Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[1], loadOptions));
+                } else
+                    obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal && finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName, loadOptions);
             } catch (ex) {
                 throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n");
             }

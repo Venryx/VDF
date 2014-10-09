@@ -36,7 +36,7 @@ var VDFLoader = (function () {
         var tokensNotInDataMarkers = new List("VDFToken");
         for (var i = 0; i < parser.tokens.length; i++) {
             var token = parser.tokens[i];
-            if (token.type == 9 /* DataEndMarker */)
+            if (token.type == 11 /* DataEndMarker */)
                 depth--;
             if (depth == 0)
                 tokensNotInDataMarkers.Add(token);
@@ -44,7 +44,7 @@ var VDFLoader = (function () {
                 depth++;
         }
         var isInlineList = tokensNotInDataMarkers.Any(function (a) {
-            return a.type == 7 /* ItemSeparator */;
+            return a.type == 9 /* ItemSeparator */;
         });
 
         var objMetadataBaseValueToken = null;
@@ -55,7 +55,7 @@ var VDFLoader = (function () {
                 objMetadataEndMarkerToken = tokensNotInDataMarkers[1];
             } else if (tokensNotInDataMarkers.Count >= 1 && tokensNotInDataMarkers[0].type == 2 /* WiderMetadataEndMarker */)
                 objMetadataEndMarkerToken = tokensNotInDataMarkers[0];
-        } else if (tokensNotInDataMarkers.Count >= 2 && (tokensNotInDataMarkers[1].type == 2 /* WiderMetadataEndMarker */ || (tokensNotInDataMarkers[0].type == VDFTokenType.MetadataBaseValue && tokensNotInDataMarkers[1].type == 4 /* MetadataEndMarker */))) {
+        } else if (tokensNotInDataMarkers.Count >= 2 && (tokensNotInDataMarkers[1].type == 2 /* WiderMetadataEndMarker */ || (tokensNotInDataMarkers[0].type == 3 /* MetadataBaseValue */ && tokensNotInDataMarkers[1].type == 4 /* MetadataEndMarker */))) {
             objMetadataBaseValueToken = tokensNotInDataMarkers[0];
             objMetadataEndMarkerToken = tokensNotInDataMarkers[1];
         } else if (tokensNotInDataMarkers.Count >= 1 && (tokensNotInDataMarkers[0].type == 2 /* WiderMetadataEndMarker */ || tokensNotInDataMarkers[0].type == 4 /* MetadataEndMarker */))
@@ -84,9 +84,9 @@ var VDFLoader = (function () {
             if (isInlineList)
                 objTypeStr = "IList";
             else if (tokensNotInDataMarkers.All(function (a) {
-                return a.type != VDFTokenType.DataPropName;
+                return a.type != 5 /* DataPropName */;
             }) && tokensNotInDataMarkers.Any(function (a) {
-                return a.type == 10 /* LineBreak */;
+                return a.type == 12 /* LineBreak */;
             }))
                 objTypeStr = "IList";
 
@@ -102,14 +102,14 @@ var VDFLoader = (function () {
         isInlineList = isInlineList || ((objTypeName == "IList" || objTypeName.indexOf("List[") == 0) && tokensNotInDataMarkers.Any(function (a) {
             return a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken;
         }) && tokensNotInDataMarkers.All(function (a) {
-            return a.type != 10 /* LineBreak */;
+            return a.type != 12 /* LineBreak */;
         })); // update based on new knowledge of obj-type
 
         var firstNonObjMetadataGroupToken = objMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(function (a) {
             return a.position > objMetadataEndMarkerToken.position;
         }) : parser.tokens.FirstOrDefault();
         var hasPoppedOutChildren = !isInlineList && tokensNotInDataMarkers.Any(function (a) {
-            return a.type == 10 /* LineBreak */;
+            return a.type == 12 /* LineBreak */;
         });
 
         // calculate token depths, based on our new knowledge of whether we're dealing with an inline-list (in that case, consider the "|"-separated text blocks as being a depth lower)
@@ -123,26 +123,26 @@ var VDFLoader = (function () {
             var lastToken = i > 0 ? parser.tokens[i - 1] : null;
             var token = parser.tokens[i];
 
-            if (token.type == 9 /* DataEndMarker */)
+            if (token.type == 11 /* DataEndMarker */)
                 depth--;
             else if (hasPoppedOutChildren) {
-                if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) {
+                if (depth == 0 && lastToken != null && lastToken.type == 7 /* PoppedOutDataStartMarker */) {
                     depth++;
                     inPoppedOutBlockAtIndent = VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
-                } else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == 10 /* LineBreak */ && VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) {
+                } else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == 12 /* LineBreak */ && VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) {
                     depth--;
                     inPoppedOutBlockAtIndent = -1;
                 }
 
                 if (objTypeName == "IList" || objTypeName.indexOf("List[") == 0)
-                    if (depth == 0 && lastToken != null && lastToken.type == 10 /* LineBreak */)
+                    if (depth == 0 && lastToken != null && lastToken.type == 12 /* LineBreak */)
                         depth++;
-                    else if (depth == 1 && token.type == 10 /* LineBreak */)
+                    else if (depth == 1 && token.type == 12 /* LineBreak */)
                         depth--;
             } else if (isInlineList) {
-                if (token.type != 7 /* ItemSeparator */ && token.type != 6 /* DataStartMarker */ && depth == 0 && (firstNonObjMetadataGroupToken == token || (lastToken != null && lastToken.type == 7 /* ItemSeparator */)))
+                if (token.type != 9 /* ItemSeparator */ && token.type != 6 /* DataStartMarker */ && depth == 0 && (firstNonObjMetadataGroupToken == token || (lastToken != null && lastToken.type == 9 /* ItemSeparator */)))
                     depth++;
-                else if (token.type == 7 /* ItemSeparator */ && !hasDepth0DataBlocks && depth == 1 && lastToken != null && lastToken.type != 7 /* ItemSeparator */)
+                else if (token.type == 9 /* ItemSeparator */ && !hasDepth0DataBlocks && depth == 1 && lastToken != null && lastToken.type != 9 /* ItemSeparator */)
                     depth--;
             }
 
@@ -170,35 +170,35 @@ var VDFLoader = (function () {
                 var lastDepth0MetadataEndMarkerToken = parser.tokens.LastOrDefault(function (a) {
                     return a.type == 4 /* MetadataEndMarker */ || a.type == 2 /* WiderMetadataEndMarker */;
                 });
-                var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.Length : 0);
+                var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.length : 0);
                 var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(function (a) {
-                    return a.type == 9 /* DataEndMarker */;
+                    return a.type == 11 /* DataEndMarker */;
                 }) : tokensAtDepth0.FirstOrDefault(function (a) {
-                    return a.type == 7 /* ItemSeparator */;
+                    return a.type == 9 /* ItemSeparator */;
                 });
                 var firstItemText = text.substr(firstItemTextPos, (firstItemEnderToken != null ? firstItemEnderToken.position : text.length) - firstItemTextPos);
                 if (firstItemEnderToken != null || firstItemText.length > 0)
                     objNode.AddItem(VDFLoader.ToVDFNode(firstItemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent));
 
-                for (var i in tokensAtDepth0.indexes()) {
+                for (var i = 0; i < tokensAtDepth0.Count; i++) {
                     var token = tokensAtDepth0[i];
-                    if (token.type == 7 /* ItemSeparator */) {
+                    if (token.type == 9 /* ItemSeparator */) {
                         var itemTextPos = token.position + token.text.length + (hasDepth0DataBlocks ? 1 : 0);
                         var itemEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                            return a.type == (hasDepth0DataBlocks ? 9 /* DataEndMarker */ : 7 /* ItemSeparator */) && a.position >= itemTextPos;
+                            return a.type == (hasDepth0DataBlocks ? 11 /* DataEndMarker */ : 9 /* ItemSeparator */) && a.position >= itemTextPos;
                         });
                         var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
                         objNode.AddItem(VDFLoader.ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent));
                     }
                 }
             } else
-                for (var i in tokensAtDepth1.indexes()) {
+                for (var i = 0; i < tokensAtDepth1.Count; i++) {
                     var token = tokensAtDepth1[i];
-                    if (token.type != VDFTokenType.PoppedOutDataStartMarker && token.type != 10 /* LineBreak */ && token.position > 0)
+                    if (token.type != 7 /* PoppedOutDataStartMarker */ && token.type != 12 /* LineBreak */ && token.position > 0)
                         if (VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) == objIndent + 1) {
                             var itemTextPos = token.position + (objIndent + 1);
                             var itemEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                                return a.type == 10 /* LineBreak */ && a.position >= itemTextPos;
+                                return a.type == 12 /* LineBreak */ && a.position >= itemTextPos;
                             });
                             var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
                             objNode.AddItem(VDFLoader.ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent + 1));
@@ -210,7 +210,7 @@ var VDFLoader = (function () {
             var token = parser.tokens[i];
             var next3Tokens = parser.tokens.GetRange(i + 1, Math.min(3, parser.tokens.Count - (i + 1)));
 
-            if (token.type == VDFTokenType.DataPropName && tokensAtDepth0.Contains(token)) {
+            if (token.type == 5 /* DataPropName */ && tokensAtDepth0.Contains(token)) {
                 var propName = token.text.replace(/^\t+/, "");
                 var propValueTypeName;
                 if (objTypeName.indexOf("Dictionary[") == 0)
@@ -221,18 +221,18 @@ var VDFLoader = (function () {
                 if (token.text.indexOf("\t") != 0) {
                     var propValueTextPos = next3Tokens[1].position;
                     var propValueEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                        return (a.type == 9 /* DataEndMarker */ || a.type == VDFTokenType.PoppedOutDataEndMarker) && a.position >= propValueTextPos;
+                        return (a.type == 11 /* DataEndMarker */ || a.type == 8 /* PoppedOutDataEndMarker */) && a.position >= propValueTextPos;
                     });
                     var propValueText = text.substr(propValueTextPos, (propValueEnderToken != null ? propValueEnderToken.position : text.length) - propValueTextPos);
                     objNode.SetProperty(propName, VDFLoader.ToVDFNode(propValueText, propValueTypeName, loadOptions, objIndent));
                 } else {
                     var propValueTextPos = next3Tokens[1].position;
                     var propValueEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                        return a.type == 9 /* DataEndMarker */ && a.position >= propValueTextPos;
+                        return a.type == 11 /* DataEndMarker */ && a.position >= propValueTextPos;
                     });
                     if (objTypeInfo.popOutChildren)
                         propValueEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                            return a.type == VDFTokenType.DataPropName && a.position > propValueTextPos;
+                            return a.type == 5 /* DataPropName */ && a.position > propValueTextPos;
                         });
                     var propValueText = text.substr(propValueTextPos, (propValueEnderToken != null ? propValueEnderToken.position : text.length) - propValueTextPos);
                     objNode.SetProperty(propName, VDFLoader.ToVDFNode(propValueText, propValueTypeName, loadOptions, objIndent + 1));
@@ -242,10 +242,10 @@ var VDFLoader = (function () {
 
         // parse base-value (if applicable)
         var firstPropNameToken = parser.tokens.FirstOrDefault(function (a) {
-            return a.type == VDFTokenType.DataPropName;
+            return a.type == 5 /* DataPropName */;
         });
         var firstBaseValueToken = parser.tokens.FirstOrDefault(function (a) {
-            return a.type == VDFTokenType.DataBaseValue;
+            return a.type == 10 /* DataBaseValue */;
         });
         if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))
             objNode.baseValue = firstBaseValueToken.text;

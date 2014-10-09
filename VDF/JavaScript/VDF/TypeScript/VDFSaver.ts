@@ -38,8 +38,6 @@ class VDFSaver
 		if (obj && obj.VDFPreSerialize)
 			obj.VDFPreSerialize(saveOptions.message);
 
-		lineInfo = lineInfo || new VDFSaver_LineInfo();
-
 		if (obj == null)
 			objNode.baseValue = "null";
 		else if (objVTypeName == "string" && obj == "")
@@ -50,9 +48,9 @@ class VDFSaver
 			objNode.baseValue = new EnumValue(objVTypeName, obj).toString();
 		else if (objVTypeName == "bool")
 			objNode.baseValue = obj.toString().toLowerCase();
-		else if (["float", "double", "decimal"].contains(objVTypeName)) // floating-point number
+		else if (["float", "double", "decimal"].indexOf(objVTypeName) != -1) // floating-point number
 			objNode.baseValue = obj.toString().startsWith("0.") ? obj.toString().substring(1) : obj.toString();
-		else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].contains(objVTypeName))
+		else if (["char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "string"].indexOf(objVTypeName) != -1)
 			objNode.baseValue = obj.toString();
 		else if (objVTypeName && objVTypeName.startsWith("List["))
 		{
@@ -111,7 +109,7 @@ class VDFSaver
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof List && objNode.items.length == 1); // if list with only one item (i.e. indistinguishable from base-prop)
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && obj instanceof Dictionary); // if dictionary (i.e. indistinguishable from prop-set)
 		markType = markType || (saveOptions.typeMarking == VDFTypeMarking.AssemblyExternal && !isGenericParamValue); // we're a non-generics-based value (i.e. we have no value-default-type specified)
-		markType = markType || ([VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal].contains(saveOptions.typeMarking) && (obj == null || objVTypeName != declaredTypeName)); // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
+		markType = markType || ([VDFTypeMarking.Assembly, VDFTypeMarking.AssemblyExternal].indexOf(saveOptions.typeMarking) != -1 && (obj == null || objVTypeName != declaredTypeName)); // if actual type is *derived* from the declared type, we must mark type, even if in the same Assembly
 		if (obj == null || (objVTypeName == "string" && obj == ""))
 			objNode.metadata_type = "";
 		else
@@ -122,8 +120,8 @@ class VDFSaver
 			if (objNode.metadata_type != null && collapseMap[objNode.metadata_type] !== undefined)
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
 			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params
-			if (objNode.metadata_type != null && ((objNode.metadata_type.startsWith("List[") && !objNode.metadata_type.substring(5).contains("[")) || objNode.metadata_type.startsWith("Dictionary[")))
-				objNode.metadata_type = objNode.metadata_type.startsWith("List[") ? objNode.metadata_type.substring(5, objNode.metadata_type.length - 1) : objNode.metadata_type.substring(11, objNode.metadata_type.length - 1);
+			if (objNode.metadata_type != null && ((objNode.metadata_type.indexOf("List[") == 0 && objNode.metadata_type.substring(5).indexOf("[") == -1) || objNode.metadata_type.indexOf("Dictionary[") != -1))
+				objNode.metadata_type = objNode.metadata_type.indexOf("List[") == 0 ? objNode.metadata_type.substring(5, objNode.metadata_type.length - 1) : objNode.metadata_type.substring(11, objNode.metadata_type.length - 1);
 		}
 
 		if (typeInfo != null && typeInfo.popOutChildren)

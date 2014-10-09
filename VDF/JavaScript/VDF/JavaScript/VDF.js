@@ -465,7 +465,7 @@ var Dictionary = (function () {
         return this.values[this.keys.indexOf(key)];
     };
     Dictionary.prototype.Set = function (key, value) {
-        if (!this.keys.contains(key)) {
+        if (this.keys.indexOf(key) == -1) {
             this.keys.push(key);
             this[key] = value; // make value accessible directly on Dictionary object
         }

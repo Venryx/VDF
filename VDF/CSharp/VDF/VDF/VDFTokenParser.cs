@@ -67,13 +67,13 @@ public class VDFTokenParser
 			char? nextNextChar = i + 2 < text.Length ? text[i + 2] : (char?)null;
 			char? nextNextNextChar = i + 3 < text.Length ? text[i + 3] : (char?)null;
 
-			var grabExtraCharsAsOwnAndSkipTheirProcessing = (Action<int, bool>)((number, addToNormalBuilder)=>
+			var grabExtraCharsAsOwnAndSkipTheirProcessing = (Action<int, bool>)((count, addToNormalBuilder)=>
 			{
-				tokenRawTextBuilder.Append(text.Substring(i + 1, number));
+				tokenRawTextBuilder.Append(text.Substring(i + 1, count));
 				if (addToNormalBuilder)
-					tokenTextBuilder.Append(text.Substring(i + 1, number));
-				i += number;
-				nextCharPos += number;
+					tokenTextBuilder.Append(text.Substring(i + 1, count));
+				i += count;
+				nextCharPos += count;
 			});
 
 			tokenRawTextBuilder.Append(ch);

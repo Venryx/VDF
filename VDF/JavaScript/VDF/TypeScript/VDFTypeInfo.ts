@@ -3,31 +3,28 @@
 	static Get(vTypeName: string) { return (window[vTypeName] || {}).typeInfo; }
 
 	props_includeL1: boolean;
+	popOutChildren: boolean;
 	propInfoByName: Object;
-	constructor(props_includeL1?: boolean, propInfoByPropName?: Object)
+	constructor(props_includeL1?: boolean, popOutChildren?: boolean, propInfoByPropName?: Object)
 	{
 		this.props_includeL1 = props_includeL1;
+		this.popOutChildren = popOutChildren;
 		this.propInfoByName = propInfoByPropName || {};
 	}
-	SetPropInfo(propName: string, propInfo: VDFPropInfo)
-	{
-		this.propInfoByName[propName] = propInfo;
-	}
+	//SetPropInfo(propName: string, propInfo: VDFPropInfo) { this.propInfoByName[propName] = propInfo; }
 }
 
 class VDFPropInfo
 {
 	propVTypeName: string;
 	includeL2: boolean;
-	popOutData: boolean;
-	popOutItemData: boolean;
+	popOutChildren: boolean;
 	writeEmptyValue: boolean;
-	constructor(propType: string, includeL2?: boolean, popOutData?: boolean, popOutItemData?: boolean, writeEmptyValue: boolean = true)
+	constructor(propType: string, includeL2?: boolean, popOutChildren?: boolean, writeEmptyValue: boolean = true)
 	{
 		this.propVTypeName = propType;
 		this.includeL2 = includeL2;
-		this.popOutData = popOutData;
-		this.popOutItemData = popOutItemData;
+		this.popOutChildren = popOutChildren;
 		this.writeEmptyValue = writeEmptyValue;
 	}
 

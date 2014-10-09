@@ -1,25 +1,21 @@
 ﻿var VDFTypeInfo = (function () {
-    function VDFTypeInfo(props_includeL1, propInfoByPropName) {
+    function VDFTypeInfo(props_includeL1, popOutChildren, propInfoByPropName) {
         this.props_includeL1 = props_includeL1;
+        this.popOutChildren = popOutChildren;
         this.propInfoByName = propInfoByPropName || {};
     }
     VDFTypeInfo.Get = function (vTypeName) {
         return (window[vTypeName] || {}).typeInfo;
     };
-
-    VDFTypeInfo.prototype.SetPropInfo = function (propName, propInfo) {
-        this.propInfoByName[propName] = propInfo;
-    };
     return VDFTypeInfo;
 })();
 
 var VDFPropInfo = (function () {
-    function VDFPropInfo(propType, includeL2, popOutData, popOutItemData, writeEmptyValue) {
+    function VDFPropInfo(propType, includeL2, popOutChildren, writeEmptyValue) {
         if (typeof writeEmptyValue === "undefined") { writeEmptyValue = true; }
         this.propVTypeName = propType;
         this.includeL2 = includeL2;
-        this.popOutData = popOutData;
-        this.popOutItemData = popOutItemData;
+        this.popOutChildren = popOutChildren;
         this.writeEmptyValue = writeEmptyValue;
     }
     VDFPropInfo.prototype.IsXValueEmpty = function (x) {
