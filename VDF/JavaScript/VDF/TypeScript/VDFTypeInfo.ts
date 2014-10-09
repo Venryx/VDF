@@ -1,6 +1,6 @@
 ﻿class VDFTypeInfo
 {
-	static Get(vTypeName: string) { return (window[vTypeName] || {}).typeInfo; }
+	static Get(vTypeName: string): VDFTypeInfo { return (window[vTypeName] || {}).typeInfo || new VDFTypeInfo(); }
 
 	props_includeL1: boolean;
 	popOutChildren: boolean;

@@ -76,7 +76,7 @@
 	{
 		var result = rawDataStr;
 		if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
-			if (rawDataStr.indexOf("@") == rawDataStr.length - 1 || rawDataStr.indexOf("|") == rawDataStr.length - 1)
+			if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
 			else
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
@@ -243,7 +243,11 @@
 
 		var finalTypeName = declaredTypeName;
 		if (finalMetadata_type != null && finalMetadata_type.length > 0)
-			finalTypeName = finalMetadata_type;  // porting-note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
+		{
+			// porting-note: this is only a limited implementation of CS functionality of making sure metadata-type (finalMetadata_type) is more specific than declared-type (finalTypeName)
+			if (finalTypeName == null || ["object", "IList", "IDictionary"].indexOf(finalTypeName) != -1) // if there is no declared type, or the from-metadata type is more specific than the declared type
+				finalTypeName = finalMetadata_type;
+		}
 
 		// porting-added; special type-mapping from C# types to JS types
 		if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].indexOf(finalTypeName) != -1)
@@ -252,20 +256,20 @@
 			finalTypeName = "string";
 
 		var finalTypeName_root = finalTypeName != null && (finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName);
-		if (loadOptions.inferCompatibleTypesForUnknownTypes)
-			if (finalTypeName != null)
-			{
-				if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type was specified, but the type doesn't exist
+		if (finalTypeName_root) // if type specified
+		{
+			if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type doesn't exist
+				if (loadOptions.inferCompatibleTypesForUnknownTypes)
 					finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
-			}
-			else // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
+				else
+					throw new Error("Type \"" + finalMetadata_type + "\" not found."); // throw an error, because we can't go on without a final-type
+		}
+		else // if no metadata-type, and no declared-type
+			if (loadOptions.inferCompatibleTypesForUnknownTypes) // if inference allowed, infer a compatible, anonymous-like type from the node-data (final-type must be something)
 				finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
-		else
-			if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type was specified, but the type doesn't exist
-				throw new Error("Type \"" + finalMetadata_type + "\" not found."); // throw an error, because we can't go on without a final-type
-			else if (finalTypeName == null) // if the type isn't specified in the VDF text itself, or as a declared type, infer that it's a string (string is the default type)
+			else // otherwise, infer that it's a string (string is the default type)
 				finalTypeName = "string"; // string is the default/fallback type
-
+		
 		var result;
 		if (VDF.typeImporters_inline[finalTypeName])
 			result = VDF.typeImporters_inline[finalTypeName](this.baseValue);
@@ -294,7 +298,7 @@
 		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
 		var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
 		for (var i = 0; i < this.items.length; i++)
-			(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[0], loadOptions));
+			(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
 		for (var propName in this.properties)
 			try
 			{
@@ -304,10 +308,10 @@
 					if (typeGenericArgumentsAreReal)
 						if (VDF.typeImporters_inline[typeGenericParameters[0]]) // porting-note: the JS version doesn't let you register importer-func's for generic-type-definitions
 							key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
-					(<Dictionary<any, any>>obj).Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[1], loadOptions));
+					(<Dictionary<any, any>>obj).Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[1] : null, loadOptions));
 				}
 				else
-					obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal && finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName, loadOptions);
+					obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal ? finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
 			}
 			catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n"); }
 

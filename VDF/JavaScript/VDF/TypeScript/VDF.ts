@@ -6,8 +6,9 @@ module VDF_SetUp
 		enumerable: false,
 		value: function ()
 		{
-			var results = this["constructor"].toString().match(/function (.{1,})\(/);
-			return (results && results.length > 1) ? results[1] : "";
+			//var results = this["constructor"].toString().match(/function (.{1,})\(/);
+			//return (results && results.length > 1) ? results[1] : "";
+			return this.constructor.name;
 		}
 	});
 	Object.defineProperty(Object.prototype, "GetType", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
@@ -15,8 +16,9 @@ module VDF_SetUp
 		enumerable: false,
 		value: function()
 		{
-			var results = this["constructor"].toString().match(/function (.{1,})\(/);
-			return window[(results && results.length > 1) ? results[1] : ""];
+			//var results = this["constructor"].toString().match(/function (.{1,})\(/);
+			//return window[(results && results.length > 1) ? results[1] : ""];
+			return window[this.constructor.name];
 		}
 	});
 
@@ -251,7 +253,7 @@ class List<T>
 			result[i] = this[i];
 		return result;
 	}
-	Add(...items): number { return this.push(items); }
+	Add(...items): number { return this.push.apply(this, items); }
 	AddRange(items: Array<T>)
 	{
 		for (var i = 0; i < items.length; i++)

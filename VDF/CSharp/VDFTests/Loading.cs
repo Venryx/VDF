@@ -8,7 +8,6 @@ using SystemMaker;
 using FluentAssertions;
 using Xunit;
 
-public class SpecialList<T> : List<T> {}
 namespace VDFTests
 {
 	public class Loading
@@ -94,15 +93,15 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata1()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2", new VDFLoadOptions(null, null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
-			a.metadata_type.Should().Be("SpecialList[int]");
+			VDFNode a = VDFLoader.ToVDFNode("List[int]>>1|2");
+			a.metadata_type.Should().Be("List[int]");
 			a[0].metadata_type.Should().Be(null);
 			a[1].metadata_type.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level0_ArrayMetadata2()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2", new VDFLoadOptions(null, null, new Dictionary<Type, string>{{typeof(SpecialList<>), "SpecialList"}}));
-			a.metadata_type.Should().Be("SpecialList[int]");
+			VDFNode a = VDFLoader.ToVDFNode("List[int]>>int>1|int>2");
+			a.metadata_type.Should().Be("List[int]");
 			a[0].metadata_type.Should().Be("int");
 			a[1].metadata_type.Should().Be("int");
 		}

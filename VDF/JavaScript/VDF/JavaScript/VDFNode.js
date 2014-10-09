@@ -104,7 +104,7 @@
     VDFNode.RawDataStringToFinalized = function (rawDataStr) {
         var result = rawDataStr;
         if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
-            if (rawDataStr.indexOf("@") == rawDataStr.length - 1 || rawDataStr.indexOf("|") == rawDataStr.length - 1)
+            if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
                 result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
             else
                 result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
@@ -253,8 +253,11 @@
             finalMetadata_type = "Dictionary[object,object]";
 
         var finalTypeName = declaredTypeName;
-        if (finalMetadata_type != null && finalMetadata_type.length > 0)
-            finalTypeName = finalMetadata_type; // porting-note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
+        if (finalMetadata_type != null && finalMetadata_type.length > 0) {
+            // porting-note: this is only a limited implementation of CS functionality of making sure metadata-type (finalMetadata_type) is more specific than declared-type (finalTypeName)
+            if (finalTypeName == null || ["object", "IList", "IDictionary"].indexOf(finalTypeName) != -1)
+                finalTypeName = finalMetadata_type;
+        }
 
         // porting-added; special type-mapping from C# types to JS types
         if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].indexOf(finalTypeName) != -1)
@@ -263,15 +266,15 @@
             finalTypeName = "string";
 
         var finalTypeName_root = finalTypeName != null && (finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName);
-        if (loadOptions.inferCompatibleTypesForUnknownTypes)
-            if (finalTypeName != null) {
-                if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1)
+        if (finalTypeName_root) {
+            if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1)
+                if (loadOptions.inferCompatibleTypesForUnknownTypes)
                     finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
-            } else
-                finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
-        else if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1)
-            throw new Error("Type \"" + finalMetadata_type + "\" not found.");
-        else if (finalTypeName == null)
+                else
+                    throw new Error("Type \"" + finalMetadata_type + "\" not found.");
+        } else if (loadOptions.inferCompatibleTypesForUnknownTypes)
+            finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
+        else
             finalTypeName = "string"; // string is the default/fallback type
 
         var result;
@@ -301,7 +304,7 @@
         var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
         var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
         for (var i = 0; i < this.items.length; i++)
-            obj.push(this.items[i].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[0], loadOptions));
+            obj.push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
         for (var propName in this.properties)
             try  {
                 if (obj instanceof Dictionary) {
@@ -309,9 +312,9 @@
                     if (typeGenericArgumentsAreReal)
                         if (VDF.typeImporters_inline[typeGenericParameters[0]])
                             key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
-                    obj.Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[1], loadOptions));
+                    obj.Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[1] : null, loadOptions));
                 } else
-                    obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal && finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName, loadOptions);
+                    obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal ? finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
             } catch (ex) {
                 throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n");
             }

@@ -225,7 +225,7 @@ public static class VDFLoader
 				if (typeof(IDictionary).IsAssignableFrom(objType))
 					propValueType = objType.IsGenericType ? objType.GetGenericArguments()[1] : null;
 				else
-					propValueType = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
+					propValueType = objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
 
 				if (!token.text.StartsWith("\t")) // if this property *key*/*definition* is inline
 				{

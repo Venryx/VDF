@@ -5,7 +5,7 @@
         this.propInfoByName = propInfoByPropName || {};
     }
     VDFTypeInfo.Get = function (vTypeName) {
-        return (window[vTypeName] || {}).typeInfo;
+        return (window[vTypeName] || {}).typeInfo || new VDFTypeInfo();
     };
     return VDFTypeInfo;
 })();

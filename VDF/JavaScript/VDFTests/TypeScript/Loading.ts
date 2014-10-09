@@ -5,6 +5,7 @@ window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual
 	Loading.Init();
 	window["oldTest"](title, testFunc);
 }*/
+
 class TypeWithPostDeserializeMethod
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
@@ -24,9 +25,9 @@ class TypeInstantiatedManuallyThenFilled
 }
 class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 {
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, true,
 	{
-		messages: new VDFPropInfo("Dictionary[string,string]"),
+		messages: new VDFPropInfo("Dictionary[string,string]", true, true),
 		otherProperty: new VDFPropInfo("bool")
 	});
 
@@ -38,7 +39,7 @@ class TypeWithPostDeserializeMethod_CustomMessageRequired
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
-		flag: new VDFPropInfo("bool", true)
+		flag: new VDFPropInfo("bool")
 	});
 	flag = false;
 	VDFPostDeserialize(message: any): void { if (message == "RequiredMessage") this.flag = true; }
@@ -144,15 +145,15 @@ three lines");
 		});
 		test("ToVDFNode_Level0_ArrayMetadata1", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("SpecialList[int]>>1|2");
-			a.metadata_type.Should().Be("SpecialList[int]");
+			var a = VDFLoader.ToVDFNode("List[int]>>1|2");
+			a.metadata_type.Should().Be("List[int]");
 			ok(a[0].metadata_type == null);
 			ok(a[1].metadata_type == null);
 		});
 		test("ToVDFNode_Level0_ArrayMetadata2", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("SpecialList[int]>>int>1|int>2");
-			a.metadata_type.Should().Be("SpecialList[int]");
+			var a = VDFLoader.ToVDFNode("List[int]>>int>1|int>2");
+			a.metadata_type.Should().Be("List[int]");
 			a[0].metadata_type.Should().Be("int");
 			a[1].metadata_type.Should().Be("int");
 		});
@@ -181,7 +182,7 @@ three lines");
 		test("ToVDFNode_Level0_KeepDeclaredType", ()=>
 		{
 			var a = VDF.Deserialize(">>SimpleString", "List[object]");
-			a[0].GetType().Should().Be(typeof(object));
+			a[0].GetTypeName().Should().Be("object");
 		});
 		test("ToVDFNode_Level0_MultilineString", ()=>
 		{
@@ -305,7 +306,7 @@ three lines");
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
-			a["messages"].properties.Count.Should().Be(2);
+			a["messages"].propertyCount.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["messages"]["title2"].baseValue.Should().Be("message2");
 			a["otherProperty"].baseValue.Should().Be("false");
@@ -331,7 +332,7 @@ messages:{,>>
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
-			a["messages"].properties.Count.Should().Be(2);
+			a["messages"].propertyCount.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["messages"]["title2"].baseValue.Should().Be("message2");
 			a["otherProperty"].baseValue.Should().Be("false");
@@ -373,14 +374,14 @@ of three lines in total.@@}bool{>true}");
 		// to object
 		// ==================
 
-		test("ToObject_Level0_Null", ()=>{ VDF.Deserialize(">null").Should().Be(null); });
-		test("ToObject_Level0_Nothing", ()=>{ VDF.Deserialize("").Should().Be(null); });
-		test("ToObject_Level0_Nothing_TypeSpecified", ()=>{ VDF.Deserialize("string>").Should().Be(null); });
-		test("ToObject_Level0_EmptyString", ()=>{ VDF.Deserialize(">empty").Should().Be(""); });
-		test("ToObject_Level0_Bool", ()=>{ VDF.Deserialize("true", "bool").Should().Be(true); });
-		test("ToObject_Level0_Float", ()=>{ VDF.Deserialize("1.5", "float").Should().Be(1.5); });
+		test("ToObject_Level0_Null", ()=>ok(VDF.Deserialize(">null") == null));
+		test("ToObject_Level0_Nothing", ()=>ok(VDF.Deserialize("") == null));
+		test("ToObject_Level0_Nothing_TypeSpecified", ()=>ok(VDF.Deserialize("string>") == null));
+		test("ToObject_Level0_EmptyString", ()=>VDF.Deserialize(">empty").Should().Be(""));
+		test("ToObject_Level0_Bool", ()=>VDF.Deserialize("true", "bool").Should().Be(true));
+		test("ToObject_Level0_Float", ()=>VDF.Deserialize("1.5", "float").Should().Be(1.5));
 
-		test("ToObject_Level1_EmptyStringInList", ()=>{ VDF.Deserialize("text1|", "List[string]")[1].Should().Be(null); });
+		test("ToObject_Level1_EmptyStringInList", ()=>ok(VDF.Deserialize("text1|", "List[string]")[1] == null));
 		test("ToObject_Level1_PostDeserializeMethod", ()=>
 		{
 			var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");
@@ -409,12 +410,12 @@ of three lines in total.@@}bool{>true}");
 		// unique to JavaScript version
 		// ==================
 
-		test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_Object", ()=>
+		test("ToVDFNode_Level0_InferCompatibleTypesForUnknownTypes_Object", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(null, true));
 			a["string"].baseValue.Should().Be("Prop value string.");
 		});
-		test("ToVDFNode_Level0_InferCompatibleTypeForUnknownType_BaseValue", ()=>
+		test("ToVDFNode_Level0_InferCompatibleTypesForUnknownTypes_BaseValue", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(null, true));
 			a["string"].baseValue.Should().Be("Prop value string.");
@@ -425,9 +426,14 @@ of three lines in total.@@}bool{>true}");
 			a.bool.Should().Be(false);
 			a.float.Should().BeExactly(3.5);
 		});
-		test("ToObject_AsObject_NestedList", ()=>
+		test("ToObject_AsObject_NestedList_InferCompatibleTypesOff", () =>
 		{
-			var a = <any>VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}");
+			var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}");
+			ok(a == null);
+		});
+		test("ToObject_AsObject_NestedList_InferCompatibleTypesOn", ()=>
+		{
+			var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}", new VDFLoadOptions(null, true));
 			a["children"].length.Should().Be(3);
 		});
 	}

@@ -3,15 +3,17 @@
     Object.defineProperty(Object.prototype, "GetTypeName", {
         enumerable: false,
         value: function () {
-            var results = this["constructor"].toString().match(/function (.{1,})\(/);
-            return (results && results.length > 1) ? results[1] : "";
+            //var results = this["constructor"].toString().match(/function (.{1,})\(/);
+            //return (results && results.length > 1) ? results[1] : "";
+            return this.constructor.name;
         }
     });
     Object.defineProperty(Object.prototype, "GetType", {
         enumerable: false,
         value: function () {
-            var results = this["constructor"].toString().match(/function (.{1,})\(/);
-            return window[(results && results.length > 1) ? results[1] : ""];
+            //var results = this["constructor"].toString().match(/function (.{1,})\(/);
+            //return window[(results && results.length > 1) ? results[1] : ""];
+            return window[this.constructor.name];
         }
     });
 
@@ -393,7 +395,7 @@ var List = (function () {
         for (var _i = 0; _i < (arguments.length - 0); _i++) {
             items[_i] = arguments[_i + 0];
         }
-        return this.push(items);
+        return this.push.apply(this, items);
     };
     List.prototype.AddRange = function (items) {
         for (var i = 0; i < items.length; i++)

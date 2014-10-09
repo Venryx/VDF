@@ -91,8 +91,11 @@ var VDFLoader = (function () {
                 objTypeStr = "IList";
 
         var objTypeName = declaredTypeName;
-        if (objTypeStr != null && objTypeStr.length > 0)
-            objTypeName = objTypeStr; // porting-note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
+        if (objTypeStr != null && objTypeStr.length > 0) {
+            // porting-note: this is only a limited implementation of CS functionality of making sure metadata-type (objTypeStr) is more specific than declared-type (objTypeName)
+            if (objTypeName == null || ["object", "IList", "IDictionary"].indexOf(objTypeName) != -1)
+                objTypeName = objTypeStr;
+        }
         if (objTypeName == null)
             objTypeName = "string"; // string is the default/fallback type (note, though, that if the below code finds properties, it'll just add them to the VDFNode anyway)
         var objTypeInfo = VDFTypeInfo.Get(objTypeName);
@@ -216,7 +219,7 @@ var VDFLoader = (function () {
                 if (objTypeName.indexOf("Dictionary[") == 0)
                     propValueTypeName = VDF.GetGenericParametersOfTypeName(objTypeName)[1];
                 else
-                    propValueTypeName = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
+                    propValueTypeName = objTypeInfo.propInfoByName[propName] ? objTypeInfo.propInfoByName[propName].propVTypeName : null;
 
                 if (token.text.indexOf("\t") != 0) {
                     var propValueTextPos = next3Tokens[1].position;
