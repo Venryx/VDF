@@ -290,8 +290,8 @@ messages:,>>
 Parsed As:
 
 messages:{,>>
-{	title1{message1}}
-{	title2{message2}}
+	title1{message1}
+	title2{message2}
 }^otherProperty{false}
  */
 			VDFNode a = VDFLoader.ToVDFNode(@"messages:,>>
