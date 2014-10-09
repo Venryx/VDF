@@ -111,7 +111,7 @@ public static class VDFLoader
 		// calculate token depths
 		// ==========
 
-		isInlineList = isInlineList || typeof(IList).IsAssignableFrom(objType) && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak); // update based on new knowledge of obj-type
+		isInlineList = isInlineList || (typeof(IList).IsAssignableFrom(objType) && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak)); // update based on new knowledge of obj-type
 
 		var firstNonObjMetadataGroupToken = objMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a=>a.position > objMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
 		var hasPoppedOutChildren = !isInlineList && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak);

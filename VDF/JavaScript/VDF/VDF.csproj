@@ -17,10 +17,6 @@
     <IISExpressUseClassicPipelineMode />
   </PropertyGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="TypeScript\Tests\Packages\General\ClassExtensions.ts" />
-    <TypeScriptCompile Include="TypeScript\Tests\Packages\General\jquery.d.ts" />
-    <TypeScriptCompile Include="TypeScript\Tests\Packages\V\V.ts" />
-    <TypeScriptCompile Include="TypeScript\Tests\Packages\V\VTabView.ts" />
     <Content Include="JavaScript\Tests\Packages\General\QUnit 1.14.0.css" />
     <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\AUTHORS.txt" />
     <Content Include="JavaScript\Tests\Packages\JQueryUI\Content\external\globalize.culture.de-DE.js" />
@@ -113,15 +109,12 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="TypeScript\Tests\Declarations\qunit.d.ts" />
-    <TypeScriptCompile Include="TypeScript\Tests\Loading.ts" />
-    <TypeScriptCompile Include="TypeScript\Tests\Saving.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDF.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDFLoader.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDFNode.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDFSaver.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDFTokenParser.ts" />
-    <TypeScriptCompile Include="TypeScript\VDF\VDFTypeInfo.ts" />
+    <TypeScriptCompile Include="TypeScript\VDF.ts" />
+    <TypeScriptCompile Include="TypeScript\VDFLoader.ts" />
+    <TypeScriptCompile Include="TypeScript\VDFNode.ts" />
+    <TypeScriptCompile Include="TypeScript\VDFSaver.ts" />
+    <TypeScriptCompile Include="TypeScript\VDFTokenParser.ts" />
+    <TypeScriptCompile Include="TypeScript\VDFTypeInfo.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -173,7 +166,7 @@
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
     <TypeScriptSourceMap>false</TypeScriptSourceMap>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptOutDir>C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\JavaScript</TypeScriptOutDir>
+    <TypeScriptOutDir>C:\Projects\Visual C#\VDF\VDF\JavaScript\VDF\JavaScript</TypeScriptOutDir>
   </PropertyGroup>
   <Import Project="$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(VSToolsPath)\TypeScript\Microsoft.TypeScript.targets')" />
 </Project>

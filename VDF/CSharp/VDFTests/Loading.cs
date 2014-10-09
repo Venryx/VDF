@@ -47,19 +47,19 @@ namespace VDFTests
 		}
 		[Fact] void ToVDFNode_Level0_Array()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<IList>("Root string 1.|Root string 2.");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("Root string 1.|Root string 2.");
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
 		}
 		[Fact] void ToVDFNode_Level0_Array_ExplicitStartAndEndMarkers()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<IList>("{Root string 1.}|{Root string 2.}");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
 		}
 		[Fact] void ToVDFNode_Level0_Array_Objects()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<IList>("name{Dan}age{50}|name{Bob}age{60}");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("name{Dan}age{50}|name{Bob}age{60}");
 			((string)a[0]["name"]).Should().Be("Dan");
 			((int)a[0]["age"]).Should().Be(50);
 			((string)a[1]["name"]).Should().Be("Bob");
@@ -80,14 +80,14 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level0_Array_Empty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<IList>("|");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("|");
 			//a.properties.Count.Should().Be(0);
 			a[0].baseValue.Should().Be(null);
 			a[1].baseValue.Should().Be(null);
 		}
 		[Fact] void ToVDFNode_Level0_Array_None()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<IList>("");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("");
 			a.items.Count.Should().Be(0);
 			a = VDFLoader.ToVDFNode(">>");
 			a.items.Count.Should().Be(0);
@@ -120,13 +120,8 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level0_InferDepth2()
 		{
-			var a = VDF.Deserialize<IList>(">>>false");
+			var a = VDF.Deserialize<List<object>>(">>>false");
 			a[0].Should().Be(false);
-		}
-		[Fact] void ToVDFNode_Level0_InferUnmarkedTypeToBeString()
-		{
-			var a = VDF.Deserialize<IList>(">>SimpleString");
-			a[0].Should().Be("SimpleString");
 		}
 		[Fact] void ToVDFNode_Level0_KeepDeclaredType()
 		{
@@ -390,6 +385,11 @@ of three lines in total.@@}bool{>true}");
 		// unique to C# version
 		// ==========
 
+		[Fact] void ToVDFNode_Level0_InferUnmarkedTypeToBeString()
+		{
+			var a = VDF.Deserialize<IList>(">>SimpleString");
+			a[0].Should().Be("SimpleString");
+		}
 		[Fact] void ToVDFNode_Level1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("scores{Dan{0}Dan{1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
 		class SpecialList3<T> : List<T> {}
 		[Fact] void ToVDFNode_Level1_SpecialListItem()
