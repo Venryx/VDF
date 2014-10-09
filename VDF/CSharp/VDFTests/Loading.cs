@@ -132,7 +132,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void ToVDFNode_Level0_InferDepth2()
 		{
-			var a = VDF.Deserialize<List<object>>(">>>false");
+			var a = VDF.Deserialize<IList>(">>>false");
 			a[0].Should().Be(false);
 		}
 		[Fact] void ToVDFNode_Level0_InferUnmarkedTypeToBeString()
@@ -244,6 +244,7 @@ three lines".Replace("\r", ""));
 			a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");
 		}
 
+		// note: if only one item (when parsed as List), assume by default obj is an object; if more than one, assume by default obj is a List or Dictionary
 		[Fact] void ToVDFNode_Level1_ArrayPoppedOut()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@"names:
@@ -265,24 +266,35 @@ three lines".Replace("\r", ""));
 			a["ages"][0].baseValue.Should().Be("10");
 			a["ages"][1].baseValue.Should().Be("20");
 		}
+		[Fact] void ToVDFNode_Level1_InferredDictionaryPoppedOut()
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"messages:
+	title1{message1}
+	title2{message2}
+^otherProperty{false}");
+			a["messages"].properties.Count.Should().Be(2);
+			a["messages"]["title1"].baseValue.Should().Be("message1");
+			a["messages"]["title2"].baseValue.Should().Be("message2");
+			a["otherProperty"].baseValue.Should().Be("false");
+		}
 		[Fact] void ToVDFNode_Level1_DictionaryPoppedOut()
 		{
 /*
 Written As:
 
-messages:object,object>>
+messages:,>>
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}
 
 Parsed As:
 
-messages:{object,object>>
+messages:{,>>
 {	title1{message1}}
 {	title2{message2}}
 }^otherProperty{false}
  */
-			VDFNode a = VDFLoader.ToVDFNode(@"messages:object,object>>
+			VDFNode a = VDFLoader.ToVDFNode(@"messages:,>>
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");
@@ -390,11 +402,7 @@ of three lines in total.@@}bool{>true}");
 		// unique to C# version
 		// ==========
 
-		[Fact] void ToVDFNode_Level1_PropLoadError_DuplicateDictionaryKeys()
-		{
-			Action act = ()=>VDFLoader.ToVDFNode("scores{Dan{0}Dan{1}}");
-			act.ShouldThrow<ArgumentException>().WithMessage("*same key*");
-		}
+		[Fact] void ToVDFNode_Level1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("scores{Dan{0}Dan{1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
 		class SpecialList3<T> : List<T> {}
 		[Fact] void ToVDFNode_Level1_SpecialListItem()
 		{

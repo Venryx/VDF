@@ -27,35 +27,143 @@ public static class VDFLoader
 		text = (text ?? "").Replace("\r\n", "\n");
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
-		// pre-parse all the tokens for our depth level
+		// parse all tokens
+		// ==========
+
 		var parser = new VDFTokenParser(text, 0);
+		while (parser.MoveNextToken()) {}
+
+		// figure out obj-type
+		// ==========
+
 		int depth = 0;
-		var tokensAtDepth0 = new List<VDFToken>();
-		var tokensAtDepth1 = new List<VDFToken>();
-		int inPoppedOutBlockAtIndent = -1;
-		while (parser.MoveNextToken())
+		var tokensNotInDataMarkers = new List<VDFToken>();
+		foreach (VDFToken token in parser.tokens)
 		{
-			VDFToken lastToken = parser.tokens.Count - 2 >= 0 ? parser.tokens[parser.tokens.Count - 2] : null;
-			VDFToken token = parser.tokens[parser.tokens.Count - 1];
+			if (token.type == VDFTokenType.DataEndMarker)
+				depth--;
+			if (depth == 0)
+				tokensNotInDataMarkers.Add(token);
+			if (token.type == VDFTokenType.DataStartMarker)
+				depth++;
+		}
+		var isInlineList = tokensNotInDataMarkers.Any(a => a.type == VDFTokenType.ItemSeparator);
+
+		VDFToken objMetadataBaseValueToken = null;
+		VDFToken objMetadataEndMarkerToken = null;
+		if (isInlineList)
+		{
+			if (tokensNotInDataMarkers.Count >= 2 && tokensNotInDataMarkers[1].type == VDFTokenType.WiderMetadataEndMarker)
+			{
+				objMetadataBaseValueToken = tokensNotInDataMarkers[0];
+				objMetadataEndMarkerToken = tokensNotInDataMarkers[1];
+			}
+			else if (tokensNotInDataMarkers.Count >= 1 && tokensNotInDataMarkers[0].type == VDFTokenType.WiderMetadataEndMarker)
+				objMetadataEndMarkerToken = tokensNotInDataMarkers[0];
+		}
+		else
+			if (tokensNotInDataMarkers.Count >= 2 && (tokensNotInDataMarkers[1].type == VDFTokenType.WiderMetadataEndMarker || (tokensNotInDataMarkers[0].type == VDFTokenType.MetadataBaseValue && tokensNotInDataMarkers[1].type == VDFTokenType.MetadataEndMarker)))
+			{
+				objMetadataBaseValueToken = tokensNotInDataMarkers[0];
+				objMetadataEndMarkerToken = tokensNotInDataMarkers[1];
+			}
+			else if (tokensNotInDataMarkers.Count >= 1 && (tokensNotInDataMarkers[0].type == VDFTokenType.WiderMetadataEndMarker || tokensNotInDataMarkers[0].type == VDFTokenType.MetadataEndMarker))
+				objMetadataEndMarkerToken = tokensNotInDataMarkers[0];
+
+		string objTypeStr = null;
+		if (objMetadataBaseValueToken != null)
+		{
+			objTypeStr = objMetadataBaseValueToken.text;
+
+			// do some expanding of obj-type-str (if applicable)
+			if (objMetadataEndMarkerToken.type == VDFTokenType.WiderMetadataEndMarker && !objTypeStr.Contains("["))
+				if (objTypeStr == ",")
+					objTypeStr = "System.Collections.IDictionary";
+				else if (FindNextDepthXCharYPos(objTypeStr, 0, 0, ',', '[', ']') != -1) // e.g. "string,object>>"
+					objTypeStr = "Dictionary[" + objTypeStr + "]";
+				else // e.g. "string>>"
+					objTypeStr = "List[" + objTypeStr + "]";
+		}
+		else if (objMetadataEndMarkerToken != null)
+			if (objMetadataEndMarkerToken.type == VDFTokenType.MetadataEndMarker)
+				objTypeStr = ""; // if type is not already set, set it to an empty string, for type-inference later
+			else
+				objTypeStr = "System.Collections.IList";
+
+		// some further inference based on token analysis
+		if (objTypeStr == null)
+			if (isInlineList)
+				objTypeStr = "System.Collections.IList";
+			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.DataPropName) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak))
+				objTypeStr = "System.Collections.IList";
+
+		Type objType = declaredType;
+		if (objTypeStr != null && objTypeStr.Length > 0)
+		{
+			var fromMetadataType = VDF.GetTypeByVName(objTypeStr, loadOptions);
+			if (objType == null || objType.IsAssignableFrom(fromMetadataType)) // if there is no declared type, or the from-metadata type is more specific than the declared type
+				objType = fromMetadataType;
+		}
+		if (objType == null)
+			objType = typeof(string); // string is the default/fallback type (note, though, that if the below code finds properties, it'll just add them to the VDFNode anyway)
+		var objTypeInfo = VDFTypeInfo.Get(objType);
+
+		// calculate token depths
+		// ==========
+
+		isInlineList = isInlineList || typeof(IList).IsAssignableFrom(objType) && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak); // update based on new knowledge of obj-type
+		var isInlineDictionary = typeof(IDictionary).IsAssignableFrom(objType) && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak);
+
+		var firstNonObjMetadataGroupToken = objMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a=>a.position > objMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
+		var hasPoppedOutChildren = !isInlineList && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak);
+
+		// calculate token depths, based on our new knowledge of whether we're dealing with an inline-list (in that case, consider the "|"-separated text blocks as being a depth lower)
+		// (note: 'depth' is increased not only by '{' chars, but also inferred/virtual '{' chars, e.g. to the left and right of item vdf-text)
+		depth = 0;
+		int inPoppedOutBlockAtIndent = -1;
+		var hasDepth0DataBlocks = false;
+		var tokensAtDepth0 = new List<VDFToken>();
+		var tokensAtDepth1 = new List<VDFToken>(); // note: this may actually contain some tokens deeper than 1 (I haven't made sure)
+		for (var i = 0; i < parser.tokens.Count; i++)
+		{
+			var lastToken = i > 0 ? parser.tokens[i - 1] : null;
+			var token = parser.tokens[i];
+
 			if (token.type == VDFTokenType.DataEndMarker)
 			{
 				depth--;
-				if (depth < 0)
-					break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
+				if (depth == 1 && isInlineDictionary)
+					depth--;
 			}
+			else if (hasPoppedOutChildren)
+			{
+				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us (for object)
+				{
+					depth++;
+					inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
+				}
+				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us (for object)
+				{
+					depth--;
+					inPoppedOutBlockAtIndent = -1;
+				}
 
-			if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us
-			{
-				depth++;
-				inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
+				if (typeof(IList).IsAssignableFrom(objType) || typeof(IDictionary).IsAssignableFrom(objType))
+					if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us (for child)
+						depth++;
+					else if (depth == 1 && token.type == VDFTokenType.LineBreak) // if inferred a virtual '}' char before us (for child)
+						depth--;
 			}
-			if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
-				depth++;
-			else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us
+			else if (isInlineList)
 			{
-				depth--;
-				inPoppedOutBlockAtIndent = -1;
+				if (token.type != VDFTokenType.ItemSeparator && token.type != VDFTokenType.DataStartMarker && depth == 0 && (firstNonObjMetadataGroupToken == token || (lastToken != null && lastToken.type == VDFTokenType.ItemSeparator))) // if inferred a virtual '{' char before us (for child)
+					depth++;
+				else if (token.type == VDFTokenType.ItemSeparator && !hasDepth0DataBlocks && depth == 1 && lastToken != null && lastToken.type != VDFTokenType.ItemSeparator) // if inferred a virtual '}' char before us (for child)
+					depth--;
 			}
+			else if (isInlineDictionary)
+				if (depth == 0 && token.type == VDFTokenType.DataPropName) // if inferred a virtual '{' char before us (for child)
+					depth++;
 
 			if (depth == 0)
 				tokensAtDepth0.Add(token);
@@ -63,196 +171,25 @@ public static class VDFLoader
 				tokensAtDepth1.Add(token);
 
 			if (token.type == VDFTokenType.DataStartMarker)
-				depth++;
-		}
-
-		var firstWiderMetadataToken = parser.tokens.FirstOrDefault(a => a.type == VDFTokenType.WiderMetadataEndMarker);
-		var firstPropNameToken = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName);
-		var firstBaseValueToken = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataBaseValue);
-		var firstLineBreakToken = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak);
-
-		// if we can tell it's a List, update the tokens-at-depth-0 list to not include the for-item tokens
-		// ('depth' is increased not only by '{' chars, but also inferred/virtual '{' chars to the left and right of item vdf-text)
-		var hasDepth0DataBlocks = false;
-		var hasWiderMetadata = firstWiderMetadataToken != null && (firstPropNameToken == null || firstWiderMetadataToken.position < firstPropNameToken.position);
-		var hasListOrDictionaryChildren = firstLineBreakToken != null && (firstPropNameToken == null || firstLineBreakToken.position < firstPropNameToken.position) && (firstBaseValueToken == null || firstLineBreakToken.position < firstBaseValueToken.position);
-		hasListOrDictionaryChildren = hasListOrDictionaryChildren || tokensAtDepth0.Any(a=>a.type == VDFTokenType.ItemSeparator);
-
-		var inferredDictionary = false;
-		var inferredList = false;
-		if ((hasWiderMetadata || hasListOrDictionaryChildren))
-			if (tokensAtDepth0.Any(a=>FindNextDepthXCharYPos(text, 0, 1, ',', '[', ']') != -1 || FindNextDepthXCharYPos(text, 0, 0, ',', '[', ']') != -1))
-				inferredDictionary = true;
-			else
-				inferredList = true;
-		var inlineItems = firstLineBreakToken == null || parser.tokens.IndexOf(firstLineBreakToken) >= 4;
-
-		if (typeof(IList).IsAssignableFrom(declaredType) || inferredList || typeof(IDictionary).IsAssignableFrom(declaredType) || inferredDictionary)
-		{
-			tokensAtDepth0 = new List<VDFToken>();
-			tokensAtDepth1 = new List<VDFToken>();
-
-			VDFToken widerMetadataEndMarkerToken = null;
-			if (parser.tokens.Count >= 2 && parser.tokens[0].type == VDFTokenType.MetadataBaseValue && parser.tokens[1].type == VDFTokenType.WiderMetadataEndMarker)
-				widerMetadataEndMarkerToken = parser.tokens[1];
-			else if (parser.tokens.Count >= 1 && parser.tokens[0].type == VDFTokenType.WiderMetadataEndMarker)
-				widerMetadataEndMarkerToken = parser.tokens[0];
-			VDFToken firstNonMetadataGroupToken = widerMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a=>a.position > widerMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
-
-			depth = 0;
-			inPoppedOutBlockAtIndent = -1;
-			for (var i = 0; i < parser.tokens.Count; i++)
 			{
-				var lastToken = i > 0 ? parser.tokens[i - 1] : null;
-				var token = parser.tokens[i];
-
-				if (token.type == VDFTokenType.DataEndMarker)
-				{
-					depth--;
-					if (depth < 0)
-						break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
-				}
-				else if (inlineItems)
-				{
-					if (token.type == VDFTokenType.ItemSeparator && !hasDepth0DataBlocks && depth == 1 && lastToken != null && lastToken.type != VDFTokenType.ItemSeparator) // if inferred a virtual '}' char before us
-						depth--;
-					else if (token.type != VDFTokenType.ItemSeparator && token.type != VDFTokenType.DataStartMarker && depth == 0 && (firstNonMetadataGroupToken == token || (lastToken != null && lastToken.type == VDFTokenType.ItemSeparator))) // if inferred a virtual '{' char before us
-						depth++;
-				}
-				else
-					if (firstNonMetadataGroupToken != token && firstLineBreakToken != token && token.type == VDFTokenType.LineBreak) // if inferred a virtual '}' char before us
-						depth--;
-					else if (token.type != VDFTokenType.LineBreak && depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
-						depth++;
-
-				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us
-				{
-					depth++;
-					inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
-				}
-				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us
-					depth++;
-				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us
-				{
-					depth--;
-					inPoppedOutBlockAtIndent = -1;
-				}
-
 				if (depth == 0)
-					tokensAtDepth0.Add(token);
-				else if (depth == 1)
-					tokensAtDepth1.Add(token);
-
-				if (token.type == VDFTokenType.DataStartMarker)
-				{
-					if (depth == 0)
-						hasDepth0DataBlocks = true;
-					depth++;
-				}
+					hasDepth0DataBlocks = true;
+				depth++;
 			}
 		}
+
+		// create the object's VDFNode, and load in the data
+		// ==========
 
 		var objNode = new VDFNode();
-
-		// non-metadata-based inference first
-		if (inferredList)
-			objNode.metadata_type = "System.Collections.IList";
-		else if (inferredDictionary)
-			objNode.metadata_type = "System.Collections.IDictionary";
-
-		// metadata-based type retrieval/inferrence
-		for (int i = 0; i < tokensAtDepth0.Count; i++)
-		{
-			var token = tokensAtDepth0[i];
-			var nextToken = tokensAtDepth0.Count > i + 1 ? tokensAtDepth0[i + 1] : null;
-			if (token.type == VDFTokenType.MetadataEndMarker)
-				objNode.metadata_type = objNode.metadata_type ?? ""; // if type is not already set, set it to an empty string, for type-inference later
-			else if (token.type == VDFTokenType.MetadataBaseValue)
-				if (nextToken.type == VDFTokenType.WiderMetadataEndMarker)
-					if (FindNextDepthXCharYPos(token.text, 0, 1, ',', '[', ']') != -1) // e.g. "Dictionary[string,object]>>"
-						objNode.metadata_type = token.text;
-					else if (FindNextDepthXCharYPos(token.text, 0, 0, ',', '[', ']') != -1) // e.g. "string,object>>"
-						objNode.metadata_type = "Dictionary[" + token.text + "]";
-					else if (token.text == ",")
-						objNode.metadata_type = "System.Collections.IDictionary";
-					else if (token.text.Contains("[")) // e.g. "List[string]>>"
-						objNode.metadata_type = token.text;
-					else // e.g. "string>>"
-						objNode.metadata_type = "List[" + token.text + "]";
-				else
-					objNode.metadata_type = token.text;
-		}
-
-		Type objType = declaredType;
-		if (objNode.metadata_type != null && objNode.metadata_type.Length > 0)
-		{
-			var fromMetadataType = VDF.GetTypeByVName(objNode.metadata_type, loadOptions);
-			if (objType == null || objType.IsAssignableFrom(fromMetadataType)) // if there is no declared type, or the from-metadata type is more specific than the declared type
-				objType = fromMetadataType;
-		}
-		if (objType == null)
-			objType = typeof(string); // string is the default/fallback type
-		var objTypeInfo = VDFTypeInfo.Get(objType);
-
-		// probably temp; very special handling for object with popped-out-children option enabled
-		if (objTypeInfo.popOutChildren)
-		{
-			tokensAtDepth0 = new List<VDFToken>();
-			tokensAtDepth1 = new List<VDFToken>();
-
-			VDFToken widerMetadataEndMarkerToken = null;
-			if (parser.tokens.Count >= 2 && parser.tokens[0].type == VDFTokenType.MetadataBaseValue && parser.tokens[1].type == VDFTokenType.WiderMetadataEndMarker)
-				widerMetadataEndMarkerToken = parser.tokens[1];
-			else if (parser.tokens.Count >= 1 && parser.tokens[0].type == VDFTokenType.WiderMetadataEndMarker)
-				widerMetadataEndMarkerToken = parser.tokens[0];
-			VDFToken firstNonMetadataGroupToken = widerMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a=>a.position > widerMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
-			VDFToken firstAfterPropNameLineBreakToken = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak && a.position > firstNonMetadataGroupToken.position);
-
-			depth = 0;
-			inPoppedOutBlockAtIndent = -1;
-			for (var i = 0; i < parser.tokens.Count; i++)
-			{
-				var lastToken = i - 1 >= 0 ? parser.tokens[i - 1] : null;
-				var token = parser.tokens[i];
-
-				if (token.type == VDFTokenType.DataEndMarker)
-				{
-					depth--;
-					if (depth < 0)
-						break; // found our ending bracket, thus no more data (we parse the prop values as we parse the prop definitions)
-				}
-
-				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us
-				{
-					depth++;
-					inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
-				}
-				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && firstAfterPropNameLineBreakToken != lastToken && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us
-				{
-					depth--;
-					inPoppedOutBlockAtIndent = -1;
-				}
-
-				if (depth == 0)
-					tokensAtDepth0.Add(token);
-				else if (depth == 1)
-					tokensAtDepth1.Add(token);
-
-				if (token.type == VDFTokenType.DataStartMarker)
-				{
-					if (depth == 0)
-						hasDepth0DataBlocks = true;
-					depth++;
-				}
-			}
-		}
+		objNode.metadata_type = objTypeStr;
 
 		// if List, parse items
 		if (typeof(IList).IsAssignableFrom(objType))
 		{
-			if (inlineItems)
+			if (isInlineList)
 			{
-				var firstDepth1Token = parser.tokens.FirstOrDefault(a => !tokensAtDepth0.Contains(a));
+				var firstDepth1Token = tokensAtDepth1.FirstOrDefault();
 				var lastDepth0MetadataEndMarkerToken = parser.tokens.LastOrDefault(a=>a.type == VDFTokenType.MetadataEndMarker || a.type == VDFTokenType.WiderMetadataEndMarker);
 				var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.Length : 0);
 				var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(a => a.type == VDFTokenType.DataEndMarker) : tokensAtDepth0.FirstOrDefault(a => a.type == VDFTokenType.ItemSeparator);
@@ -318,13 +255,11 @@ public static class VDFLoader
 					objNode.properties.Add(propName, ToVDFNode(propValueText, propValueType, loadOptions, objIndent + 1));
 				}
 			}
-			else if (typeof(IDictionary).IsAssignableFrom(objType) && tokensAtDepth0.Contains(token) && token.type == VDFTokenType.PoppedOutDataEndMarker)
-				break;
-			//else if (token.type == VDFTokenType.LineBreak) // no more prop definitions, thus no more data (we parse the prop values as we parse the prop definitions)
-			//	break;
 		}
 
 		// parse base-value (if applicable)
+		var firstPropNameToken = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName);
+		var firstBaseValueToken = parser.tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataBaseValue);
 		if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))
 			objNode.baseValue = firstBaseValueToken.text;
 

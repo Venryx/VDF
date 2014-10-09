@@ -21,7 +21,7 @@ public class VDFException : Exception
 		return message + "\n" + base.StackTrace + "\n==================";
 	}
 	public override string Message { get { return ToString(); } }
-	public override string StackTrace { get { return innerException.StackTrace; } }
+	public override string StackTrace { get { return innerException != null ? innerException.StackTrace : base.StackTrace; } }
 }
 public static class VDF
 {
