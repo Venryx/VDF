@@ -1,7 +1,7 @@
 // Object: base
 // ==================
 
-/*interface Object
+interface Object
 {
 	_AddItem(name: string, value, forceAdd?: boolean): void;
 	_AddFunction(func: Function, forceAdd?: boolean): void;
@@ -49,7 +49,7 @@ Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd
 // the below lets you do stuff like this: Array.prototype._AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
 Object.prototype._AddGetterSetter(null, function _AddFunction_Inline(func) { this._AddFunction(func, true); });
 Object.prototype._AddGetterSetter(null, function _AddGetter_Inline(func) { this._AddGetterSetter(func, null); });
-Object.prototype._AddGetterSetter(null, function _AddSetter_Inline(func) { this._AddGetterSetter(null, func); });*/
+Object.prototype._AddGetterSetter(null, function _AddSetter_Inline(func) { this._AddGetterSetter(null, func); });
 
 // Object: normal
 // ==================

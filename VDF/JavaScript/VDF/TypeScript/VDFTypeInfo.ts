@@ -20,7 +20,7 @@ class VDFPropInfo
 	includeL2: boolean;
 	popOutChildren: boolean;
 	writeEmptyValue: boolean;
-	constructor(propType: string, includeL2?: boolean, popOutChildren?: boolean, writeEmptyValue: boolean = true)
+	constructor(propType: string, includeL2: boolean = true, popOutChildren?: boolean, writeEmptyValue: boolean = true)
 	{
 		this.propVTypeName = propType;
 		this.includeL2 = includeL2;

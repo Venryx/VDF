@@ -46,6 +46,22 @@ class TypeWithPostDeserializeMethod_CustomMessageRequired
 
 class Loading
 {
+	static initialized: boolean;
+	static Init()
+	{
+		if (this.initialized)
+			return;
+		this.initialized = true;
+		Object.prototype._AddFunction_Inline = function Should()
+		{
+			return 0 || // fix for auto-semicolon-insertion
+			{
+				Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
+				BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
+			};
+		};
+	}
+
 	static RunTests()
 	{
 		// to VDFNode

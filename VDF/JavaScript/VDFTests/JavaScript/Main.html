@@ -15,8 +15,17 @@
     <script>
     $(function()
     {
-        $("#runSavingTests").click(function() { Saving.RunTests(); });
-        $("#runLoadingTests").click(function() { Loading.RunTests(); });
+		// note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
+        $("#runSavingTests").click(function()
+        {
+	        Saving.Init();
+	        Saving.RunTests();
+        });
+        $("#runLoadingTests").click(function()
+        {
+	        Loading.Init();
+	        Loading.RunTests();
+        });
     });
     </script>
 </head>

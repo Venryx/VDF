@@ -30,9 +30,9 @@ var VDFSaver = (function () {
         saveOptions = saveOptions || new VDFSaveOptions();
 
         var objNode = new VDFNode();
-        var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj);
-        var isAnonymousType = obj.constructor == {}.constructor || obj.constructor == object;
-        var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo());
+        var objVTypeName = obj != null && (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj));
+        var isAnonymousType = obj != null && (obj.constructor == {}.constructor || obj.constructor == object);
+        var typeInfo = obj != null && (obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()));
 
         if (obj && obj.VDFPreSerialize)
             obj.VDFPreSerialize(saveOptions.message);

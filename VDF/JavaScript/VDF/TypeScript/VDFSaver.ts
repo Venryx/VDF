@@ -31,9 +31,9 @@ class VDFSaver
 		saveOptions = saveOptions || new VDFSaveOptions();
 
 		var objNode = new VDFNode();
-		var objVTypeName = EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj); // at bottom, enums an integer; but consider it of a distinct type
-		var isAnonymousType = obj.constructor == (<any>{}).constructor || obj.constructor == object; // if true anonymous object, or if VDF-anonymous-object
-		var typeInfo = obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo()); // (if not specified: if anon type, include all props, otherwise, use default values)
+		var objVTypeName = obj != null && (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetVTypeNameOfObject(obj)); // at bottom, enums an integer; but consider it of a distinct type
+		var isAnonymousType = obj != null && (obj.constructor == (<any>{}).constructor || obj.constructor == object); // if true anonymous object, or if VDF-anonymous-object
+		var typeInfo = obj != null && (obj.GetType()["typeInfo"] || (isAnonymousType ? new VDFTypeInfo(true) : new VDFTypeInfo())); // (if not specified: if anon type, include all props, otherwise, use default values)
 
 		if (obj && obj.VDFPreSerialize)
 			obj.VDFPreSerialize(saveOptions.message);

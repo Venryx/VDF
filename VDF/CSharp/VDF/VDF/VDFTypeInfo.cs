@@ -44,8 +44,8 @@ public class VDFTypeInfo
 		return result;
 	}
 
-	public bool props_includeL1 = false; // by default, use an opt-in approach
-	public bool popOutChildren = false;
+	public bool props_includeL1; // by default, use an opt-in approach
+	public bool popOutChildren;
 	public Dictionary<string, VDFPropInfo> propInfoByName = new Dictionary<string, VDFPropInfo>();
 	public List<VDFMethodInfo> methodInfo = new List<VDFMethodInfo>();
 }

@@ -52,6 +52,23 @@ var TypeWithPostDeserializeMethod_CustomMessageRequired = (function () {
 var Loading = (function () {
     function Loading() {
     }
+    Loading.Init = function () {
+        if (this.initialized)
+            return;
+        this.initialized = true;
+        Object.prototype._AddFunction_Inline = function Should() {
+            var _this = this;
+            return 0 || {
+                Be: function (value, message) {
+                    equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+                },
+                BeExactly: function (value, message) {
+                    strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+                }
+            };
+        };
+    };
+
     Loading.RunTests = function () {
         // to VDFNode
         // ==========

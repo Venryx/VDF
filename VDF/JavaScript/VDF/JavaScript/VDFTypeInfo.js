@@ -12,6 +12,7 @@
 
 var VDFPropInfo = (function () {
     function VDFPropInfo(propType, includeL2, popOutChildren, writeEmptyValue) {
+        if (typeof includeL2 === "undefined") { includeL2 = true; }
         if (typeof writeEmptyValue === "undefined") { writeEmptyValue = true; }
         this.propVTypeName = propType;
         this.includeL2 = includeL2;

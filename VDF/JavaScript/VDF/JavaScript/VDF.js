@@ -231,7 +231,7 @@ var List = (function () {
         configurable: true
     });
 
-    // Array standard functions replications
+    // Array standard method replications
     List.prototype.modifyInnerListWithCall = function (func, args) {
         for (var i = 0; i < this.innerArray.length; i++)
             delete this[i];
@@ -381,7 +381,7 @@ var List = (function () {
         configurable: true
     });
 
-    // new functions
+    // new methods
     List.prototype.indexes = function () {
         var result = {};
         for (var i = 0; i < this.length; i++)
@@ -461,6 +461,16 @@ var Dictionary = (function () {
             for (var i = 0; i < keyValuePairs.length; i++)
                 this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
     }
+    Object.defineProperty(Dictionary.prototype, "Count", {
+        // properties
+        get: function () {
+            return this.keys.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    // methods
     Dictionary.prototype.Get = function (key) {
         return this.values[this.keys.indexOf(key)];
     };

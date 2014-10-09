@@ -38,7 +38,7 @@
 
 	constructor(baseValue?: string, metadata_type?: string)
 	{
-		VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutToOwnLine", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "isListItem_nonFirst");
+		VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
 		this.baseValue = baseValue;
 		this.metadata_type = metadata_type;
 	}
@@ -112,8 +112,8 @@
 				if (this.popOutChildren)
 				{
 					var lines = item.ToVDF().split('\n');
-					for (var i = 0; i < lines.length; i++)
-						lines[i] = "\t" + lines[i];
+					for (var i2 = 0; i2 < lines.length; i2++)
+						lines[i2] = "\t" + lines[i2];
 					builder.Append("\n" + lines.join("\n"));
 				}
 				else
@@ -170,10 +170,10 @@
 		if (this.isListItem && this.isList)
 			builder.Append("}");
 
-		this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.properties.length > 0));
-		if (this.items.filter(function() { return this.hasDanglingIndentation; }).length > 0)
+		this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.propertyCount > 0));
+		if (this.items.filter(a=>a.hasDanglingIndentation).length > 0)
 		{
-			this.hasDanglingIndentation = true;
+			this.hasDanglingIndentation = true; 
 			for (var i = 0; i < this.items.length; i++)
 				if (this.items[i].hasDanglingIndentation)
 				{
@@ -251,10 +251,10 @@
 		else if (finalTypeName == "char")
 			finalTypeName = "string";
 
+		var finalTypeName_root = finalTypeName != null && (finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName);
 		if (loadOptions.inferCompatibleTypesForUnknownTypes)
 			if (finalTypeName != null)
 			{
-				var finalTypeName_root = finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
 				if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type was specified, but the type doesn't exist
 					finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
 			}

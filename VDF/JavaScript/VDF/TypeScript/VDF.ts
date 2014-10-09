@@ -208,7 +208,7 @@ class List<T>
 		return highestIndex + 1;
 	}
 
-	// Array standard functions replications
+	// Array standard method replications
 	private modifyInnerListWithCall(func, args?: any[])
 	{
 		for (var i = 0; i < this.innerArray.length; i++)
@@ -243,7 +243,7 @@ class List<T>
 	// new properties
 	get Count() { return this.length; }
 
-	// new functions
+	// new methods
 	indexes()
 	{
 		var result = {};
@@ -327,6 +327,10 @@ class Dictionary<K, V>
 				this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
 	}
 
+	// properties
+	get Count() { return this.keys.length; }
+
+	// methods
 	Get(key: K) { return this.values[this.keys.indexOf(key)]; }
 	Set(key: K, value: V)
 	{

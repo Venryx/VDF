@@ -1,0 +1,6 @@
+C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.dll.config
+C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.dll
+C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.pdb
+C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.csprojResolveAssemblyReference.cache
+C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.dll
+C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.pdb
