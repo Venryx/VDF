@@ -240,6 +240,9 @@ class List<T>
 	reduce(...args) { return Array.prototype.reduce.apply(this.innerArray, args); }
 	reduceRight(...args) { return Array.prototype.reduceRight.apply(this.innerArray, args); }
 
+	// new properties
+	get Count() { return this.length; }
+
 	// new functions
 	indexes()
 	{
@@ -248,7 +251,6 @@ class List<T>
 			result[i] = this[i];
 		return result;
 	}
-	Count
 	Add(...items): number { return this.push(items); }
 	AddRange(items: Array<T>)
 	{
@@ -270,6 +272,38 @@ class List<T>
 				return false;
 		return true;
 	}
+	FirstOrDefault(matchFunc?): T
+	{
+		if (matchFunc)
+		{
+			for (var i in this.indexes())
+				if (matchFunc(this[i]))
+					return this[i];
+			return null;
+		}
+		else
+			return this[0];
+	}
+	LastOrDefault(matchFunc?): T
+	{
+		if (matchFunc)
+		{
+			for (var i = this.length - 1; i >= 0; i--)
+				if (matchFunc(this[i]))
+					return this[i];
+			return null;
+		}
+		else
+			return this[this.length - 1];
+	}
+	GetRange(index: number, count: number): List<T>
+	{
+		var result = new List<T>(this.itemType);
+		for (var i = index; i < index + count; i++)
+			result.Add(this[i]);
+		return result;
+	}
+	Contains(item: T) { return this.indexOf(item) != -1; }
 }
 VDFUtils.MakePropertiesNonEnumerable(List.prototype, true);
 class Dictionary<K, V>

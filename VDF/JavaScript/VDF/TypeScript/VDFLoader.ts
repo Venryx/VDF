@@ -12,7 +12,7 @@
 class VDFLoader
 {
 	static ToVDFNode(text: string, loadOptions: VDFLoadOptions, declaredTypeName?: string): VDFNode;
-	static ToVDFNode(text: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions): VDFNode;
+	static ToVDFNode(text: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions, objIndent?: number): VDFNode;
 	static ToVDFNode(text: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any, objIndent: number = 0): VDFNode
 	{
 		var declaredTypeName: string;
@@ -35,7 +35,7 @@ class VDFLoader
 
 		var depth = 0;
 		var tokensNotInDataMarkers = new List<VDFToken>("VDFToken");
-		for (var i in parser.tokens.indexes())
+		for (var i = 0; i < parser.tokens.length; i++)
 		{
 			var token = parser.tokens[i];
 			if (token.type == VDFTokenType.DataEndMarker)
@@ -105,7 +105,7 @@ class VDFLoader
 		// calculate token depths
 		// ==========
 
-		isInlineList = isInlineList || (objTypeName.startsWith("List[") && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak)); // update based on new knowledge of obj-type
+		isInlineList = isInlineList || (objTypeName.indexOf("List[") == 0 && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak)); // update based on new knowledge of obj-type
 
 		var firstNonObjMetadataGroupToken = objMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a=>a.position > objMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
 		var hasPoppedOutChildren = !isInlineList && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak);
@@ -113,10 +113,10 @@ class VDFLoader
 		// calculate token depths, based on our new knowledge of whether we're dealing with an inline-list (in that case, consider the "|"-separated text blocks as being a depth lower)
 		// (note: 'depth' is increased not only by '{' chars, but also inferred/virtual '{' chars, e.g. to the left and right of item vdf-text)
 		depth = 0;
-		int inPoppedOutBlockAtIndent = -1;
+		var inPoppedOutBlockAtIndent = -1;
 		var hasDepth0DataBlocks = false;
-		var tokensAtDepth0 = new List<VDFToken>();
-		var tokensAtDepth1 = new List<VDFToken>(); // note: this may actually contain some tokens deeper than 1 (I haven't made sure)
+		var tokensAtDepth0 = new List<VDFToken>("VDFToken");
+		var tokensAtDepth1 = new List<VDFToken>("VDFToken"); // note: this may actually contain some tokens deeper than 1 (I haven't made sure)
 		for (var i = 0; i < parser.tokens.Count; i++)
 		{
 			var lastToken = i > 0 ? parser.tokens[i - 1] : null;
@@ -129,15 +129,15 @@ class VDFLoader
 				if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.PoppedOutDataStartMarker) // if inferred a virtual '{' char before us (for object)
 				{
 					depth++;
-					inPoppedOutBlockAtIndent = FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
+					inPoppedOutBlockAtIndent = VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) + 1;
 				}
-				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us (for object)
+				else if (inPoppedOutBlockAtIndent != -1 && depth == 1 && lastToken != null && lastToken.type == VDFTokenType.LineBreak && VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) == inPoppedOutBlockAtIndent - 1) // if inferred a virtual '}' char before us (for object)
 				{
 					depth--;
 					inPoppedOutBlockAtIndent = -1;
 				}
 
-				if (typeof(IList).IsAssignableFrom(objType))
+				if (objTypeName.indexOf("List[") == 0)
 					if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us (for child)
 						depth++;
 					else if (depth == 1 && token.type == VDFTokenType.LineBreak) // if inferred a virtual '}' char before us (for child)
@@ -171,62 +171,66 @@ class VDFLoader
 		objNode.metadata_type = objTypeStr;
 
 		// if List, parse items
-		if (typeof(IList).IsAssignableFrom(objType))
+		if (objTypeName.indexOf("List[") == 0)
 			if (isInlineList)
 			{
 				var firstDepth1Token = tokensAtDepth1.FirstOrDefault();
 				var lastDepth0MetadataEndMarkerToken = parser.tokens.LastOrDefault(a=>a.type == VDFTokenType.MetadataEndMarker || a.type == VDFTokenType.WiderMetadataEndMarker);
 				var firstItemTextPos = firstDepth1Token != null ? firstDepth1Token.position : (lastDepth0MetadataEndMarkerToken != null ? lastDepth0MetadataEndMarkerToken.position + lastDepth0MetadataEndMarkerToken.text.Length : 0);
 				var firstItemEnderToken = hasDepth0DataBlocks ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker) : tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.ItemSeparator);
-				var firstItemText = text.Substring(firstItemTextPos, (firstItemEnderToken != null ? firstItemEnderToken.position : text.Length) - firstItemTextPos);
-				if (firstItemEnderToken != null || firstItemText.Length > 0) // (if there's an item separator or depth-0-data-end-marker, we can go ahead and infer that a zero-length sub-section represents an actual object)
-					objNode.items.Add(ToVDFNode(firstItemText, objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
+				var firstItemText = text.substr(firstItemTextPos, (firstItemEnderToken != null ? firstItemEnderToken.position : text.length) - firstItemTextPos);
+				if (firstItemEnderToken != null || firstItemText.length > 0) // (if there's an item separator or depth-0-data-end-marker, we can go ahead and infer that a zero-length sub-section represents an actual object)
+					objNode.AddItem(VDFLoader.ToVDFNode(firstItemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent));
 
-				foreach (VDFToken token in tokensAtDepth0)
+				for (var i in tokensAtDepth0.indexes())
+				{
+					var token: VDFToken = tokensAtDepth0[i];
 					if (token.type == VDFTokenType.ItemSeparator)
 					{
-						var itemTextPos = token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0);
+						var itemTextPos = token.position + token.text.length + (hasDepth0DataBlocks ? 1 : 0);
 						var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == (hasDepth0DataBlocks ? VDFTokenType.DataEndMarker : VDFTokenType.ItemSeparator) && a.position >= itemTextPos);
-						var itemText = text.Substring(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.Length) - itemTextPos);
-						objNode.items.Add(ToVDFNode(itemText, objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
+						var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
+						objNode.AddItem(VDFLoader.ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent));
 					}
+				}
 			}
 			else
-				foreach (var token in tokensAtDepth1)
+				for (var i in tokensAtDepth1.indexes())
 				{
+					var token: VDFToken = tokensAtDepth1[i];
 					if (token.type != VDFTokenType.PoppedOutDataStartMarker && token.type != VDFTokenType.LineBreak && token.position > 0)
-						if (FindIndentDepthOfLineContainingCharPos(text, token.position) == objIndent + 1)
+						if (VDFLoader.FindIndentDepthOfLineContainingCharPos(text, token.position) == objIndent + 1)
 						{
 							var itemTextPos = token.position + (objIndent + 1);
 							var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak && a.position >= itemTextPos);
-							var itemText = text.Substring(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.Length) - itemTextPos);
-							objNode.items.Add(ToVDFNode(itemText, objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent + 1));
+							var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
+							objNode.AddItem(ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent + 1));
 						}
 						else
 							break;
 				}
 
 		// parse keys-and-values/properties (depending on whether we're a Dictionary)
-		for (int i = 0; i < parser.tokens.Count; i++)
+		for (var i = 0; i < parser.tokens.Count; i++)
 		{
 			var token = parser.tokens[i];
-			var next3Tokens = parser.tokens.GetRange(i + 1, Math.Min(3, parser.tokens.Count - (i + 1)));
+			var next3Tokens = parser.tokens.GetRange(i + 1, Math.min(3, parser.tokens.Count - (i + 1)));
 
 			if (token.type == VDFTokenType.DataPropName && tokensAtDepth0.Contains(token))
 			{
-				var propName = token.text.TrimStart(new[]{'\t'});
-				Type propValueType;
-				if (typeof(IDictionary).IsAssignableFrom(objType))
-					propValueType = objType.IsGenericType ? objType.GetGenericArguments()[0] : null;
+				var propName = token.text.replace(/^\t+/, "");
+				var propValueTypeName: string;
+				if (objTypeName.indexOf("Dictionary[") == 0)
+					propValueTypeName = VDF.GetGenericParametersOfTypeName(objTypeName)[1];
 				else
-					propValueType = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
+					propValueTypeName = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
 
-				if (!token.text.StartsWith("\t")) // if this property *key*/*definition* is inline
+				if (token.text.indexOf("\t") != 0) // if this property *key*/*definition* is inline
 				{
 					var propValueTextPos = next3Tokens[1].position;
 					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>(a.type == VDFTokenType.DataEndMarker || a.type == VDFTokenType.PoppedOutDataEndMarker) && a.position >= propValueTextPos);
-					var propValueText = text.Substring(propValueTextPos, (propValueEnderToken != null ? propValueEnderToken.position : text.Length) - propValueTextPos);
-					objNode.properties.Add(propName, ToVDFNode(propValueText, propValueType, loadOptions, objIndent));
+					var propValueText = text.substr(propValueTextPos, (propValueEnderToken != null ? propValueEnderToken.position : text.length) - propValueTextPos);
+					objNode.SetProperty(propName, VDFLoader.ToVDFNode(propValueText, propValueTypeName, loadOptions, objIndent));
 				}
 				else // if this property *key*/*definition* is popped-out
 				{
@@ -234,8 +238,8 @@ class VDFLoader
 					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker && a.position >= propValueTextPos);
 					if (objTypeInfo.popOutChildren) // maybe temp; special handling for types with pop-out-children enabled
 						propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName && a.position > propValueTextPos);
-					var propValueText = text.Substring(propValueTextPos, (propValueEnderToken != null ? propValueEnderToken.position : text.Length) - propValueTextPos);
-					objNode.properties.Add(propName, ToVDFNode(propValueText, propValueType, loadOptions, objIndent + 1));
+					var propValueText = text.substr(propValueTextPos, (propValueEnderToken != null ? propValueEnderToken.position : text.length) - propValueTextPos);
+					objNode.SetProperty(propName, VDFLoader.ToVDFNode(propValueText, propValueTypeName, loadOptions, objIndent + 1));
 				}
 			}
 		}
@@ -249,96 +253,28 @@ class VDFLoader
 		return objNode;
 	}
 
-	static FindNextDepthXCharYPos(vdfFile: string, searchStartPos: number, targetDepth: number, ch: string, depthStartChar: string, depthEndChar: string): number
+	static FindNextDepthXCharYPos(text: string, searchStartPos: number, targetDepth: number, ch: string, depthStartChar: string, depthEndChar: string): number
 	{
 		var depth = 0;
-		for (var i = searchStartPos; i < vdfFile.length && depth >= 0; i++)
-			if (vdfFile[i] == depthStartChar)
+		for (var i = searchStartPos; i < text.length && depth >= 0; i++)
+			if (text[i] == depthStartChar)
 				depth++;
-			else if (vdfFile[i] == ch && depth == targetDepth)
+			else if (text[i] == ch && depth == targetDepth)
 				return i;
-			else if (vdfFile[i] == depthEndChar)
+			else if (text[i] == depthEndChar)
 				depth--;
 		return -1;
 	}
-	static FindNextDepthXItemSeparatorCharPos(vdfFile: string, searchStartPos: number, targetDepth: number): number
-	{
-		var depth = 0;
-		var parser = new VDFTokenParser(vdfFile, searchStartPos);
-		while (parser.MoveNextToken() && depth >= 0) // use parser, so we don't have to deal with special '|' symbol usage, for separating '@@' literal-markers from the end of a troublesome string (i.e. "Bad string.@@")
-			if (parser.tokens[parser.tokens.length - 1].type == VDFTokenType.DataStartMarker)
-				depth++;
-			else if (parser.tokens[parser.tokens.length - 1].type == VDFTokenType.ItemSeparator && depth == targetDepth)
-				return parser.nextCharPos - 1;
-			else if (parser.tokens[parser.tokens.length - 1].type == VDFTokenType.DataEndMarker)
-			{
-				depth--;
-				if (depth < 0)
-					break;
-			}
-		return -1;
-	}
-	static FindIndentDepthOfLineContainingCharPos(vdfFile: string, charPos: number): number
+	static FindIndentDepthOfLineContainingCharPos(text: string, charPos: number): number
 	{
 		var lineIndentDepth = 0;
-		for (var i = charPos - 1; i > 0 && vdfFile[i] != '\n'; i--)
-			if (vdfFile[i] == '\t')
+		if (text[charPos] != '\n')
+			for (var i = charPos + 1; i < text.length && text[i] != '\n'; i++) // search up, starting at the next char
+				if (text[i] == '\t')
+					lineIndentDepth++;
+		for (var i = charPos; i > 0 && (text[i] != '\n' || i == charPos); i--) // search down, starting from the char itself
+			if (text[i] == '\t')
 				lineIndentDepth++;
 		return lineIndentDepth;
-	}
-	static FindNextLineBreakCharPos(vdfFile: string, searchStartPos: number): number
-	{
-		for (var i = searchStartPos; i < vdfFile.length; i++)
-			if (vdfFile[i] == '\n')
-				return i;
-		return -1;
-	}
-	static FindPoppedOutChildTextPositions(vdfFile: string, parentIndentDepth: number, searchStartPos: number, poppedOutChildDataIndex: number): Array<number>
-	{
-		var result = new Array<number>();
-
-		var poppedOutChildDatasReached = 0;
-		var indentsOnThisLine = 0;
-		var inLiteralMarkers = false;
-		for (var i = searchStartPos; i < vdfFile.length; i++)
-		{
-			var lastChar = i > 0 ? vdfFile[i - 1] : null;
-			var ch = vdfFile[i];
-			var nextChar = i < vdfFile.length - 1 ? vdfFile[i + 1] : null;
-			var nextNextChar = i < vdfFile.length - 2 ? vdfFile[i + 2] : null;
-
-			if (lastChar != '@' && ch == '@' && nextChar == '@' && (!inLiteralMarkers || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // special case; escape literals
-			{
-				inLiteralMarkers = !inLiteralMarkers;
-				i++; // increment index by one extra, so as to have the next char processed be the first char after literal-marker
-				continue; // skip processing of literal-marker
-			}
-			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until end-literal-marker is reached
-				continue;
-
-			if (ch == '\n')
-				indentsOnThisLine = 0;
-			else if (ch == '\t')
-				indentsOnThisLine++;
-			else if (indentsOnThisLine == parentIndentDepth + 1)
-			{
-				if (poppedOutChildDatasReached == 0 || ch == '#')
-					poppedOutChildDatasReached++;
-				if (poppedOutChildDatasReached == poppedOutChildDataIndex + 1)
-					result.push(i);
-				if (poppedOutChildDatasReached > poppedOutChildDataIndex + 1) // we just finished processing the given popped-out child-data, so break
-					break;
-
-				var nextLineBreakCharPos = VDFLoader.FindNextLineBreakCharPos(vdfFile, i);
-				if (nextLineBreakCharPos != -1)
-					i = nextLineBreakCharPos - 1; // we only care about the tabs, and the first non-tab char; so skip to next line, once we process first non-tab char
-				else
-					break; // last line, so break
-			}
-			else if (indentsOnThisLine <= parentIndentDepth && poppedOutChildDatasReached > 0) // if we've reached a peer of the parent, break
-				break;
-		}
-
-		return result;
 	}
 }

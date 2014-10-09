@@ -63,7 +63,7 @@ class VDFSaver
 					itemValueNode.isListItem_nonFirst = true;
 				if (popOutItemData)
 					itemValueNode.popOutToOwnLine = true;
-				objNode.PushItem(itemValueNode);
+				objNode.AddItem(itemValueNode);
 			}
 		}
 		else if (objVTypeName && objVTypeName.startsWith("Dictionary["))

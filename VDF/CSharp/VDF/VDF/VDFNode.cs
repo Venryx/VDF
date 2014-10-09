@@ -253,7 +253,7 @@ public class VDFNode
 
 		var type = obj.GetType();
 		var typeInfo = VDFTypeInfo.Get(type);
-		for (int i = 0; i < items.Count; i++)
+		for (var i = 0; i < items.Count; i++)
 			if (obj is Array)
 				((Array)obj).SetValue(items[i].ToObject(type.GetElementType(), loadOptions), i);
 			else if (obj is IList)

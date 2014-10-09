@@ -69,7 +69,7 @@ public static class VDFSaver
 		{
 			objNode.isList = true;
 			var objAsList = (IList)obj;
-			for (int i = 0; i < objAsList.Count; i++)
+			for (var i = 0; i < objAsList.Count; i++)
 			{
 				VDFNode itemValueNode = ToVDFNode(objAsList[i], type.GetGenericArguments()[0], saveOptions, true);
 				itemValueNode.isListItem = true;

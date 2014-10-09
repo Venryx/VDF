@@ -213,7 +213,7 @@ public static class VDFLoader
 				}
 
 		// parse keys-and-values/properties (depending on whether we're a Dictionary)
-		for (int i = 0; i < parser.tokens.Count; i++)
+		for (var i = 0; i < parser.tokens.Count; i++)
 		{
 			var token = parser.tokens[i];
 			var next3Tokens = parser.tokens.GetRange(i + 1, Math.Min(3, parser.tokens.Count - (i + 1)));
@@ -223,7 +223,7 @@ public static class VDFLoader
 				var propName = token.text.TrimStart(new[]{'\t'});
 				Type propValueType;
 				if (typeof(IDictionary).IsAssignableFrom(objType))
-					propValueType = objType.IsGenericType ? objType.GetGenericArguments()[0] : null;
+					propValueType = objType.IsGenericType ? objType.GetGenericArguments()[1] : null;
 				else
 					propValueType = objTypeInfo != null && objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
 
@@ -258,7 +258,7 @@ public static class VDFLoader
 	static int FindNextDepthXCharYPos(string text, int searchStartPos, int targetDepth, char ch, char depthStartChar, char depthEndChar)
 	{
 		int depth = 0;
-		for (int i = searchStartPos; i < text.Length && depth >= 0; i++)
+		for (var i = searchStartPos; i < text.Length && depth >= 0; i++)
 			if (text[i] == depthStartChar)
 				depth++;
 			else if (text[i] == ch && depth == targetDepth)
@@ -271,10 +271,10 @@ public static class VDFLoader
 	{
 		int lineIndentDepth = 0;
 		if (text[charPos] != '\n')
-			for (int i = charPos + 1; i < text.Length && text[i] != '\n'; i++) // search up, starting at the next char
+			for (var i = charPos + 1; i < text.Length && text[i] != '\n'; i++) // search up, starting at the next char
 				if (text[i] == '\t')
 					lineIndentDepth++;
-		for (int i = charPos; i > 0 && (text[i] != '\n' || i == charPos); i--) // search down, starting from the char itself
+		for (var i = charPos; i > 0 && (text[i] != '\n' || i == charPos); i--) // search down, starting from the char itself
 			if (text[i] == '\t')
 				lineIndentDepth++;
 		return lineIndentDepth;

@@ -86,7 +86,7 @@
         this.items[index] = value;
         this[index] = value;
     };
-    VDFNode.prototype.PushItem = function (value) {
+    VDFNode.prototype.AddItem = function (value) {
         this.SetItem(this.items.length, value);
     };
     VDFNode.prototype.InsertItem = function (index, value) {
@@ -94,7 +94,7 @@
         for (var i = 0; i < oldItems.length; i++)
             delete this[i];
         for (var i = 0; i < oldItems.length + 1; i++)
-            this.PushItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
+            this.AddItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
     };
     VDFNode.prototype.SetProperty = function (key, value) {
         this.properties[key] = value;

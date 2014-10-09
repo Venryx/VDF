@@ -372,6 +372,15 @@ var List = (function () {
         return Array.prototype.reduceRight.apply(this.innerArray, args);
     };
 
+    Object.defineProperty(List.prototype, "Count", {
+        // new properties
+        get: function () {
+            return this.length;
+        },
+        enumerable: true,
+        configurable: true
+    });
+
     // new functions
     List.prototype.indexes = function () {
         var result = {};
@@ -379,7 +388,6 @@ var List = (function () {
             result[i] = this[i];
         return result;
     };
-
     List.prototype.Add = function () {
         var items = [];
         for (var _i = 0; _i < (arguments.length - 0); _i++) {
@@ -405,6 +413,33 @@ var List = (function () {
             if (!matchFunc(this[i]))
                 return false;
         return true;
+    };
+    List.prototype.FirstOrDefault = function (matchFunc) {
+        if (matchFunc) {
+            for (var i in this.indexes())
+                if (matchFunc(this[i]))
+                    return this[i];
+            return null;
+        } else
+            return this[0];
+    };
+    List.prototype.LastOrDefault = function (matchFunc) {
+        if (matchFunc) {
+            for (var i = this.length - 1; i >= 0; i--)
+                if (matchFunc(this[i]))
+                    return this[i];
+            return null;
+        } else
+            return this[this.length - 1];
+    };
+    List.prototype.GetRange = function (index, count) {
+        var result = new List(this.itemType);
+        for (var i = index; i < index + count; i++)
+            result.Add(this[i]);
+        return result;
+    };
+    List.prototype.Contains = function (item) {
+        return this.indexOf(item) != -1;
     };
     return List;
 })();

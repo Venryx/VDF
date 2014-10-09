@@ -115,7 +115,7 @@ public static class VDF
 			var genericArgumentTypes = new List<Type>();
 			int depth = 0;
 			int lastStartBracketPos = -1;
-			for (int i = 0; i < vTypeName.Length; i++)
+			for (var i = 0; i < vTypeName.Length; i++)
 			{
 				char ch = vTypeName[i];
 				if (ch == ']')

@@ -48,14 +48,14 @@
 		this.items[index] = value;
 		this[index] = value;
 	}
-	PushItem(value: any) { this.SetItem(this.items.length, value); }
+	AddItem(value: any) { this.SetItem(this.items.length, value); }
 	InsertItem(index: number, value: any)
 	{
 		var oldItems = this.items;
 		for (var i = 0; i < oldItems.length; i++) // we need to first remove old values, so the slate is clean for manual re-adding/re-ordering
 			delete this[i];
 		for (var i = 0; i < oldItems.length + 1; i++) // now add them all back in, in the correct order
-			this.PushItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
+			this.AddItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
 	}
 	SetProperty(key: string, value: any)
 	{
