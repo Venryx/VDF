@@ -68,17 +68,27 @@
 
 	isList: boolean;
 	isDictionary: boolean;
-	popOutToOwnLine: boolean;
+	popOutChildren: boolean;
 	isFirstItemOfNonFirstPopOutGroup: boolean;
 	isListItem: boolean;
-	isListItem_nonFirst: boolean;
-	GetInLineItemText(): string
+	hasDanglingIndentation: boolean;
+	static RawDataStringToFinalized(rawDataStr: string): string
+	{
+		var result = rawDataStr;
+		if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
+			if (rawDataStr.indexOf("@") == rawDataStr.length - 1 || rawDataStr.indexOf("|") == rawDataStr.length - 1)
+				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
+			else
+				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
+		return result;
+	}
+	ToVDF(): string
 	{
 		var builder = new StringBuilder();
 		if (this.isFirstItemOfNonFirstPopOutGroup)
 			builder.Append("#");
-		if (this.isListItem_nonFirst && !this.popOutToOwnLine)
-			builder.Append("|");
+		//if (this.isListItem_nonFirst && !this.popOutToOwnLine)
+		//	builder.Append("|");
 		if (this.isListItem && this.isList)
 			builder.Append("{");
 		if (this.metadata_type != null)
@@ -88,71 +98,99 @@
 			builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue));
 		else if (this.items.length > 0)
 		{
-			for (var key in this.items)
-				if (!this.items[key].popOutToOwnLine)
-					builder.Append(this.items[key].GetInLineItemText());
+			for (var i = 0; i < this.items.length; i++)
+			{
+				var lastItem = i > 0 ? this.items[i - 1] : null;
+				var item = this.items[i];
+
+				if (lastItem != null && lastItem.hasDanglingIndentation)
+				{
+					builder.Append("\n");
+					lastItem.hasDanglingIndentation = false;
+				}
+
+				if (this.popOutChildren)
+				{
+					var lines = item.ToVDF().split('\n');
+					for (var i = 0; i < lines.length; i++)
+						lines[i] = "\t" + lines[i];
+					builder.Append("\n" + lines.join("\n"));
+				}
+				else
+					builder.Append((i > 0 ? "|" : "") + item.ToVDF());
+			}
 		}
 		else
+		{
+			var lastPropName: string = null;
 			for (var propName in this.properties)
-				if (this.properties[propName].popOutToOwnLine)
-					builder.Append(propName + "{#}");
-				else if (this.properties[propName].items.filter(item=>item.popOutToOwnLine).length)
-					builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "#}");
+			{
+				var lastPropValue = lastPropName != null ? this.properties[lastPropName] : null;
+				var propValue = this.properties[propName];
+
+				if (lastPropValue != null && lastPropValue.hasDanglingIndentation)
+					if (this.popOutChildren) // if we're popping out this current child, we can ignore adding a marker for it, because it's supposed to be on its own line
+						lastPropValue.hasDanglingIndentation = false;
+					else
+					{
+						builder.Append("\n");
+						lastPropValue.hasDanglingIndentation = false;
+						if (lastPropValue.popOutChildren)
+							builder.Append("^");
+					}
+
+				var propNameAndValueVDF: string;
+				if (propValue.popOutChildren)
+					propNameAndValueVDF = propName + ":" + propValue.ToVDF();
 				else
-					builder.Append(propName + "{" + this.properties[propName].GetInLineItemText() + "}");
+				{
+					var propValueVDF = propValue.ToVDF();
+					if (propValue.hasDanglingIndentation)
+					{
+						propValueVDF += "\n";
+						propValue.hasDanglingIndentation = false;
+					}
+					propNameAndValueVDF = propName + "{" + propValueVDF + "}";
+				}
+				if (this.popOutChildren)
+				{
+					var lines = propNameAndValueVDF.split('\n');
+					for (var i = 0; i < lines.length; i++)
+						lines[i] = "\t" + lines[i];
+					propNameAndValueVDF = "\n" + lines.join("\n");
+					builder.Append(propNameAndValueVDF);
+				}
+				else
+					builder.Append(propNameAndValueVDF);
+
+				lastPropName = propName;
+			}
+		}
 
 		if (this.isListItem && this.isList)
 			builder.Append("}");
 
-		return builder.ToString();
-	}
-	static RawDataStringToFinalized(rawDataStr: string): string
-	{
-		var result = rawDataStr;
-		if (rawDataStr.contains(">") || rawDataStr.contains("}") || rawDataStr.contains("@@") || rawDataStr.contains("\n"))
-			if (rawDataStr.endsWith("@") || rawDataStr.endsWith("|"))
-				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
-			else
-				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
-		return result;
-	}
-	GetPoppedOutItemText(): string
-	{
-		var lines = new Array<string>();
-		if (this.popOutToOwnLine)
-			lines.push(this.GetInLineItemText());
-		for (var key in this.items)
+		this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.properties.length > 0));
+		if (this.items.filter(function() { return this.hasDanglingIndentation; }).length > 0)
 		{
-			var item = this.items[key];
-			var poppedOutText: string = item.GetPoppedOutItemText();
-			if (poppedOutText.length > 0)
-			{
-				var poppedOutLines = poppedOutText.split('\n');
-				for (var index in poppedOutLines)
-					if (poppedOutLines[index].length)
-						lines.push(poppedOutLines[index]);
-			}
+			this.hasDanglingIndentation = true;
+			for (var i = 0; i < this.items.length; i++)
+				if (this.items[i].hasDanglingIndentation)
+				{
+					this.items[i].hasDanglingIndentation = false; // we've taken it as our own
+					break;
+				}
 		}
-		for (var propName in this.properties)
-		{
-			var propValueNode: VDFNode = this.properties[propName];
-			var poppedOutText: string = propValueNode.GetPoppedOutItemText();
-			{
-				var poppedOutLines = poppedOutText.split('\n');
-				for (var index in poppedOutLines)
-					if (poppedOutLines[index].length)
-						lines.push(poppedOutLines[index]);
-			}
-		}
-		var builder = new StringBuilder();
-		for (var i2 = 0; i2 < lines.length; i2++)
-			builder.Append(i2 == 0 ? "" : "\n").Append(this.popOutToOwnLine ? "\t" : "").Append(lines[i2]); // line-breaks + indents + data
+		else
+			for (var key in this.properties)
+				if (this.properties[key].hasDanglingIndentation)
+				{
+					this.hasDanglingIndentation = true;
+					this.properties[key].hasDanglingIndentation = false; // we've taken it as our own
+					break;
+				}
+
 		return builder.ToString();
-	}
-	ToVDF(): string
-	{
-		var poppedOutItemText: string = this.GetPoppedOutItemText();
-		return this.GetInLineItemText() + (poppedOutItemText.length > 0 ? "\n" + poppedOutItemText : "");
 	}
 
 	// loading
@@ -161,12 +199,12 @@
 	static CreateNewInstanceOfType(typeName: string, loadOptions: VDFLoadOptions)
 	{
 		// no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
-		if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].contains(typeName) || EnumValue.IsEnum(typeName))
+		if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].indexOf(typeName) != -1 || EnumValue.IsEnum(typeName))
 			return null;
 		var genericParameters = VDF.GetGenericParametersOfTypeName(typeName);
-		if (typeName.startsWith("List["))
+		if (typeName.indexOf("List[") == 0)
 			return new List(genericParameters[0]);
-		if (typeName.startsWith("Dictionary["))
+		if (typeName.indexOf("Dictionary[") == 0)
 			return new Dictionary(genericParameters[0], genericParameters[1]);
 		return new window[typeName];
 	}
@@ -185,37 +223,48 @@
 		loadOptions = loadOptions || new VDFLoadOptions();
 
 		var finalMetadata_type = this.metadata_type;
-		if (finalMetadata_type == "") // empty string, so infer type
+		if (finalMetadata_type == "") // empty string for metadata_type, so infer type
 		{
 			if (this.baseValue == "null")
-				finalMetadata_type = "null";
-			else if (["true", "false"].contains(this.baseValue))
+				return null;
+			if (this.baseValue == "empty")
+				return "";
+			if (["true", "false"].indexOf(this.baseValue) != -1)
 				finalMetadata_type = "bool";
-			else if (this.baseValue.contains("."))
+			else if (this.baseValue.indexOf(".") != -1)
 				finalMetadata_type = "float";
 			else
 				finalMetadata_type = "int";
 		}
-		else if (finalMetadata_type == null && this.baseValue != null && (declaredTypeName == null || declaredTypeName == "object")) // if no type specified, but it has a base-value and no declared-type is set (or declared type is object), infer it to be string
-			finalMetadata_type = "string";
+		else if (finalMetadata_type == "IList")
+			finalMetadata_type = "List[object]";
+		else if (finalMetadata_type == "IDictionary")
+			finalMetadata_type = "Dictionary[object,object]";
 
-		if (finalMetadata_type == "null") // special case for null-values
-			return null;
+		var finalTypeName = declaredTypeName;
+		if (finalMetadata_type != null && finalMetadata_type.length > 0)
+			finalTypeName = finalMetadata_type;  // porting-note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
 
-		var finalTypeName = finalMetadata_type != null ? finalMetadata_type : declaredTypeName;
-		if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].contains(finalTypeName))
+		// porting-added; special type-mapping from C# types to JS types
+		if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].indexOf(finalTypeName) != -1)
 			finalTypeName = "number";
 		else if (finalTypeName == "char")
 			finalTypeName = "string";
 
-		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
-			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
-		var finalTypeName_root = finalTypeName.contains("[") ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
-		if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && !["bool", "number", "string"].contains(finalTypeName_root)) // if type was specified, but the type doesn't exist
-			if (loadOptions.inferCompatibleTypesForUnknownTypes) // and user allows inference-of-compatible-types-for-unknown-types (final-type must be something)
-				finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
-			else // otherwise, throw an error, because we can't go on without a final-type
-				throw new Error("Type \"" + finalMetadata_type + "\" not found.");
+		if (loadOptions.inferCompatibleTypesForUnknownTypes)
+			if (finalTypeName != null)
+			{
+				var finalTypeName_root = finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName;
+				if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type was specified, but the type doesn't exist
+					finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
+			}
+			else // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
+				finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
+		else
+			if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type was specified, but the type doesn't exist
+				throw new Error("Type \"" + finalMetadata_type + "\" not found."); // throw an error, because we can't go on without a final-type
+			else if (finalTypeName == null) // if the type isn't specified in the VDF text itself, or as a declared type, infer that it's a string (string is the default type)
+				finalTypeName = "string"; // string is the default/fallback type
 
 		var result;
 		if (VDF.typeImporters_inline[finalTypeName])
@@ -231,12 +280,12 @@
 		else
 		{
 			result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
-			this.IntoObject(result, loadOptions);
+			this.IntoObject(result, loadOptions, (declaredTypeName != null && (declaredTypeName.indexOf("List[") == 0 || declaredTypeName.indexOf("Dictionary[") == 0)) || (metadata_type != "IList" && metadata_type != "IDictionary"));
 		}
 
 		return result;
 	}
-	IntoObject(obj: any, loadOptions?: VDFLoadOptions)
+	IntoObject(obj: any, loadOptions?: VDFLoadOptions, typeGenericArgumentsAreReal: boolean = true)
 	{
 		loadOptions = loadOptions || new VDFLoadOptions();
 		var finalTypeName = VDF.GetVTypeNameOfObject(obj);
@@ -245,14 +294,20 @@
 		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
 		var finalTypeInfo = VDF.GetTypeInfo(finalTypeName);
 		for (var i = 0; i < this.items.length; i++)
-			(<List<any>>obj).push(this.items[i].ToObject(typeGenericParameters[0], loadOptions));
+			(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[0], loadOptions));
 		for (var propName in this.properties)
 			try
 			{
 				if (obj instanceof Dictionary)
-					(<Dictionary<any, any>>obj).Set(VDF.typeImporters_inline[typeGenericParameters[0]] ? VDF.typeImporters_inline[typeGenericParameters[0]](propName) : propName, this.properties[propName].ToObject(typeGenericParameters[1], loadOptions));
+				{
+					var key: any = propName; // in most cases, the Dictionary's in-code key-type will be a string, so we can just use the in-VDF raw-key-string directly
+					if (typeGenericArgumentsAreReal)
+						if (VDF.typeImporters_inline[typeGenericParameters[0]]) // porting-note: apparently the JS version doesn't support the full type-importer-inline system (no generics passed to importer-func's)
+							key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
+					(<Dictionary<any, any>>obj).Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal && typeGenericParameters[1], loadOptions));
+				}
 				else
-					obj[propName] = this.properties[propName].ToObject(finalTypeInfo && finalTypeInfo.propInfoByName[propName] ? finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+					obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal && finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName, loadOptions);
 			}
 			catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n"); }
 

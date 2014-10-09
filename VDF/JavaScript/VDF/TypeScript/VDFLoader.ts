@@ -86,18 +86,18 @@ class VDFLoader
 			if (objMetadataEndMarkerToken.type == VDFTokenType.MetadataEndMarker)
 				objTypeStr = ""; // if type is not already set, set it to an empty string, for type-inference later
 			else
-				objTypeStr = "System.Collections.IList";
+				objTypeStr = "IList";
 
 		// some further inference based on token analysis
 		if (objTypeStr == null)
 			if (isInlineList)
-				objTypeStr = "System.Collections.IList";
+				objTypeStr = "IList";
 			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.DataPropName) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak))
-				objTypeStr = "System.Collections.IList";
+				objTypeStr = "IList";
 
 		var objTypeName = declaredTypeName;
 		if (objTypeStr != null && objTypeStr.length > 0)
-			objTypeName = objTypeStr; // note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
+			objTypeName = objTypeStr; // porting-note: dropped CS functionality of making sure metadata-type (objTypeStr) is more specific than obj-type
 		if (objTypeName == null)
 			objTypeName = "string"; // string is the default/fallback type (note, though, that if the below code finds properties, it'll just add them to the VDFNode anyway)
 		var objTypeInfo = VDFTypeInfo.Get(objTypeName);
@@ -105,7 +105,7 @@ class VDFLoader
 		// calculate token depths
 		// ==========
 
-		isInlineList = isInlineList || (objTypeName.indexOf("List[") == 0 && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak)); // update based on new knowledge of obj-type
+		isInlineList = isInlineList || ((objTypeName == "IList" || objTypeName.indexOf("List[") == 0) && tokensNotInDataMarkers.Any(a=>a != objMetadataBaseValueToken && a != objMetadataEndMarkerToken) && tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.LineBreak)); // update based on new knowledge of obj-type
 
 		var firstNonObjMetadataGroupToken = objMetadataEndMarkerToken != null ? parser.tokens.FirstOrDefault(a=>a.position > objMetadataEndMarkerToken.position) : parser.tokens.FirstOrDefault();
 		var hasPoppedOutChildren = !isInlineList && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak);
@@ -137,7 +137,7 @@ class VDFLoader
 					inPoppedOutBlockAtIndent = -1;
 				}
 
-				if (objTypeName.indexOf("List[") == 0)
+				if (objTypeName == "IList" || objTypeName.indexOf("List[") == 0)
 					if (depth == 0 && lastToken != null && lastToken.type == VDFTokenType.LineBreak) // if inferred a virtual '{' char before us (for child)
 						depth++;
 					else if (depth == 1 && token.type == VDFTokenType.LineBreak) // if inferred a virtual '}' char before us (for child)
@@ -171,7 +171,7 @@ class VDFLoader
 		objNode.metadata_type = objTypeStr;
 
 		// if List, parse items
-		if (objTypeName.indexOf("List[") == 0)
+		if ((objTypeName == "IList" || objTypeName.indexOf("List[") == 0))
 			if (isInlineList)
 			{
 				var firstDepth1Token = tokensAtDepth1.FirstOrDefault();
@@ -204,7 +204,7 @@ class VDFLoader
 							var itemTextPos = token.position + (objIndent + 1);
 							var itemEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak && a.position >= itemTextPos);
 							var itemText = text.substr(itemTextPos, (itemEnderToken != null ? itemEnderToken.position : text.length) - itemTextPos);
-							objNode.AddItem(ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent + 1));
+							objNode.AddItem(VDFLoader.ToVDFNode(itemText, VDF.GetGenericParametersOfTypeName(objTypeName)[0], loadOptions, objIndent + 1));
 						}
 						else
 							break;

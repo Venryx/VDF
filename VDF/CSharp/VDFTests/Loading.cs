@@ -123,6 +123,11 @@ three lines".Replace("\r", ""));
 			var a = VDF.Deserialize<List<object>>(">>>false");
 			a[0].Should().Be(false);
 		}
+		[Fact] void ToVDFNode_Level0_InferUnmarkedTypeToBeString()
+		{
+			var a = VDF.Deserialize<IList>(">>SimpleString");
+			a[0].Should().Be("SimpleString");
+		}
 		[Fact] void ToVDFNode_Level0_KeepDeclaredType()
 		{
 			var a = VDF.Deserialize<List<object>>(">>SimpleString");
@@ -385,11 +390,6 @@ of three lines in total.@@}bool{>true}");
 		// unique to C# version
 		// ==========
 
-		[Fact] void ToVDFNode_Level0_InferUnmarkedTypeToBeString()
-		{
-			var a = VDF.Deserialize<IList>(">>SimpleString");
-			a[0].Should().Be("SimpleString");
-		}
 		[Fact] void ToVDFNode_Level1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("scores{Dan{0}Dan{1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
 		class SpecialList3<T> : List<T> {}
 		[Fact] void ToVDFNode_Level1_SpecialListItem()

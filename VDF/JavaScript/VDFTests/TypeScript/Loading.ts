@@ -157,6 +157,11 @@ three lines");
 			var a = VDF.Deserialize(">>>false", "List[object]");
 			a[0].Should().Be(false);
 		});
+		test("ToVDFNode_Level0_InferUnmarkedTypeToBeString", ()=>
+		{
+			var a = VDF.Deserialize(">>SimpleString", "IList");
+			a[0].Should().Be("SimpleString");
+		});
 		test("ToVDFNode_Level0_KeepDeclaredType", ()=>
 		{
 			var a = VDF.Deserialize(">>SimpleString", "List[object]");
