@@ -28,13 +28,15 @@ public class VDFToken
 {
 	public VDFTokenType type;
 	public int position;
-	public string rawText;
+	public int index;
+	//public string rawText;
 	public string text;
-	public VDFToken(VDFTokenType type, int position, string rawText, string text)
+	public VDFToken(VDFTokenType type, int position, int index/*, string rawText*/, string text)
 	{
 		this.type = type;
 		this.position = position;
-		this.rawText = rawText;
+		this.index = index;
+		//this.rawText = rawText;
 		this.text = text;
 	}
 }
@@ -53,7 +55,7 @@ public class VDFTokenParser
 	public bool MoveNextToken()
 	{
 		var tokenType = VDFTokenType.None;
-		var tokenRawTextBuilder = new StringBuilder();
+		//var tokenRawTextBuilder = new StringBuilder();
 		var tokenTextBuilder = new StringBuilder();
 
 		bool inLiteralMarkers = false;
@@ -69,14 +71,14 @@ public class VDFTokenParser
 
 			var grabExtraCharsAsOwnAndSkipTheirProcessing = (Action<int, bool>)((count, addToNormalBuilder)=>
 			{
-				tokenRawTextBuilder.Append(text.Substring(i + 1, count));
+				//tokenRawTextBuilder.Append(text.Substring(i + 1, count));
 				if (addToNormalBuilder)
 					tokenTextBuilder.Append(text.Substring(i + 1, count));
 				i += count;
 				nextCharPos += count;
 			});
 
-			tokenRawTextBuilder.Append(ch);
+			//tokenRawTextBuilder.Append(ch);
 			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
 			{
 				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
@@ -136,21 +138,10 @@ public class VDFTokenParser
 		if (tokenType == VDFTokenType.None)
 			return false;
 
-		var token = new VDFToken(tokenType, firstCharPos, tokenRawTextBuilder.ToString(), tokenTextBuilder.ToString());
+		var token = new VDFToken(tokenType, firstCharPos, tokens.Count/*, tokenRawTextBuilder.ToString()*/, tokenTextBuilder.ToString());
 		tokens.Add(token);
 		return true;
 	}
-	/*public VDFToken PeekNextToken()
-	{
-		var oldPos = nextCharPos;
-		var oldTokenCount = tokens.Count;
-		MoveNextToken();
-		nextCharPos = oldPos;
-		if (tokens.Count > oldTokenCount)
-			return tokens.Last();
-		return null;
-	}
-	public string PeekNextChars(int charsToPeek = 1) { return text.Substring(nextCharPos, Math.Min(charsToPeek, text.Length - nextCharPos)); }*/
 
 	static int FindNextLineBreakCharPos(string text, int searchStartPos)
 	{

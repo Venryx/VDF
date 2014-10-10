@@ -22,13 +22,13 @@ class VDFToken
 {
 	type: VDFTokenType;
 	position: number;
-	rawText: string;
+	index: number;
 	text: string;
-	constructor(type: VDFTokenType, position: number, rawText: string, text: string)
+	constructor(type: VDFTokenType, position: number, index: number, text: string)
 	{
 		this.type = type;
 		this.position = position;
-		this.rawText = rawText;
+		this.index = index;
 		this.text = text;
 	}
 }
@@ -47,7 +47,6 @@ class VDFTokenParser
 	MoveNextToken(): boolean
 	{
 		var tokenType = VDFTokenType.None;
-		var tokenRawTextBuilder = new StringBuilder();
 		var tokenTextBuilder = new StringBuilder();
 
 		var inLiteralMarkers = false;
@@ -63,14 +62,12 @@ class VDFTokenParser
 
 			var grabExtraCharsAsOwnAndSkipTheirProcessing = (count, addToNormalBuilder)=>
 			{
-				tokenRawTextBuilder.Append(this.text.substr(i + 1, count));
 				if (addToNormalBuilder)
 					tokenTextBuilder.Append(this.text.substr(i + 1, count));
 				i += count;
 				this.nextCharPos += count;
 			};
 
-			tokenRawTextBuilder.Append(ch);
 			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
 			{
 				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
@@ -130,21 +127,10 @@ class VDFTokenParser
 		if (tokenType == VDFTokenType.None)
 			return false;
 
-		var token = new VDFToken(tokenType, firstCharPos, tokenRawTextBuilder.ToString(), tokenTextBuilder.ToString());
+		var token = new VDFToken(tokenType, firstCharPos, this.tokens.Count, tokenTextBuilder.ToString());
 		this.tokens.Add(token);
 		return true;
 	}
-	/*PeekNextToken(): VDFToken
-	{
-		var oldPos = this.nextCharPos;
-		var oldTokenCount = this.tokens.length;
-		this.MoveNextToken();
-		this.nextCharPos = oldPos;
-		if (this.tokens.length > oldTokenCount)
-			return this.tokens[this.tokens.length - 1];
-		return null;
-	}
-	PeekNextChars(charsToPeek: number = 1): string { return this.text.substring(this.nextCharPos, Math.min(this.nextCharPos + charsToPeek, this.text.length)); }*/
 
 	static FindNextLineBreakCharPos(text: string, searchStartPos: number): number
 	{

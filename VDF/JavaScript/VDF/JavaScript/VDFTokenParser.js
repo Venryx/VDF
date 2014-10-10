@@ -19,10 +19,10 @@
     VDFTokenType[VDFTokenType["InLineComment"] = 13] = "InLineComment";
 })(VDFTokenType || (VDFTokenType = {}));
 var VDFToken = (function () {
-    function VDFToken(type, position, rawText, text) {
+    function VDFToken(type, position, index, text) {
         this.type = type;
         this.position = position;
-        this.rawText = rawText;
+        this.index = index;
         this.text = text;
     }
     return VDFToken;
@@ -36,7 +36,6 @@ var VDFTokenParser = (function () {
     VDFTokenParser.prototype.MoveNextToken = function () {
         var _this = this;
         var tokenType = 0 /* None */;
-        var tokenRawTextBuilder = new StringBuilder();
         var tokenTextBuilder = new StringBuilder();
 
         var inLiteralMarkers = false;
@@ -50,14 +49,12 @@ var VDFTokenParser = (function () {
             var nextNextNextChar = i + 3 < this.text.length ? this.text[i + 3] : null;
 
             var grabExtraCharsAsOwnAndSkipTheirProcessing = function (count, addToNormalBuilder) {
-                tokenRawTextBuilder.Append(_this.text.substr(i + 1, count));
                 if (addToNormalBuilder)
                     tokenTextBuilder.Append(_this.text.substr(i + 1, count));
                 i += count;
                 _this.nextCharPos += count;
             };
 
-            tokenRawTextBuilder.Append(ch);
             if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') {
                 grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
                 inLiteralMarkers = true;
@@ -107,22 +104,11 @@ var VDFTokenParser = (function () {
         if (tokenType == 0 /* None */)
             return false;
 
-        var token = new VDFToken(tokenType, firstCharPos, tokenRawTextBuilder.ToString(), tokenTextBuilder.ToString());
+        var token = new VDFToken(tokenType, firstCharPos, this.tokens.Count, tokenTextBuilder.ToString());
         this.tokens.Add(token);
         return true;
     };
 
-    /*PeekNextToken(): VDFToken
-    {
-    var oldPos = this.nextCharPos;
-    var oldTokenCount = this.tokens.length;
-    this.MoveNextToken();
-    this.nextCharPos = oldPos;
-    if (this.tokens.length > oldTokenCount)
-    return this.tokens[this.tokens.length - 1];
-    return null;
-    }
-    PeekNextChars(charsToPeek: number = 1): string { return this.text.substring(this.nextCharPos, Math.min(this.nextCharPos + charsToPeek, this.text.length)); }*/
     VDFTokenParser.FindNextLineBreakCharPos = function (text, searchStartPos) {
         for (var i = searchStartPos; i < text.length; i++)
             if (text[i] == '\n')

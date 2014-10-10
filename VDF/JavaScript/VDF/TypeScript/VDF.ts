@@ -274,6 +274,13 @@ class List<T>
 				return false;
 		return true;
 	}
+	First(matchFunc?): T
+	{
+		var result = this.FirstOrDefault(matchFunc);
+		if (result == null)
+			throw new Error("Matching item not found.");
+		return result;
+	}
 	FirstOrDefault(matchFunc?): T
 	{
 		if (matchFunc)
@@ -285,6 +292,13 @@ class List<T>
 		}
 		else
 			return this[0];
+	}
+	Last(matchFunc?): T
+	{
+		var result = this.LastOrDefault(matchFunc);
+		if (result == null)
+			throw new Error("Matching item not found.");
+		return result;
 	}
 	LastOrDefault(matchFunc?): T
 	{

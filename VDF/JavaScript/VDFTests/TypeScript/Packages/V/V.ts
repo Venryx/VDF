@@ -31,4 +31,29 @@ var V = new function ()
 	self.Multiline = function(functionWithInCommentMultiline) { return functionWithInCommentMultiline.toString().replace(/^[^\/]+\/\*/, '').replace(/\*\/(.|\n)*/, ''); };
 
 	self.ExtendWith = function(value) { $.extend(this, value); };
+
+	self.timerStart = 0;
+	self.StartTimer = function() { self.timerStart = new Date().getTime(); }
+	self.StopTimerAndMarkTime = function() { console.log("Took (in ms): " + (new Date().getTime() - self.timerStart)); }
 };
+
+class VDebug_Base
+{
+	static timerStart: number = 0;
+	static StartTimer() { VDebug.timerStart = new Date().getTime(); }
+	static StopTimerAndMarkTime(name?: string) { console.log("Time (in ms)" + (name ? " - " + name : "") + ": " + (new Date().getTime() - VDebug.timerStart)); }
+	static sectionTotals: any = {};
+	static waitTimerIDs: any = {};
+	static StartSection() { VDebug.timerStart = new Date().getTime(); }
+	static EndSection(name: string, waitTimeBeforeResults: number = 1000)
+	{
+		VDebug.sectionTotals[name] = (VDebug.sectionTotals[name] || 0) + (new Date().getTime() - VDebug.timerStart);
+		var oldVal = VDebug.sectionTotals[name];
+		clearTimeout(VDebug.waitTimerIDs[name]);
+		VDebug.waitTimerIDs[name] = setTimeout(() =>
+		{
+			if (VDebug.sectionTotals[name] == oldVal)
+				console.log("Time (in ms)" + (name ? " - " + name : "") + ": " + oldVal);
+		}, waitTimeBeforeResults);
+	}
+}

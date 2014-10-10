@@ -416,6 +416,12 @@ var List = (function () {
                 return false;
         return true;
     };
+    List.prototype.First = function (matchFunc) {
+        var result = this.FirstOrDefault(matchFunc);
+        if (result == null)
+            throw new Error("Matching item not found.");
+        return result;
+    };
     List.prototype.FirstOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var i in this.indexes())
@@ -424,6 +430,12 @@ var List = (function () {
             return null;
         } else
             return this[0];
+    };
+    List.prototype.Last = function (matchFunc) {
+        var result = this.LastOrDefault(matchFunc);
+        if (result == null)
+            throw new Error("Matching item not found.");
+        return result;
     };
     List.prototype.LastOrDefault = function (matchFunc) {
         if (matchFunc) {
