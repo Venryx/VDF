@@ -37,7 +37,7 @@ var V = new function ()
 	self.StopTimerAndMarkTime = function() { console.log("Took (in ms): " + (new Date().getTime() - self.timerStart)); }
 };
 
-class VDebug_Base
+class VDebug
 {
 	static timerStart: number = 0;
 	static StartTimer() { VDebug.timerStart = new Date().getTime(); }

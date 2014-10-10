@@ -18,20 +18,26 @@
 		// note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
         $("#runSavingTests").click(function()
         {
-	        Saving.Init();
-	        Saving.RunTests();
+        	var startTime = new Date().getTime();
+        	Saving.Init();
+        	Saving.RunTests();
+        	$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
         });
         $("#runLoadingTests").click(function()
         {
+        	var startTime = new Date().getTime();
 	        Loading.Init();
 	        Loading.RunTests();
+	        $("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
         });
     });
     </script>
 </head>
 <body>
     <input id="runSavingTests" type="button" value="Run Saving Tests"/>
-    <input id="runLoadingTests" type="button" value="Run Loading Tests"/>
+	<input id="runLoadingTests" type="button" value="Run Loading Tests"/>
+	<div id="savingResults" style="display: inline-block; width: 200; font-size: 14;">Saving time (in ms): </div>
+	<div id="loadingResults" style="display: inline-block; width: 200; font-size: 14;">Loading time (in ms): </div>
     <div>
         <div id="qunit"></div>
         <div id="qunit-fixture"></div>

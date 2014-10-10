@@ -46,20 +46,20 @@ var V = new function () {
     };
 };
 
-var VDebug_Base = (function () {
-    function VDebug_Base() {
+var VDebug = (function () {
+    function VDebug() {
     }
-    VDebug_Base.StartTimer = function () {
+    VDebug.StartTimer = function () {
         VDebug.timerStart = new Date().getTime();
     };
-    VDebug_Base.StopTimerAndMarkTime = function (name) {
+    VDebug.StopTimerAndMarkTime = function (name) {
         console.log("Time (in ms)" + (name ? " - " + name : "") + ": " + (new Date().getTime() - VDebug.timerStart));
     };
 
-    VDebug_Base.StartSection = function () {
+    VDebug.StartSection = function () {
         VDebug.timerStart = new Date().getTime();
     };
-    VDebug_Base.EndSection = function (name, waitTimeBeforeResults) {
+    VDebug.EndSection = function (name, waitTimeBeforeResults) {
         if (typeof waitTimeBeforeResults === "undefined") { waitTimeBeforeResults = 1000; }
         VDebug.sectionTotals[name] = (VDebug.sectionTotals[name] || 0) + (new Date().getTime() - VDebug.timerStart);
         var oldVal = VDebug.sectionTotals[name];
@@ -69,10 +69,10 @@ var VDebug_Base = (function () {
                 console.log("Time (in ms)" + (name ? " - " + name : "") + ": " + oldVal);
         }, waitTimeBeforeResults);
     };
-    VDebug_Base.timerStart = 0;
+    VDebug.timerStart = 0;
 
-    VDebug_Base.sectionTotals = {};
-    VDebug_Base.waitTimerIDs = {};
-    return VDebug_Base;
+    VDebug.sectionTotals = {};
+    VDebug.waitTimerIDs = {};
+    return VDebug;
 })();
 //# sourceMappingURL=V.js.map
