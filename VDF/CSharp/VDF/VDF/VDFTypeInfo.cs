@@ -7,11 +7,11 @@ using System.Reflection;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute
 {
 	public bool includePropsL1;
-	public bool popOutChildren;
-	public VDFType(bool includePropsL1 = false, bool popOutChildren = false)
+	public bool popOutChildrenL1;
+	public VDFType(bool includePropsL1 = false, bool popOutChildrenL1 = false)
 	{
 		this.includePropsL1 = includePropsL1;
-		this.popOutChildren = popOutChildren;
+		this.popOutChildrenL1 = popOutChildrenL1;
 	}
 }
 public class VDFTypeInfo
@@ -39,26 +39,26 @@ public class VDFTypeInfo
 		if (typeTag != null)
 		{
 			result.props_includeL1 = typeTag.includePropsL1;
-			result.popOutChildren = typeTag.popOutChildren;
+			result.popOutChildrenL1 = typeTag.popOutChildrenL1;
 		}
 		return result;
 	}
 
 	public bool props_includeL1; // by default, use an opt-in approach
-	public bool popOutChildren;
+	public bool popOutChildrenL1;
 	public Dictionary<string, VDFPropInfo> propInfoByName = new Dictionary<string, VDFPropInfo>();
 	public List<VDFMethodInfo> methodInfo = new List<VDFMethodInfo>();
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute
 {
-	public bool includeL2;
-	public bool popOutChildren;
+	public bool? includeL2;
+	public bool? popOutChildrenL2;
 	public bool writeEmptyValue;
-	public VDFProp(bool includeL2 = true, bool popOutChildren = false, bool writeEmptyValue = true)
+	public VDFProp(bool includeL2 = true, bool popOutChildrenL2 = false, bool writeEmptyValue = true)
 	{
 		this.includeL2 = includeL2;
-		this.popOutChildren = popOutChildren;
+		this.popOutChildrenL2 = popOutChildrenL2;
 		this.writeEmptyValue = writeEmptyValue;
 	}
 }
@@ -85,7 +85,7 @@ public class VDFPropInfo
 		if (propTag != null)
 		{
 			result.includeL2 = propTag.includeL2;
-			result.popOutChildren = propTag.popOutChildren;
+			result.popOutChildrenL2 = propTag.popOutChildrenL2;
 			result.writeEmptyValue = propTag.writeEmptyValue;
 		}
 		return result;
@@ -93,7 +93,7 @@ public class VDFPropInfo
 
 	public MemberInfo memberInfo;
 	public bool? includeL2;
-	public bool popOutChildren;
+	public bool? popOutChildrenL2;
 	public bool writeEmptyValue = true;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }

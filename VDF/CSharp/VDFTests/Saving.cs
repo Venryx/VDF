@@ -89,7 +89,7 @@ namespace VDFTests
 			a["strings2"].items.Count.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
 		}
-		class TypeWithList_PopOutItemData { [VDFProp(popOutChildren = true)] List<string> list = new List<string>{"A", "B"}; }
+		class TypeWithList_PopOutItemData { [VDFProp(popOutChildrenL2: true)] List<string> list = new List<string>{"A", "B"}; }
 		[Fact] void FromObject_Level1_ListItems_PoppedOutChildren()
 		{
 			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutItemData>(new TypeWithList_PopOutItemData());
@@ -178,7 +178,7 @@ namespace VDFTests
 
 		class FromObject_Level1_Object_DictionaryPoppedOutThenBool_Class1
 		{
-			[VDFProp(popOutChildren: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			[VDFProp(popOutChildrenL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
@@ -193,9 +193,9 @@ namespace VDFTests
 	title2{message2}
 ^otherProperty{true}".Replace("\r", ""));
 		}
-		[VDFType(popOutChildren: true)] class FromObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+		[VDFType(popOutChildrenL1: true)] class FromObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
-			[VDFProp(popOutChildren: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			[VDFProp(popOutChildrenL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}

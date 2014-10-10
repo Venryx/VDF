@@ -410,9 +410,9 @@ Shoot at Enemy Vehicle
 			VDF.DeserializeInto("flag{true}", a);
 			a.flag.Should().Be(true);
 		}
-		[VDFType(popOutChildren: true)] class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+		[VDFType(popOutChildrenL1: true)] class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
-			[VDFProp(popOutChildren: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
+			[VDFProp(popOutChildrenL2: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}

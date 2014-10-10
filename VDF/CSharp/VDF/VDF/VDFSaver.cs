@@ -80,8 +80,6 @@ public static class VDFSaver
 				objNode.properties.Add(ToVDFNode(key, type.GetGenericArguments()[0], saveOptions, true), ToVDFNode(objAsDictionary[key], type.GetGenericArguments()[1], saveOptions, true));
 		}
 		else // an object, with properties
-		{
-			
 			foreach (string propName in typeInfo.propInfoByName.Keys)
 				try
 				{
@@ -100,11 +98,10 @@ public static class VDFSaver
 
 					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
 					var propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : typeof(object), saveOptions);
-					propValueNode.popOutChildren = propInfo.popOutChildren;
+					propValueNode.popOutChildren = propInfo.popOutChildrenL2.HasValue ? propInfo.popOutChildrenL2.Value : propValueNode.popOutChildren;
 					objNode.properties.Add(propName, propValueNode);
 				}
 				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
-		}
 
 		// do type-marking at the end, since it depends quite a bit on the actual data (since the data determines how much can be inferred, and how much needs to be specified)
 		bool markType = saveOptions.typeMarking == VDFTypeMarking.AssemblyExternalNoCollapse;
@@ -126,7 +123,7 @@ public static class VDFSaver
 				objNode.metadata_type = objNode.metadata_type.StartsWith("List[") ? objNode.metadata_type.Substring(5, objNode.metadata_type.Length - 6) : objNode.metadata_type.Substring(11, objNode.metadata_type.Length - 12);
 		}
 
-		if (typeInfo != null && typeInfo.popOutChildren)
+		if (typeInfo != null && typeInfo.popOutChildrenL1)
 			objNode.popOutChildren = true;
 
 		return objNode;

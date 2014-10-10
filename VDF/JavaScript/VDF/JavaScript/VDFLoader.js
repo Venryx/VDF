@@ -91,7 +91,7 @@ var VDFLoader = (function () {
                 return a.type != 7 /* PoppedOutDataStartMarker */;
             }) && tokensNotInDataMarkers.Any(function (a) {
                 return a.type == 12 /* LineBreak */;
-            }))
+            }) && (declaredTypeName == null || declaredTypeName == "object"))
                 objTypeStr = "IList";
 
         var objTypeName = declaredTypeName;
@@ -248,12 +248,8 @@ var VDFLoader = (function () {
                 } else {
                     var propValueToken = next3Tokens[1];
                     var propValueEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                        return a.type == 11 /* DataEndMarker */ && a.position >= propValueToken.position;
+                        return a.type == 5 /* DataPropName */ && a.position > propValueToken.position;
                     });
-                    if (objTypeInfo.popOutChildren)
-                        propValueEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
-                            return a.type == 5 /* DataPropName */ && a.position > propValueToken.position;
-                        });
                     objNode.SetProperty(propName, VDFLoader.ToVDFNode(getTokenRange_tokens(propValueToken, propValueEnderToken), propValueTypeName, loadOptions, objIndent + 1));
                 }
             }

@@ -94,7 +94,7 @@ public static class VDFLoader
 		if (objTypeStr == null)
 			if (isInlineList)
 				objTypeStr = "System.Collections.IList";
-			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.PoppedOutDataStartMarker) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak))
+			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.PoppedOutDataStartMarker) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak) && (declaredType == null || declaredType == typeof(object)))
 				objTypeStr = "System.Collections.IList";
 
 		Type objType = declaredType;
@@ -239,9 +239,7 @@ public static class VDFLoader
 				else // if this property *key*/*definition* is popped-out
 				{
 					var propValueToken = next3Tokens[1];
-					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker && a.position >= propValueToken.position);
-					if (objTypeInfo.popOutChildren) // maybe temp; special handling for types with pop-out-children enabled
-						propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName && a.position > propValueToken.position);
+					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName && a.position > propValueToken.position);
 					objNode.properties.Add(propName, ToVDFNode(getTokenRange_tokens(propValueToken, propValueEnderToken), propValueType, loadOptions, objIndent + 1));
 				}
 			}

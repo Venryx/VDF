@@ -94,7 +94,7 @@ class VDFSaver
 				
 					// if obj is an anonymous type, considers its props' declared-types to be 'object'; also, if not popped-out, pass it the same line-info pack that we were given
 					var propValueNode = VDFSaver.ToVDFNode(propValue, !isAnonymousType ? propInfo.propVTypeName : "object", saveOptions);
-					propValueNode.popOutChildren = propInfo.popOutChildren;
+					propValueNode.popOutChildren = propInfo.popOutChildrenL2 != null ? propInfo.popOutChildrenL2 : propValueNode.popOutChildren;
 					objNode.SetProperty(propName, propValueNode);
 				}
 				catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"); }
@@ -120,7 +120,7 @@ class VDFSaver
 				objNode.metadata_type = objNode.metadata_type.indexOf("List[") == 0 ? objNode.metadata_type.substring(5, objNode.metadata_type.length - 1) : objNode.metadata_type.substring(11, objNode.metadata_type.length - 1);
 		}
 
-		if (typeInfo != null && typeInfo.popOutChildren)
+		if (typeInfo != null && typeInfo.popOutChildrenL1)
 			objNode.popOutChildren = true;
 
 		return objNode;

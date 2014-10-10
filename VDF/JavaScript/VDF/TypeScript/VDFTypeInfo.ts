@@ -3,12 +3,12 @@
 	static Get(vTypeName: string): VDFTypeInfo { return (window[vTypeName] || {}).typeInfo || new VDFTypeInfo(); }
 
 	props_includeL1: boolean;
-	popOutChildren: boolean;
+	popOutChildrenL1: boolean;
 	propInfoByName: Object;
-	constructor(props_includeL1?: boolean, popOutChildren?: boolean, propInfoByPropName?: Object)
+	constructor(props_includeL1?: boolean, popOutChildrenL1?: boolean, propInfoByPropName?: Object)
 	{
 		this.props_includeL1 = props_includeL1;
-		this.popOutChildren = popOutChildren;
+		this.popOutChildrenL1 = popOutChildrenL1;
 		this.propInfoByName = propInfoByPropName || {};
 	}
 	//SetPropInfo(propName: string, propInfo: VDFPropInfo) { this.propInfoByName[propName] = propInfo; }
@@ -18,13 +18,13 @@ class VDFPropInfo
 {
 	propVTypeName: string;
 	includeL2: boolean;
-	popOutChildren: boolean;
+	popOutChildrenL2: boolean;
 	writeEmptyValue: boolean;
-	constructor(propType: string, includeL2: boolean = true, popOutChildren?: boolean, writeEmptyValue: boolean = true)
+	constructor(propType: string, includeL2: boolean = true, popOutChildrenL2: boolean = false, writeEmptyValue: boolean = true)
 	{
 		this.propVTypeName = propType;
 		this.includeL2 = includeL2;
-		this.popOutChildren = popOutChildren;
+		this.popOutChildrenL2 = popOutChildrenL2;
 		this.writeEmptyValue = writeEmptyValue;
 	}
 
