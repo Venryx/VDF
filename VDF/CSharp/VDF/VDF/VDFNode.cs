@@ -74,8 +74,6 @@ public class VDFNode
 	public bool isList;
 	public bool isDictionary;
 	public bool popOutChildren;
-	public bool isFirstItemOfNonFirstPopOutGroup;
-	public bool isListItem;
 	public bool hasDanglingIndentation;
 	static string RawDataStringToFinalized(string rawDataStr, bool disallowRawPipe = false)
 	{
@@ -90,10 +88,6 @@ public class VDFNode
 	public string ToVDF(bool disallowRawPipe = false)
 	{
 		var builder = new StringBuilder();
-		if (isFirstItemOfNonFirstPopOutGroup)
-			builder.Append("#");
-		//if (isListItem_nonFirst && !popOutToOwnLine)
-		//	builder.Append("|");
 		if (metadata_type != null)
 			builder.Append(isList || isDictionary ? metadata_type.Replace(" ", "") + ">>" : metadata_type.Replace(" ", "") + ">");
 

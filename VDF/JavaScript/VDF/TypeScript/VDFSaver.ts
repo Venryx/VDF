@@ -57,11 +57,7 @@ class VDFSaver
 			objNode.isList = true;
 			var objAsList = <List<any>>obj;
 			for (var i = 0; i < objAsList.length; i++)
-			{
-				var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true);
-				itemValueNode.isListItem = true;
-				objNode.AddItem(itemValueNode);
-			}
+				objNode.AddItem(VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true));
 		}
 		else if (objVTypeName && objVTypeName.startsWith("Dictionary["))
 		{

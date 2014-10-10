@@ -54,11 +54,8 @@ var VDFSaver = (function () {
         else if (objVTypeName && objVTypeName.startsWith("List[")) {
             objNode.isList = true;
             var objAsList = obj;
-            for (var i = 0; i < objAsList.length; i++) {
-                var itemValueNode = VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true);
-                itemValueNode.isListItem = true;
-                objNode.AddItem(itemValueNode);
-            }
+            for (var i = 0; i < objAsList.length; i++)
+                objNode.AddItem(VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true));
         } else if (objVTypeName && objVTypeName.startsWith("Dictionary[")) {
             objNode.isDictionary = true;
             var objAsDictionary = obj;

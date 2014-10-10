@@ -112,11 +112,6 @@
     };
     VDFNode.prototype.ToVDF = function (disallowRawPipe) {
         var builder = new StringBuilder();
-        if (this.isFirstItemOfNonFirstPopOutGroup)
-            builder.Append("#");
-
-        //if (this.isListItem_nonFirst && !this.popOutToOwnLine)
-        //	builder.Append("|");
         if (this.metadata_type != null)
             builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
 
