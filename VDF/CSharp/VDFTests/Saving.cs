@@ -45,6 +45,13 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode<string>("This is a\nmultiline string\nof three lines in total.");
 			a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
 		}
+		[Fact] void FromVDFNode_Level1_TroublesomeLiteral()
+		{
+			var a = new VDFNode();
+			a[0] = new VDFNode("This is a list item that|needs|escaping.");
+			a[1] = new VDFNode("This is a list item that doesn't need escaping.");
+			a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|This is a list item that doesn't need escaping.");
+		}
 
 		[Fact] void FromVDFNode_Level1_BaseValues()
 		{

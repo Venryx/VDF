@@ -2,6 +2,25 @@
 {
 	metadata_type: string;
 	baseValue: string;
+	
+	constructor(baseValue?: string, metadata_type?: string)
+	{
+		VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
+		this.baseValue = baseValue;
+		this.metadata_type = metadata_type;
+	}
+
+	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
+	get AsBool() { return new VDFNode(this.baseValue).ToObject("bool"); }
+	set AsBool(value: boolean) { this.baseValue = value.toString(); }
+	get AsInt() { return new VDFNode(this.baseValue).ToObject("int"); }
+	set AsInt(value: number) { this.baseValue = parseInt(value.toString()).toString(); }
+	get AsFloat() { return new VDFNode(this.baseValue).ToObject("float"); }
+	set AsFloat(value: number) { this.baseValue = value.toString(); }
+	get AsString() { return this.baseValue; }
+	set AsString(value: string) { this.baseValue = value; }
+	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
+
 	get items(): Array<VDFNode>
 	{
 		var result = [];
@@ -24,23 +43,6 @@
 		for (var key in this.properties)
 			result++;
 		return result;
-	}
-	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
-	get AsBool() { return new VDFNode(this.baseValue).ToObject("bool"); }
-	set AsBool(value: boolean) { this.baseValue = value.toString(); }
-	get AsInt() { return new VDFNode(this.baseValue).ToObject("int"); }
-	set AsInt(value: number) { this.baseValue = parseInt(value.toString()).toString(); }
-	get AsFloat() { return new VDFNode(this.baseValue).ToObject("float"); }
-	set AsFloat(value: number) { this.baseValue = value.toString(); }
-	get AsString() { return this.baseValue; }
-	set AsString(value: string) { this.baseValue = value; }
-	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
-
-	constructor(baseValue?: string, metadata_type?: string)
-	{
-		VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
-		this.baseValue = baseValue;
-		this.metadata_type = metadata_type;
 	}
 
 	SetItem(index: number, value: any)
@@ -72,17 +74,17 @@
 	isFirstItemOfNonFirstPopOutGroup: boolean;
 	isListItem: boolean;
 	hasDanglingIndentation: boolean;
-	static RawDataStringToFinalized(rawDataStr: string): string
+	static RawDataStringToFinalized(rawDataStr: string, disallowRawPipe?: boolean): string
 	{
 		var result = rawDataStr;
-		if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
+		if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
 			if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
 			else
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
 		return result;
 	}
-	ToVDF(): string
+	ToVDF(disallowRawPipe?: boolean): string
 	{
 		var builder = new StringBuilder();
 		if (this.isFirstItemOfNonFirstPopOutGroup)
@@ -93,7 +95,7 @@
 			builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
 		
 		if (this.baseValue != null)
-			builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue));
+			builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue, disallowRawPipe));
 		else if (this.items.length > 0)
 		{
 			var hasListItem = this.items.filter(a=>a.isList).length;
@@ -116,7 +118,10 @@
 					builder.Append("\n" + lines.join("\n"));
 				}
 				else
-					builder.Append((i > 0 ? "|" : "") + (hasListItem ? "{" : "") + item.ToVDF() + (hasListItem ? "}" : ""));
+					if (hasListItem)
+						builder.Append((i > 0 ? "|" : "") + "{" + item.ToVDF() + "}");
+					else
+						builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && item.baseValue.indexOf("@@") != 0 && item.baseValue.indexOf("|") != -1));
 			}
 		}
 		else

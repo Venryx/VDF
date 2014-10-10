@@ -14,6 +14,12 @@ public class VDFNode
 	public List<VDFNode> items = new List<VDFNode>();
 	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>(); // this also holds Dictionaries' keys/values
 
+	public VDFNode(string baseValue = null, string metadata_type = null)
+	{
+		this.baseValue = baseValue;
+		this.metadata_type = metadata_type;
+	}
+
 	public VDFNode this[int index]
 	{
 		get { return items[index]; }
@@ -71,17 +77,17 @@ public class VDFNode
 	public bool isFirstItemOfNonFirstPopOutGroup;
 	public bool isListItem;
 	public bool hasDanglingIndentation;
-	static string RawDataStringToFinalized(string rawDataStr)
+	static string RawDataStringToFinalized(string rawDataStr, bool disallowRawPipe = false)
 	{
 		string result = rawDataStr;
-		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || rawDataStr.Contains("@@") || rawDataStr.Contains("\n"))
+		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || (disallowRawPipe && rawDataStr.Contains("|")) || rawDataStr.Contains("@@") || rawDataStr.Contains("\n"))
 			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
 				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
 			else
 				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "@@";
 		return result;
 	}
-	public string ToVDF()
+	public string ToVDF(bool disallowRawPipe = false)
 	{
 		var builder = new StringBuilder();
 		if (isFirstItemOfNonFirstPopOutGroup)
@@ -92,7 +98,7 @@ public class VDFNode
 			builder.Append(isList || isDictionary ? metadata_type.Replace(" ", "") + ">>" : metadata_type.Replace(" ", "") + ">");
 
 		if (baseValue != null)
-			builder.Append(RawDataStringToFinalized(baseValue));
+			builder.Append(RawDataStringToFinalized(baseValue, disallowRawPipe));
 		else if (items.Count > 0)
 		{
 			var hasListItem = items.Any(a=>a.isList);
@@ -109,12 +115,15 @@ public class VDFNode
 
 				if (popOutChildren)
 				{
-					var lines = item.ToVDF().Split(new[] { '\n' });
+					var lines = item.ToVDF().Split(new[] {'\n'});
 					lines = lines.Select(a=>"\t" + a).ToArray();
 					builder.Append("\n" + String.Join("\n", lines));
 				}
 				else
-					builder.Append((i > 0 ? "|" : "") + (hasListItem ? "{" : "") + item.ToVDF() + (hasListItem ? "}" : ""));
+					if (hasListItem)
+						builder.Append((i > 0 ? "|" : "") + "{" + item.ToVDF() + "}");
+					else
+						builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && !item.baseValue.StartsWith("@@") && item.baseValue.Contains("|")));
 			}
 		}
 		else
