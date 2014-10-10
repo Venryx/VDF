@@ -116,39 +116,45 @@ var VDF = (function () {
 var VDFUtils = (function () {
     function VDFUtils() {
     }
-    VDFUtils.MakePropertiesNonEnumerable = function (obj, alsoMakeFunctionsNonEnumerable) {
-        if (typeof alsoMakeFunctionsNonEnumerable === "undefined") { alsoMakeFunctionsNonEnumerable = false; }
+    VDFUtils.SetUpHiddenFields = function (obj, addSetters) {
+        var fieldNames = [];
+        for (var _i = 0; _i < (arguments.length - 2); _i++) {
+            fieldNames[_i] = arguments[_i + 2];
+        }
+        if (addSetters && !obj._hiddenFieldStore)
+            Object.defineProperty(obj, "_hiddenFieldStore", { enumerable: false, value: {} });
+        for (var i in fieldNames)
+            (function () {
+                var propName = fieldNames[i];
+                var origValue = obj[propName];
+                delete obj[propName];
+                if (addSetters)
+                    Object.defineProperty(obj, propName, {
+                        enumerable: false,
+                        get: function () {
+                            return obj["_hiddenFieldStore"][propName];
+                        },
+                        set: function (value) {
+                            return obj["_hiddenFieldStore"][propName] = value;
+                        }
+                    });
+                else
+                    Object.defineProperty(obj, propName, {
+                        enumerable: false,
+                        value: origValue
+                    });
+                obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
+            })();
+    };
+    VDFUtils.MakePropertiesHidden = function (obj, alsoMakeFunctionsHidden, addSetters) {
         for (var propName in obj) {
             var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
             if (propDescriptor) {
                 propDescriptor.enumerable = false;
                 Object.defineProperty(obj, propName, propDescriptor);
-            } else if (alsoMakeFunctionsNonEnumerable && obj[propName] instanceof Function)
-                VDFUtils.SetUpStashFields(obj, propName);
+            } else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
+                VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
         }
-    };
-    VDFUtils.SetUpStashFields = function (obj) {
-        var fieldNames = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            fieldNames[_i] = arguments[_i + 1];
-        }
-        if (!obj._stashFieldStore)
-            Object.defineProperty(obj, "_stashFieldStore", { enumerable: false, value: {} });
-        for (var i in fieldNames)
-            (function () {
-                var propName = fieldNames[i];
-                var origValue = obj[propName];
-                Object.defineProperty(obj, propName, {
-                    enumerable: false,
-                    get: function () {
-                        return obj["_stashFieldStore"][propName];
-                    },
-                    set: function (value) {
-                        obj["_stashFieldStore"][propName] = value;
-                    }
-                });
-                obj[propName] = origValue; // for 'stashing' a prop that was set beforehand
-            })();
     };
     return VDFUtils;
 })();
@@ -206,270 +212,115 @@ var EnumValue = (function () {
     };
     return EnumValue;
 })();
-var List = (function () {
-    function List(itemType) {
-        var items = [];
-        for (var _i = 0; _i < (arguments.length - 1); _i++) {
-            items[_i] = arguments[_i + 1];
-        }
-        VDFUtils.SetUpStashFields(this, "innerArray", "realVTypeName", "itemType");
-        this.realVTypeName = "List[" + itemType + "]";
-        this.innerArray = [];
-        for (var i in items)
-            this.push(items[i]);
-        this.itemType = itemType;
+
+window["List"] = function List(itemType) {
+    var items = [];
+    for (var _i = 0; _i < (arguments.length - 1); _i++) {
+        items[_i] = arguments[_i + 1];
     }
-    Object.defineProperty(List.prototype, "length", {
-        // Array standard property replications
-        get: function () {
-            //return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
-            var highestIndex = -1;
-            for (var propName in this)
-                if (parseInt(propName) == propName && parseInt(propName) > highestIndex)
-                    highestIndex = parseInt(propName);
-            return highestIndex + 1;
-        },
-        enumerable: true,
-        configurable: true
-    });
+    var self = Object.create(Array.prototype);
+    self = (Array.apply(self, items) || self);
+    self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
+    self.constructor = List; // makes "(new List()).constructor == List" be true
+    self.realVTypeName = "List[" + itemType + "]";
+    self.itemType = itemType;
+    return self;
+};
+(function () {
+    var self = List.prototype;
+    self["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
 
-    // Array standard method replications
-    List.prototype.modifyInnerListWithCall = function (func, args) {
-        for (var i = 0; i < this.innerArray.length; i++)
-            delete this[i];
-        var result = func.apply(this.innerArray, args);
-        for (var i = 0; i < this.innerArray.length; i++)
-            this[i] = this.innerArray[i];
-        return result;
-    };
-    List.prototype.pop = function () {
-        return this.modifyInnerListWithCall(Array.prototype.pop);
-    };
-    List.prototype.push = function () {
-        var items = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            items[_i] = arguments[_i + 0];
-        }
-        return this.modifyInnerListWithCall(Array.prototype.push, items);
-    };
-    List.prototype.reverse = function () {
-        return this.modifyInnerListWithCall(Array.prototype.reverse);
-    };
-    List.prototype.shift = function () {
-        return this.modifyInnerListWithCall(Array.prototype.shift);
-    };
-    List.prototype.sort = function (compareFn) {
-        return this.modifyInnerListWithCall(Array.prototype.sort, [compareFn]);
-    };
-    List.prototype.splice = function (start, deleteCount) {
-        var items = [];
-        for (var _i = 0; _i < (arguments.length - 2); _i++) {
-            items[_i] = arguments[_i + 2];
-        }
-        return this.modifyInnerListWithCall(Array.prototype.splice, deleteCount != null ? [start, deleteCount].concat(items) : [start]);
-    };
-    List.prototype.unshift = function () {
-        var items = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            items[_i] = arguments[_i + 0];
-        }
-        return this.modifyInnerListWithCall(Array.prototype.unshift, items);
-    };
-    List.prototype.concat = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.concat.apply(this.innerArray, args);
-    };
-    List.prototype.join = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.join.apply(this.innerArray, args);
-    };
-    List.prototype.slice = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.slice.apply(this.innerArray, args);
-    };
-    List.prototype.toString = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.toString.apply(this.innerArray, args);
-    };
-    List.prototype.toLocaleString = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.toLocaleString.apply(this.innerArray, args);
-    };
-    List.prototype.indexOf = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.indexOf.apply(this.innerArray, args);
-    };
-    List.prototype.lastIndexOf = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.lastIndexOf.apply(this.innerArray, args);
-    };
-    List.prototype.forEach = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.forEach.apply(this.innerArray, args);
-    };
-    List.prototype.every = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.every.apply(this.innerArray, args);
-    };
-    List.prototype.some = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.some.apply(this.innerArray, args);
-    };
-    List.prototype.filter = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.filter.apply(this.innerArray, args);
-    };
-    List.prototype.map = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.map.apply(this.innerArray, args);
-    };
-    List.prototype.reduce = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.reduce.apply(this.innerArray, args);
-    };
-    List.prototype.reduceRight = function () {
-        var args = [];
-        for (var _i = 0; _i < (arguments.length - 0); _i++) {
-            args[_i] = arguments[_i + 0];
-        }
-        return Array.prototype.reduceRight.apply(this.innerArray, args);
-    };
-
-    Object.defineProperty(List.prototype, "Count", {
-        // new properties
-        get: function () {
+    // new properties
+    Object.defineProperty(self, "Count", { enumerable: false, get: function () {
             return this.length;
-        },
-        enumerable: true,
-        configurable: true
-    });
+        } });
 
     // new methods
-    List.prototype.indexes = function () {
+    self.indexes = function () {
         var result = {};
         for (var i = 0; i < this.length; i++)
             result[i] = this[i];
         return result;
     };
-    List.prototype.Add = function () {
+    self.Add = function () {
         var items = [];
         for (var _i = 0; _i < (arguments.length - 0); _i++) {
             items[_i] = arguments[_i + 0];
         }
         return this.push.apply(this, items);
     };
-    List.prototype.AddRange = function (items) {
+    self.AddRange = function (items) {
         for (var i = 0; i < items.length; i++)
             this.push(items[i]);
     };
-    List.prototype.Remove = function (item) {
+    self.Remove = function (item) {
         this.splice(this.indexOf(item), 1);
     };
-    List.prototype.Any = function (matchFunc) {
+    self.Any = function (matchFunc) {
         for (var i in this.indexes())
-            if (matchFunc(this[i]))
+            if (matchFunc.call(this[i], this[i]))
                 return true;
         return false;
     };
-    List.prototype.All = function (matchFunc) {
+    self.All = function (matchFunc) {
         for (var i in this.indexes())
-            if (!matchFunc(this[i]))
+            if (!matchFunc.call(this[i], this[i]))
                 return false;
         return true;
     };
-    List.prototype.First = function (matchFunc) {
+    self.First = function (matchFunc) {
         var result = this.FirstOrDefault(matchFunc);
         if (result == null)
             throw new Error("Matching item not found.");
         return result;
     };
-    List.prototype.FirstOrDefault = function (matchFunc) {
+    self.FirstOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var i in this.indexes())
-                if (matchFunc(this[i]))
+                if (matchFunc.call(this[i], this[i]))
                     return this[i];
             return null;
         } else
             return this[0];
     };
-    List.prototype.Last = function (matchFunc) {
+    self.Last = function (matchFunc) {
         var result = this.LastOrDefault(matchFunc);
         if (result == null)
             throw new Error("Matching item not found.");
         return result;
     };
-    List.prototype.LastOrDefault = function (matchFunc) {
+    self.LastOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var i = this.length - 1; i >= 0; i--)
-                if (matchFunc(this[i]))
+                if (matchFunc.call(this[i], this[i]))
                     return this[i];
             return null;
         } else
             return this[this.length - 1];
     };
-    List.prototype.GetRange = function (index, count) {
+    self.GetRange = function (index, count) {
         var result = new List(this.itemType);
         for (var i = index; i < index + count; i++)
             result.Add(this[i]);
         return result;
     };
-    List.prototype.Contains = function (item) {
+    self.Contains = function (item) {
         return this.indexOf(item) != -1;
     };
-    return List;
 })();
-VDFUtils.MakePropertiesNonEnumerable(List.prototype, true);
+
 var Dictionary = (function () {
     function Dictionary(keyType, valueType) {
         var keyValuePairs = [];
         for (var _i = 0; _i < (arguments.length - 2); _i++) {
             keyValuePairs[_i] = arguments[_i + 2];
         }
-        VDFUtils.SetUpStashFields(this, "realVTypeName", "keyType", "valueType", "keys", "values");
         this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
         this.keyType = keyType;
         this.valueType = valueType;
         this.keys = [];
         this.values = [];
+        VDFUtils.MakePropertiesHidden(this, true);
 
         if (keyValuePairs)
             for (var i = 0; i < keyValuePairs.length; i++)
@@ -497,5 +348,5 @@ var Dictionary = (function () {
     };
     return Dictionary;
 })();
-VDFUtils.MakePropertiesNonEnumerable(Dictionary.prototype, true);
+VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
 //# sourceMappingURL=VDF.js.map

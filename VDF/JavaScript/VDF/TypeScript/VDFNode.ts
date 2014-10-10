@@ -5,7 +5,7 @@
 	
 	constructor(baseValue?: string, metadata_type?: string)
 	{
-		VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
+		VDFUtils.SetUpHiddenFields(this, true, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
 		this.baseValue = baseValue;
 		this.metadata_type = metadata_type;
 	}
@@ -320,4 +320,4 @@
 			obj.VDFPostDeserialize(loadOptions.message);
 	}
 }
-VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);
+VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

@@ -1,6 +1,6 @@
 ﻿var VDFNode = (function () {
     function VDFNode(baseValue, metadata_type) {
-        VDFUtils.SetUpStashFields(this, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
+        VDFUtils.SetUpHiddenFields(this, true, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
         this.baseValue = baseValue;
         this.metadata_type = metadata_type;
     }
@@ -324,5 +324,5 @@
     };
     return VDFNode;
 })();
-VDFUtils.MakePropertiesNonEnumerable(VDFNode.prototype, true);
+VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 //# sourceMappingURL=VDFNode.js.map

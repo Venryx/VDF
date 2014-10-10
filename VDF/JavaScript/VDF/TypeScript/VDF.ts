@@ -116,7 +116,32 @@ class VDF
 
 class VDFUtils
 {
-	static MakePropertiesNonEnumerable(obj, alsoMakeFunctionsNonEnumerable: boolean = false)
+	static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
+	{
+		if (addSetters && !obj._hiddenFieldStore)
+			Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
+		for (var i in fieldNames)
+			(()=>{
+				var propName = fieldNames[i];
+				var origValue = obj[propName];
+				delete obj[propName];
+				if (addSetters)
+					Object.defineProperty(obj, propName,
+					{
+						enumerable: false,
+						get: ()=>obj["_hiddenFieldStore"][propName],
+						set: value=>obj["_hiddenFieldStore"][propName] = value
+					});
+				else
+					Object.defineProperty(obj, propName,
+					{
+						enumerable: false,
+						value: origValue
+					});
+				obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
+			})();
+	}
+	static MakePropertiesHidden(obj, alsoMakeFunctionsHidden?: boolean, addSetters?: boolean)
 	{
 		for (var propName in obj)
 		{
@@ -126,26 +151,9 @@ class VDFUtils
 				propDescriptor.enumerable = false;
 				Object.defineProperty(obj, propName, propDescriptor);
 			}
-			else if (alsoMakeFunctionsNonEnumerable && obj[propName] instanceof Function)
-				VDFUtils.SetUpStashFields(obj, propName);
+			else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
+				VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
 		}
-	}
-	static SetUpStashFields(obj, ...fieldNames)
-	{
-		if (!obj._stashFieldStore)
-			Object.defineProperty(obj, "_stashFieldStore", { enumerable: false, value: {} });
-		for (var i in fieldNames)
-		(()=>{
-			var propName = fieldNames[i];
-			var origValue = obj[propName];
-			Object.defineProperty(obj, propName,
-			{
-				enumerable: false,
-				get: function() { return obj["_stashFieldStore"][propName]; },
-				set: function(value) { obj["_stashFieldStore"][propName] = value; }
-			});
-			obj[propName] = origValue; // for 'stashing' a prop that was set beforehand
-		})();
 	}
 }
 class StringBuilder
@@ -184,144 +192,127 @@ class EnumValue
 	static GetEnumIntForStringValue(enumTypeName: string, stringValue: string) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); }
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
-class List<T>
-{
-	private innerArray: any[];
-	realVTypeName: string;
-	itemType: string;
-	constructor(itemType: string, ...items: T[])
-	{
-		VDFUtils.SetUpStashFields(this, "innerArray", "realVTypeName", "itemType");
-		this.realVTypeName = "List[" + itemType + "]";
-		this.innerArray = [];
-		for (var i in items)
-			this.push(items[i]);
-		this.itemType = itemType;
-	}
-	
-	// Array standard property replications
-	get length()
-	{
-		//return this.innerArray.length; // we can't just check internal array's length, since user may have 'added' items by calling "list[0] = value;"
-		var highestIndex = -1;
-		for (var propName in this)
-			if (parseInt(propName) == propName && parseInt(propName) > highestIndex) // if integer key
-				highestIndex = parseInt(propName);
-		return highestIndex + 1;
-	}
 
-	// Array standard method replications
-	private modifyInnerListWithCall(func, args?: any[])
-	{
-		for (var i = 0; i < this.innerArray.length; i++)
-			delete this[i];
-		var result = func.apply(this.innerArray, args);
-		for (var i = 0; i < this.innerArray.length; i++) // copy all inner-array items as our own
-			this[i] = this.innerArray[i];
-		return result;
-	}
-	pop(): T { return this.modifyInnerListWithCall(Array.prototype.pop); }
-	push(...items): number { return this.modifyInnerListWithCall(Array.prototype.push, items); }
-	reverse() :T[] { return this.modifyInnerListWithCall(Array.prototype.reverse); }
-	shift(): T { return this.modifyInnerListWithCall(Array.prototype.shift); }
-	sort(compareFn?: (a: T, b: T) => number): T[] { return this.modifyInnerListWithCall(Array.prototype.sort, [compareFn]); }
-	splice(start: number, deleteCount?: number, ...items: T[]): T[] { return this.modifyInnerListWithCall(Array.prototype.splice, deleteCount != null ? (<Array<any>>[start, deleteCount]).concat(items) : [start]); }
-	unshift(...items: T[]): number { return this.modifyInnerListWithCall(Array.prototype.unshift, items); }
-	concat(...args) { return Array.prototype.concat.apply(this.innerArray, args); }
-	join(...args) { return Array.prototype.join.apply(this.innerArray, args); }
-	slice(...args) { return Array.prototype.slice.apply(this.innerArray, args); }
-	toString(...args) { return Array.prototype.toString.apply(this.innerArray, args); }
-	toLocaleString(...args) { return Array.prototype.toLocaleString.apply(this.innerArray, args); }
-	indexOf(...args) { return Array.prototype.indexOf.apply(this.innerArray, args); }
-	lastIndexOf(...args) { return Array.prototype.lastIndexOf.apply(this.innerArray, args); }
-	forEach(...args) { return Array.prototype.forEach.apply(this.innerArray, args); }
-	every(...args) { return Array.prototype.every.apply(this.innerArray, args); }
-	some(...args) { return Array.prototype.some.apply(this.innerArray, args); }
-	filter(...args) { return Array.prototype.filter.apply(this.innerArray, args); }
-	map(...args) { return Array.prototype.map.apply(this.innerArray, args); }
-	reduce(...args) { return Array.prototype.reduce.apply(this.innerArray, args); }
-	reduceRight(...args) { return Array.prototype.reduceRight.apply(this.innerArray, args); }
+window["List"] = function List(itemType: string, ...items): void // actual constructor
+{
+	var self = Object.create(Array.prototype);
+	self = (Array.apply(self, items) || self);
+	self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
+	self.constructor = List; // makes "(new List()).constructor == List" be true
+	self.realVTypeName = "List[" + itemType + "]";
+	self.itemType = itemType;
+	return self;
+};
+(()=> // actual properties and methods
+{
+	var self = List.prototype;
+	self["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
 
 	// new properties
-	get Count() { return this.length; }
+	Object.defineProperty(self, "Count", { enumerable: false, get: function () { return this.length; } });
 
 	// new methods
-	indexes()
+	self.indexes = function()
 	{
 		var result = {};
 		for (var i = 0; i < this.length; i++)
 			result[i] = this[i];
 		return result;
-	}
-	Add(...items): number { return this.push.apply(this, items); }
-	AddRange(items: Array<T>)
+	};
+	self.Add = function(...items) { return this.push.apply(this, items); };
+	self.AddRange = function(items)
 	{
 		for (var i = 0; i < items.length; i++)
 			this.push(items[i]);
-	}
-	Remove(item: T) { this.splice(this.indexOf(item), 1); }
-	Any(matchFunc)
+	};
+	self.Remove = function(item) { this.splice(this.indexOf(item), 1); };
+	self.Any = function(matchFunc)
 	{
 		for (var i in this.indexes())
-			if (matchFunc(this[i]))
+			if (matchFunc.call(this[i], this[i]))
 				return true;
 		return false;
-	}
-	All(matchFunc)
+	};
+	self.All = function(matchFunc)
 	{
 		for (var i in this.indexes())
-			if (!matchFunc(this[i]))
+			if (!matchFunc.call(this[i], this[i]))
 				return false;
 		return true;
-	}
-	First(matchFunc?): T
+	};
+	self.First = function(matchFunc)
 	{
 		var result = this.FirstOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
-	}
-	FirstOrDefault(matchFunc?): T
+	};
+	self.FirstOrDefault = function(matchFunc)
 	{
 		if (matchFunc)
 		{
 			for (var i in this.indexes())
-				if (matchFunc(this[i]))
+				if (matchFunc.call(this[i], this[i]))
 					return this[i];
 			return null;
 		}
 		else
 			return this[0];
-	}
-	Last(matchFunc?): T
+	};
+	self.Last = function(matchFunc)
 	{
 		var result = this.LastOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
-	}
-	LastOrDefault(matchFunc?): T
+	};
+	self.LastOrDefault = function(matchFunc)
 	{
 		if (matchFunc)
 		{
 			for (var i = this.length - 1; i >= 0; i--)
-				if (matchFunc(this[i]))
+				if (matchFunc.call(this[i], this[i]))
 					return this[i];
 			return null;
-		}
-		else
+		} else
 			return this[this.length - 1];
-	}
-	GetRange(index: number, count: number): List<T>
+	};
+	self.GetRange = function(index, count)
 	{
-		var result = new List<T>(this.itemType);
+		var result = new List(this.itemType);
 		for (var i = index; i < index + count; i++)
 			result.Add(this[i]);
 		return result;
-	}
-	Contains(item: T) { return this.indexOf(item) != -1; }
+	};
+	self.Contains = function(item) { return this.indexOf(item) != -1; };
+})();
+declare var List: // static/constructor declaration stuff
+{
+	new <T>(itemType: string, ...items: T[]): List<T>;
+	prototype: List<any>;
 }
-VDFUtils.MakePropertiesNonEnumerable(List.prototype, true);
+interface List<T> extends Array<T> // class/instance declaration stuff
+{
+	// new properties
+	realVTypeName: string;
+	itemType: string;
+	Count: number;
+
+	// new methods
+	indexes(): any;
+	Add(...items): number;
+	AddRange(items: Array<T>): void;
+	Remove(item: T): void;
+	Any(matchFunc): boolean;
+	All(matchFunc): boolean;
+	First(matchFunc?): T;
+	FirstOrDefault(matchFunc?): T;
+	Last(matchFunc?): T;
+	LastOrDefault(matchFunc?): T;
+	GetRange(index: number, count: number): List<T>;
+	Contains(item: T): boolean;
+}
+
 class Dictionary<K, V>
 {
 	realVTypeName: string;
@@ -331,12 +322,12 @@ class Dictionary<K, V>
 	values: any[];
 	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
-		VDFUtils.SetUpStashFields(this, "realVTypeName", "keyType", "valueType", "keys", "values");
 		this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
 		this.keyType = keyType;
 		this.valueType = valueType;
 		this.keys = [];
 		this.values = [];
+		VDFUtils.MakePropertiesHidden(this, true);
 
 		if (keyValuePairs)
 			for (var i = 0; i < keyValuePairs.length; i++)
@@ -358,4 +349,4 @@ class Dictionary<K, V>
 		this.values[this.keys.indexOf(key)] = value;
 	}
 }
-VDFUtils.MakePropertiesNonEnumerable(Dictionary.prototype, true);
+VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
