@@ -81,7 +81,7 @@ class VDFLoader
 			// do some expanding of obj-type-str (if applicable)
 			if (objMetadataEndMarkerToken.type == VDFTokenType.WiderMetadataEndMarker && objTypeStr.indexOf("[") == -1)
 				if (objTypeStr == ",")
-					objTypeStr = "System.Collections.IDictionary";
+					objTypeStr = "IDictionary";
 				else if (VDFLoader.FindNextDepthXCharYPos(objTypeStr, 0, 0, ',', '[', ']') != -1) // e.g. "string,object>>"
 					objTypeStr = "Dictionary[" + objTypeStr + "]";
 				else // e.g. "string>>"

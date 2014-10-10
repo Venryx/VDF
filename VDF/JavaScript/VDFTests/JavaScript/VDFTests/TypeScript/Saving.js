@@ -215,7 +215,7 @@ var Saving = (function () {
             a.ToVDF().Should().Be("Root string.");
 
             a = new VDFNode();
-            a[0] = new VDFNode("Root string also.");
+            a.SetItem(0, new VDFNode("Root string also."));
             a.ToVDF().Should().Be("Root string also.");
         });
         test("FromVDFNode_Level0_Metadata_Type", function () {
@@ -240,17 +240,17 @@ var Saving = (function () {
         });
         test("FromVDFNode_Level1_TroublesomeLiteral", function () {
             var a = new VDFNode();
-            a[0] = new VDFNode("This is a list item that|needs|escaping.");
-            a[1] = new VDFNode("This is a list item that doesn't need escaping.");
+            a.SetItem(0, new VDFNode("This is a list item that|needs|escaping."));
+            a.SetItem(1, new VDFNode("This is a list item that doesn't need escaping."));
             a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|This is a list item that doesn't need escaping.");
         });
 
         test("FromVDFNode_Level1_BaseValues", function () {
             var a = new VDFNode();
-            a["bool"] = new VDFNode("false");
-            a["int"] = new VDFNode("5");
-            a["float"] = new VDFNode(".5");
-            a["string"] = new VDFNode("Prop value string.");
+            a.SetProperty("bool", new VDFNode("false"));
+            a.SetProperty("int", new VDFNode("5"));
+            a.SetProperty("float", new VDFNode(".5"));
+            a.SetProperty("string", new VDFNode("Prop value string."));
             a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
         });
         test("FromVDFNode_Level1_BaseValuesThatNeedEscaping", function () {

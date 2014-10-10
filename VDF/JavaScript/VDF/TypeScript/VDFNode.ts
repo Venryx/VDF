@@ -2,10 +2,11 @@
 {
 	metadata_type: string;
 	baseValue: string;
+	items = new List<VDFNode>("VDFNode");
+	properties = new Dictionary<string, VDFNode>("string", "VDFNode"); // this also holds Dictionaries' keys/values
 	
 	constructor(baseValue?: string, metadata_type?: string)
 	{
-		VDFUtils.SetUpHiddenFields(this, true, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
 		this.baseValue = baseValue;
 		this.metadata_type = metadata_type;
 	}
@@ -20,30 +21,6 @@
 	get AsString() { return this.baseValue; }
 	set AsString(value: string) { this.baseValue = value; }
 	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
-
-	get items(): Array<VDFNode>
-	{
-		var result = [];
-		for (var key in this)
-			if (!(this[key] instanceof Function) && parseInt(key) == key) // if number-index
-				result.push(this[key]);
-		return result;
-	}
-	get properties(): any // this also holds Dictionaries' keys/values
-	{
-		var objWithPropKeys = {};
-		for (var key in this)
-			if (!(this[key] instanceof Function) && parseInt(key) != key) // if not number-index
-				objWithPropKeys[key] = this[key];
-		return objWithPropKeys;
-	}
-	get propertyCount()
-	{
-		var result = 0;
-		for (var key in this.properties)
-			result++;
-		return result;
-	}
 
 	SetItem(index: number, value: any)
 	{
@@ -61,7 +38,7 @@
 	}
 	SetProperty(key: string, value: any)
 	{
-		this.properties[key] = value;
+		this.properties.Set(key, value);
 		this[key] = value;
 	}
 
@@ -165,7 +142,7 @@
 			}
 		}
 
-		this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.propertyCount > 0));
+		this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.properties.Count > 0));
 		if (this.items.filter(a=>a.hasDanglingIndentation).length > 0)
 		{
 			this.hasDanglingIndentation = true; 
@@ -203,7 +180,7 @@
 			return new Dictionary(genericParameters[0], genericParameters[1]);
 		return new window[typeName];
 	}
-	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.propertyCount ? "object" : (node.items.length ? "List[object]" : "string"); }
+	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.properties.Count ? "object" : (node.items.length ? "List[object]" : "string"); }
 
 	ToObject(loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
 	ToObject(declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;

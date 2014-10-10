@@ -72,7 +72,7 @@ var VDFLoader = (function () {
             // do some expanding of obj-type-str (if applicable)
             if (objMetadataEndMarkerToken.type == 2 /* WiderMetadataEndMarker */ && objTypeStr.indexOf("[") == -1)
                 if (objTypeStr == ",")
-                    objTypeStr = "System.Collections.IDictionary";
+                    objTypeStr = "IDictionary";
                 else if (VDFLoader.FindNextDepthXCharYPos(objTypeStr, 0, 0, ',', '[', ']') != -1)
                     objTypeStr = "Dictionary[" + objTypeStr + "]";
                 else

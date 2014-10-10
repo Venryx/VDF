@@ -31,7 +31,7 @@ class ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class
 		otherProperty: new VDFPropInfo("bool")
 	});
 
-	messages = new Dictionary<string, string>();
+	messages = new Dictionary<string, string>("string", "string");
 	otherProperty: boolean;
 }
 
@@ -313,7 +313,7 @@ three lines");
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
-			a["messages"].propertyCount.Should().Be(2);
+			a["messages"].properties.Count.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["messages"]["title2"].baseValue.Should().Be("message2");
 			a["otherProperty"].baseValue.Should().Be("false");
@@ -339,7 +339,7 @@ messages:{,>>
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
-			a["messages"].propertyCount.Should().Be(2);
+			a["messages"].properties.Count.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["messages"]["title2"].baseValue.Should().Be("message2");
 			a["otherProperty"].baseValue.Should().Be("false");

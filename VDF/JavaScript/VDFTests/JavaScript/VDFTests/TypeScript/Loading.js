@@ -26,7 +26,7 @@ var TypeInstantiatedManuallyThenFilled = (function () {
 })();
 var ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
     function ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
-        this.messages = new Dictionary();
+        this.messages = new Dictionary("string", "string");
     }
     ToObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1.typeInfo = new VDFTypeInfo(false, true, {
         messages: new VDFPropInfo("Dictionary[string,string]", true, true),
@@ -282,7 +282,7 @@ three lines");
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
-            a["messages"].propertyCount.Should().Be(2);
+            a["messages"].properties.Count.Should().Be(2);
             a["messages"]["title1"].baseValue.Should().Be("message1");
             a["messages"]["title2"].baseValue.Should().Be("message2");
             a["otherProperty"].baseValue.Should().Be("false");
@@ -307,7 +307,7 @@ three lines");
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{false}");
-            a["messages"].propertyCount.Should().Be(2);
+            a["messages"].properties.Count.Should().Be(2);
             a["messages"]["title1"].baseValue.Should().Be("message1");
             a["messages"]["title2"].baseValue.Should().Be("message2");
             a["otherProperty"].baseValue.Should().Be("false");

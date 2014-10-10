@@ -346,6 +346,11 @@ var Dictionary = (function () {
         }
         this.values[this.keys.indexOf(key)] = value;
     };
+    Dictionary.prototype.Add = function (key, value) {
+        if (this.Get(key) != undefined)
+            throw new Error("Dictionary already contains key '" + key + "'.");
+        this.Set(key, value);
+    };
     return Dictionary;
 })();
 VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);

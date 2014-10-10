@@ -348,5 +348,11 @@ class Dictionary<K, V>
 		}
 		this.values[this.keys.indexOf(key)] = value;
 	}
+	Add(key: K, value: V)
+	{
+		if (this.Get(key) != undefined)
+			throw new Error("Dictionary already contains key '" + key + "'.");
+		this.Set(key, value);
+	}
 }
 VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);

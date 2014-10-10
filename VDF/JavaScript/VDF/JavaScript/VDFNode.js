@@ -1,6 +1,7 @@
 ﻿var VDFNode = (function () {
     function VDFNode(baseValue, metadata_type) {
-        VDFUtils.SetUpHiddenFields(this, true, "metadata_type", "baseValue", "isList", "isDictionary", "popOutChildren", "isFirstItemOfNonFirstPopOutGroup", "isListItem", "hasDanglingIndentation");
+        this.items = new List("VDFNode");
+        this.properties = new Dictionary("string", "VDFNode");
         this.baseValue = baseValue;
         this.metadata_type = metadata_type;
     }
@@ -49,39 +50,6 @@
         return this.AsString;
     };
 
-    Object.defineProperty(VDFNode.prototype, "items", {
-        get: function () {
-            var result = [];
-            for (var key in this)
-                if (!(this[key] instanceof Function) && parseInt(key) == key)
-                    result.push(this[key]);
-            return result;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(VDFNode.prototype, "properties", {
-        get: function () {
-            var objWithPropKeys = {};
-            for (var key in this)
-                if (!(this[key] instanceof Function) && parseInt(key) != key)
-                    objWithPropKeys[key] = this[key];
-            return objWithPropKeys;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(VDFNode.prototype, "propertyCount", {
-        get: function () {
-            var result = 0;
-            for (var key in this.properties)
-                result++;
-            return result;
-        },
-        enumerable: true,
-        configurable: true
-    });
-
     VDFNode.prototype.SetItem = function (index, value) {
         this.items[index] = value;
         this[index] = value;
@@ -97,7 +65,7 @@
             this.AddItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
     };
     VDFNode.prototype.SetProperty = function (key, value) {
-        this.properties[key] = value;
+        this.properties.Set(key, value);
         this[key] = value;
     };
 
@@ -180,7 +148,7 @@
             }
         }
 
-        this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.propertyCount > 0));
+        this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.properties.Count > 0));
         if (this.items.filter(function (a) {
             return a.hasDanglingIndentation;
         }).length > 0) {
@@ -215,7 +183,7 @@
         return new window[typeName];
     };
     VDFNode.GetCompatibleTypeNameForNode = function (node) {
-        return node.propertyCount ? "object" : (node.items.length ? "List[object]" : "string");
+        return node.properties.Count ? "object" : (node.items.length ? "List[object]" : "string");
     };
 
     VDFNode.prototype.ToObject = function (declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName) {
