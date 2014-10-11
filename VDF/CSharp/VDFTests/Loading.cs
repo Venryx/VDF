@@ -3,8 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
-using SystemMaker;
 using FluentAssertions;
 using Xunit;
 
@@ -17,9 +15,14 @@ namespace VDFTests
 		
 		[Fact] void ToVDFNode_Level0_Comment()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"// comment
+			VDFNode a = VDFLoader.ToVDFNode(@";; comment
 			Root string.");
 			a.baseValue.Should().Be("			Root string.");
+		}
+		[Fact] void ToVDFNode_Level0_Comment2()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("Root string ends here.;; comment");
+			a.baseValue.Should().Be("Root string ends here.");
 		}
 		[Fact] void ToVDFNode_Level0_BaseValue()
 		{
@@ -122,15 +125,15 @@ three lines".Replace("\r", ""));
 			var a = VDF.Deserialize<List<object>>(">>>false");
 			a[0].Should().Be(false);
 		}
-		[Fact] void ToVDFNode_Level0_InferUnmarkedTypeToBeString()
+		[Fact] void ToVDFNode_Level0_InferUnmarkedBaseValueTypeToBeString()
 		{
 			var a = VDF.Deserialize<IList>(">>SimpleString");
 			a[0].Should().Be("SimpleString");
 		}
-		[Fact] void ToVDFNode_Level0_KeepDeclaredType()
+		[Fact] void ToVDFNode_Level0_InferUnmarkedBaseValueTypeToBeString_EvenWhenTypeSpecifiedAsObject()
 		{
 			var a = VDF.Deserialize<List<object>>(">>SimpleString");
-			a[0].GetType().Should().Be(typeof(object));
+			a[0].Should().Be("SimpleString");
 		}
 		[Fact] void ToVDFNode_Level0_MultilineString()
 		{

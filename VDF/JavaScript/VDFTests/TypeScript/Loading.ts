@@ -70,9 +70,14 @@ class Loading
 
 		test("ToVDFNode_Level0_Comment", ()=>
 		{
-			var a = VDFLoader.ToVDFNode("// comment\n\
+			var a = VDFLoader.ToVDFNode(";; comment\n\
 			Root string.");
 			a.baseValue.Should().Be("			Root string.");
+		});
+		test("ToVDFNode_Level0_Comment2", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("Root string ends here.;; comment");
+			a.baseValue.Should().Be("Root string ends here.");
 		});
 		test("ToVDFNode_Level0_BaseValue", ()=>
 		{
@@ -174,15 +179,15 @@ three lines");
 			var a = VDF.Deserialize(">>>false", "List[object]");
 			a[0].Should().Be(false);
 		});
-		test("ToVDFNode_Level0_InferUnmarkedTypeToBeString", ()=>
+		test("ToVDFNode_Level0_InferUnmarkedBaseValueTypeToBeString", ()=>
 		{
 			var a = VDF.Deserialize(">>SimpleString", "IList");
 			a[0].Should().Be("SimpleString");
 		});
-		test("ToVDFNode_Level0_KeepDeclaredType", ()=>
+		test("ToVDFNode_Level0_InferUnmarkedBaseValueTypeToBeString_EvenWhenTypeSpecifiedAsObject", ()=>
 		{
 			var a = VDF.Deserialize(">>SimpleString", "List[object]");
-			a[0].GetTypeName().Should().Be("object");
+			a[0].Should().Be("SimpleString");
 		});
 		test("ToVDFNode_Level0_MultilineString", ()=>
 		{

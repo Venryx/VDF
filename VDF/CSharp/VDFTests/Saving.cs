@@ -49,8 +49,9 @@ namespace VDFTests
 		{
 			var a = new VDFNode();
 			a[0] = new VDFNode("This is a list item that|needs|escaping.");
-			a[1] = new VDFNode("This is a list item that doesn't need escaping.");
-			a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|This is a list item that doesn't need escaping.");
+			a[1] = new VDFNode("Here's;;another.");
+			a[2] = new VDFNode("This is a list item that doesn't need escaping.");
+			a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|@@Here's;;another.@@|This is a list item that doesn't need escaping.");
 		}
 
 		[Fact] void FromVDFNode_Level1_BaseValues()

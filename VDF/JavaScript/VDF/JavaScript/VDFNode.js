@@ -71,7 +71,7 @@
 
     VDFNode.RawDataStringToFinalized = function (rawDataStr, disallowRawPipe) {
         var result = rawDataStr;
-        if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
+        if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1)
             if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
                 result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
             else
@@ -250,6 +250,8 @@
         else if (finalTypeName == "number")
             result = parseFloat(this.baseValue);
         else if (finalTypeName == "string")
+            result = this.baseValue;
+        else if (this.baseValue != null)
             result = this.baseValue;
         else {
             result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);

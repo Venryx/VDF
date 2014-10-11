@@ -78,7 +78,7 @@ public class VDFNode
 	static string RawDataStringToFinalized(string rawDataStr, bool disallowRawPipe = false)
 	{
 		string result = rawDataStr;
-		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || (disallowRawPipe && rawDataStr.Contains("|")) || rawDataStr.Contains("@@") || rawDataStr.Contains("\n"))
+		if (rawDataStr.Contains(">") || rawDataStr.Contains("}") || (disallowRawPipe && rawDataStr.Contains("|")) || rawDataStr.Contains("@@") || rawDataStr.Contains(";;") || rawDataStr.Contains("\n"))
 			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
 				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
 			else
@@ -238,6 +238,8 @@ public class VDFNode
 			result = Enum.Parse(finalType, baseValue);
 		else if (finalType.IsPrimitive || finalType == typeof(string))
 			result = Convert.ChangeType(baseValue, finalType);
+		else if (baseValue != null) // (non-importer-registered objects, the only alternative to base-value-fallback-strings left, doesn't store base-values)
+			result = Convert.ChangeType(baseValue, typeof(string));
 		else
 		{
 			result = CreateNewInstanceOfType(finalType);

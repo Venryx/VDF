@@ -1,7 +1,6 @@
 ﻿enum VDFTokenType
 {
 	None,
-	PoppedOutNodeMarker,
 	WiderMetadataEndMarker,
 	MetadataBaseValue,
 	MetadataEndMarker,
@@ -39,6 +38,8 @@ class VDFTokenParser
 	tokens: List<VDFToken>;
 	constructor(text: string, firstCharPos: number)
 	{
+		text = (text || "").replace(/\r\n/g, "\n");
+
 		this.text = text;
 		this.nextCharPos = firstCharPos;
 		this.tokens = new List<VDFToken>("VDFToken");
@@ -60,9 +61,9 @@ class VDFTokenParser
 			var nextNextChar = i + 2 < this.text.length ? this.text[i + 2] : null;
 			var nextNextNextChar = i + 3 < this.text.length ? this.text[i + 3] : null;
 
-			var grabExtraCharsAsOwnAndSkipTheirProcessing = (count, addToNormalBuilder)=>
+			var grabExtraCharsAsOwnAndSkipTheirProcessing = (count, addToTokenTextBuilder)=>
 			{
-				if (addToNormalBuilder)
+				if (addToTokenTextBuilder)
 					tokenTextBuilder.Append(this.text.substr(i + 1, count));
 				i += count;
 				this.nextCharPos += count;
@@ -104,23 +105,21 @@ class VDFTokenParser
 				tokenType = VDFTokenType.PoppedOutDataEndMarker;
 			else if (ch == '\n')
 				tokenType = VDFTokenType.LineBreak;
-			else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/')
+			else if (ch == ';' && nextChar == ';')
 			{
 				tokenType = VDFTokenType.InLineComment;
 				var newNextCharPos = VDFTokenParser.FindNextLineBreakCharPos(this.text, i + 2); // since rest of line is comment, skip to first char of next line
-				grabExtraCharsAsOwnAndSkipTheirProcessing(newNextCharPos - (i + 1), true);
+				grabExtraCharsAsOwnAndSkipTheirProcessing((newNextCharPos != -1 ? newNextCharPos + 1 : this.text.length) - (i + 1), true);
 			}
 			//else if (ch == '\t')
 			//	tokenType = VDFTokenType.Indent;
-			else if (ch == '#' && lastChar == '\t')
-				tokenType = VDFTokenType.PoppedOutNodeMarker;
 			else if (ch == '|')
 				tokenType = VDFTokenType.ItemSeparator;
 			else if (nextChar == '>')
 				tokenType = VDFTokenType.MetadataBaseValue;
 			else if (nextChar == '{' || nextChar == ':')
 				tokenType = VDFTokenType.DataPropName;
-			else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
+			else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || (nextChar == ';' && nextNextChar == ';') || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
 				tokenType = VDFTokenType.DataBaseValue;
 		}
 		

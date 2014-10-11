@@ -25,7 +25,7 @@ class VDFLoader
 			tokens = arg1;
 		else
 		{
-			var parser_ = new VDFTokenParser((arg1 || "").replace(/\r\n/g, "\n"), 0);
+			var parser_ = new VDFTokenParser(arg1, 0);
 			while (parser_.MoveNextToken()) { };
 			tokens = parser_.tokens;
 		}
@@ -97,7 +97,7 @@ class VDFLoader
 		if (objTypeStr == null)
 			if (isInlineList)
 				objTypeStr = "IList";
-			else if (tokensNotInDataMarkers.All(a=> a.type != VDFTokenType.PoppedOutDataStartMarker) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak) && (declaredTypeName == null || declaredTypeName == "object"))
+			else if (tokensNotInDataMarkers.All(a=>a.type != VDFTokenType.PoppedOutDataStartMarker) && tokensNotInDataMarkers.Any(a=>a.type == VDFTokenType.LineBreak) && (declaredTypeName == null || declaredTypeName == "object"))
 				objTypeStr = "IList";
 
 		var objTypeName = declaredTypeName;
@@ -256,10 +256,13 @@ class VDFLoader
 		}
 
 		// parse base-value (if applicable)
-		var firstPropNameToken = tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName);
-		var firstBaseValueToken = tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataBaseValue);
-		if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))
-			objNode.baseValue = firstBaseValueToken.text;
+		if (objNode.items.Count == 0 && objNode.properties.Count == 0)
+		{
+			var firstPropNameToken = tokens.FirstOrDefault(a => a.type == VDFTokenType.DataPropName);
+			var firstBaseValueToken = tokens.FirstOrDefault(a => a.type == VDFTokenType.DataBaseValue);
+			if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))
+				objNode.baseValue = firstBaseValueToken.text;
+		}
 
 		return objNode;
 	}

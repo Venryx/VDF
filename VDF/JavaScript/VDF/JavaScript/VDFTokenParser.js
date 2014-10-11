@@ -1,22 +1,21 @@
 ﻿var VDFTokenType;
 (function (VDFTokenType) {
     VDFTokenType[VDFTokenType["None"] = 0] = "None";
-    VDFTokenType[VDFTokenType["PoppedOutNodeMarker"] = 1] = "PoppedOutNodeMarker";
-    VDFTokenType[VDFTokenType["WiderMetadataEndMarker"] = 2] = "WiderMetadataEndMarker";
-    VDFTokenType[VDFTokenType["MetadataBaseValue"] = 3] = "MetadataBaseValue";
-    VDFTokenType[VDFTokenType["MetadataEndMarker"] = 4] = "MetadataEndMarker";
+    VDFTokenType[VDFTokenType["WiderMetadataEndMarker"] = 1] = "WiderMetadataEndMarker";
+    VDFTokenType[VDFTokenType["MetadataBaseValue"] = 2] = "MetadataBaseValue";
+    VDFTokenType[VDFTokenType["MetadataEndMarker"] = 3] = "MetadataEndMarker";
 
     //LiteralStartMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
     //LiteralEndMarker
-    VDFTokenType[VDFTokenType["DataPropName"] = 5] = "DataPropName";
-    VDFTokenType[VDFTokenType["DataStartMarker"] = 6] = "DataStartMarker";
-    VDFTokenType[VDFTokenType["PoppedOutDataStartMarker"] = 7] = "PoppedOutDataStartMarker";
-    VDFTokenType[VDFTokenType["PoppedOutDataEndMarker"] = 8] = "PoppedOutDataEndMarker";
-    VDFTokenType[VDFTokenType["ItemSeparator"] = 9] = "ItemSeparator";
-    VDFTokenType[VDFTokenType["DataBaseValue"] = 10] = "DataBaseValue";
-    VDFTokenType[VDFTokenType["DataEndMarker"] = 11] = "DataEndMarker";
-    VDFTokenType[VDFTokenType["LineBreak"] = 12] = "LineBreak";
-    VDFTokenType[VDFTokenType["InLineComment"] = 13] = "InLineComment";
+    VDFTokenType[VDFTokenType["DataPropName"] = 4] = "DataPropName";
+    VDFTokenType[VDFTokenType["DataStartMarker"] = 5] = "DataStartMarker";
+    VDFTokenType[VDFTokenType["PoppedOutDataStartMarker"] = 6] = "PoppedOutDataStartMarker";
+    VDFTokenType[VDFTokenType["PoppedOutDataEndMarker"] = 7] = "PoppedOutDataEndMarker";
+    VDFTokenType[VDFTokenType["ItemSeparator"] = 8] = "ItemSeparator";
+    VDFTokenType[VDFTokenType["DataBaseValue"] = 9] = "DataBaseValue";
+    VDFTokenType[VDFTokenType["DataEndMarker"] = 10] = "DataEndMarker";
+    VDFTokenType[VDFTokenType["LineBreak"] = 11] = "LineBreak";
+    VDFTokenType[VDFTokenType["InLineComment"] = 12] = "InLineComment";
 })(VDFTokenType || (VDFTokenType = {}));
 var VDFToken = (function () {
     function VDFToken(type, position, index, text) {
@@ -29,6 +28,8 @@ var VDFToken = (function () {
 })();
 var VDFTokenParser = (function () {
     function VDFTokenParser(text, firstCharPos) {
+        text = (text || "").replace(/\r\n/g, "\n");
+
         this.text = text;
         this.nextCharPos = firstCharPos;
         this.tokens = new List("VDFToken");
@@ -48,8 +49,8 @@ var VDFTokenParser = (function () {
             var nextNextChar = i + 2 < this.text.length ? this.text[i + 2] : null;
             var nextNextNextChar = i + 3 < this.text.length ? this.text[i + 3] : null;
 
-            var grabExtraCharsAsOwnAndSkipTheirProcessing = function (count, addToNormalBuilder) {
-                if (addToNormalBuilder)
+            var grabExtraCharsAsOwnAndSkipTheirProcessing = function (count, addToTokenTextBuilder) {
+                if (addToTokenTextBuilder)
                     tokenTextBuilder.Append(_this.text.substr(i + 1, count));
                 i += count;
                 _this.nextCharPos += count;
@@ -62,7 +63,7 @@ var VDFTokenParser = (function () {
                 grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
                 tokenTextBuilder = new StringBuilder(VDFTokenParser.FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
                 inLiteralMarkers = false;
-                tokenType = 10 /* DataBaseValue */; // cause the return of chars as DataBaseValue token
+                tokenType = 9 /* DataBaseValue */; // cause the return of chars as DataBaseValue token
             } else
                 tokenTextBuilder.Append(ch);
 
@@ -71,34 +72,32 @@ var VDFTokenParser = (function () {
 
             if (ch == '>')
                 if (nextChar == '>') {
-                    tokenType = 2 /* WiderMetadataEndMarker */;
+                    tokenType = 1 /* WiderMetadataEndMarker */;
                     grabExtraCharsAsOwnAndSkipTheirProcessing(1, true);
                 } else
-                    tokenType = 4 /* MetadataEndMarker */;
+                    tokenType = 3 /* MetadataEndMarker */;
             else if (ch == '{')
-                tokenType = 6 /* DataStartMarker */;
+                tokenType = 5 /* DataStartMarker */;
             else if (ch == '}')
-                tokenType = 11 /* DataEndMarker */;
+                tokenType = 10 /* DataEndMarker */;
             else if (ch == ':')
-                tokenType = 7 /* PoppedOutDataStartMarker */;
+                tokenType = 6 /* PoppedOutDataStartMarker */;
             else if (ch == '^')
-                tokenType = 8 /* PoppedOutDataEndMarker */;
+                tokenType = 7 /* PoppedOutDataEndMarker */;
             else if (ch == '\n')
-                tokenType = 12 /* LineBreak */;
-            else if ((lastChar == null || lastChar == '\n') && ch == '/' && nextChar == '/') {
-                tokenType = 13 /* InLineComment */;
+                tokenType = 11 /* LineBreak */;
+            else if (ch == ';' && nextChar == ';') {
+                tokenType = 12 /* InLineComment */;
                 var newNextCharPos = VDFTokenParser.FindNextLineBreakCharPos(this.text, i + 2);
-                grabExtraCharsAsOwnAndSkipTheirProcessing(newNextCharPos - (i + 1), true);
-            } else if (ch == '#' && lastChar == '\t')
-                tokenType = 1 /* PoppedOutNodeMarker */;
-            else if (ch == '|')
-                tokenType = 9 /* ItemSeparator */;
+                grabExtraCharsAsOwnAndSkipTheirProcessing((newNextCharPos != -1 ? newNextCharPos + 1 : this.text.length) - (i + 1), true);
+            } else if (ch == '|')
+                tokenType = 8 /* ItemSeparator */;
             else if (nextChar == '>')
-                tokenType = 3 /* MetadataBaseValue */;
+                tokenType = 2 /* MetadataBaseValue */;
             else if (nextChar == '{' || nextChar == ':')
-                tokenType = 5 /* DataPropName */;
-            else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || nextChar == '\n' || nextChar == null)
-                tokenType = 10 /* DataBaseValue */;
+                tokenType = 4 /* DataPropName */;
+            else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || (nextChar == ';' && nextNextChar == ';') || nextChar == '\n' || nextChar == null)
+                tokenType = 9 /* DataBaseValue */;
         }
 
         if (tokenType == 0 /* None */)

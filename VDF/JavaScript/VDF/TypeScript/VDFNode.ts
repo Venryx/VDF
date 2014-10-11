@@ -52,7 +52,7 @@
 	static RawDataStringToFinalized(rawDataStr: string, disallowRawPipe?: boolean): string
 	{
 		var result = rawDataStr;
-		if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf("\n") != -1)
+		if (rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1)
 			if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
 			else
@@ -252,6 +252,8 @@
 		else if (finalTypeName == "number")
 			result = parseFloat(this.baseValue);
 		else if (finalTypeName == "string")
+			result = this.baseValue;
+		else if (this.baseValue != null) // (non-importer-registered objects, the only alternative to base-value-fallback-strings left, doesn't store base-values)
 			result = this.baseValue;
 		else
 		{

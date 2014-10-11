@@ -24,7 +24,6 @@ public static class VDFLoader
 	public static VDFNode ToVDFNode(string text, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(text, declaredType, loadOptions); }
 	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null, int objIndent = 0)
 	{
-		text = (text ?? "").Replace("\r\n", "\n");
 		var parser = new VDFTokenParser(text, 0);
 		while (parser.MoveNextToken()) {}
 		return ToVDFNode(parser.tokens, declaredType, loadOptions, objIndent);
@@ -246,10 +245,13 @@ public static class VDFLoader
 		}
 
 		// parse base-value (if applicable)
-		var firstPropNameToken = tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName);
-		var firstBaseValueToken = tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataBaseValue);
-		if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))
-			objNode.baseValue = firstBaseValueToken.text;
+		if (objNode.items.Count == 0 && objNode.properties.Count == 0)
+		{
+			var firstPropNameToken = tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName);
+			var firstBaseValueToken = tokens.FirstOrDefault(a=>a.type == VDFTokenType.DataBaseValue);
+			if (firstBaseValueToken != null && (firstPropNameToken == null || firstBaseValueToken.position < firstPropNameToken.position))
+				objNode.baseValue = firstBaseValueToken.text;
+		}
 
 		return objNode;
 	}

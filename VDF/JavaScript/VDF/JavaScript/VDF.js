@@ -127,7 +127,6 @@ var VDFUtils = (function () {
             (function () {
                 var propName = fieldNames[i];
                 var origValue = obj[propName];
-                delete obj[propName];
                 if (addSetters)
                     Object.defineProperty(obj, propName, {
                         enumerable: false,
@@ -315,12 +314,12 @@ var Dictionary = (function () {
         for (var _i = 0; _i < (arguments.length - 2); _i++) {
             keyValuePairs[_i] = arguments[_i + 2];
         }
+        VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
         this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
         this.keyType = keyType;
         this.valueType = valueType;
         this.keys = [];
         this.values = [];
-        VDFUtils.MakePropertiesHidden(this, true);
 
         if (keyValuePairs)
             for (var i = 0; i < keyValuePairs.length; i++)

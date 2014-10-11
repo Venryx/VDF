@@ -124,7 +124,6 @@ class VDFUtils
 			(()=>{
 				var propName = fieldNames[i];
 				var origValue = obj[propName];
-				delete obj[propName];
 				if (addSetters)
 					Object.defineProperty(obj, propName,
 					{
@@ -136,7 +135,7 @@ class VDFUtils
 					Object.defineProperty(obj, propName,
 					{
 						enumerable: false,
-						value: origValue
+						value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
 					});
 				obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
 			})();
@@ -322,12 +321,12 @@ class Dictionary<K, V>
 	values: any[];
 	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
+		VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
 		this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
 		this.keyType = keyType;
 		this.valueType = valueType;
 		this.keys = [];
 		this.values = [];
-		VDFUtils.MakePropertiesHidden(this, true);
 
 		if (keyValuePairs)
 			for (var i = 0; i < keyValuePairs.length; i++)

@@ -241,8 +241,9 @@ var Saving = (function () {
         test("FromVDFNode_Level1_TroublesomeLiteral", function () {
             var a = new VDFNode();
             a.SetItem(0, new VDFNode("This is a list item that|needs|escaping."));
-            a.SetItem(1, new VDFNode("This is a list item that doesn't need escaping."));
-            a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|This is a list item that doesn't need escaping.");
+            a.SetItem(1, new VDFNode("Here's;;another."));
+            a.SetItem(2, new VDFNode("This is a list item that doesn't need escaping."));
+            a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|@@Here's;;another.@@|This is a list item that doesn't need escaping.");
         });
 
         test("FromVDFNode_Level1_BaseValues", function () {
