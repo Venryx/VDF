@@ -216,14 +216,15 @@ namespace VDFTests
 		class T1_Level1 { [VDFProp] T1_Level2 level2 = new T1_Level2(); }
 		class T1_Level2
 		{
-			[VDFProp(true, true)] List<string> messages = new List<string> { "DeepString1", "DeepString2" };
+			[VDFProp(true, true)] List<string> messages = new List<string> {"DeepString1_Line1\n\tDeepString1_Line2", "DeepString2"};
 			[VDFProp] bool otherProperty = true;
 		}
-		[Fact] void FromObject_Level2_Object_ArrayPoppedOutThenBool()
+		[Fact] void FromObject_Level2_Object_ArrayPoppedOutWithMultilineLiteralThenBool()
 		{
 			var a = VDFSaver.ToVDFNode(new T1_Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
 			a.ToVDF().Should().Be(@"level2{messages:
-	DeepString1
+	@@DeepString1_Line1
+	DeepString1_Line2@@
 	DeepString2
 ^otherProperty{true}}".Replace("\r", ""));
 		}

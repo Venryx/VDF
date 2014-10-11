@@ -98,7 +98,7 @@ class T1_Level2
 		messages: new VDFPropInfo("Dictionary[string,string]", true, true),
 		otherProperty: new VDFPropInfo("bool")
 	});
-	messages = new List<string>("string", "DeepString1", "DeepString2");
+	messages = new List<string>("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
 	otherProperty = true;
 }
 
@@ -354,11 +354,12 @@ class Saving
 	otherProperty{true}".replace(/\r/g, ""));
 		});
 
-		test("FromObject_Level2_Object_ArrayPoppedOutThenBool", ()=>
+		test("FromObject_Level2_Object_ArrayPoppedOutWithMultilineLiteralThenBool", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new T1_Level1(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a.ToVDF().Should().Be("level2{messages:\n\
-	DeepString1\n\
+	@@DeepString1_Line1\n\
+	DeepString1_Line2@@\n\
 	DeepString2\n\
 ^otherProperty{true}}".replace(/\r/g, ""));
 		});

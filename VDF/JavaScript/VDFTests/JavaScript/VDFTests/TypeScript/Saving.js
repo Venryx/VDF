@@ -105,7 +105,7 @@ var T1_Level1 = (function () {
 })();
 var T1_Level2 = (function () {
     function T1_Level2() {
-        this.messages = new List("string", "DeepString1", "DeepString2");
+        this.messages = new List("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
         this.otherProperty = true;
     }
     T1_Level2.typeInfo = new VDFTypeInfo(false, false, {
@@ -360,10 +360,11 @@ var Saving = (function () {
 	otherProperty{true}".replace(/\r/g, ""));
         });
 
-        test("FromObject_Level2_Object_ArrayPoppedOutThenBool", function () {
+        test("FromObject_Level2_Object_ArrayPoppedOutWithMultilineLiteralThenBool", function () {
             var a = VDFSaver.ToVDFNode(new T1_Level1(), new VDFSaveOptions(null, 0 /* None */));
             a.ToVDF().Should().Be("level2{messages:\n\
-	DeepString1\n\
+	@@DeepString1_Line1\n\
+	DeepString1_Line2@@\n\
 	DeepString2\n\
 ^otherProperty{true}}".replace(/\r/g, ""));
         });

@@ -78,6 +78,29 @@
                 result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
         return result;
     };
+    VDFNode.AddIndentToChildText = function (childText) {
+        var builder = new StringBuilder();
+        builder.Append("\t");
+        var inLiteralMarkers = false;
+        for (var i = 0; i < childText.length; i++) {
+            var lastChar = i - 1 >= 0 ? childText[i - 1] : null;
+            var ch = childText[i];
+            var nextChar = i + 1 < childText.length ? childText[i + 1] : null;
+            var nextNextChar = i + 2 < childText.length ? childText[i + 2] : null;
+            var nextNextNextChar = i + 3 < childText.length ? childText[i + 3] : null;
+
+            if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@')
+                inLiteralMarkers = true;
+            else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null))
+                inLiteralMarkers = false;
+
+            if (lastChar == '\n' && !inLiteralMarkers)
+                builder.Append("\t");
+
+            builder.Append(ch);
+        }
+        return builder.ToString();
+    };
     VDFNode.prototype.ToVDF = function (disallowRawPipe) {
         var builder = new StringBuilder();
         if (this.metadata_type != null)
@@ -93,17 +116,14 @@
                 var lastItem = i > 0 ? this.items[i - 1] : null;
                 var item = this.items[i];
 
-                if (lastItem != null && lastItem.hasDanglingIndentation) {
+                if (lastItem != null && lastItem.guardingItsLastLine) {
                     builder.Append("\n");
-                    lastItem.hasDanglingIndentation = false;
+                    lastItem.guardingItsLastLine = false;
                 }
 
-                if (this.popOutChildren) {
-                    var lines = item.ToVDF().split('\n');
-                    for (var i2 = 0; i2 < lines.length; i2++)
-                        lines[i2] = "\t" + lines[i2];
-                    builder.Append("\n" + lines.join("\n"));
-                } else if (hasListItem)
+                if (this.popOutChildren)
+                    builder.Append("\n" + VDFNode.AddIndentToChildText(item.ToVDF()));
+                else if (hasListItem)
                     builder.Append((i > 0 ? "|" : "") + "{" + item.ToVDF() + "}");
                 else
                     builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && item.baseValue.indexOf("@@") != 0 && item.baseValue.indexOf("|") != -1));
@@ -114,12 +134,12 @@
                 var lastPropValue = lastPropName != null ? this.properties[lastPropName] : null;
                 var propValue = this.properties[propName];
 
-                if (lastPropValue != null && lastPropValue.hasDanglingIndentation)
+                if (lastPropValue != null && lastPropValue.guardingItsLastLine)
                     if (this.popOutChildren)
-                        lastPropValue.hasDanglingIndentation = false;
+                        lastPropValue.guardingItsLastLine = false;
                     else {
                         builder.Append("\n");
-                        lastPropValue.hasDanglingIndentation = false;
+                        lastPropValue.guardingItsLastLine = false;
                         if (lastPropValue.popOutChildren)
                             builder.Append("^");
                     }
@@ -129,40 +149,36 @@
                     propNameAndValueVDF = propName + ":" + propValue.ToVDF();
                 else {
                     var propValueVDF = propValue.ToVDF();
-                    if (propValue.hasDanglingIndentation) {
+                    if (propValue.guardingItsLastLine) {
                         propValueVDF += "\n";
-                        propValue.hasDanglingIndentation = false;
+                        propValue.guardingItsLastLine = false;
                     }
                     propNameAndValueVDF = propName + "{" + propValueVDF + "}";
                 }
-                if (this.popOutChildren) {
-                    var lines = propNameAndValueVDF.split('\n');
-                    for (var i = 0; i < lines.length; i++)
-                        lines[i] = "\t" + lines[i];
-                    propNameAndValueVDF = "\n" + lines.join("\n");
-                    builder.Append(propNameAndValueVDF);
-                } else
+                if (this.popOutChildren)
+                    builder.Append("\n" + VDFNode.AddIndentToChildText(propNameAndValueVDF));
+                else
                     builder.Append(propNameAndValueVDF);
 
                 lastPropName = propName;
             }
         }
 
-        this.hasDanglingIndentation = (this.popOutChildren && (this.items.length > 0 || this.properties.Count > 0));
+        this.guardingItsLastLine = (this.popOutChildren && (this.items.length > 0 || this.properties.Count > 0));
         if (this.items.filter(function (a) {
-            return a.hasDanglingIndentation;
+            return a.guardingItsLastLine;
         }).length > 0) {
-            this.hasDanglingIndentation = true;
+            this.guardingItsLastLine = true;
             for (var i = 0; i < this.items.length; i++)
-                if (this.items[i].hasDanglingIndentation) {
-                    this.items[i].hasDanglingIndentation = false; // we've taken it as our own
+                if (this.items[i].guardingItsLastLine) {
+                    this.items[i].guardingItsLastLine = false; // we've taken it as our own
                     break;
                 }
         } else
             for (var key in this.properties)
-                if (this.properties[key].hasDanglingIndentation) {
-                    this.hasDanglingIndentation = true;
-                    this.properties[key].hasDanglingIndentation = false; // we've taken it as our own
+                if (this.properties[key].guardingItsLastLine) {
+                    this.guardingItsLastLine = true;
+                    this.properties[key].guardingItsLastLine = false; // we've taken it as our own
                     break;
                 }
 

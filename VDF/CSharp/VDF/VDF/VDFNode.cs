@@ -74,7 +74,7 @@ public class VDFNode
 	public bool isList;
 	public bool isDictionary;
 	public bool popOutChildren;
-	public bool hasDanglingIndentation;
+	public bool guardingItsLastLine;
 	static string RawDataStringToFinalized(string rawDataStr, bool disallowRawPipe = false)
 	{
 		string result = rawDataStr;
@@ -84,6 +84,31 @@ public class VDFNode
 			else
 				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "@@";
 		return result;
+	}
+	static string AddIndentToChildText(string childText)
+	{
+		var builder = new StringBuilder();
+		builder.Append("\t");
+		bool inLiteralMarkers = false;
+		for (var i = 0; i < childText.Length; i++)
+		{
+			char? lastChar = i - 1 >= 0 ? childText[i - 1] : (char?)null;
+			char ch = childText[i];
+			char? nextChar = i + 1 < childText.Length ? childText[i + 1] : (char?)null;
+			char? nextNextChar = i + 2 < childText.Length ? childText[i + 2] : (char?)null;
+			char? nextNextNextChar = i + 3 < childText.Length ? childText[i + 3] : (char?)null;
+
+			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
+				inLiteralMarkers = true;
+			else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // if first char of literal-end-marker
+				inLiteralMarkers = false;
+
+			if (lastChar == '\n' && !inLiteralMarkers)
+				builder.Append("\t");
+
+			builder.Append(ch);
+		}
+		return builder.ToString();
 	}
 	public string ToVDF(bool disallowRawPipe = false)
 	{
@@ -95,24 +120,20 @@ public class VDFNode
 			builder.Append(RawDataStringToFinalized(baseValue, disallowRawPipe));
 		else if (items.Count > 0)
 		{
-			var hasListItem = items.Any(a=>a.isList);
+			var hasListItem = items.Any(a => a.isList);
 			for (var i = 0; i < items.Count; i++)
 			{
 				var lastItem = i > 0 ? items[i - 1] : null;
 				var item = items[i];
 
-				if (lastItem != null && lastItem.hasDanglingIndentation)
+				if (lastItem != null && lastItem.guardingItsLastLine)
 				{
 					builder.Append("\n");
-					lastItem.hasDanglingIndentation = false;
+					lastItem.guardingItsLastLine = false;
 				}
 
 				if (popOutChildren)
-				{
-					var lines = item.ToVDF().Split(new[] {'\n'});
-					lines = lines.Select(a=>"\t" + a).ToArray();
-					builder.Append("\n" + String.Join("\n", lines));
-				}
+					builder.Append("\n" + AddIndentToChildText(item.ToVDF()));
 				else
 					if (hasListItem)
 						builder.Append((i > 0 ? "|" : "") + "{" + item.ToVDF() + "}");
@@ -128,13 +149,13 @@ public class VDFNode
 				var lastPropValue = lastPropName != null ? properties[lastPropName] : null;
 				var propValue = properties[propName];
 
-				if (lastPropValue != null && lastPropValue.hasDanglingIndentation)
+				if (lastPropValue != null && lastPropValue.guardingItsLastLine)
 					if (popOutChildren) // if we're popping out this current child, we can ignore adding a marker for it, because it's supposed to be on its own line
-						lastPropValue.hasDanglingIndentation = false;
+						lastPropValue.guardingItsLastLine = false;
 					else
 					{
 						builder.Append("\n");
-						lastPropValue.hasDanglingIndentation = false;
+						lastPropValue.guardingItsLastLine = false;
 						if (lastPropValue.popOutChildren)
 							builder.Append("^");
 					}
@@ -145,20 +166,15 @@ public class VDFNode
 				else
 				{
 					var propValueVDF = propValue.ToVDF();
-					if (propValue.hasDanglingIndentation)
+					if (propValue.guardingItsLastLine)
 					{
 						propValueVDF += "\n";
-						propValue.hasDanglingIndentation = false;
+						propValue.guardingItsLastLine = false;
 					}
 					propNameAndValueVDF = propName + "{" + propValueVDF + "}";
 				}
 				if (popOutChildren)
-				{
-					var lines = propNameAndValueVDF.Split(new[] {'\n'});
-					lines = lines.Select(a=>"\t" + a).ToArray();
-					propNameAndValueVDF = "\n" + String.Join("\n", lines);
-					builder.Append(propNameAndValueVDF);
-				}
+					builder.Append("\n" + AddIndentToChildText(propNameAndValueVDF));
 				else
 					builder.Append(propNameAndValueVDF);
 
@@ -166,16 +182,16 @@ public class VDFNode
 			}
 		}
 
-		hasDanglingIndentation = (popOutChildren && (items.Count > 0 || properties.Count > 0));
-		if (items.Any(a=>a.hasDanglingIndentation))
+		guardingItsLastLine = (popOutChildren && (items.Count > 0 || properties.Count > 0));
+		if (items.Any(a=>a.guardingItsLastLine))
 		{
-			hasDanglingIndentation = true;
-			items.First(a=>a.hasDanglingIndentation).hasDanglingIndentation = false; // we've taken it as our own
+			guardingItsLastLine = true;
+			items.First(a=>a.guardingItsLastLine).guardingItsLastLine = false; // we've taken it as our own
 		}
-		else if (properties.Values.Any(a=>a.hasDanglingIndentation))
+		else if (properties.Values.Any(a=>a.guardingItsLastLine))
 		{
-			hasDanglingIndentation = true;
-			properties.Values.First(a=>a.hasDanglingIndentation).hasDanglingIndentation = false; // we've taken it as our own
+			guardingItsLastLine = true;
+			properties.Values.First(a=>a.guardingItsLastLine).guardingItsLastLine = false; // we've taken it as our own
 		}
 
 		return builder.ToString();
