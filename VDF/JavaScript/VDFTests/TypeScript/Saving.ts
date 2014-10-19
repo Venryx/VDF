@@ -166,6 +166,17 @@ class T4_Level4
 	otherProperty = false; 
 }
 
+class T5_Level2
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, true,
+	{
+		firstProperty: new VDFPropInfo("bool"),
+		otherProperty: new VDFPropInfo("bool")
+	});
+	firstProperty = false;
+	otherProperty = false;
+}
+
 class Saving
 {
 	static initialized: boolean;
@@ -398,6 +409,15 @@ class Saving
 		text2\n\
 	^otherProperty{false}\n\
 }}".replace(/\r/g, ""));
+		});
+
+		test("FromObject_Level4_Object_ArrayPoppedOut_Object", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new List<T5_Level2>("T5_Level2", new T5_Level2()), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
+			a.ToVDF().Should().Be("T5_Level2>>{\n\
+	firstProperty{>false}\n\
+	otherProperty{>false}\n\
+}".replace(/\r/g, ""));
 		});
 	}
 }

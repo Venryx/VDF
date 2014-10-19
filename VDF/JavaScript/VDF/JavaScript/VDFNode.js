@@ -109,8 +109,8 @@
         if (this.baseValue != null)
             builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue, disallowRawPipe));
         else if (this.items.length > 0) {
-            var hasListItem = this.items.filter(function (a) {
-                return a.isList;
+            var hasItemWeMustBracket = this.items.filter(function (a) {
+                return a.isList || a.popOutChildren;
             }).length;
             for (var i = 0; i < this.items.length; i++) {
                 var lastItem = i > 0 ? this.items[i - 1] : null;
@@ -123,9 +123,15 @@
 
                 if (this.popOutChildren)
                     builder.Append("\n" + VDFNode.AddIndentToChildText(item.ToVDF()));
-                else if (hasListItem)
-                    builder.Append((i > 0 ? "|" : "") + "{" + item.ToVDF() + "}");
-                else
+                else if (hasItemWeMustBracket) {
+                    var itemVDF = item.ToVDF();
+                    var beforeEndBracketExtraText = "";
+                    if (item.guardingItsLastLine) {
+                        beforeEndBracketExtraText = "\n";
+                        item.guardingItsLastLine = false;
+                    }
+                    builder.Append((i > 0 ? "|" : "") + "{" + itemVDF + beforeEndBracketExtraText + "}");
+                } else
                     builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && item.baseValue.indexOf("@@") != 0 && item.baseValue.indexOf("|") != -1));
             }
         } else {

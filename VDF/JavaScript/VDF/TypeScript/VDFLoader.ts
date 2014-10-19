@@ -240,7 +240,9 @@ class VDFLoader
 				else
 					propValueTypeName = objTypeInfo.propInfoByName[propName] ? objTypeInfo.propInfoByName[propName].propVTypeName : null;
 
-				if (token.text.indexOf("\t") != 0) // if this property *key*/*definition* is inline
+				if (next3Tokens.Count < 2 || next3Tokens[1].type == VDFTokenType.DataEndMarker) // if (as Dictionary) we have no items
+					objNode.SetProperty(propName, VDFLoader.ToVDFNode(new List<VDFToken>("VDFToken"), propValueTypeName, loadOptions, objIndent));
+				else if (token.text.indexOf("\t") != 0) // if this property *key*/*definition* is inline
 				{
 					var propValueToken = next3Tokens[1];
 					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>(a.type == VDFTokenType.DataEndMarker || a.type == VDFTokenType.PoppedOutDataEndMarker) && a.position >= propValueToken.position);

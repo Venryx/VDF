@@ -239,7 +239,9 @@ var VDFLoader = (function () {
                 else
                     propValueTypeName = objTypeInfo.propInfoByName[propName] ? objTypeInfo.propInfoByName[propName].propVTypeName : null;
 
-                if (token.text.indexOf("\t") != 0) {
+                if (next3Tokens.Count < 2 || next3Tokens[1].type == 10 /* DataEndMarker */)
+                    objNode.SetProperty(propName, VDFLoader.ToVDFNode(new List("VDFToken"), propValueTypeName, loadOptions, objIndent));
+                else if (token.text.indexOf("\t") != 0) {
                     var propValueToken = next3Tokens[1];
                     var propValueEnderToken = tokensAtDepth0.FirstOrDefault(function (a) {
                         return (a.type == 10 /* DataEndMarker */ || a.type == 7 /* PoppedOutDataEndMarker */) && a.position >= propValueToken.position;

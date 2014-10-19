@@ -276,6 +276,20 @@ namespace VDFTests
 }}".Replace("\r", ""));
 		}
 
+		[VDFType(false, true)] class T5_Level2
+		{
+			[VDFProp] bool firstProperty = false;
+			[VDFProp] bool otherProperty = false;
+		}
+		[Fact] void FromObject_Level4_Object_ArrayPoppedOut_Object()
+		{
+			var a = VDFSaver.ToVDFNode(new List<T5_Level2>{new T5_Level2()}, new VDFSaveOptions(typeMarking: VDFTypeMarking.AssemblyExternal));
+			a.ToVDF().Should().Be(@"T5_Level2>>{
+	firstProperty{>false}
+	otherProperty{>false}
+}".Replace("\r", ""));
+		}
+
 		// unique to C# version
 		// ==========
 

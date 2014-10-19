@@ -242,6 +242,11 @@ three lines".Replace("\r", ""));
 		}
 
 		// note: if only one item (when parsed as List), assume by default obj is an object; if more than one, assume by default obj is a List or Dictionary
+		[Fact] void ToVDFNode_Level1_ArrayPoppedOut_NoItems()
+		{
+			VDFNode a = VDFLoader.ToVDFNode(@"names:");
+			a["names"].properties.Count.Should().Be(0);
+		}
 		[Fact] void ToVDFNode_Level1_ArrayPoppedOut()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@"names:

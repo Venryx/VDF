@@ -120,7 +120,7 @@ public class VDFNode
 			builder.Append(RawDataStringToFinalized(baseValue, disallowRawPipe));
 		else if (items.Count > 0)
 		{
-			var hasListItem = items.Any(a => a.isList);
+			var hasItemWeMustBracket = items.Any(a=>a.isList || a.popOutChildren);
 			for (var i = 0; i < items.Count; i++)
 			{
 				var lastItem = i > 0 ? items[i - 1] : null;
@@ -135,8 +135,17 @@ public class VDFNode
 				if (popOutChildren)
 					builder.Append("\n" + AddIndentToChildText(item.ToVDF()));
 				else
-					if (hasListItem)
-						builder.Append((i > 0 ? "|" : "") + "{" + item.ToVDF() + "}");
+					if (hasItemWeMustBracket)
+					{
+						var itemVDF = item.ToVDF();
+						var beforeEndBracketExtraText = "";
+						if (item.guardingItsLastLine)
+						{
+							beforeEndBracketExtraText = "\n";
+							item.guardingItsLastLine = false;
+						}
+						builder.Append((i > 0 ? "|" : "") + "{" + itemVDF + beforeEndBracketExtraText + "}");
+					}
 					else
 						builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && !item.baseValue.StartsWith("@@") && item.baseValue.Contains("|")));
 			}

@@ -186,6 +186,18 @@ var T4_Level4 = (function () {
     return T4_Level4;
 })();
 
+var T5_Level2 = (function () {
+    function T5_Level2() {
+        this.firstProperty = false;
+        this.otherProperty = false;
+    }
+    T5_Level2.typeInfo = new VDFTypeInfo(false, true, {
+        firstProperty: new VDFPropInfo("bool"),
+        otherProperty: new VDFPropInfo("bool")
+    });
+    return T5_Level2;
+})();
+
 var Saving = (function () {
     function Saving() {
     }
@@ -401,6 +413,14 @@ var Saving = (function () {
 		text2\n\
 	^otherProperty{false}\n\
 }}".replace(/\r/g, ""));
+        });
+
+        test("FromObject_Level4_Object_ArrayPoppedOut_Object", function () {
+            var a = VDFSaver.ToVDFNode(new List("T5_Level2", new T5_Level2()), new VDFSaveOptions(null, 2 /* AssemblyExternal */));
+            a.ToVDF().Should().Be("T5_Level2>>{\n\
+	firstProperty{>false}\n\
+	otherProperty{>false}\n\
+}".replace(/\r/g, ""));
         });
     };
     return Saving;

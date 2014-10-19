@@ -262,6 +262,10 @@ three lines");
         });
 
         // note: if only one item (when parsed as List), assume by default obj is an object; if more than one, assume by default obj is a List or Dictionary
+        test("ToVDFNode_Level1_ArrayPoppedOut_NoItems", function () {
+            var a = VDFLoader.ToVDFNode("names:");
+            a["names"].properties.Count.Should().Be(0);
+        });
         test("ToVDFNode_Level1_ArrayPoppedOut", function () {
             var a = VDFLoader.ToVDFNode("names:\n\
 	Dan\n\
