@@ -269,6 +269,8 @@ var Saving = (function () {
         test("FromVDFNode_Level1_BaseValuesThatNeedEscaping", function () {
             var a = new VDFNode("string>In-string VDF data.");
             a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
+            a = new VDFNode("C:/path/with/colon/char/that/needs/escaping");
+            a.ToVDF().Should().Be("@@C:/path/with/colon/char/that/needs/escaping@@");
         });
 
         // from object

@@ -67,6 +67,8 @@ namespace VDFTests
 		{
 			var a = new VDFNode{baseValue = "string>In-string VDF data."};
 			a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
+			a = new VDFNode {baseValue = "C:/path/with/colon/char/that/needs/escaping"};
+			a.ToVDF().Should().Be("@@C:/path/with/colon/char/that/needs/escaping@@");
 		}
 
 		// from object
