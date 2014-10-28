@@ -70,7 +70,7 @@ public static class VDFSaver
 			objNode.isList = true;
 			var objAsList = (IList)obj;
 			for (var i = 0; i < objAsList.Count; i++)
-				objNode.items.Add(ToVDFNode(objAsList[i], type.GetGenericArguments()[0], saveOptions, true));
+				objNode.items.Add(ToVDFNode(objAsList[i], type.HasElementType ? type.GetElementType() : type.GetGenericArguments()[0], saveOptions, true));
 		}
 		else if (obj is IDictionary)
 		{

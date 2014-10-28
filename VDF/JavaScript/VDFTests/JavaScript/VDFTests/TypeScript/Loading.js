@@ -210,6 +210,10 @@ three lines");
             var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
             a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
         });
+        test("ToVDFNode_Level1_TroublesomeLiteral3", function () {
+            var a = VDFLoader.ToVDFNode("@@@@@Prop value string that needs escaping.@@@|@@");
+            a.baseValue.Should().Be("@@Prop value string that needs escaping.@@");
+        });
         test("ToVDFNode_Level1_VDFWithVDFWithVDF", function () {
             var a = VDFLoader.ToVDFNode("level1{@@level2{@@@level3{Base string.}@@@}@@}");
             a["level1"].baseValue.Should().Be("level2{@@level3{Base string.}@@}");

@@ -142,12 +142,9 @@ class VDFTokenParser
 	static FinalizedDataStringToRaw(finalizedDataStr: string): string
 	{
 		var result: string = finalizedDataStr;
-		if (finalizedDataStr.indexOf("}") != -1)
-		{
-			if ((result[result.length - 2] == '@' || result[result.length - 2] == '|') && result.lastIndexOf("|") == result.length - 1)
-				result = result.substr(0, result.length - 1); // chop off last char, as it was just added by the serializer for separation
-			result = result.replace(/@(@{2,})/g, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
-		}
+		if ((result[result.length - 2] == '@' || result[result.length - 2] == '|') && result.lastIndexOf("|") == result.length - 1)
+			result = result.substr(0, result.length - 1); // chop off last char, as it was just added by the serializer for separation
+		result = result.replace(/@(@{2,})/g, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
 		return result;
 	}
 }

@@ -153,12 +153,9 @@ public class VDFTokenParser
 	static string FinalizedDataStringToRaw(string finalizedDataStr)
 	{
 		string result = finalizedDataStr;
-		if (finalizedDataStr.Contains("}"))
-		{
-			if ((result[result.Length - 2] == '@' || result[result.Length - 2] == '|') && result.EndsWith("|"))
-				result = result.Substring(0, result.Length - 1); // chop off last char, as it was just added by the serializer for separation
-			result = new Regex("@(@{2,})").Replace(result, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
-		}
+		if ((result[result.Length - 2] == '@' || result[result.Length - 2] == '|') && result.EndsWith("|"))
+			result = result.Substring(0, result.Length - 1); // chop off last char, as it was just added by the serializer for separation
+		result = new Regex("@(@{2,})").Replace(result, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
 		return result;
 	}
 }

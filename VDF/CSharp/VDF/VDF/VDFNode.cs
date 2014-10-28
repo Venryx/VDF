@@ -211,6 +211,8 @@ public class VDFNode
 
 	static object CreateNewInstanceOfType(Type type)
 	{
+		if (typeof(Array).IsAssignableFrom(type)) // if array, we start out with a List, and then turn it into array at the end
+			return Activator.CreateInstance(typeof(List<>).MakeGenericType(type.GetElementType()), true);
 		if (typeof(IList).IsAssignableFrom(type) || typeof(IDictionary).IsAssignableFrom(type)) // special cases, which require that we call the constructor
 			return Activator.CreateInstance(type, true);
 		return FormatterServices.GetUninitializedObject(type); // preferred (for simplicity/consistency's sake): create an instance of the type, completely uninitialized 
@@ -269,6 +271,12 @@ public class VDFNode
 		{
 			result = CreateNewInstanceOfType(finalType);
 			IntoObject(result, loadOptions, (declaredType != null && declaredType.IsGenericType) || (metadata_type != "System.Collections.IList" && metadata_type != "System.Collections.IDictionary"));
+			if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp List object for item population; so, now, replace the temp-list with an array
+			{
+				var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
+				((IList)result).CopyTo(newResult, 0);
+				result = newResult;
+			}
 		}
 
 		return result;

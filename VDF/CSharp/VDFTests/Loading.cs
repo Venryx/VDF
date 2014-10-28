@@ -179,6 +179,11 @@ three lines".Replace("\r", ""));
 			VDFNode a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
 			a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
 		}
+		[Fact] void ToVDFNode_Level1_TroublesomeLiteral3()
+		{
+			VDFNode a = VDFLoader.ToVDFNode("@@@@@Prop value string that needs escaping.@@@|@@");
+			a.baseValue.Should().Be("@@Prop value string that needs escaping.@@");
+		}
 		[Fact] void ToVDFNode_Level1_VDFWithVDFWithVDF()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("level1{@@level2{@@@level3{Base string.}@@@}@@}");
@@ -454,6 +459,13 @@ Shoot at Enemy Vehicle
 		{
 			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), (obj, genericArgs)=>new SpecialList3<string>{"Obvious first-item data; of type: " + genericArgs.First().Name.ToLower()}); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
 			VDF.Deserialize<SpecialList3<string>>("String that doesn't matter.").Should().BeEquivalentTo(new SpecialList3<string>{"Obvious first-item data; of type: string"});
+		}
+		class TypeWithArray { [VDFProp] public string[] array; }
+		[Fact] void ToObject_Level1_ArrayItems()
+		{
+			var a = VDF.Deserialize<TypeWithArray>("array{A|B}");
+			a.array[0].Should().Be("A");
+			a.array[1].Should().Be("B");
 		}
 	}
 }

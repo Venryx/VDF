@@ -302,5 +302,11 @@ namespace VDFTests
 			var a = new SpecialList2<string>{"A", "B", "C"};
 			VDF.Serialize<SpecialList2<string>>(a).Should().Be("You'll never see the items!");
 		}
+		class TypeWithArray { [VDFProp] string[] array = {"A", "B"}; }
+		[Fact] void FromObject_Level1_ArrayItems()
+		{
+			var a = VDFSaver.ToVDFNode<TypeWithArray>(new TypeWithArray());
+			a.ToVDF().Should().Be("array{A|B}");
+		}
 	}
 }
