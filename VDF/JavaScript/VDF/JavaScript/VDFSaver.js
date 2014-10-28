@@ -117,6 +117,9 @@ var VDFSaver = (function () {
         if (typeInfo != null && typeInfo.popOutChildrenL1)
             objNode.popOutChildren = true;
 
+        if (obj && obj.VDFPostSerialize)
+            obj.VDFPostSerialize(saveOptions.message);
+
         return objNode;
     };
     return VDFSaver;

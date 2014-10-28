@@ -138,9 +138,20 @@ namespace VDFTests
 		}
 		[Fact] void FromObject_Level1_PreSerializePreparation()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod());
+			var a = VDFSaver.ToVDFNode<TypeWithPreSerializePrepMethod>(new TypeWithPreSerializePrepMethod());
 			((bool)a["preSerializeWasCalled"]).Should().Be(true);
-			a.ToVDF().Should().Be("TypeWithPreSerializePrepMethod>preSerializeWasCalled{true}");
+			a.ToVDF().Should().Be("preSerializeWasCalled{true}");
+		}
+		class TypeWithPostSerializeCleanupMethod
+		{
+			[VDFProp] bool postSerializeWasCalled;
+			[VDFPostSerialize] void VDFPostSerialize() { postSerializeWasCalled = true; }
+		}
+		[Fact] void FromObject_Level1_PostSerializeCleanup()
+		{
+			var a = VDFSaver.ToVDFNode<TypeWithPostSerializeCleanupMethod>(new TypeWithPostSerializeCleanupMethod());
+			((bool)a["postSerializeWasCalled"]).Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
+			a.ToVDF().Should().Be("postSerializeWasCalled{false}");
 		}
 		class TypeWithMixOfProps
 		{

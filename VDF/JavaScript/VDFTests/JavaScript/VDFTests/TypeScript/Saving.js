@@ -44,6 +44,18 @@ var TypeWithPreSerializePrepMethod = (function () {
     });
     return TypeWithPreSerializePrepMethod;
 })();
+var TypeWithPostSerializeCleanupMethod = (function () {
+    function TypeWithPostSerializeCleanupMethod() {
+        this.postSerializeWasCalled = false;
+    }
+    TypeWithPostSerializeCleanupMethod.prototype.VDFPostSerialize = function () {
+        this.postSerializeWasCalled = true;
+    };
+    TypeWithPostSerializeCleanupMethod.typeInfo = new VDFTypeInfo(false, false, {
+        postSerializeWasCalled: new VDFPropInfo("bool")
+    });
+    return TypeWithPostSerializeCleanupMethod;
+})();
 var TypeWithMixOfProps = (function () {
     function TypeWithMixOfProps() {
         this.Bool = true;
@@ -330,9 +342,14 @@ var Saving = (function () {
             a.ToVDF().Should().Be("Bool{>false}Int{>5}Float{>.5}String{Prop value string.}");
         });
         test("FromObject_Level1_PreSerializePreparation", function () {
-            var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod());
+            var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod(), "TypeWithPreSerializePrepMethod");
             a["preSerializeWasCalled"].AsBool.Should().Be(true);
-            a.ToVDF().Should().Be("TypeWithPreSerializePrepMethod>preSerializeWasCalled{true}");
+            a.ToVDF().Should().Be("preSerializeWasCalled{true}");
+        });
+        test("FromObject_Level1_PostSerializeCleanup", function () {
+            var a = VDFSaver.ToVDFNode(new TypeWithPostSerializeCleanupMethod(), "TypeWithPostSerializeCleanupMethod");
+            a["postSerializeWasCalled"].AsBool.Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
+            a.ToVDF().Should().Be("postSerializeWasCalled{false}");
         });
         test("FromObject_Level1_TypeProperties_MarkForNone", function () {
             var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, 0 /* None */));

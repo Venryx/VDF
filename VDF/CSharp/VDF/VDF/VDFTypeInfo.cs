@@ -125,6 +125,8 @@ public class VDFPropInfo
 }
 
 [AttributeUsage(AttributeTargets.Method)] public class VDFPreSerialize : Attribute {}
+[AttributeUsage(AttributeTargets.Method)] public class VDFPostSerialize : Attribute {}
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)] public class VDFPreDeserialize : Attribute {}
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)] public class VDFPostDeserialize : Attribute {}
 public class VDFMethodInfo
 {
@@ -132,24 +134,35 @@ public class VDFMethodInfo
 	public static VDFMethodInfo Get(MethodBase method)
 	{
 		if (!cachedMethodInfo.ContainsKey(method))
-			Set(method, (VDFPreSerialize)method.GetCustomAttributes(typeof(VDFPreSerialize), true).FirstOrDefault(), (VDFPostDeserialize)method.GetCustomAttributes(typeof(VDFPostDeserialize), true).FirstOrDefault());
+			Set(method,
+				(VDFPreSerialize)method.GetCustomAttributes(typeof(VDFPreSerialize), true).FirstOrDefault(),
+				(VDFPostSerialize)method.GetCustomAttributes(typeof(VDFPostSerialize), true).FirstOrDefault(),
+				(VDFPreDeserialize)method.GetCustomAttributes(typeof(VDFPreDeserialize), true).FirstOrDefault(),
+				(VDFPostDeserialize)method.GetCustomAttributes(typeof(VDFPostDeserialize), true).FirstOrDefault());
 		return cachedMethodInfo[method];
 	}
-	public static void Set(MethodBase method, VDFPreSerialize preSerializeTag = null, VDFPostDeserialize postDeserializeTag = null) { cachedMethodInfo[method] = BuildMethodInfo(method, preSerializeTag, postDeserializeTag); }
-	static VDFMethodInfo BuildMethodInfo(MethodBase method, VDFPreSerialize preSerializeTag, VDFPostDeserialize postDeserializeTag)
+	public static void Set(MethodBase method, VDFPreSerialize preSerializeTag = null, VDFPostSerialize postSerializeTag = null, VDFPreDeserialize preDeserializeTag = null, VDFPostDeserialize postDeserializeTag = null)
+		{ cachedMethodInfo[method] = BuildMethodInfo(method, preSerializeTag, postSerializeTag, preDeserializeTag, postDeserializeTag); }
+	static VDFMethodInfo BuildMethodInfo(MethodBase method, VDFPreSerialize preSerializeTag, VDFPostSerialize postSerializeTag, VDFPreDeserialize preDeserializeTag, VDFPostDeserialize postDeserializeTag)
 	{
 		var result = new VDFMethodInfo();
 		result.memberInfo = method;
 		if (preSerializeTag != null)
 			result.preSerializeMethod = true;
+		if (postSerializeTag != null)
+			result.postSerializeMethod = true;
+		if (preDeserializeTag != null)
+			result.preDeserializeMethod = true;
 		if (postDeserializeTag != null)
 			result.postDeserializeMethod = true;
 		return result;
 	}
 
 	public MethodBase memberInfo;
-	public bool preSerializeMethod = false;
-	public bool postDeserializeMethod = false;
+	public bool preSerializeMethod;
+	public bool postSerializeMethod;
+	public bool preDeserializeMethod;
+	public bool postDeserializeMethod;
 
 	public object Call(object objParent, object[] args) { return memberInfo.Invoke(objParent, args); }
 }

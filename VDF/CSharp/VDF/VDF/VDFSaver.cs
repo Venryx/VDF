@@ -47,7 +47,7 @@ public static class VDFSaver
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
-				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[]{saveOptions.message} : new object[0]);
+				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {saveOptions.message} : new object[0]);
 
 		if (type == null)
 			objNode.baseValue = "null";
@@ -125,6 +125,10 @@ public static class VDFSaver
 
 		if (typeInfo != null && typeInfo.popOutChildrenL1)
 			objNode.popOutChildren = true;
+
+		if (obj != null)
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.postSerializeMethod))
+				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {saveOptions.message} : new object[0]);
 
 		return objNode;
 	}

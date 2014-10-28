@@ -4,6 +4,18 @@ window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual
 Loading.Init();
 window["oldTest"](title, testFunc);
 }*/
+var TypeWithPreDeserializeMethod = (function () {
+    function TypeWithPreDeserializeMethod() {
+        this.flag = false;
+    }
+    TypeWithPreDeserializeMethod.prototype.VDFPreDeserialize = function () {
+        this.flag = true;
+    };
+    TypeWithPreDeserializeMethod.typeInfo = new VDFTypeInfo(false, false, {
+        flag: new VDFPropInfo("bool")
+    });
+    return TypeWithPreDeserializeMethod;
+})();
 var TypeWithPostDeserializeMethod = (function () {
     function TypeWithPostDeserializeMethod() {
         this.flag = false;
@@ -417,6 +429,10 @@ Shoot at Enemy Vehicle\n\
 
         test("ToObject_Level1_EmptyStringInList", function () {
             return ok(VDF.Deserialize("text1|", "List[string]")[1] == null);
+        });
+        test("ToObject_Level1_PreDeserializeMethod", function () {
+            var a = VDF.Deserialize("", "TypeWithPreDeserializeMethod");
+            a.flag.Should().Be(true);
         });
         test("ToObject_Level1_PostDeserializeMethod", function () {
             var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");

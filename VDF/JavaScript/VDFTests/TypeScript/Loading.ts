@@ -6,6 +6,15 @@ window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual
 	window["oldTest"](title, testFunc);
 }*/
 
+class TypeWithPreDeserializeMethod
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
+	{
+		flag: new VDFPropInfo("bool")
+	});
+	flag = false;
+	VDFPreDeserialize(): void { this.flag = true; }
+}
 class TypeWithPostDeserializeMethod
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
@@ -443,7 +452,12 @@ Shoot at Enemy Vehicle\n\
 		test("ToObject_Level0_Bool", ()=>VDF.Deserialize("true", "bool").Should().Be(true));
 		test("ToObject_Level0_Float", ()=>VDF.Deserialize("1.5", "float").Should().Be(1.5));
 
-		test("ToObject_Level1_EmptyStringInList", ()=>ok(VDF.Deserialize("text1|", "List[string]")[1] == null));
+		test("ToObject_Level1_EmptyStringInList", ()=> ok(VDF.Deserialize("text1|", "List[string]")[1] == null));
+		test("ToObject_Level1_PreDeserializeMethod", ()=>
+		{
+			var a = VDF.Deserialize("", "TypeWithPreDeserializeMethod");
+			a.flag.Should().Be(true);
+		});
 		test("ToObject_Level1_PostDeserializeMethod", ()=>
 		{
 			var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");

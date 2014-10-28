@@ -285,6 +285,10 @@
     VDFNode.prototype.IntoObject = function (obj, loadOptions, typeGenericArgumentsAreReal) {
         if (typeof typeGenericArgumentsAreReal === "undefined") { typeGenericArgumentsAreReal = true; }
         loadOptions = loadOptions || new VDFLoadOptions();
+
+        if (obj && obj.VDFPreDeserialize)
+            obj.VDFPreDeserialize(loadOptions.message);
+
         var finalTypeName = VDF.GetVTypeNameOfObject(obj);
         if (finalTypeName == null)
             finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);

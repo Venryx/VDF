@@ -289,6 +289,10 @@
 	IntoObject(obj: any, loadOptions?: VDFLoadOptions, typeGenericArgumentsAreReal: boolean = true)
 	{
 		loadOptions = loadOptions || new VDFLoadOptions();
+
+		if (obj && obj.VDFPreDeserialize)
+			obj.VDFPreDeserialize(loadOptions.message);
+
 		var finalTypeName = VDF.GetVTypeNameOfObject(obj);
 		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
 			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);

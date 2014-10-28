@@ -42,6 +42,15 @@ class TypeWithPreSerializePrepMethod
 	preSerializeWasCalled: boolean;
 	VDFPreSerialize(): void { this.preSerializeWasCalled = true; }
 }
+class TypeWithPostSerializeCleanupMethod
+{
+	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
+	{
+		postSerializeWasCalled: new VDFPropInfo("bool")
+	});
+	postSerializeWasCalled: boolean = false;
+	VDFPostSerialize(): void { this.postSerializeWasCalled = true; }
+}
 class TypeWithMixOfProps
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
@@ -317,9 +326,15 @@ class Saving
 		});
 		test("FromObject_Level1_PreSerializePreparation", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod());
+			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod(), "TypeWithPreSerializePrepMethod");
 			a["preSerializeWasCalled"].AsBool.Should().Be(true);
-			a.ToVDF().Should().Be("TypeWithPreSerializePrepMethod>preSerializeWasCalled{true}");
+			a.ToVDF().Should().Be("preSerializeWasCalled{true}");
+		});
+		test("FromObject_Level1_PostSerializeCleanup", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new TypeWithPostSerializeCleanupMethod(), "TypeWithPostSerializeCleanupMethod");
+			a["postSerializeWasCalled"].AsBool.Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
+			a.ToVDF().Should().Be("postSerializeWasCalled{false}");
 		});
 		test("FromObject_Level1_TypeProperties_MarkForNone", ()=>
 		{

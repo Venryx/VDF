@@ -287,6 +287,13 @@ public class VDFNode
 
 		var type = obj.GetType();
 		var typeInfo = VDFTypeInfo.Get(type);
+
+		// call pre-deserialize constructors before pre-deserialize normal methods
+		foreach (VDFMethodInfo method in typeInfo.methodInfo.Where(methodInfo=>methodInfo.memberInfo is ConstructorInfo && methodInfo.preDeserializeMethod))
+			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message} : new object[0]);
+		foreach (VDFMethodInfo method in typeInfo.methodInfo.Where(methodInfo=>methodInfo.memberInfo is MethodInfo && methodInfo.preDeserializeMethod))
+			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message} : new object[0]);
+
 		for (var i = 0; i < items.Count; i++)
 			if (obj is Array)
 				((Array)obj).SetValue(items[i].ToObject(type.GetElementType(), loadOptions), i);
@@ -311,9 +318,9 @@ public class VDFNode
 			catch (Exception ex) { throw new VDFException("Error loading key-value-pair or property '" + propName + "'.", ex); }
 
 		// call post-deserialize constructors before post-deserialize normal methods
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
+		foreach (VDFMethodInfo method in typeInfo.methodInfo.Where(methodInfo=>methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))
 			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message} : new object[0]);
-		foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
-			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message } : new object[0]);
+		foreach (VDFMethodInfo method in typeInfo.methodInfo.Where(methodInfo=>methodInfo.memberInfo is MethodInfo && methodInfo.postDeserializeMethod))
+			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message} : new object[0]);
 	}
 }

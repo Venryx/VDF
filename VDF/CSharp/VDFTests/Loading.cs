@@ -392,13 +392,23 @@ Shoot at Enemy Vehicle
 		[Fact] void ToObject_Level0_EmptyString() { VDF.Deserialize(">empty").Should().Be(""); }
 		[Fact] void ToObject_Level0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
 		[Fact] void ToObject_Level0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
+
+		[Fact] void ToObject_Level1_EmptyStringInList() { VDF.Deserialize<List<string>>("text1|")[1].Should().Be(null); }
+		class TypeWithPreDeserializeMethod
+		{
+			[VDFProp] public bool flag;
+			[VDFPreDeserialize] void VDFPreDeserialize() { flag = true; }
+		}
+		[Fact] void ToObject_Level1_PreDeserializeMethod()
+		{
+			var a = VDF.Deserialize<TypeWithPreDeserializeMethod>("");
+			a.flag.Should().Be(true);
+		}
 		class TypeWithPostDeserializeMethod
 		{
 			[VDFProp] public bool flag;
 			[VDFPostDeserialize] void VDFPostDeserialize() { flag = true; }
 		}
-
-		[Fact] void ToObject_Level1_EmptyStringInList() { VDF.Deserialize<List<string>>("text1|")[1].Should().Be(null); }
 		[Fact] void ToObject_Level1_PostDeserializeMethod()
 		{
 			var a = VDF.Deserialize<TypeWithPostDeserializeMethod>("");
