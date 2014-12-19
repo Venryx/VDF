@@ -211,10 +211,11 @@ class VDFLoader
 				}
 			}
 			else
-				for (var i = 0; i < tokensAtDepth0.Count; i++)
+				for (var i in tokensAtDepth0.indexes())
 				{
 					var token: VDFToken = tokensAtDepth0[i];
-					if (token.type == VDFTokenType.LineBreak && tokensAtDepth1.Any(a=>a.position > token.position) && tokensAtDepth1.FirstOrDefault(a=>a.position > token.position).text.indexOf("\t") == 0)
+					var nextTokenAtDepth1: VDFToken = tokensAtDepth1.FirstOrDefault(a=> a.position > token.position);
+					if (token.type == VDFTokenType.LineBreak && nextTokenAtDepth1 != null && nextTokenAtDepth1.text.indexOf("\t") == 0 && nextTokenAtDepth1.text.indexOf("\t\t") != 0)
 					{
 						var itemToken = getTokenAtIndex(token.index + 1); //tokens.First(a => a.position > token.position); // note: item-token's text includes tab char
 						var itemEnderToken = itemToken != null ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.LineBreak && a.position >= itemToken.position) : null;

@@ -71,7 +71,7 @@ class TypeWithMixOfProps
 }
 enum Enum1 { _IsEnum, A, B, C }
 
-class FromObject_Level1_Object_DictionaryPoppedOutThenBool_Class1
+class Depth1_Object_DictionaryPoppedOutThenBool_Class1
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
@@ -81,7 +81,7 @@ class FromObject_Level1_Object_DictionaryPoppedOutThenBool_Class1
 	messages = new Dictionary<string, string>("string", "string", ["title1", "message1"], ["title2", "message2"]);
 	otherProperty = true;
 }
-class FromObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+class Saving_Depth1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, true,
 	{
@@ -92,15 +92,15 @@ class FromObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Cla
 	otherProperty = true;
 }
 
-class T1_Level1
+class T1_Depth1
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
-		level2: new VDFPropInfo("T1_Level2")
+		level2: new VDFPropInfo("T1_Depth2")
 	});
-	level2 = new T1_Level2();
+	level2 = new T1_Depth2();
 }
-class T1_Level2
+class T1_Depth2
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
@@ -138,33 +138,33 @@ class Level3
 	messages = new List<string>("string", "DeepString1", "DeepString2");
 }
 
-class T4_Level1
+class T4_Depth1
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
-		level2: new VDFPropInfo("T4_Level2_level2")
+		level2: new VDFPropInfo("T4_Depth2_Depth2")
 	});
-	level2 = new T4_Level2();
+	level2 = new T4_Depth2();
 }
-class T4_Level2
+class T4_Depth2
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
-		level3_first: new VDFPropInfo("T4_Level3"),
-		level3_second: new VDFPropInfo("T4_Level3")
+		level3_first: new VDFPropInfo("T4_Depth3"),
+		level3_second: new VDFPropInfo("T4_Depth3")
 	});
-	level3_first = new T4_Level3();
-	level3_second = new T4_Level3();
+	level3_first = new T4_Depth3();
+	level3_second = new T4_Depth3();
 }
-class T4_Level3
+class T4_Depth3
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
-		level4s: new VDFPropInfo("List[T4_Level4]", true, true)
+		level4s: new VDFPropInfo("List[T4_Depth4]", true, true)
 	});
-	level4s = new List<T4_Level4>("T4_Level4", new T4_Level4(), new T4_Level4());
+	level4s = new List<T4_Depth4>("T4_Depth4", new T4_Depth4(), new T4_Depth4());
 }
-class T4_Level4
+class T4_Depth4
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
 	{
@@ -175,7 +175,7 @@ class T4_Level4
 	otherProperty = false; 
 }
 
-class T5_Level2
+class T5_Depth2
 {
 	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, true,
 	{
@@ -209,7 +209,7 @@ class Saving
 		// from VDFNode
 		// ==========
 
-		test("FromVDFNode_Level0_BaseValue", ()=>
+		test("Depth0_BaseValue", ()=>
 		{
 			var a = new VDFNode();
 			a.baseValue = "Root string.";
@@ -219,31 +219,31 @@ class Saving
 			a.SetItem(0, new VDFNode("Root string also."));
 			a.ToVDF().Should().Be("Root string also.");
 		});
-		test("FromVDFNode_Level0_Metadata_Type", ()=>
+		test("Depth0_Metadata_Type", ()=>
 		{
 			var a = new VDFNode();
 			a.metadata_type = "string";
 			a.baseValue = "Root string.";
 			a.ToVDF().Should().Be("string>Root string.");
 		});
-		test("FromVDFNode_Level0_Metadata_Type_Collapsed", ()=>
+		test("Depth0_Metadata_Type_Collapsed", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new List("string"), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("string>>");
 			a = VDFSaver.ToVDFNode(new List("List[string]", new List("string", "1A", "1B", "1C")), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("List[List[string]]>>{1A|1B|1C}"); // only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
 		});
-		test("FromVDFNode_Level0_EnumDefault", () =>
+		test("Depth0_EnumDefault", () =>
 		{
 			var a = VDFSaver.ToVDFNode(Enum1.A, "Enum1");
 			a.ToVDF().Should().Be("A");
 		});
-		test("FromVDFNode_Level0_MultilineString", () =>
+		test("Depth0_MultilineString", () =>
 		{
 			var a = VDFSaver.ToVDFNode("This is a\nmultiline string\nof three lines in total.", "string");
 			a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
 		});
-		test("FromVDFNode_Level1_TroublesomeLiteral", ()=>
+		test("Depth1_TroublesomeLiteral", ()=>
 		{
 			var a = new VDFNode();
 			a.SetItem(0, new VDFNode("This is a list item that|needs|escaping."));
@@ -252,7 +252,7 @@ class Saving
 			a.ToVDF().Should().Be("@@This is a list item that|needs|escaping.@@|@@Here's;;another.@@|This is a list item that doesn't need escaping.");
 		});
 
-		test("FromVDFNode_Level1_BaseValues", ()=>
+		test("Depth1_BaseValues", ()=>
 		{
 			var a = new VDFNode();
 			a.SetProperty("bool", new VDFNode("false"));
@@ -261,7 +261,7 @@ class Saving
 			a.SetProperty("string", new VDFNode("Prop value string."));
 			a.ToVDF().Should().Be("bool{false}int{5}float{.5}string{Prop value string.}");
 		});
-		test("FromVDFNode_Level1_BaseValuesThatNeedEscaping", ()=>
+		test("Depth1_BaseValuesThatNeedEscaping", ()=>
 		{
 			var a = new VDFNode("string>In-string VDF data.");
 			a.ToVDF().Should().Be("@@string>In-string VDF data.@@");
@@ -272,11 +272,11 @@ class Saving
 		// from object
 		// ==========
 
-		test("FromObject_Level0_Null", ()=>{ VDF.Serialize(null).Should().Be(">null"); });
-		test("FromObject_Level0_EmptyString", ()=>{ VDF.Serialize("").Should().Be(">empty"); });
+		test("Depth0_Null", ()=>{ VDF.Serialize(null).Should().Be(">null"); });
+		test("Depth0_EmptyString", ()=>{ VDF.Serialize("").Should().Be(">empty"); });
 
-		test("FromObject_Level1_IgnoreEmptyString", ()=>{ VDF.Serialize(new TypeWithEmptyStringProp(), "TypeWithEmptyStringProp").Should().Be(""); });
-		test("FromObject_Level1_NullValues", ()=>
+		test("Depth1_IgnoreEmptyString", ()=>{ VDF.Serialize(new TypeWithEmptyStringProp(), "TypeWithEmptyStringProp").Should().Be(""); });
+		test("Depth1_NullValues", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
 			a["obj"].metadata_type.Should().Be(""); // type "null" should be collapsed
@@ -288,29 +288,29 @@ class Saving
 			a["strings2"].items.length.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
 		});
-		test("FromObject_Level1_ListItems_PoppedOutChildren", ()=>
+		test("Depth1_ListItems_PoppedOutChildren", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithList_PopOutItemData(), "TypeWithList_PopOutItemData");
 			a.ToVDF().Should().Be("list:\n\
 	A\n\
 	B".replace(/\r/g, ""));
 		});
-		test("FromObject_Level1_ListItems_Null", ()=>
+		test("Depth1_ListItems_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new List("string", null));
 			a[0].metadata_type.Should().Be("");
 			a[0].baseValue.Should().Be("null");
 			a.ToVDF().Should().Be("string>>>null");
 		});
-		test("FromObject_Level1_StringAndArraysInArray", ()=>VDF.Serialize(new List<object>("object", "text", new List<string>("string", "a", "b"))).Should().Be(">>{text}|{string>>a|b}"));
-		test("FromObject_Level1_DictionaryValues_Null", ()=>
+		test("Depth1_StringAndArraysInArray", ()=>VDF.Serialize(new List<object>("object", "text", new List<string>("string", "a", "b"))).Should().Be(">>{text}|{string>>a|b}"));
+		test("Depth1_DictionaryValues_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));
 			a["key1"].metadata_type.Should().Be("");
 			a["key1"].baseValue.Should().Be("null");
 			a.ToVDF().Should().Be("string,string>>key1{>null}");
 		});
-		test("FromObject_Level1_AnonymousTypeProperties_MarkNoTypes", ()=>
+		test("Depth1_AnonymousTypeProperties_MarkNoTypes", ()=>
 		{
 			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(null, VDFTypeMarking.None));
 			a["Bool"].baseValue.Should().Be("false");
@@ -319,24 +319,24 @@ class Saving
 			a["String"].baseValue.Should().Be("Prop value string.");
 			a.ToVDF().Should().Be("Bool{false}Int{5}Float{.5}String{Prop value string.}");
 		});
-		test("FromObject_Level1_AnonymousTypeProperties_MarkAllTypes", ()=>
+		test("Depth1_AnonymousTypeProperties_MarkAllTypes", ()=>
 		{
 			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Float: .5, String: "Prop value string."}, new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("Bool{>false}Int{>5}Float{>.5}String{Prop value string.}");
 		});
-		test("FromObject_Level1_PreSerializePreparation", ()=>
+		test("Depth1_PreSerializePreparation", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod(), "TypeWithPreSerializePrepMethod");
 			a["preSerializeWasCalled"].AsBool.Should().Be(true);
 			a.ToVDF().Should().Be("preSerializeWasCalled{true}");
 		});
-		test("FromObject_Level1_PostSerializeCleanup", ()=>
+		test("Depth1_PostSerializeCleanup", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithPostSerializeCleanupMethod(), "TypeWithPostSerializeCleanupMethod");
 			a["postSerializeWasCalled"].AsBool.Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
 			a.ToVDF().Should().Be("postSerializeWasCalled{false}");
 		});
-		test("FromObject_Level1_TypeProperties_MarkForNone", ()=>
+		test("Depth1_TypeProperties_MarkForNone", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a["Bool"].baseValue.Should().Be("true");
@@ -348,33 +348,33 @@ class Saving
 			a["nestedList"][0][0].baseValue.Should().Be("1A");
 			a.ToVDF().Should().Be("Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
 		});
-		test("FromObject_Level1_TypeProperties_MarkForAssembly", ()=>
+		test("Depth1_TypeProperties_MarkForAssembly", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.Assembly));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
 		});
-		test("FromObject_Level1_TypeProperties_MarkForAssemblyExternal", ()=>
+		test("Depth1_TypeProperties_MarkForAssemblyExternal", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{>true}Int{>5}Float{>.5}String{Prop value string.}list{string>>2A|2B}nestedList{List[List[string]]>>{string>>1A}}");
 		});
-		test("FromObject_Level1_TypeProperties_MarkForAssemblyExternalNoCollapse", ()=>
+		test("Depth1_TypeProperties_MarkForAssemblyExternalNoCollapse", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternalNoCollapse));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{bool>true}Int{int>5}Float{float>.5}String{string>Prop value string.}list{List[string]>>string>2A|string>2B}nestedList{List[List[string]]>>{List[string]>>string>1A}}");
 		});
 
-		test("FromObject_Level1_DictionaryPoppedOutThenBool", ()=>
+		test("Depth1_DictionaryPoppedOutThenBool", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new FromObject_Level1_Object_DictionaryPoppedOutThenBool_Class1(), new VDFSaveOptions(null, VDFTypeMarking.None));
+			var a = VDFSaver.ToVDFNode(new Depth1_Object_DictionaryPoppedOutThenBool_Class1(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a.ToVDF().Should().Be("messages:\n\
 	title1{message1}\n\
 	title2{message2}\n\
 ^otherProperty{true}".replace(/\r/g, ""));
 		});
-		test("FromObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
+		test("Depth1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new FromObject_Level1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1(), new VDFSaveOptions(null, VDFTypeMarking.None));
+			var a = VDFSaver.ToVDFNode(new Saving_Depth1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a.ToVDF().Should().Be("\n\
 	messages:\n\
 		title1{message1}\n\
@@ -382,9 +382,9 @@ class Saving
 	otherProperty{true}".replace(/\r/g, ""));
 		});
 
-		test("FromObject_Level2_Object_ArrayPoppedOutWithMultilineLiteralThenBool", ()=>
+		test("Depth2_Object_ArrayPoppedOutWithMultilineLiteralThenBool", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new T1_Level1(), new VDFSaveOptions(null, VDFTypeMarking.None));
+			var a = VDFSaver.ToVDFNode(new T1_Depth1(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a.ToVDF().Should().Be("level2{messages:\n\
 	@@DeepString1_Line1\n\
 	DeepString1_Line2@@\n\
@@ -392,7 +392,7 @@ class Saving
 ^otherProperty{true}}".replace(/\r/g, ""));
 		});
 
-		test("FromObject_Level3_Object_Array_ArrayPoppedOut", ()=>
+		test("Depth3_Object_Array_ArrayPoppedOut", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a.ToVDF().Should().Be("level2{level3_first{messages:\n\
@@ -404,9 +404,9 @@ class Saving
 }}".replace(/\r/g, ""));
 		});
 
-		test("FromObject_Level4_Object_Array_ArrayPoppedOut_ArrayPoppedOutThenBool", ()=>
+		test("Depth4_Object_Array_ArrayPoppedOut_ArrayPoppedOutThenBool", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new T4_Level1(), new VDFSaveOptions(null, VDFTypeMarking.None));
+			var a = VDFSaver.ToVDFNode(new T4_Depth1(), new VDFSaveOptions(null, VDFTypeMarking.None));
 			a.ToVDF().Should().Be("level2{level3_first{level4s:\n\
 	messages:\n\
 		text1\n\
@@ -428,10 +428,10 @@ class Saving
 }}".replace(/\r/g, ""));
 		});
 
-		test("FromObject_Level4_Object_ArrayPoppedOut_Object", ()=>
+		test("Depth4_Object_ArrayPoppedOut_Object", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new List<T5_Level2>("T5_Level2", new T5_Level2()), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
-			a.ToVDF().Should().Be("T5_Level2>>{\n\
+			var a = VDFSaver.ToVDFNode(new List<T5_Depth2>("T5_Depth2", new T5_Depth2()), new VDFSaveOptions(null, VDFTypeMarking.AssemblyExternal));
+			a.ToVDF().Should().Be("T5_Depth2>>{\n\
 	firstProperty{>false}\n\
 	otherProperty{>false}\n\
 }".replace(/\r/g, ""));

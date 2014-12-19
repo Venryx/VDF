@@ -12,8 +12,6 @@ namespace VDFTests
 {
 	public class Quick
 	{
-		
-
 		// temp
 		// ==========
 
@@ -43,14 +41,11 @@ namespace VDFTests
 		[Fact] void Load()
 		{
 			var a = VDFLoader.ToVDFNode<FrameData>(@"
-	settings{showTooltips{true}autoOpenSubmenus{Frame2|CreativeDefense}autoOpenPage{>empty}}
-	prefs{Types_toolOptions{@@Select{}Add{}Resize{}Remove{}@@}Types_liveTool{Select}}
-	liveWorldName{>null}
-	lastLivePackName{>null}", new VDFLoadOptions(null, null, new Dictionary<Type, string>
-			{
-				{typeof(Vector3), "Vector3"}
-			}));
-			a["settings"]["showTooltips"].baseValue.Should().Be("true");
+name{L0}children:>>
+	name{L1}children:>>
+		name{L2}
+			".Trim());
+			a["children"].items.Count.Should().Be(1);
 		}
 
 		[Fact] void Save()

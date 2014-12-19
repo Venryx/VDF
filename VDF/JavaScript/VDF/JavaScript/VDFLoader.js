@@ -209,13 +209,12 @@ var VDFLoader = (function () {
                     }
                 }
             } else
-                for (var i = 0; i < tokensAtDepth0.Count; i++) {
+                for (var i in tokensAtDepth0.indexes()) {
                     var token = tokensAtDepth0[i];
-                    if (token.type == 11 /* LineBreak */ && tokensAtDepth1.Any(function (a) {
+                    var nextTokenAtDepth1 = tokensAtDepth1.FirstOrDefault(function (a) {
                         return a.position > token.position;
-                    }) && tokensAtDepth1.FirstOrDefault(function (a) {
-                        return a.position > token.position;
-                    }).text.indexOf("\t") == 0) {
+                    });
+                    if (token.type == 11 /* LineBreak */ && nextTokenAtDepth1 != null && nextTokenAtDepth1.text.indexOf("\t") == 0 && nextTokenAtDepth1.text.indexOf("\t\t") != 0) {
                         var itemToken = getTokenAtIndex(token.index + 1);
                         var itemEnderToken = itemToken != null ? tokensAtDepth0.FirstOrDefault(function (a) {
                             return a.type == 11 /* LineBreak */ && a.position >= itemToken.position;
