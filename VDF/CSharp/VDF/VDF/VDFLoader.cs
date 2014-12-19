@@ -22,12 +22,7 @@ public static class VDFLoader
 {
 	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions loadOptions = null) { return ToVDFNode(text, typeof(T), loadOptions); }
 	public static VDFNode ToVDFNode(string text, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(text, declaredType, loadOptions); }
-	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null, int objIndent = 0)
-	{
-		var parser = new VDFTokenParser(text, 0);
-		while (parser.MoveNextToken()) {}
-		return ToVDFNode(parser.tokens, declaredType, loadOptions, objIndent);
-	}
+	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null, int objIndent = 0) { return ToVDFNode(VDFTokenParser.ParseTokens(text), declaredType, loadOptions, objIndent); }
 	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions loadOptions = null, int objIndent = 0)
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();

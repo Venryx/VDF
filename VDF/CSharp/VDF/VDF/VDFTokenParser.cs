@@ -39,30 +39,20 @@ public class VDFToken
 		this.text = text;
 	}
 }
-public class VDFTokenParser
+public static class VDFTokenParser
 {
-	string text;
-	public int nextCharPos;
-	public List<VDFToken> tokens;
-	public VDFTokenParser(string text, int firstCharPos)
+	public static List<VDFToken> ParseTokens(string text, bool postProcessTokens = true)
 	{
 		text = (text ?? "").Replace("\r\n", "\n");
 
-		this.text = text;
-		nextCharPos = firstCharPos;
-		tokens = new List<VDFToken>();
-	}
-
-	public bool MoveNextToken()
-	{
-		var tokenType = VDFTokenType.None;
-		//var tokenRawTextBuilder = new StringBuilder();
-		var tokenTextBuilder = new StringBuilder();
+		var result = new List<VDFToken>();
 
 		bool inLiteralMarkers = false;
-
-		var firstCharPos = nextCharPos;
-		for (int i = nextCharPos; i < text.Length && tokenType == VDFTokenType.None; i++, nextCharPos++)
+		int currentTokenFirstCharPos = 0;
+		var currentTokenType = VDFTokenType.None;
+		//var currentTokenRawTextBuilder = new StringBuilder();
+		var currentTokenTextBuilder = new StringBuilder();
+		for (int i = 0; i < text.Length && currentTokenType == VDFTokenType.None; i++)
 		{
 			char? lastChar = i - 1 >= 0 ? text[i - 1] : (char?)null;
 			char ch = text[i];
@@ -72,14 +62,13 @@ public class VDFTokenParser
 
 			var grabExtraCharsAsOwnAndSkipTheirProcessing = (Action<int, bool>)((count, addToTokenTextBuilder)=>
 			{
-				//tokenRawTextBuilder.Append(text.Substring(i + 1, count));
+				//currentTokenRawTextBuilder.Append(text.Substring(i + 1, count));
 				if (addToTokenTextBuilder)
-					tokenTextBuilder.Append(text.Substring(i + 1, count));
+					currentTokenTextBuilder.Append(text.Substring(i + 1, count));
 				i += count;
-				nextCharPos += count;
 			});
 
-			//tokenRawTextBuilder.Append(ch);
+			//currentTokenRawTextBuilder.Append(ch);
 			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
 			{
 				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
@@ -88,12 +77,12 @@ public class VDFTokenParser
 			else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // if first char of literal-end-marker
 			{
 				grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
-				tokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(tokenTextBuilder.ToString()));
+				currentTokenTextBuilder = new StringBuilder(FinalizedDataStringToRaw(currentTokenTextBuilder.ToString()));
 				inLiteralMarkers = false;
-				tokenType = VDFTokenType.DataBaseValue; // cause the return of chars as DataBaseValue token
+				currentTokenType = VDFTokenType.DataBaseValue; // cause the return of chars as DataBaseValue token
 			}
 			else
-				tokenTextBuilder.Append(ch);
+				currentTokenTextBuilder.Append(ch);
 
 			if (inLiteralMarkers) // don't do any token processing, (other than the literal-block-related stuff), until literal-end-marker is reached
 				continue;
@@ -101,47 +90,54 @@ public class VDFTokenParser
 			if (ch == '>')
 				if (nextChar == '>')
 				{
-					tokenType = VDFTokenType.WiderMetadataEndMarker;
+					currentTokenType = VDFTokenType.WiderMetadataEndMarker;
 					grabExtraCharsAsOwnAndSkipTheirProcessing(1, true);
 				}
 				else
-					tokenType = VDFTokenType.MetadataEndMarker;
+					currentTokenType = VDFTokenType.MetadataEndMarker;
 			else if (ch == '{')
-				tokenType = VDFTokenType.DataStartMarker;
+				currentTokenType = VDFTokenType.DataStartMarker;
 			else if (ch == '}')
-				tokenType = VDFTokenType.DataEndMarker;
+				currentTokenType = VDFTokenType.DataEndMarker;
 			else if (ch == ':')
-				tokenType = VDFTokenType.PoppedOutDataStartMarker;
+				currentTokenType = VDFTokenType.PoppedOutDataStartMarker;
 			else if (ch == '^')
-				tokenType = VDFTokenType.PoppedOutDataEndMarker;
+				currentTokenType = VDFTokenType.PoppedOutDataEndMarker;
 			else if (ch == '\n')
-				tokenType = VDFTokenType.LineBreak;
+				currentTokenType = VDFTokenType.LineBreak;
 			else if (ch == ';' && nextChar == ';')
 			{
-				tokenType = VDFTokenType.InLineComment;
+				currentTokenType = VDFTokenType.InLineComment;
 				var newNextCharPos = FindNextLineBreakCharPos(text, i + 2); // since rest of line is comment, skip to first char of next line
 				grabExtraCharsAsOwnAndSkipTheirProcessing((newNextCharPos != -1 ? newNextCharPos + 1 : text.Length) - (i + 1), true);
 			}
 			//else if (ch == '\t')
 			//	tokenType = VDFTokenType.Indent;
 			else if (ch == '|')
-				tokenType = VDFTokenType.ItemSeparator;
+				currentTokenType = VDFTokenType.ItemSeparator;
 			else if (nextChar == '>')
-				tokenType = VDFTokenType.MetadataBaseValue;
+				currentTokenType = VDFTokenType.MetadataBaseValue;
 			else if (nextChar == '{' || nextChar == ':')
-				tokenType = VDFTokenType.DataPropName;
+				currentTokenType = VDFTokenType.DataPropName;
 			else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || (nextChar == ';' && nextNextChar == ';') || nextChar == '\n' || nextChar == null) // if normal char, and we're at end of normal-segment
-				tokenType = VDFTokenType.DataBaseValue;
+				currentTokenType = VDFTokenType.DataBaseValue;
+
+			if (currentTokenType != VDFTokenType.None)
+			{
+				result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count/*, currentTokenRawTextBuilder.ToString()*/, currentTokenTextBuilder.ToString()));
+
+				currentTokenFirstCharPos = i + 1;
+				currentTokenType = VDFTokenType.None;
+				//currentTokenRawTextBuilder.Length = 0; // clear
+				currentTokenTextBuilder.Length = 0; // clear
+			}
 		}
 
-		if (tokenType == VDFTokenType.None)
-			return false;
+		if (postProcessTokens)
+			PostProcessTokens(result);
 
-		var token = new VDFToken(tokenType, firstCharPos, tokens.Count/*, tokenRawTextBuilder.ToString()*/, tokenTextBuilder.ToString());
-		tokens.Add(token);
-		return true;
+		return result;
 	}
-
 	static int FindNextLineBreakCharPos(string text, int searchStartPos)
 	{
 		for (int i = searchStartPos; i < text.Length; i++)
@@ -149,7 +145,6 @@ public class VDFTokenParser
 				return i;
 		return -1;
 	}
-
 	static string FinalizedDataStringToRaw(string finalizedDataStr)
 	{
 		string result = finalizedDataStr;
@@ -157,5 +152,10 @@ public class VDFTokenParser
 			result = result.Substring(0, result.Length - 1); // chop off last char, as it was just added by the serializer for separation
 		result = new Regex("@(@{2,})").Replace(result, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
 		return result;
+	}
+
+	static void PostProcessTokens(List<VDFToken> tokens)
+	{
+		
 	}
 }

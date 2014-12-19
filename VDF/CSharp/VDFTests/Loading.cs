@@ -340,6 +340,7 @@ name{L0}children:>>
 		name{L2}
 			".Trim());
 			a["children"].items.Count.Should().Be(1);
+			a["children"].items[0].items.Count.Should().Be(1);
 		}
 
 		[Fact] void Depth5_DeepNestedPoppedOutData()
