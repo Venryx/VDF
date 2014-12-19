@@ -16,8 +16,8 @@ namespace VDFTests
 		[Fact] void Depth0_Comment()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(@";; comment
-			Root string.");
-			a.baseValue.Should().Be("			Root string.");
+Root string.");
+			a.baseValue.Should().Be("Root string.");
 		}
 		[Fact] void Depth0_Comment2()
 		{
@@ -39,8 +39,8 @@ namespace VDFTests
 		}
 		[Fact] void Depth0_BaseValue_Literal()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("@@Base-value string that {needs escaping}.@@");
-			a.baseValue.Should().Be("Base-value string that {needs escaping}.");
+			VDFNode a = VDFLoader.ToVDFNode("@@\tBase-value string that {needs escaping}.@@");
+			a.baseValue.Should().Be("\tBase-value string that {needs escaping}.");
 		}
 		[Fact] void Depth0_Metadata_Type()
 		{
@@ -53,12 +53,12 @@ namespace VDFTests
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
 		}
-		[Fact] void Depth0_Array_ExplicitStartAndEndMarkers()
+		/*[Fact] void Depth0_Array_ExplicitStartAndEndMarkers()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
-		}
+		}*/
 		[Fact] void Depth0_Array_Objects()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<object>>("name{Dan}age{50}|name{Bob}age{60}");
@@ -87,11 +87,14 @@ three lines".Replace("\r", ""));
 			a[0].baseValue.Should().Be(null);
 			a[1].baseValue.Should().Be(null);
 		}
-		[Fact] void Depth0_Array_None()
+		[Fact] void Depth0_Array_None_NoType()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<object>>("");
 			a.items.Count.Should().Be(0);
-			a = VDFLoader.ToVDFNode(">>");
+		}
+		[Fact] void Depth0_Array_None_Type()
+		{
+			VDFNode a = VDFLoader.ToVDFNode(">>");
 			a.items.Count.Should().Be(0);
 		}
 		[Fact] void Depth0_ArrayMetadata1()
@@ -193,7 +196,7 @@ three lines".Replace("\r", ""));
 		}
 		void Depth1_ArraysInArrays()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|{3A}");
+			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}{2A|2B}{3A}");
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be("1B");
 			a[1][0].baseValue.Should().Be("2A");
@@ -202,7 +205,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArraysInArrays_SecondsEmpty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
+			VDFNode a = VDFLoader.ToVDFNode("{1A|}{2A|}");
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be(null);
 			a[1][0].baseValue.Should().Be("2A");
@@ -210,7 +213,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArraysInArrays_FirstsAndSecondsEmpty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{|}|{|}");
+			VDFNode a = VDFLoader.ToVDFNode("{|}{|}");
 			a[0][0].baseValue.Should().Be(null);
 			a[0][1].baseValue.Should().Be(null);
 			a[1][0].baseValue.Should().Be(null);
@@ -218,7 +221,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_StringAndArraysInArrays()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{text}|{2A|}");
+			VDFNode a = VDFLoader.ToVDFNode("{text}{2A|}");
 			a[0].baseValue.Should().Be("text");
 			a[1][0].baseValue.Should().Be("2A");
 			a[1][1].baseValue.Should().Be(null);
@@ -254,7 +257,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArrayPoppedOut()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"names:
+			VDFNode a = VDFLoader.ToVDFNode(@"names:>>
 	Dan
 	Bob");
 			a["names"][0].baseValue.Should().Be("Dan");
@@ -262,10 +265,10 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArraysPoppedOut() // each 'group' is actually just the value-data of one of the parent's properties
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"names:
+			VDFNode a = VDFLoader.ToVDFNode(@"names:>>
 	Dan
 	Bob
-^ages:
+^ages:>>
 	10
 	20");
 			a["names"][0].baseValue.Should().Be("Dan");
@@ -275,7 +278,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_InferredDictionaryPoppedOut()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(@"messages:,>>
+			VDFNode a = VDFLoader.ToVDFNode(@"messages:
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");
@@ -301,7 +304,7 @@ messages:{,>>
 	title2{message2}
 }^otherProperty{false}
  */
-			VDFNode a = VDFLoader.ToVDFNode(@"messages:,>>
+			VDFNode a = VDFLoader.ToVDFNode(@"messages:
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");
@@ -321,7 +324,7 @@ of three lines in total.@@}bool{>true}");
 		}
 		[Fact] void Depth1_ArrayPoppedOutThenMultilineString()
 		{
-			var a = VDFLoader.ToVDFNode(@"childTexts:
+			var a = VDFLoader.ToVDFNode(@"childTexts:>>
 	text1
 	text2
 ^text{@@This is a
@@ -340,7 +343,7 @@ name{L0}children:>>
 		name{L2}
 			".Trim());
 			a["children"].items.Count.Should().Be(1);
-			a["children"].items[0].items.Count.Should().Be(1);
+			a["children"].items[0]["children"].items.Count.Should().Be(1);
 		}
 
 		[Fact] void Depth5_DeepNestedPoppedOutData()
@@ -356,7 +359,7 @@ name{L0}children:>>
 		}
 		[Fact] void Depth5_SpeedTester()
 		{
-			var vdf = @"id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:
+			var vdf = @"id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:>>
 	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}
 	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}
 	id{52854b70-c200-478f-bcd2-c69a03cd808f}typeName{Wheel}name{FrontLeftWheel}pivotPoint_unit{-0.5,0.5,0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}

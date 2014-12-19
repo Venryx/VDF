@@ -45,7 +45,17 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode<string>("This is a\nmultiline string\nof three lines in total.");
 			a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
 		}
-		[Fact] void Depth1_TroublesomeLiteral()
+		[Fact] void Depth0_EscapeAsLiteral_1()
+		{
+			var a = new VDFNode("\tBase value string that needs escaping.");
+			a.ToVDF().Should().Be("@@\tBase value string that needs escaping.@@");
+		}
+		[Fact] void Depth0_EscapeAsLiteral_2()
+		{
+			var a = new VDFNode("Base value string that {needs escaping}.");
+			a.ToVDF().Should().Be("@@Base value string that {needs escaping}.@@");
+		}
+		[Fact] void Depth1_EscapeAsLiteral_Troublesome()
 		{
 			var a = new VDFNode();
 			a[0] = new VDFNode("This is a list item that|needs|escaping.");

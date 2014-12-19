@@ -78,7 +78,7 @@ public class VDFNode
 	static string RawDataStringToFinalized(string rawDataStr, bool disallowRawPipe = false)
 	{
 		string result = rawDataStr;
-		if (rawDataStr.Contains(":") || rawDataStr.Contains(">") || rawDataStr.Contains("}") || (disallowRawPipe && rawDataStr.Contains("|")) || rawDataStr.Contains("@@") || rawDataStr.Contains(";;") || rawDataStr.Contains("\n"))
+		if (rawDataStr.Contains(":") || rawDataStr.Contains(">") || rawDataStr.Contains("}") || (disallowRawPipe && rawDataStr.Contains("|")) || rawDataStr.Contains("@@") || rawDataStr.Contains(";;") || rawDataStr.Contains("\n") || rawDataStr.Contains("\t")) // note: tabs can probably be put back in without escaping, in certain cases
 			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
 				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
 			else

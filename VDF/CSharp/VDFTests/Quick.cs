@@ -38,7 +38,7 @@ namespace VDFTests
 			public string autoOpenPage = "";
 		}
 
-		[Fact] void Load()
+		/*[Fact] void Load()
 		{
 			var a = VDFLoader.ToVDFNode<FrameData>(@"
 name{L0}children:>>
@@ -46,9 +46,9 @@ name{L0}children:>>
 		name{L2}
 			".Trim());
 			a["children"].items.Count.Should().Be(1);
-		}
+		}*/
 
-		[Fact] void Save()
+		/*[Fact] void Save()
 		{
 			var a = VDF.Deserialize<FrameData>(@"
 	settings{showTooltips{true}autoOpenSubmenus{Frame2|CreativeDefense}autoOpenPage{>empty}}
@@ -66,7 +66,7 @@ name{L0}children:>>
 	prefs{Types_toolOptions{@@Select{}Add{}Resize{}Remove{}@@}Types_liveTool{Select}}
 	liveWorldName{>null}
 	lastLivePackName{>null}".Replace("\r\n", "\n"));
-		}
+		}*/
 	}
 }
 
