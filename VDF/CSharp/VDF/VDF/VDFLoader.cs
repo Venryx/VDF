@@ -30,6 +30,7 @@ public static class VDFLoader
 		// figure out obj-type
 		// ==========
 
+		// todo; you should be able to remove/rework this now, with new token post-processing system in place
 		int depth = 0;
 		var tokensNotInDataMarkers = new List<VDFToken>();
 		foreach (VDFToken token in tokens)

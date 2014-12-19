@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,7 +22,7 @@ public enum VDFTokenType
 	DataEndMarker,
 	LineBreak,
 	InLineComment,
-	//Indent // this is taken care of at a higher level by the VDFLoader class
+	Indent
 }
 public class VDFToken
 {
@@ -111,8 +112,8 @@ public static class VDFTokenParser
 				var newNextCharPos = FindNextLineBreakCharPos(text, i + 2); // since rest of line is comment, skip to first char of next line
 				grabExtraCharsAsOwnAndSkipTheirProcessing((newNextCharPos != -1 ? newNextCharPos + 1 : text.Length) - (i + 1), true);
 			}
-			//else if (ch == '\t')
-			//	tokenType = VDFTokenType.Indent;
+			else if (ch == '\t')
+				currentTokenType = VDFTokenType.Indent;
 			else if (ch == '|')
 				currentTokenType = VDFTokenType.ItemSeparator;
 			else if (nextChar == '>')
@@ -156,6 +157,123 @@ public static class VDFTokenParser
 
 	static void PostProcessTokens(List<VDFToken> tokens)
 	{
-		
+		// pass 1: find brackets that start and end inline-lists
+		// ----------
+
+		var depth_basic = 0;
+		var depthStartMarkers = new List<VDFToken>();
+		var inlineListStartMarkers = new HashSet<VDFToken>();
+		var depthsWaitingForInlineListEndMarkers = new HashSet<int>();
+		var inlineListEndMarkers = new HashSet<VDFToken>();
+		foreach (var token in tokens)
+			if (token.type == VDFTokenType.DataStartMarker)
+			{
+				depth_basic++;
+				depthStartMarkers[depth_basic] = token;
+			}
+			else if (token.type == VDFTokenType.ItemSeparator)
+			{
+				inlineListStartMarkers.Add(depthStartMarkers[depth_basic]);
+				depthsWaitingForInlineListEndMarkers.Add(depth_basic);
+			}
+			else if (token.type == VDFTokenType.DataEndMarker)
+			{
+				if (depthsWaitingForInlineListEndMarkers.Contains(depth_basic))
+				{
+					inlineListEndMarkers.Add(token);
+					depthsWaitingForInlineListEndMarkers.Remove(depth_basic);
+				}
+				depthStartMarkers.RemoveAt(depth_basic);
+				depth_basic--;
+			}
+
+		// pass 2: add brackets surrounding inline-list items
+		// ----------
+
+		for (var i = 0; i < tokens.Count; i++)
+		{
+			var token = tokens[i];
+			if (token.type == VDFTokenType.DataStartMarker && inlineListStartMarkers.Contains(token))
+				tokens.Insert(++i, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
+			else if (token.type == VDFTokenType.ItemSeparator)
+			{
+				tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
+				tokens.Insert(++i, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
+			}
+			else if (token.type == VDFTokenType.DataEndMarker && inlineListEndMarkers.Contains(token))
+				tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
+		}
+
+		// pass 3: add inferred indent-block data-[start/end]-marker tokens
+		// ----------
+
+		var lastLine_indentsReached = 0;
+		var line_indentsReached = 0;
+		var line_firstNonIndentCharReached = false;
+		for (var i = 0; i < tokens.Count; i++)
+		{
+			var token = tokens[i];
+			if (new[] {VDFTokenType.PoppedOutDataStartMarker, VDFTokenType.PoppedOutDataEndMarker, VDFTokenType.LineBreak}.Contains(token.type))
+				tokens.RemoveAt(i--);
+			else if (token.type == VDFTokenType.Indent)
+				line_indentsReached++;
+			else if (token.type == VDFTokenType.LineBreak)
+			{
+				lastLine_indentsReached = line_indentsReached;
+
+				line_firstNonIndentCharReached = false;
+				line_indentsReached = 0;
+			}
+			else if (!line_firstNonIndentCharReached)
+			{
+				line_firstNonIndentCharReached = true;
+				if (i != 0)
+				{
+					if (line_indentsReached > lastLine_indentsReached)
+						tokens.Insert(i++, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // add inferred indent-block data-start-marker token (for list)
+					else
+					{
+						for (var i2 = lastLine_indentsReached; i2 > line_indentsReached; i2++) // add inferred indent-block data-end-marker tokens
+						{
+							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block last-item
+							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
+						}
+						if (token.type != VDFTokenType.PoppedOutDataEndMarker) // if not the ^ token (i.e. if actually a new item, instead of a prop continution)
+							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for current-indent-block last-item
+					}
+
+					if (token.type != VDFTokenType.PoppedOutDataEndMarker) // if not the ^ token (i.e. if actually a new item, instead of a prop continution)
+						tokens.Insert(i++, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // add inferred indent-block data-start-marker token (for item)
+				}
+			}
+		}
+
+		for (var i = lastLine_indentsReached; i > 0; i++) // add inferred indent-block data-end-marker tokens
+		{
+			tokens.Insert(tokens.Count, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block last-item
+			tokens.Insert(tokens.Count, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
+		}
+
+		// pass 4: remove [:, ^, line-break, indent, |, and comment] tokens
+		// ----------
+
+		for (var i = 0; i < tokens.Count; i++)
+		{
+			var token = tokens[i];
+			if (new[] {VDFTokenType.PoppedOutDataStartMarker, VDFTokenType.PoppedOutDataEndMarker, VDFTokenType.LineBreak, VDFTokenType.Indent, VDFTokenType.ItemSeparator, VDFTokenType.InLineComment}.Contains(token.type))
+				tokens.RemoveAt(i--);
+		}
+
+		// pass 5: fix token position-and-index properties
+		// ----------
+
+		var textProcessedLength = 0;
+		for (var i = 0; i < tokens.Count; i++)
+		{
+			var token = tokens[i];
+			token.position = textProcessedLength;
+			token.index = i;
+			textProcessedLength += token.text.Length;
+		}
 	}
 }
