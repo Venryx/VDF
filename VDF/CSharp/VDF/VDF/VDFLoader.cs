@@ -27,11 +27,43 @@ public static class VDFLoader
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
+		// pre-process/fix tokens
+		// ==========
+
+		// if we're a non-list object
+		int depth;
+		for (var i0 = 0; i0 < 2; i0++) // probably temp
+			if ((declaredType != null && !typeof(IList).IsAssignableFrom(declaredType)) || (tokens.Count > 0 && tokens[0].type == VDFTokenType.MetadataBaseValue && tokens[0].text.Contains(","))) // todo: should check for comma char only at depth 0
+			{
+				depth = 0;
+				bool hasItems = false;
+				for (var i = 0; i < tokens.Count; i++)
+				{
+					var token = tokens[i];
+
+					if (token.type == VDFTokenType.DataEndMarker)
+						depth--;
+
+					if (depth == 0 && !hasItems)
+						if (token.type == VDFTokenType.DataStartMarker)
+							hasItems = true;
+						else if (token.type == VDFTokenType.DataPropName)
+							break;
+					// and yet we have items (i.e. data was ambiguous to parser, and was considered to be within popped-out items), fix tokens to have them end up as properties
+					if (hasItems && depth == 0 && new[] {VDFTokenType.DataStartMarker, VDFTokenType.DataEndMarker}.Contains(token.type))
+						tokens.RemoveAt(i--);
+
+					if (token.type == VDFTokenType.DataStartMarker)
+						depth++;
+				}
+				if (hasItems) // if we had items (and therefore made the fixes), fix up the tokens' position-and-index properties
+					VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
+			}
+
 		// figure out obj-type
 		// ==========
 
-		// todo; you should be able to remove/rework this now, with new token post-processing system in place
-		int depth = 0;
+		depth = 0;
 		var tokensAtDepth0 = new List<VDFToken>();
 		foreach (VDFToken token in tokens)
 		{
@@ -42,7 +74,7 @@ public static class VDFLoader
 			if (token.type == VDFTokenType.DataStartMarker)
 				depth++;
 		}
-		var isList = false;
+		var isList = typeof(IList).IsAssignableFrom(declaredType);
 		for (var i = 0; i < tokensAtDepth0.Count; i++)
 		{
 			var lastToken = i - 1 >= 0 ? tokensAtDepth0[i - 1] : null;
@@ -95,6 +127,20 @@ public static class VDFLoader
 		if (objType == null)
 			objType = typeof(string); // string is the default/fallback type (note, though, that if the below code finds properties, it'll just add them to the VDFNode anyway)
 		var objTypeInfo = VDFTypeInfo.Get(objType);
+
+		// pre-process/fix tokens
+		// ==========
+
+		// if we're a non-list object and yet we have items (i.e. data was ambiguous to parser, and was considered to be within popped-out items), fix tokens to have them end up as properties
+		/*var firstStartMarker = tokensAtDepth0.FirstOrDefault(a => a.type == VDFTokenType.DataStartMarker);
+		var firstPropertyName = tokensAtDepth0.FirstOrDefault(a => a.type == VDFTokenType.DataPropName);
+		if (!typeof(IList).IsAssignableFrom(objType) && (firstStartMarker != null && (firstPropertyName == null || firstStartMarker.index < firstPropertyName.index)))
+		{
+			for (var i = 0; i < tokensAtDepth0.Count; i++)
+				if (new[] { VDFTokenType.DataStartMarker, VDFTokenType.DataEndMarker }.Contains(tokensAtDepth0[i].type))
+					tokensAtDepth0.RemoveAt(i--);
+			scanForDepth0Tokens(); // rescan
+		}*/
 
 		// calculate token depths
 		// ==========
@@ -219,49 +265,50 @@ public static class VDFLoader
 		}*/
 
 		// if List, parse items
-		if (typeof(IList).IsAssignableFrom(objType))
-			for (var i = 0; i < tokensAtDepth0.Count; i++)
-			{
-				var token = tokensAtDepth0[i];
-				if (token.type == VDFTokenType.DataStartMarker)
-				{
-					var itemFirstToken = getTokenAtIndex(token.index + 1); //tokens.First(a=>a.position >= token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0));
-					var itemEnderToken = itemFirstToken != null ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker && a.index >= itemFirstToken.index) : null;
-					objNode.items.Add(ToVDFNode(getTokenRange_tokens(itemFirstToken, itemEnderToken), objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
-				}
-			}
-
-		// parse keys-and-values/properties (depending on whether we're a Dictionary)
-		for (var i = 0; i < tokens.Count; i++)
+		//if (typeof(IList).IsAssignableFrom(objType))
+		for (var i = 0; i < tokensAtDepth0.Count; i++)
 		{
-			var token = tokens[i];
-			var next3Tokens = tokens.GetRange(i + 1, Math.Min(3, tokens.Count - (i + 1)));
-
-			if (token.type == VDFTokenType.DataPropName && tokensAtDepth0.Contains(token))
+			var token = tokensAtDepth0[i];
+			if (token.type == VDFTokenType.DataStartMarker)
 			{
-				var propName = token.text.TrimStart(new[]{'\t'});
-				Type propValueType;
-				if (typeof(IDictionary).IsAssignableFrom(objType))
-					propValueType = objType.IsGenericType ? objType.GetGenericArguments()[1] : null;
-				else
-					propValueType = objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
-
-				if (next3Tokens.Count < 2 || next3Tokens[1].type == VDFTokenType.DataEndMarker) // if (as Dictionary) we have no items
-					objNode.properties.Add(propName, ToVDFNode(new List<VDFToken>(), propValueType, loadOptions, objIndent));
-				else if (!token.text.StartsWith("\t")) // if this property *key*/*definition* is inline
-				{
-					var propValueToken = next3Tokens[1];
-					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>(a.type == VDFTokenType.DataEndMarker || a.type == VDFTokenType.PoppedOutDataEndMarker) && a.position >= propValueToken.position);
-					objNode.properties.Add(propName, ToVDFNode(getTokenRange_tokens(propValueToken, propValueEnderToken), propValueType, loadOptions, objIndent));
-				}
-				else // if this property *key*/*definition* is popped-out
-				{
-					var propValueToken = next3Tokens[1];
-					var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName && a.position > propValueToken.position);
-					objNode.properties.Add(propName, ToVDFNode(getTokenRange_tokens(propValueToken, propValueEnderToken), propValueType, loadOptions, objIndent + 1));
-				}
+				var itemFirstToken = getTokenAtIndex(token.index + 1); //tokens.First(a=>a.position >= token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0));
+				var itemEnderToken = itemFirstToken != null ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker && a.index > itemFirstToken.index) : null;
+				objNode.items.Add(ToVDFNode(getTokenRange_tokens(itemFirstToken, itemEnderToken), objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
 			}
 		}
+
+		// if object or dictionary, parse keys-and-values/properties (depending on whether we're a Dictionary)
+		if (!typeof(IList).IsAssignableFrom(objType))
+			for (var i = 0; i < tokens.Count; i++)
+			{
+				var token = tokens[i];
+				var next3Tokens = tokens.GetRange(i + 1, Math.Min(3, tokens.Count - (i + 1)));
+
+				if (token.type == VDFTokenType.DataPropName && tokensAtDepth0.Contains(token))
+				{
+					var propName = token.text.TrimStart(new[] {'\t'});
+					Type propValueType;
+					if (typeof(IDictionary).IsAssignableFrom(objType))
+						propValueType = objType.IsGenericType ? objType.GetGenericArguments()[1] : null;
+					else
+						propValueType = objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
+
+					if (next3Tokens.Count < 2 || next3Tokens[1].type == VDFTokenType.DataEndMarker) // if (as Dictionary) we have no items
+						objNode.properties.Add(propName, ToVDFNode(new List<VDFToken>(), propValueType, loadOptions, objIndent));
+					else //if (!token.text.StartsWith("\t")) // if this property *key*/*definition* is inline
+					{
+						var propValueToken = next3Tokens[1]; //next3Tokens.First(a=>a.type != VDFTokenType.DataStartMarker);
+						var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>(a.type == VDFTokenType.DataEndMarker || a.type == VDFTokenType.PoppedOutDataEndMarker) && a.index > propValueToken.index);
+						objNode.properties.Add(propName, ToVDFNode(getTokenRange_tokens(propValueToken, propValueEnderToken), propValueType, loadOptions, objIndent));
+					}
+					/*else // if this property *key*#/*definition* is popped-out
+					{
+						var propValueToken = next3Tokens[1];
+						var propValueEnderToken = tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataPropName && a.position > propValueToken.position);
+						objNode.properties.Add(propName, ToVDFNode(getTokenRange_tokens(propValueToken, propValueEnderToken), propValueType, loadOptions, objIndent + 1));
+					}*/
+				}
+			}
 
 		// parse base-value (if applicable)
 		if (objNode.items.Count == 0 && objNode.properties.Count == 0)
@@ -274,6 +321,13 @@ public static class VDFLoader
 
 		return objNode;
 	}
+	/*public static void RestoreItemPropertiesAsRootProperties(VDFNode objNode)
+	{
+		foreach (VDFNode item in objNode.items)
+			foreach (var key in item.properties.Keys)
+				objNode.properties[key] = item.properties[key];
+		objNode.items.Clear();
+	}*/
 
 	static int FindNextDepthXCharYPos(string text, int searchStartPos, int targetDepth, char ch, char depthStartChar, char depthEndChar)
 	{
