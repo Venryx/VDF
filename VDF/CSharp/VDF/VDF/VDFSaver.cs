@@ -118,7 +118,7 @@ public static class VDFSaver
 			var collapseMap = new Dictionary<string, string> {{"string", null}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
 			if (objNode.metadata_type != null && collapseMap.ContainsKey(objNode.metadata_type))
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
-			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params
+			// if list of generic-params-without-generic-params, or dictionary, chop out name and just include generic-params
 			if (objNode.metadata_type != null && ((objNode.metadata_type.StartsWith("List[") && !objNode.metadata_type.Substring(5).Contains("[")) || objNode.metadata_type.StartsWith("Dictionary[")))
 				objNode.metadata_type = objNode.metadata_type.StartsWith("List[") ? objNode.metadata_type.Substring(5, objNode.metadata_type.Length - 6) : objNode.metadata_type.Substring(11, objNode.metadata_type.Length - 12);
 		}

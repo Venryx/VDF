@@ -282,7 +282,6 @@ three lines".Replace("\r", ""));
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");
-			//VDFLoader.RestoreItemPropertiesAsRootProperties(a["messages"]); // since the popped-out items are ambiguous (currently, anyway), this is needed
 			a["messages"].properties.Count.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["messages"]["title2"].baseValue.Should().Be("message2");
@@ -309,7 +308,6 @@ messages:{,>>
 	title1{message1}
 	title2{message2}
 ^otherProperty{false}");
-			//VDFLoader.RestoreItemPropertiesAsRootProperties(a["messages"]); // since the popped-out items are ambiguous (currently, anyway), this is needed
 			a["messages"].properties.Count.Should().Be(2);
 			a["messages"]["title1"].baseValue.Should().Be("message1");
 			a["messages"]["title2"].baseValue.Should().Be("message2");
