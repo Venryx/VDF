@@ -50,7 +50,7 @@ public static class VDFLoader
 						else if (token.type == VDFTokenType.DataPropName)
 							break;
 					// and yet we have items (i.e. data was ambiguous to parser, and was considered to be within popped-out items), fix tokens to have them end up as properties
-					if (hasItems && depth == 0 && new[] {VDFTokenType.DataStartMarker, VDFTokenType.DataEndMarker}.Contains(token.type))
+					if (hasItems && depth == 0 && (token.type == VDFTokenType.DataStartMarker || token.type == VDFTokenType.DataEndMarker))
 						tokens.RemoveAt(i--);
 
 					if (token.type == VDFTokenType.DataStartMarker)
@@ -186,7 +186,14 @@ public static class VDFLoader
 		return objNode;
 	}
 	static List<VDFToken> GetTokenRange_Tokens(List<VDFToken> tokens, VDFToken firstToken, VDFToken enderToken)
-		{ return tokens.GetRange(firstToken.index, (enderToken != null ? enderToken.index : tokens.Count) - firstToken.index).Select(a=>new VDFToken(a.type, a.position - firstToken.position, a.index - firstToken.index, a.text)).ToList(); }
+	{
+		//return tokens.GetRange(firstToken.index, (enderToken != null ? enderToken.index : tokens.Count) - firstToken.index).Select(a=>new VDFToken(a.type, a.position - firstToken.position, a.index - firstToken.index, a.text)).ToList();
+
+		var result = new List<VDFToken>();
+		for (var i = firstToken.index; i < (enderToken != null ? enderToken.index : tokens.Count); i++)
+			result.Add(new VDFToken(tokens[i].type, tokens[i].position - firstToken.position, tokens[i].index - firstToken.index, tokens[i].text));
+		return result;
+	}
 
 	static int FindNextDepthXCharYPos(string text, int searchStartPos, int targetDepth, char ch, char depthStartChar, char depthEndChar)
 	{

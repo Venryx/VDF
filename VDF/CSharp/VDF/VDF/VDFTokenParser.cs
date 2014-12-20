@@ -60,7 +60,7 @@ public static class VDFTokenParser
 		int currentTokenFirstCharPos = 0;
 		var currentTokenType = VDFTokenType.None;
 		var currentTokenTextBuilder = new StringBuilder();
-		for (int i = 0; i < text.Length && currentTokenType == VDFTokenType.None; i++)
+		for (var i = 0; i < text.Length; i++)
 		{
 			char? lastChar = i - 1 >= 0 ? text[i - 1] : (char?)null;
 			char ch = text[i];
@@ -171,7 +171,7 @@ public static class VDFTokenParser
 		for (var i = 0; i < tokens.Count; i++)
 		{
 			var token = tokens[i];
-			if (new[] {VDFTokenType.InLineComment}.Contains(token.type))
+			if (token.type == VDFTokenType.InLineComment)
 				tokens.RemoveAt(i--);
 		}
 
@@ -180,7 +180,7 @@ public static class VDFTokenParser
 
 		var depth_base = 0;
 		var line_indentsReached = 0;
-		var depthStartMarkers = new Dictionary<int, VDFToken>();
+		var depthStartMarkers = new Dictionary<int, VDFToken>(); //new List<VDFToken>();
 		var depthsOfChildrenData = new HashSet<int>();
 		for (var i = 0; i < tokens.Count; i++)
 		{
@@ -198,13 +198,18 @@ public static class VDFTokenParser
 			if (token.type == VDFTokenType.DataStartMarker)
 			{
 				if (token != null)
+					/*if (depthStartMarkers.Count > depth)
+						depthStartMarkers[depth] = token;
+					else
+						for (var i2 = depthStartMarkers.Count; i2 <= depth; i2++)
+							depthStartMarkers.Add(i2 == depth ? token : null);*/
 					depthStartMarkers[depth] = token;
 			}
 			else if (token.type == VDFTokenType.DataEndMarker)
 			{
 				if (depthsOfChildrenData.Contains(depth + 1))
 				{
-					var firstInDepthTokenIndex = depthStartMarkers.ContainsKey(depth + 1) ? tokens.IndexOf(depthStartMarkers[depth + 1]) + 1 : 0;
+					var firstInDepthTokenIndex = depthStartMarkers.ContainsKey(depth + 1) ? tokens.IndexOf(depthStartMarkers[depth + 1]) + 1 : 0; //depthStartMarkers.Count > depth + 1 ? tokens.IndexOf(depthStartMarkers[depth + 1]) + 1 : 0;
 					int itemFirstTokenIndex = firstInDepthTokenIndex;
 					if (tokens[firstInDepthTokenIndex].type == VDFTokenType.WiderMetadataEndMarker)
 						itemFirstTokenIndex = firstInDepthTokenIndex + 1;
@@ -281,11 +286,11 @@ public static class VDFTokenParser
 							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block last-item
 							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
 						}
-						if (!new[] {VDFTokenType.PoppedOutDataEndMarker, VDFTokenType.DataEndMarker}.Contains(token.type)) // if not the ^ or } token (i.e. if actually a new item, instead of a prop continution)
+						if (token.type != VDFTokenType.PoppedOutDataEndMarker && token.type != VDFTokenType.DataEndMarker) // if not the ^ or } token (i.e. if actually a new item, instead of a prop continution)
 							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for current-indent-block last-item
 					}
 
-					if (!new[] {VDFTokenType.PoppedOutDataEndMarker, VDFTokenType.DataEndMarker}.Contains(token.type)) // if not the ^ or } token (i.e. if actually a new item, instead of a prop continution)
+					if (token.type != VDFTokenType.PoppedOutDataEndMarker && token.type != VDFTokenType.DataEndMarker) // if not the ^ or } token (i.e. if actually a new item, instead of a prop continution)
 						tokens.Insert(i++, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // add inferred indent-block data-start-marker token (for item)
 				}
 			}
@@ -304,7 +309,7 @@ public static class VDFTokenParser
 		for (var i = 0; i < tokens.Count; i++)
 		{
 			var token = tokens[i];
-			if (new[] {VDFTokenType.PoppedOutDataStartMarker, VDFTokenType.PoppedOutDataEndMarker, VDFTokenType.LineBreak, VDFTokenType.Indent, VDFTokenType.ItemSeparator}.Contains(token.type))
+			if (token.type == VDFTokenType.PoppedOutDataStartMarker || token.type == VDFTokenType.PoppedOutDataEndMarker || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.Indent || token.type == VDFTokenType.ItemSeparator)
 				tokens.RemoveAt(i--);
 		}
 
@@ -314,9 +319,6 @@ public static class VDFTokenParser
 
 		// pass 4: fix token position-and-index properties
 		// ----------
-
-		// temp
-		Console.Write(String.Join("", tokens.Select(a => a.text).ToArray()));
 
 		RefreshTokenPositionAndIndexProperties(tokens);
 	}
