@@ -136,9 +136,9 @@
             }
         } else {
             var lastPropName = null;
-            for (var propName in this.properties) {
-                var lastPropValue = lastPropName != null ? this.properties[lastPropName] : null;
-                var propValue = this.properties[propName];
+            for (var propName in this.properties.Keys) {
+                var lastPropValue = lastPropName != null ? this.properties.Get(lastPropName) : null;
+                var propValue = this.properties.Get(propName);
 
                 if (lastPropValue != null && lastPropValue.guardingItsLastLine)
                     if (this.popOutChildren)
@@ -181,10 +181,10 @@
                     break;
                 }
         } else
-            for (var key in this.properties)
-                if (this.properties[key].guardingItsLastLine) {
+            for (var key in this.properties.Keys)
+                if (this.properties.Get(key).guardingItsLastLine) {
                     this.guardingItsLastLine = true;
-                    this.properties[key].guardingItsLastLine = false; // we've taken it as our own
+                    this.properties.Get(key).guardingItsLastLine = false; // we've taken it as our own
                     break;
                 }
 
@@ -297,16 +297,16 @@
         if (obj.push)
             for (var i = 0; i < this.items.length; i++)
                 obj.push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
-        for (var propName in this.properties)
+        for (var propName in this.properties.Keys)
             try  {
                 if (obj instanceof Dictionary) {
                     var key = propName;
                     if (typeGenericArgumentsAreReal)
                         if (VDF.typeImporters_inline[typeGenericParameters[0]])
                             key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
-                    obj.Set(key, this.properties[propName].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[1] : null, loadOptions));
+                    obj.Set(key, this.properties.Get(propName).ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[1] : null, loadOptions));
                 } else
-                    obj[propName] = this.properties[propName].ToObject(typeGenericArgumentsAreReal ? finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+                    obj[propName] = this.properties.Get(propName).ToObject(typeGenericArgumentsAreReal ? finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
             } catch (ex) {
                 throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n");
             }

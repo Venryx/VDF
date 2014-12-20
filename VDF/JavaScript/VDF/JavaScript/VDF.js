@@ -322,7 +322,7 @@ var Dictionary = (function () {
         for (var _i = 0; _i < (arguments.length - 2); _i++) {
             keyValuePairs[_i] = arguments[_i + 2];
         }
-        VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
+        //VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
         this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
         this.keyType = keyType;
         this.valueType = valueType;
@@ -333,8 +333,18 @@ var Dictionary = (function () {
             for (var i = 0; i < keyValuePairs.length; i++)
                 this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
     }
-    Object.defineProperty(Dictionary.prototype, "Count", {
+    Object.defineProperty(Dictionary.prototype, "Keys", {
         // properties
+        get: function () {
+            var result = {};
+            for (var i = 0; i < this.keys.length; i++)
+                result[this.keys[i]] = null;
+            return result;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Dictionary.prototype, "Count", {
         get: function () {
             return this.keys.length;
         },

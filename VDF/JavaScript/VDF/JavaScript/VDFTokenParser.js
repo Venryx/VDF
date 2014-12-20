@@ -247,12 +247,6 @@ var VDFTokenParser = (function () {
 
         // pass 4: fix token position-and-index properties
         // ----------
-        // temp
-        var text1 = "";
-        for (var i = 0; i < tokens.Count; i++)
-            text1 += tokens[i].text;
-        console.log(text1);
-
         VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
     };
     VDFTokenParser.RefreshTokenPositionAndIndexProperties = function (tokens) {

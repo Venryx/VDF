@@ -41,12 +41,13 @@ namespace VDFTests
 		[Fact] void Load()
 		{
 			var a = VDFLoader.ToVDFNode(@"
-id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:>>
-	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}
-	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}
-	id{e97f8ee1-320c-4aef-9343-3317accb015b}typeName{Crate}name{Crate}pivotPoint_unit{0,0.625,0}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}
+name{Root}children:
+	name{Stories}
+	name{Games}children:
+		name{CreativeDefense}children:
+			name{DevelopmentTree}
 			".Trim());
-			a["parts"].items.Count.Should().Be(3);
+			a["children"][1]["children"][0]["children"][0]["name"].baseValue.Should().Be("DevelopmentTree");
 		}
 
 		/*[Fact] void Save()

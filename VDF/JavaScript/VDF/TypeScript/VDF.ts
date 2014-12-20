@@ -325,7 +325,7 @@ class Dictionary<K, V>
 	values: any[];
 	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
 	{
-		VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
+		//VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
 		this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
 		this.keyType = keyType;
 		this.valueType = valueType;
@@ -338,6 +338,13 @@ class Dictionary<K, V>
 	}
 
 	// properties
+	get Keys()
+	{
+		var result = {};
+		for (var i = 0; i < this.keys.length; i++)
+			result[this.keys[i]] = null;
+		return result;
+	}
 	get Count() { return this.keys.length; }
 
 	// methods

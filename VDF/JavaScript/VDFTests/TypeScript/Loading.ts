@@ -563,5 +563,29 @@ Shoot at Enemy Vehicle\n\
 	Gun1 fire@@}", new VDFLoadOptions(true, true));
 			a.parts.Count.Should().Be(9);
 		});
+
+		// quick/temp tests
+		// ==========
+
+		test("Load_Quick", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("\n\
+name{Root}children:\n\
+	name{Stories}\n\
+	name{Games}children:\n\
+		name{CreativeDefense}children:\n\
+			name{DevelopmentTree}\n\
+			".trim().replace(/    /g, "\t"));
+			a["children"][1]["children"][0]["children"][0]["name"].baseValue.Should().Be("DevelopmentTree");
+
+			var b = VDF.Deserialize("\n\
+name{Root}children:\n\
+	name{Stories}\n\
+	name{Games}children:\n\
+		name{CreativeDefense}children:\n\
+			name{DevelopmentTree}\n\
+			".trim().replace(/    /g, "\t"), new VDFLoadOptions(null, true));
+			b["children"][1]["children"][0]["children"][0]["name"].Should().Be("DevelopmentTree");
+		});
 	}
 }

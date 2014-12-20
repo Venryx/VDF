@@ -256,8 +256,6 @@ public class VDFNode
 		if (finalType == null)
 			finalType = typeof(string); // string is the default/fallback type
 		
-		V.Nothing();
-
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))
 			result = VDF.typeImporters_inline[finalType](baseValue, finalType.GetGenericArguments().ToList());
