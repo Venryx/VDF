@@ -160,21 +160,23 @@ var VDFUtils = (function () {
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.data = [];
-        this.counter = 0;
         if (startData)
             this.data.push(startData);
     }
     StringBuilder.prototype.Append = function (str) {
-        this.data[this.counter++] = str;
+        this.data.push(str);
         return this;
     };
-    StringBuilder.prototype.Remove = function (i, j) {
-        this.data.splice(i, j || 1);
+    StringBuilder.prototype.Insert = function (index, str) {
+        this.data.splice(index, 0, str);
         return this;
     };
-    StringBuilder.prototype.Insert = function (i, str) {
-        this.data.splice(i, 0, str);
+    StringBuilder.prototype.Remove = function (index, count) {
+        this.data.splice(index, count || 1);
         return this;
+    };
+    StringBuilder.prototype.Clear = function () {
+        this.Remove(0, this.data.length);
     };
     StringBuilder.prototype.ToString = function (joinerString) {
         return this.data.join(joinerString || "");
@@ -252,8 +254,14 @@ window["List"] = function List(itemType) {
         for (var i = 0; i < items.length; i++)
             this.push(items[i]);
     };
+    self.Insert = function (index, item) {
+        return this.splice(index, 0, item);
+    };
     self.Remove = function (item) {
-        this.splice(this.indexOf(item), 1);
+        this.RemoveAt(this.indexOf(item));
+    };
+    self.RemoveAt = function (index) {
+        this.splice(index, 1);
     };
     self.Any = function (matchFunc) {
         for (var i in this.indexes())
@@ -335,6 +343,9 @@ var Dictionary = (function () {
     });
 
     // methods
+    Dictionary.prototype.ContainsKey = function (key) {
+        return this.keys.indexOf(key) != -1;
+    };
     Dictionary.prototype.Get = function (key) {
         return this.values[this.keys.indexOf(key)];
     };

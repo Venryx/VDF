@@ -115,7 +115,7 @@ class VDFSaver
 			var collapseMap = {"string": null, "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": ""};
 			if (objNode.metadata_type != null && collapseMap[objNode.metadata_type] !== undefined)
 				objNode.metadata_type = collapseMap[objNode.metadata_type];
-			// if List of generic-params-without-generic-params, or Dictionary, chop out name and just include generic-params
+			// if list of generic-params-without-generic-params, or dictionary, chop out name and just include generic-params
 			if (objNode.metadata_type != null && ((objNode.metadata_type.indexOf("List[") == 0 && objNode.metadata_type.substring(5).indexOf("[") == -1) || objNode.metadata_type.indexOf("Dictionary[") != -1))
 				objNode.metadata_type = objNode.metadata_type.indexOf("List[") == 0 ? objNode.metadata_type.substring(5, objNode.metadata_type.length - 1) : objNode.metadata_type.substring(11, objNode.metadata_type.length - 1);
 		}

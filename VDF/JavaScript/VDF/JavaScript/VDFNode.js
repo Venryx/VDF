@@ -71,7 +71,7 @@
 
     VDFNode.RawDataStringToFinalized = function (rawDataStr, disallowRawPipe) {
         var result = rawDataStr;
-        if (rawDataStr.indexOf(":") != -1 || rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1)
+        if (rawDataStr.indexOf(":") != -1 || rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1 || rawDataStr.indexOf("\t") != -1)
             if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
                 result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
             else
@@ -294,8 +294,9 @@
             finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
         var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
         var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
-        for (var i = 0; i < this.items.length; i++)
-            obj.push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
+        if (obj.push)
+            for (var i = 0; i < this.items.length; i++)
+                obj.push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
         for (var propName in this.properties)
             try  {
                 if (obj instanceof Dictionary) {

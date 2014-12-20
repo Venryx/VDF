@@ -243,7 +243,17 @@ class Saving
 			var a = VDFSaver.ToVDFNode("This is a\nmultiline string\nof three lines in total.", "string");
 			a.ToVDF().Should().Be("@@This is a\nmultiline string\nof three lines in total.@@");
 		});
-		test("Depth1_TroublesomeLiteral", ()=>
+		test("Depth0_EscapeAsLiteral_1", ()=>
+		{
+			var a = new VDFNode("\tBase value string that needs escaping.");
+			a.ToVDF().Should().Be("@@\tBase value string that needs escaping.@@");
+		});
+		test("Depth0_EscapeAsLiteral_2", ()=>
+		{
+			var a = new VDFNode("Base value string that {needs escaping}.");
+			a.ToVDF().Should().Be("@@Base value string that {needs escaping}.@@");
+		});
+		test("Depth1_EscapeAsLiteral_Troublesome", ()=>
 		{
 			var a = new VDFNode();
 			a.SetItem(0, new VDFNode("This is a list item that|needs|escaping."));

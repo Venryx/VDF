@@ -86,8 +86,8 @@ var Loading = (function () {
         // ==========
         test("Depth0_Comment", function () {
             var a = VDFLoader.ToVDFNode(";; comment\n\
-			Root string.");
-            a.baseValue.Should().Be("			Root string.");
+Root string.");
+            a.baseValue.Should().Be("Root string.");
         });
         test("Depth0_Comment2", function () {
             var a = VDFLoader.ToVDFNode("Root string ends here.;; comment");
@@ -105,8 +105,8 @@ var Loading = (function () {
             a.ToVDF().Should().Be("Root string.");
         });
         test("Depth0_BaseValue_Literal", function () {
-            var a = VDFLoader.ToVDFNode("@@Base-value string that {needs escaping}.@@");
-            a.baseValue.Should().Be("Base-value string that {needs escaping}.");
+            var a = VDFLoader.ToVDFNode("@@\tBase-value string that {needs escaping}.@@");
+            a.baseValue.Should().Be("\tBase-value string that {needs escaping}.");
         });
         test("Depth0_Metadata_Type", function () {
             var a = VDFLoader.ToVDFNode("string>Root string.");
@@ -117,11 +117,13 @@ var Loading = (function () {
             a[0].baseValue.Should().Be("Root string 1.");
             a[1].baseValue.Should().Be("Root string 2.");
         });
-        test("Depth0_Array_ExplicitStartAndEndMarkers", function () {
-            var a = VDFLoader.ToVDFNode("{Root string 1.}|{Root string 2.}", "List[object]");
-            a[0].baseValue.Should().Be("Root string 1.");
-            a[1].baseValue.Should().Be("Root string 2.");
-        });
+
+        /*test("Depth0_Array_ExplicitStartAndEndMarkers", ()=>
+        {
+        var a = VDFLoader.ToVDFNode("{Root string 1.}{Root string 2.}", "List[object]");
+        a[0].baseValue.Should().Be("Root string 1.");
+        a[1].baseValue.Should().Be("Root string 2.");
+        });*/
         test("Depth0_Array_Objects", function () {
             var a = VDFLoader.ToVDFNode("name{Dan}age{50}|name{Bob}age{60}", "List[object]");
             a[0]["name"].AsString.Should().Be("Dan");
@@ -146,11 +148,13 @@ three lines");
             ok(a[0].baseValue == null);
             ok(a[1].baseValue == null);
         });
-        test("Depth0_Array_None", function () {
+        test("Depth0_Array_None_NoType", function () {
             var a = VDFLoader.ToVDFNode("", "List[object]");
-            a.items.length.Should().Be(0);
-            a = VDFLoader.ToVDFNode(">>");
-            a.items.length.Should().Be(0);
+            a.items.Count.Should().Be(0);
+        });
+        test("Depth0_Array_None_Type", function () {
+            var a = VDFLoader.ToVDFNode(">>");
+            a.items.Count.Should().Be(0);
         });
         test("Depth0_ArrayMetadata1", function () {
             var a = VDFLoader.ToVDFNode("List[int]>>1|2");
@@ -233,7 +237,7 @@ three lines");
             VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue)["level3"].baseValue.Should().Be("Base string.");
         });
         test("Depth1_ArraysInArrays", function () {
-            var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|{3A}");
+            var a = VDFLoader.ToVDFNode("{1A|1B}{2A|2B}{3A}");
             a[0][0].baseValue.Should().Be("1A");
             a[0][1].baseValue.Should().Be("1B");
             a[1][0].baseValue.Should().Be("2A");
@@ -241,21 +245,21 @@ three lines");
             a[2].baseValue.Should().Be("3A");
         });
         test("Depth1_ArraysInArrays_SecondsEmpty", function () {
-            var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
+            var a = VDFLoader.ToVDFNode("{1A|}{2A|}");
             a[0][0].baseValue.Should().Be("1A");
             ok(a[0][1].baseValue == null);
             a[1][0].baseValue.Should().Be("2A");
             ok(a[1][1].baseValue == null);
         });
         test("Depth1_ArraysInArrays_FirstsAndSecondsEmpty", function () {
-            var a = VDFLoader.ToVDFNode("{|}|{|}");
+            var a = VDFLoader.ToVDFNode("{|}{|}");
             ok(a[0][0].baseValue == null);
             ok(a[0][1].baseValue == null);
             ok(a[1][0].baseValue == null);
             ok(a[1][1].baseValue == null);
         });
         test("Depth1_StringAndArraysInArrays", function () {
-            var a = VDFLoader.ToVDFNode("{text}|{2A|}");
+            var a = VDFLoader.ToVDFNode("{text}{2A|}");
             a[0].baseValue.Should().Be("text");
             a[1][0].baseValue.Should().Be("2A");
             ok(a[1][1].baseValue == null);
@@ -358,17 +362,18 @@ of three lines in total.@@}bool{>true}");
 
         test("Depth2_ObjectWithArrayProp_PoppedOutObjectWithArrayProp_PoppedOutObject", function () {
             var a = VDFLoader.ToVDFNode("\n\
-name{L0}children:>>\n\
-	name{L1}children:>>\n\
+name{L0}children:\n\
+	name{L1}children:\n\
 		name{L2}\n\
 			".trim());
             a["children"].items.Count.Should().Be(1);
+            a["children"].items[0]["children"].items.Count.Should().Be(1);
         });
 
         test("Depth5_DeepNestedPoppedOutData", function () {
-            var vdf = "name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children:>>\n\
+            var vdf = "name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children:\n\
 	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}\n\
-}}Test2{vObjectRoot{name{VObjectRoot}children:>>\n\
+}}Test2{vObjectRoot{name{VObjectRoot}children:\n\
 	id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}\n\
 }}}";
             var livePackNode = VDFLoader.ToVDFNode(vdf);

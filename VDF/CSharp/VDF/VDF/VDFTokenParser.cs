@@ -185,15 +185,26 @@ public static class VDFTokenParser
 		for (var i = 0; i < tokens.Count; i++)
 		{
 			var token = tokens[i];
-			if (token.type == VDFTokenType.Indent)
+			if (token.type == VDFTokenType.DataStartMarker)
+				depth_base++;
+			else if (token.type == VDFTokenType.DataEndMarker)
+				depth_base--;
+			else if (token.type == VDFTokenType.Indent)
 				line_indentsReached++;
 			else if (token.type == VDFTokenType.LineBreak)
 				line_indentsReached = 0;
+			var depth = depth_base + line_indentsReached;
+
+			if (token.type == VDFTokenType.DataStartMarker)
+			{
+				if (token != null)
+					depthStartMarkers[depth] = token;
+			}
 			else if (token.type == VDFTokenType.DataEndMarker)
 			{
-				if (depthsOfChildrenData.Contains(depth_base))
+				if (depthsOfChildrenData.Contains(depth + 1))
 				{
-					var firstInDepthTokenIndex = depthStartMarkers.ContainsKey(depth_base) ? tokens.IndexOf(depthStartMarkers[depth_base]) + 1 : 0;
+					var firstInDepthTokenIndex = depthStartMarkers.ContainsKey(depth + 1) ? tokens.IndexOf(depthStartMarkers[depth + 1]) + 1 : 0;
 					int itemFirstTokenIndex = firstInDepthTokenIndex;
 					if (tokens[firstInDepthTokenIndex].type == VDFTokenType.WiderMetadataEndMarker)
 						itemFirstTokenIndex = firstInDepthTokenIndex + 1;
@@ -205,28 +216,21 @@ public static class VDFTokenParser
 						i++; // increment, since we added the token above
 
 						tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
-						depthsOfChildrenData.Remove(depth_base);
+						depthsOfChildrenData.Remove(depth_base + 1);
 					}
 				}
-				depth_base--;
 			}
 			else if (token.type == VDFTokenType.WiderMetadataEndMarker)
 			{
 				var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
 				if (lastToken == null || lastToken.type != VDFTokenType.MetadataBaseValue || !lastToken.text.Contains(",")) // todo: should check for comma char only at depth 0
-					depthsOfChildrenData.Add(depth_base);
+					depthsOfChildrenData.Add(depth);
 			}
 			else if (token.type == VDFTokenType.ItemSeparator)
 			{
 				tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
 				tokens.Insert(++i, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
-				depthsOfChildrenData.Add(depth_base);
-			}
-			else if (token.type == VDFTokenType.DataStartMarker)
-			{
-				depth_base++;
-				if (token != null)
-					depthStartMarkers[depth_base] = token;
+				depthsOfChildrenData.Add(depth);
 			}
 		}
 
@@ -310,6 +314,9 @@ public static class VDFTokenParser
 
 		// pass 4: fix token position-and-index properties
 		// ----------
+
+		// temp
+		Console.Write(String.Join("", tokens.Select(a => a.text).ToArray()));
 
 		RefreshTokenPositionAndIndexProperties(tokens);
 	}

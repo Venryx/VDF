@@ -52,7 +52,7 @@
 	static RawDataStringToFinalized(rawDataStr: string, disallowRawPipe?: boolean): string
 	{
 		var result = rawDataStr;
-		if (rawDataStr.indexOf(":") != -1 || rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1)
+		if (rawDataStr.indexOf(":") != -1 || rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1 || rawDataStr.indexOf("\t") != -1) // note: tabs can probably be put back in without escaping, in certain cases
 			if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
 				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
 			else
@@ -264,7 +264,7 @@
 				finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
 			else // otherwise, infer that it's a string (string is the default type)
 				finalTypeName = "string"; // string is the default/fallback type
-		
+
 		var result;
 		if (VDF.typeImporters_inline[finalTypeName])
 			result = VDF.typeImporters_inline[finalTypeName](this.baseValue);
@@ -298,8 +298,9 @@
 			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
 		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
 		var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
-		for (var i = 0; i < this.items.length; i++)
-			(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
+		if (obj.push) // if push method actually exists // maybe todo: remove/rework this
+			for (var i = 0; i < this.items.length; i++)
+				(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
 		for (var propName in this.properties)
 			try
 			{

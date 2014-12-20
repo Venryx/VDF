@@ -158,15 +158,15 @@ class VDFUtils
 class StringBuilder
 {
 	public data: Array<string> = [];
-	public counter: number = 0;
 	constructor(startData?: string)
 	{
 		if (startData)
 			this.data.push(startData);
 	}
-	Append(str) { this.data[this.counter++] = str; return this; } // adds string str to the StringBuilder
-	Remove(i, j) { this.data.splice(i, j || 1); return this; } // removes j elements starting at i, or 1 if j is omitted
-	Insert(i, str) { this.data.splice(i, 0, str); return this; } // inserts string str at i
+	Append(str) { this.data.push(str); return this; } // adds string str to the StringBuilder
+	Insert(index, str) { this.data.splice(index, 0, str); return this; } // inserts string 'str' at 'index'
+	Remove(index, count) { this.data.splice(index, count || 1); return this; } // starting at 'index', removes specified number of elements (if not specified, count defaults to 1)
+	Clear() { this.Remove(0, this.data.length); }
 	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
 }
 
@@ -208,7 +208,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	self["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
 
 	// new properties
-	Object.defineProperty(self, "Count", { enumerable: false, get: function () { return this.length; } });
+	Object.defineProperty(self, "Count", { enumerable: false, get: function() { return this.length; } });
 
 	// new methods
 	self.indexes = function()
@@ -224,7 +224,9 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 		for (var i = 0; i < items.length; i++)
 			this.push(items[i]);
 	};
-	self.Remove = function(item) { this.splice(this.indexOf(item), 1); };
+	self.Insert = function(index, item) { return this.splice(index, 0, item); };
+	self.Remove = function(item) { this.RemoveAt(this.indexOf(item)); };
+	self.RemoveAt = function(index) { this.splice(index, 1); };
 	self.Any = function(matchFunc)
 	{
 		for (var i in this.indexes())
@@ -301,7 +303,9 @@ interface List<T> extends Array<T> // class/instance declaration stuff
 	indexes(): any;
 	Add(...items): number;
 	AddRange(items: Array<T>): void;
+	Insert(index, item): void;
 	Remove(item: T): void;
+	RemoveAt(index: number): void;
 	Any(matchFunc): boolean;
 	All(matchFunc): boolean;
 	First(matchFunc?): T;
@@ -337,6 +341,7 @@ class Dictionary<K, V>
 	get Count() { return this.keys.length; }
 
 	// methods
+	ContainsKey(key: K) { return this.keys.indexOf(key) != -1; }
 	Get(key: K) { return this.values[this.keys.indexOf(key)]; }
 	Set(key: K, value: V)
 	{

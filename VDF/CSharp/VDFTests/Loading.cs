@@ -194,7 +194,7 @@ three lines".Replace("\r", ""));
 			VDFLoader.ToVDFNode(a["level1"])["level2"].baseValue.Should().Be("level3{Base string.}");
 			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"])["level2"])["level3"].baseValue.Should().Be("Base string.");
 		}
-		void Depth1_ArraysInArrays()
+		[Fact] void Depth1_ArraysInArrays()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}{2A|2B}{3A}");
 			a[0][0].baseValue.Should().Be("1A");
