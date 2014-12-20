@@ -161,28 +161,39 @@ var VDFTokenParser = (function () {
                 if (token != null)
                     depthData[depth].startMarker = token;
             } else if (token.type == 10 /* DataEndMarker */) {
-                if (depthData.Count > depth + 1 && depthData[depth + 1].hasUnhandledChildrenData) {
-                    var firstInDepthTokenIndex = depthData[depth + 1].hasUnhandledChildrenData ? tokens.indexOf(depthData[depth + 1].startMarker) + 1 : 0;
+                if (depthData.Count > depth + 1 && (depthData[depth + 1].needsChildStartBracket || depthData[depth + 1].needsChildEndBracket)) {
+                    var firstInDepthTokenIndex = (depthData[depth + 1].needsChildStartBracket || depthData[depth + 1].needsChildEndBracket) ? tokens.indexOf(depthData[depth + 1].startMarker) + 1 : 0;
                     var itemFirstTokenIndex = firstInDepthTokenIndex;
                     if (tokens[firstInDepthTokenIndex].type == 1 /* WiderMetadataEndMarker */)
                         itemFirstTokenIndex = firstInDepthTokenIndex + 1;
                     else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == 1 /* WiderMetadataEndMarker */)
                         itemFirstTokenIndex = firstInDepthTokenIndex + 2;
 
-                    if (itemFirstTokenIndex < tokens.Count - 1)
-                        if (tokens[itemFirstTokenIndex].type != 5 /* DataStartMarker */) {
-                            tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                            i++; // increment, since we added the token above
+                    if (depthData[depth + 1].lastItemFirstToken == null)
+                        depthData[depth + 1].lastItemFirstToken = tokens[itemFirstTokenIndex];
 
-                            tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
-                            depthData[depth + 1].hasUnhandledChildrenData = false;
-                        }
+                    if (itemFirstTokenIndex < i) {
+                        if (depthData[depth + 1].needsChildStartBracket)
+                            if (tokens[itemFirstTokenIndex].type != 5 /* DataStartMarker */) {
+                                tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
+                                i++; // increment, since we added the token above
+                                depthData[depth + 1].needsChildStartBracket = false;
+                            }
+
+                        if (depthData[depth + 1].needsChildEndBracket)
+                            if (depthData[depth + 1].lastItemFirstToken != null && depthData[depth + 1].lastItemFirstToken.type != 5 /* DataStartMarker */) {
+                                tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
+                                depthData[depth + 1].needsChildEndBracket = false;
+                            }
+                    }
                 }
                 //depthData.RemoveAt(depth);
             } else if (token.type == 1 /* WiderMetadataEndMarker */) {
                 var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
-                if (lastToken == null || lastToken.type != 2 /* MetadataBaseValue */ || lastToken.text.indexOf(",") == -1)
-                    depthData[depth].hasUnhandledChildrenData = true;
+                if (lastToken == null || lastToken.type != 2 /* MetadataBaseValue */ || lastToken.text.indexOf(",") == -1) {
+                    depthData[depth].needsChildStartBracket = true;
+                    depthData[depth].needsChildEndBracket = true;
+                }
             } else if (token.type == 8 /* ItemSeparator */) {
                 if (depthData[depth].lastItemFirstToken == null) {
                     var firstInDepthTokenIndex = tokens.indexOf(depthData[depth].startMarker) + 1;
@@ -193,13 +204,19 @@ var VDFTokenParser = (function () {
                         itemFirstTokenIndex = firstInDepthTokenIndex + 2;
 
                     depthData[depth].lastItemFirstToken = tokens[itemFirstTokenIndex];
+
+                    if (tokens[itemFirstTokenIndex].type != 5 /* DataStartMarker */) {
+                        tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
+                        i++; // increment, since we added the token above
+                    }
                 }
 
                 if (depthData[depth].lastItemFirstToken.type != 5 /* DataStartMarker */)
                     tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
-                if (tokens[i + 1].type != 5 /* DataStartMarker */)
+                if (tokens[i + 1].type != 5 /* DataStartMarker */) {
                     tokens.Insert(++i, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                depthData[depth].hasUnhandledChildrenData = true;
+                    depthData[depth].needsChildEndBracket = true;
+                }
                 var nextToken = tokens[i + 1];
                 depthData[depth].lastItemFirstToken = nextToken;
             }

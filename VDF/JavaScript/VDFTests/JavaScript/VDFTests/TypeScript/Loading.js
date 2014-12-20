@@ -143,11 +143,13 @@ which is on two lines");
 which is on\n\
 three lines");
         });
-        test("Depth0_Array_Empty", function () {
-            var a = VDFLoader.ToVDFNode("|", "List[object]");
-            ok(a[0].baseValue == null);
-            ok(a[1].baseValue == null);
-        });
+
+        /*test("Depth0_Array_Empty", ()=> // for now at least, it's against the rules to have items without a char of their own
+        {
+        var a = VDFLoader.ToVDFNode("|", "List[object]");
+        ok(a[0].baseValue == null);
+        ok(a[1].baseValue == null);
+        });*/
         test("Depth0_Array_None_NoType", function () {
             var a = VDFLoader.ToVDFNode("", "List[object]");
             a.items.Count.Should().Be(0);

@@ -80,13 +80,13 @@ which is on two lines".Replace("\r", ""));
 which is on
 three lines".Replace("\r", ""));
 		}
-		[Fact] void Depth0_Array_Empty()
+		/*[Fact] void Depth0_Array_Empty() // for now at least, it's against the rules to have items without a char of their own
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<object>>("|");
 			//a.properties.Count.Should().Be(0);
 			a[0].baseValue.Should().Be(null);
 			a[1].baseValue.Should().Be(null);
-		}
+		}*/
 		[Fact] void Depth0_Array_None_NoType()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<object>>("");

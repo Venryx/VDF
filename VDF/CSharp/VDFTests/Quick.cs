@@ -58,8 +58,8 @@ namespace VDFTests
 
 		[Fact] void Load()
 		{
-			var a = VDFLoader.ToVDFNode("id{f3f18ce3-6052-45d3-a225-5cf270e0400b}name{Gun1}pivotPoint_unit{-1,0,-0.75}anchorNormal{0,1,0}scale{2,2,2}controller{true}typeName{MachineGun}", typeof(IList)); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
-			a.items.Count.Should().Be(1);
+			var a = VDFLoader.ToVDFNode(">>>19|{string>>}"); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
+			a[1].items.Count.Should().Be(0);
 		}
 
 		/*[Fact] void Save()

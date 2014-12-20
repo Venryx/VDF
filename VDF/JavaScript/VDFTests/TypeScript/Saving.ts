@@ -186,6 +186,7 @@ class T5_Depth2
 	otherProperty = false;
 }
 
+// note: from now on, while you don't need to specify the *type*, you do need to specify (by some means) the *sort* of type (e.g. object/dictionary or list)
 class Saving
 {
 	static initialized: boolean;
@@ -293,10 +294,11 @@ class Saving
 			a["obj"].baseValue.Should().Be("null");
 			a["strings"].metadata_type.Should().Be("");
 			a["strings"].baseValue.Should().Be("null");
-			equal(a["strings2"].metadata_type, null); // unmarked type
+			//equal(a["strings2"].metadata_type, null); // unmarked type
+			a["strings2"].metadata_type.Should().Be(""); // auto-marked as list (needed, to specify sort of type, as required)
 			equal(a["strings2"].baseValue, null); // it's a List, so it shouldn't have a base-value
 			a["strings2"].items.length.Should().Be(0);
-			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{}");
+			a.ToVDF().Should().Be("TypeWithNullProps>obj{>null}strings{>null}strings2{>>}");
 		});
 		test("Depth1_ListItems_PoppedOutChildren", ()=>
 		{
@@ -311,6 +313,11 @@ class Saving
 			a[0].metadata_type.Should().Be("");
 			a[0].baseValue.Should().Be("null");
 			a.ToVDF().Should().Be("string>>>null");
+		});
+		test("Depth1_SingleListItemWithAssemblyKnownTypeShouldStillSpecifySortOfType", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(new List<string>("string", "hi"), "List[string]");
+			a.ToVDF().Should().Be(">>hi");
 		});
 		test("Depth1_StringAndArraysInArray", ()=>VDF.Serialize(new List<object>("object", "text", new List<string>("string", "a", "b"))).Should().Be(">>text|{string>>a|b}"));
 		test("Depth1_DictionaryValues_Null", ()=>
@@ -356,12 +363,12 @@ class Saving
 			a["list"][0].baseValue.Should().Be("2A");
 			a["list"][1].baseValue.Should().Be("2B");
 			a["nestedList"][0][0].baseValue.Should().Be("1A");
-			a.ToVDF().Should().Be("Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
+			a.ToVDF().Should().Be("Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{>>{>>1A}}");
 		});
 		test("Depth1_TypeProperties_MarkForAssembly", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(null, VDFTypeMarking.Assembly));
-			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{{1A}}");
+			a.ToVDF().Should().Be("TypeWithMixOfProps>Bool{true}Int{5}Float{.5}String{Prop value string.}list{2A|2B}nestedList{>>{>>1A}}");
 		});
 		test("Depth1_TypeProperties_MarkForAssemblyExternal", ()=>
 		{

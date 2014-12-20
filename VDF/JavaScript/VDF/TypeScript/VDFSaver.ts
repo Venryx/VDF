@@ -59,6 +59,8 @@ class VDFSaver
 			var objAsList = <List<any>>obj;
 			for (var i = 0; i < objAsList.length; i++)
 				objNode.AddItem(VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true));
+			if (objAsList.Count <= 1 && objNode.metadata_type == null)
+				objNode.metadata_type = "";
 		}
 		else if (objVTypeName && objVTypeName.startsWith("Dictionary["))
 		{
@@ -110,7 +112,7 @@ class VDFSaver
 		if (obj == null || (objVTypeName == "string" && obj == ""))
 			objNode.metadata_type = "";
 		else
-			objNode.metadata_type = markType ? objVTypeName : null;
+			objNode.metadata_type = markType ? objVTypeName : objNode.metadata_type; //null;
 		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
 		{
 			var collapseMap = {"string": null, "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": ""};

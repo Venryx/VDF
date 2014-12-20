@@ -56,6 +56,8 @@ var VDFSaver = (function () {
             var objAsList = obj;
             for (var i = 0; i < objAsList.length; i++)
                 objNode.AddItem(VDFSaver.ToVDFNode(objAsList[i], objAsList.itemType, saveOptions, true));
+            if (objAsList.Count <= 1 && objNode.metadata_type == null)
+                objNode.metadata_type = "";
         } else if (objVTypeName && objVTypeName.startsWith("Dictionary[")) {
             objNode.isDictionary = true;
             var objAsDictionary = obj;
@@ -103,7 +105,7 @@ var VDFSaver = (function () {
         if (obj == null || (objVTypeName == "string" && obj == ""))
             objNode.metadata_type = "";
         else
-            objNode.metadata_type = markType ? objVTypeName : null;
+            objNode.metadata_type = markType ? objVTypeName : objNode.metadata_type; //null;
         if (saveOptions.typeMarking != 3 /* AssemblyExternalNoCollapse */) {
             var collapseMap = { "string": null, "bool": "", "int": "", "float": "", "List[object]": "", "Dictionary[object,object]": "" };
             if (objNode.metadata_type != null && collapseMap[objNode.metadata_type] !== undefined)

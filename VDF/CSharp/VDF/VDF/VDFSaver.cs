@@ -73,6 +73,8 @@ public static class VDFSaver
 			var objAsList = (IList)obj;
 			for (var i = 0; i < objAsList.Count; i++)
 				objNode.items.Add(ToVDFNode(objAsList[i], type.HasElementType ? type.GetElementType() : type.GetGenericArguments()[0], saveOptions, true));
+			if (objAsList.Count <= 1 && objNode.metadata_type == null)
+				objNode.metadata_type = "";
 		}
 		else if (obj is IDictionary)
 		{
@@ -114,7 +116,7 @@ public static class VDFSaver
 		if (obj == null || (type == typeof(string) && (string)obj == ""))
 			objNode.metadata_type = "";
 		else
-			objNode.metadata_type = markType ? VDF.GetVNameOfType(obj != null ? obj.GetType() : null, saveOptions) : null;
+			objNode.metadata_type = markType ? VDF.GetVNameOfType(obj != null ? obj.GetType() : null, saveOptions) : objNode.metadata_type; //null;
 		if (saveOptions.typeMarking != VDFTypeMarking.AssemblyExternalNoCollapse)
 		{
 			var collapseMap = new Dictionary<string, string> {{"string", null}, {"bool", ""}, {"int", ""}, {"float", ""}, {"List[object]", ""}, {"Dictionary[object,object]", ""}};
