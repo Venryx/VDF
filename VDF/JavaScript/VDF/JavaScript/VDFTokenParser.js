@@ -137,12 +137,11 @@ var VDFTokenParser = (function () {
                 tokens.RemoveAt(i--);
         }
 
-        // pass 1: add brackets surrounding inline-list items
+        // pass 1: add brackets surrounding inline-list items (the ones that don't already have a set, anyway)
         // ----------
         var depth_base = 0;
         var line_indentsReached = 0;
-        var depthStartMarkers = new Dictionary("number", "VDFToken");
-        var depthsOfChildrenData = new List("number");
+        var depthData = new List("DepthData", new DepthData());
         for (var i = 0; i < tokens.Count; i++) {
             var token = tokens[i];
             if (token.type == 5 /* DataStartMarker */)
@@ -156,32 +155,53 @@ var VDFTokenParser = (function () {
             var depth = depth_base + line_indentsReached;
 
             if (token.type == 5 /* DataStartMarker */) {
+                while (depthData.Count <= depth)
+                    depthData.Add(new DepthData());
+                depthData[depth] = new DepthData();
                 if (token != null)
-                    depthStartMarkers.Set(depth, token);
+                    depthData[depth].startMarker = token;
             } else if (token.type == 10 /* DataEndMarker */) {
-                if (depthsOfChildrenData.Contains(depth + 1)) {
-                    var firstInDepthTokenIndex = depthStartMarkers.ContainsKey(depth + 1) ? tokens.indexOf(depthStartMarkers.Get(depth + 1)) + 1 : 0;
+                if (depthData.Count > depth + 1 && depthData[depth + 1].hasUnhandledChildrenData) {
+                    var firstInDepthTokenIndex = depthData[depth + 1].hasUnhandledChildrenData ? tokens.indexOf(depthData[depth + 1].startMarker) + 1 : 0;
                     var itemFirstTokenIndex = firstInDepthTokenIndex;
                     if (tokens[firstInDepthTokenIndex].type == 1 /* WiderMetadataEndMarker */)
                         itemFirstTokenIndex = firstInDepthTokenIndex + 1;
                     else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == 1 /* WiderMetadataEndMarker */)
                         itemFirstTokenIndex = firstInDepthTokenIndex + 2;
-                    if (itemFirstTokenIndex < tokens.Count - 1) {
-                        tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                        i++; // increment, since we added the token above
 
-                        tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
-                        depthsOfChildrenData.Remove(depth_base + 1);
-                    }
+                    if (itemFirstTokenIndex < tokens.Count - 1)
+                        if (tokens[itemFirstTokenIndex].type != 5 /* DataStartMarker */) {
+                            tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
+                            i++; // increment, since we added the token above
+
+                            tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
+                            depthData[depth + 1].hasUnhandledChildrenData = false;
+                        }
                 }
+                //depthData.RemoveAt(depth);
             } else if (token.type == 1 /* WiderMetadataEndMarker */) {
                 var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
                 if (lastToken == null || lastToken.type != 2 /* MetadataBaseValue */ || lastToken.text.indexOf(",") == -1)
-                    depthsOfChildrenData.Add(depth);
+                    depthData[depth].hasUnhandledChildrenData = true;
             } else if (token.type == 8 /* ItemSeparator */) {
-                tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
-                tokens.Insert(++i, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                depthsOfChildrenData.Add(depth);
+                if (depthData[depth].lastItemFirstToken == null) {
+                    var firstInDepthTokenIndex = tokens.indexOf(depthData[depth].startMarker) + 1;
+                    var itemFirstTokenIndex = firstInDepthTokenIndex;
+                    if (tokens[firstInDepthTokenIndex].type == 1 /* WiderMetadataEndMarker */)
+                        itemFirstTokenIndex = firstInDepthTokenIndex + 1;
+                    else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == 1 /* WiderMetadataEndMarker */)
+                        itemFirstTokenIndex = firstInDepthTokenIndex + 2;
+
+                    depthData[depth].lastItemFirstToken = tokens[itemFirstTokenIndex];
+                }
+
+                if (depthData[depth].lastItemFirstToken.type != 5 /* DataStartMarker */)
+                    tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
+                if (tokens[i + 1].type != 5 /* DataStartMarker */)
+                    tokens.Insert(++i, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
+                depthData[depth].hasUnhandledChildrenData = true;
+                var nextToken = tokens[i + 1];
+                depthData[depth].lastItemFirstToken = nextToken;
             }
         }
 
@@ -259,5 +279,11 @@ var VDFTokenParser = (function () {
         }
     };
     return VDFTokenParser;
+})();
+
+var DepthData = (function () {
+    function DepthData() {
+    }
+    return DepthData;
 })();
 //# sourceMappingURL=VDFTokenParser.js.map

@@ -94,11 +94,13 @@
 			builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue, disallowRawPipe));
 		else if (this.items.length > 0)
 		{
-			var hasItemWeMustBracket = this.items.filter(a=>a.isList || a.popOutChildren).length;
+			//var hasItemWeMustBracket = this.items.filter(a=>a.isList || a.popOutChildren).length;
 			for (var i = 0; i < this.items.length; i++)
 			{
 				var lastItem = i > 0 ? this.items[i - 1] : null;
 				var item = this.items[i];
+
+				var isItemWeMustBracket = item.isList || item.popOutChildren;
 
 				if (lastItem != null && lastItem.guardingItsLastLine)
 				{
@@ -109,7 +111,7 @@
 				if (this.popOutChildren)
 					builder.Append("\n" + VDFNode.AddIndentToChildText(item.ToVDF()));
 				else
-					if (hasItemWeMustBracket)
+					if (isItemWeMustBracket) //hasItemWeMustBracket)
 					{
 						var itemVDF = item.ToVDF();
 						var beforeEndBracketExtraText = "";

@@ -329,7 +329,7 @@ var Saving = (function () {
             a.ToVDF().Should().Be("string>>>null");
         });
         test("Depth1_StringAndArraysInArray", function () {
-            return VDF.Serialize(new List("object", "text", new List("string", "a", "b"))).Should().Be(">>{text}|{string>>a|b}");
+            return VDF.Serialize(new List("object", "text", new List("string", "a", "b"))).Should().Be(">>text|{string>>a|b}");
         });
         test("Depth1_DictionaryValues_Null", function () {
             var a = VDFSaver.ToVDFNode(new Dictionary("string", "string", ["key1", null]));

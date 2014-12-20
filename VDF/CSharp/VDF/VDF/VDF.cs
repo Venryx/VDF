@@ -109,7 +109,10 @@ public static class VDF
 			rootName = loadOptions.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[] {'`'})[0];
 		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vTypeName), loadOptions);
 		if (rootType == null)
-			throw new VDFException("Could not find type \"" + rootName + "\".");
+			if (loadOptions.inferStringTypeForUnknownTypes) // maybe todo: rework this
+				return typeof(string);
+			else
+				throw new VDFException("Could not find type \"" + rootName + "\"."); // temp
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();

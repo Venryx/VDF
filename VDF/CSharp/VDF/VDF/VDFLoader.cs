@@ -6,15 +6,19 @@ using System.Linq;
 public class VDFLoadOptions
 {
 	public object message;
+
+	// CS only
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
 	//public List<string> extraSearchAssemblyNames; // maybe add this option later
+	public bool inferStringTypeForUnknownTypes;
 
-	public VDFLoadOptions(object message = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	public VDFLoadOptions(object message = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null, bool inferStringTypeForUnknownTypes = false)
 	{
 		this.message = message;
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
+		this.inferStringTypeForUnknownTypes = inferStringTypeForUnknownTypes;
 	}
 }
 
@@ -136,16 +140,16 @@ public static class VDFLoader
 		
 		// if list, parse items
 		//if (typeof(IList).IsAssignableFrom(objType))
-		for (var i = 0; i < tokensAtDepth0.Count; i++)
-		{
-			var token = tokensAtDepth0[i];
-			if (token.type == VDFTokenType.DataStartMarker)
+			for (var i = 0; i < tokensAtDepth0.Count; i++)
 			{
-				var itemFirstToken = token.index + 1 < tokens.Count ? tokens[token.index + 1] : null; //tokens.First(a=>a.position >= token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0));
-				var itemEnderToken = itemFirstToken != null ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker && a.index > itemFirstToken.index) : null;
-				objNode.items.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
+				var token = tokensAtDepth0[i];
+				if (token.type == VDFTokenType.DataStartMarker)
+				{
+					var itemFirstToken = token.index + 1 < tokens.Count ? tokens[token.index + 1] : null; //tokens.First(a=>a.position >= token.position + token.text.Length + (hasDepth0DataBlocks ? 1 : 0));
+					var itemEnderToken = itemFirstToken != null ? tokensAtDepth0.FirstOrDefault(a=>a.type == VDFTokenType.DataEndMarker && a.index > itemFirstToken.index) : null;
+					objNode.items.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions, objIndent));
+				}
 			}
-		}
 
 		// if not list (i.e. if perhaps object or dictionary), parse keys-and-values/properties (depending on whether we're a dictionary)
 		if (!typeof(IList).IsAssignableFrom(objType))

@@ -14,22 +14,24 @@ public enum VDFTypeMarking
 public class VDFSaveOptions
 {
 	public object message;
+	public VDFTypeMarking typeMarking;
+
+	// CS only
 	public List<MemberInfo> includePropsL3;
 	public List<MemberInfo> excludePropsL4;
 	public List<MemberInfo> includePropsL5;
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
-	public VDFTypeMarking typeMarking;
 
 	public VDFSaveOptions(object message = null, IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null, VDFTypeMarking typeMarking = VDFTypeMarking.Assembly)
 	{
 		this.message = message;
+		this.typeMarking = typeMarking;
 		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
 		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
 		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
-		this.typeMarking = typeMarking;
 	}
 }
 

@@ -9,6 +9,7 @@ class VDFSaveOptions
 {
 	message: any;
 	typeMarking: VDFTypeMarking;
+
 	constructor(message?: any, typeMarking: VDFTypeMarking = VDFTypeMarking.Assembly)
 	{
 		this.message = message;

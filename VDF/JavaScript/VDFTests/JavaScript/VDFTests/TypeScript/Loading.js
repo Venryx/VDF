@@ -237,7 +237,7 @@ three lines");
             VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue)["level3"].baseValue.Should().Be("Base string.");
         });
         test("Depth1_ArraysInArrays", function () {
-            var a = VDFLoader.ToVDFNode("{1A|1B}{2A|2B}{3A}");
+            var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|3A");
             a[0][0].baseValue.Should().Be("1A");
             a[0][1].baseValue.Should().Be("1B");
             a[1][0].baseValue.Should().Be("2A");
@@ -245,21 +245,21 @@ three lines");
             a[2].baseValue.Should().Be("3A");
         });
         test("Depth1_ArraysInArrays_SecondsEmpty", function () {
-            var a = VDFLoader.ToVDFNode("{1A|}{2A|}");
+            var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
             a[0][0].baseValue.Should().Be("1A");
             ok(a[0][1].baseValue == null);
             a[1][0].baseValue.Should().Be("2A");
             ok(a[1][1].baseValue == null);
         });
         test("Depth1_ArraysInArrays_FirstsAndSecondsEmpty", function () {
-            var a = VDFLoader.ToVDFNode("{|}{|}");
+            var a = VDFLoader.ToVDFNode("{|}|{|}");
             ok(a[0][0].baseValue == null);
             ok(a[0][1].baseValue == null);
             ok(a[1][0].baseValue == null);
             ok(a[1][1].baseValue == null);
         });
         test("Depth1_StringAndArraysInArrays", function () {
-            var a = VDFLoader.ToVDFNode("{text}{2A|}");
+            var a = VDFLoader.ToVDFNode("text|{2A|}");
             a[0].baseValue.Should().Be("text");
             a[1][0].baseValue.Should().Be("2A");
             ok(a[1][1].baseValue == null);
@@ -534,13 +534,69 @@ Shoot at Enemy Vehicle\n\
         // ==========
         test("Load_Quick", function () {
             var a = VDFLoader.ToVDFNode("\n\
-name{Root}children:\n\
-	name{Stories}\n\
-	name{Games}children:\n\
-		name{CreativeDefense}children:\n\
-			name{DevelopmentTree}\n\
+>>{Map>>{\n\
+	id{System.Guid>e10fffb1-b5f7-4404-9e77-508f8aaa73f3}\n\
+	name{Road}\n\
+	terrain{VTerrain>}\n\
+	regions:Region>>\n\
+		id{System.Guid>e5b9f479-deb7-4596-9a6f-910c7e297cbb}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
+		id{System.Guid>e908f0c0-c24c-482c-a210-0206e9b4c54f}name{Gravel}layer{>1}soilID{System.Guid>25fb1b3e-5290-420e-a321-6b0811b06816}\n\
+		id{System.Guid>bf5b4247-d667-45d2-837b-7e6534627a16}name{Path}layer{>4}soilID{System.Guid>ddc82700-51ca-43c1-b7ae-e53f72c3296b}\n\
+		id{System.Guid>f89e76b7-064d-40fc-9369-24c3c0e1a46a}name{DarkGrass}layer{>2}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
+		id{System.Guid>1ca9dac7-ab7e-4610-b84f-a61495c18c34}name{RocksAndGrass}layer{>3}soilID{System.Guid>a015276b-a061-44c5-8f80-b8083222ac8d}\n\
+	prefs{string,object>>selectedRegionID{>null}}\n\
+	lastCameraPos{Vector3>62.77748,72.13427,-32.98473}\n\
+	lastCameraRot{Vector3>43.25,0.2498523,0}\n\
+	showRegionOverlay{>false}\n\
+}|{\n\
+	id{System.Guid>78eff07d-1876-4139-beaf-21822c0dc0cb}\n\
+	name{RoadAndPath}\n\
+	terrain{VTerrain>}\n\
+	regions:Region>>\n\
+		id{System.Guid>e5b9f479-deb7-4596-9a6f-910c7e297cbb}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
+		id{System.Guid>bf5b4247-d667-45d2-837b-7e6534627a16}name{Path}layer{>7}soilID{System.Guid>188ed914-f208-4adb-a4e6-75867160e7bc}\n\
+		id{System.Guid>f89e76b7-064d-40fc-9369-24c3c0e1a46a}name{DarkGrass}layer{>6}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
+		id{System.Guid>65183f26-6c2f-4d25-93e9-3c2e53b9d2fe}name{GravelPath}layer{>6}soilID{System.Guid>25fb1b3e-5290-420e-a321-6b0811b06816}\n\
+	prefs{string,object>>selectedRegionID{System.Guid>65183f26-6c2f-4d25-93e9-3c2e53b9d2fe}}\n\
+	lastCameraPos{Vector3>53.48114,78.86283,-75.72661}\n\
+	lastCameraRot{Vector3>33.75,10.75037,0}\n\
+	showRegionOverlay{>false}\n\
+}|{\n\
+	id{System.Guid>04662d18-0c74-45ad-bddf-755320b08aad}\n\
+	name{SimpleHill}\n\
+	terrain{VTerrain>}\n\
+	regions:Region>>\n\
+		id{System.Guid>e7ff881b-3625-4213-a3fb-fb65de4c22a7}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
+		id{System.Guid>e53f3844-a12a-4d7c-bff5-0155cbe05f46}name{DarkGrass}layer{>1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
+	prefs{string,object>>selectedChunkPosition{Vector3i>0,0,0}selectedRegionID{System.Guid>e53f3844-a12a-4d7c-bff5-0155cbe05f46}}\n\
+	lastCameraPos{Vector3>102.5171,89.69484,-31.49277}\n\
+	lastCameraRot{Vector3>34.50011,12.25032,0}\n\
+	showRegionOverlay{>false}\n\
+}|{\n\
+	id{System.Guid>a2c69a05-1ac0-4dc6-a51b-6f0bbadf8082}\n\
+	name{Test1}\n\
+	terrain{VTerrain>}\n\
+	regions:Region>>\n\
+		id{System.Guid>5c2723fb-62d5-4ce3-859a-5c0474026e1b}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
+		id{System.Guid>07caffe1-8a40-4a58-880d-d413a1fccaee}name{DarkGrass}layer{>1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
+	prefs{string,object>>selectedRegionID{System.Guid>07caffe1-8a40-4a58-880d-d413a1fccaee}selectedChunkPosition{Vector3i>4,0,4}}\n\
+	lastCameraPos{Vector3>161.7268,43.22983,156.8803}\n\
+	lastCameraRot{Vector3>27.24998,167.9989,0}\n\
+	showRegionOverlay{>false}\n\
+}|{\n\
+	id{System.Guid>c18d38e0-61f8-4b3d-a31e-041913b8bad0}\n\
+	name{Test1345345}\n\
+	terrain{VTerrain>}\n\
+	regions:Region>>\n\
+		id{System.Guid>15041c99-fac3-44a6-ad2e-098374d56f72}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
+		id{System.Guid>3ed40004-8633-46aa-89a4-0bc0016a9e7f}name{Test1}layer{>1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
+	prefs{string,object>>selectedRegionID{System.Guid>3ed40004-8633-46aa-89a4-0bc0016a9e7f}}\n\
+	lastCameraPos{Vector3>91.30679,38.33265,69.90929}\n\
+	lastCameraRot{Vector3>45.75002,233.2497,0}\n\
+	showRegionOverlay{>false}\n\
+}}\n\
 			".trim().replace(/    /g, "\t"));
-            a["children"][1]["children"][0]["children"][0]["name"].baseValue.Should().Be("DevelopmentTree");
+            a[0].items.Count.Should().Be(5);
 
             var b = VDF.Deserialize("\n\
 name{Root}children:\n\

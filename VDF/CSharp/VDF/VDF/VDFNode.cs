@@ -120,11 +120,13 @@ public class VDFNode
 			builder.Append(RawDataStringToFinalized(baseValue, disallowRawPipe));
 		else if (items.Count > 0)
 		{
-			var hasItemWeMustBracket = items.Any(a=>a.isList || a.popOutChildren);
+			//var hasItemWeMustBracket = items.Any(a=>a.isList || a.popOutChildren);
 			for (var i = 0; i < items.Count; i++)
 			{
 				var lastItem = i > 0 ? items[i - 1] : null;
 				var item = items[i];
+
+				var isItemWeMustBracket = item.isList || item.popOutChildren;
 
 				if (lastItem != null && lastItem.guardingItsLastLine)
 				{
@@ -135,7 +137,7 @@ public class VDFNode
 				if (popOutChildren)
 					builder.Append("\n" + AddIndentToChildText(item.ToVDF()));
 				else
-					if (hasItemWeMustBracket)
+					if (isItemWeMustBracket) //hasItemWeMustBracket)
 					{
 						var itemVDF = item.ToVDF();
 						var beforeEndBracketExtraText = "";

@@ -1,7 +1,10 @@
 ﻿class VDFLoadOptions
 {
 	message: any;
+
+	// JS only
 	inferCompatibleTypesForUnknownTypes: boolean;
+
 	constructor(message?: any, inferCompatibleTypesForUnknownTypes: boolean = false)
 	{
 		this.message = message;

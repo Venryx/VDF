@@ -38,16 +38,28 @@ namespace VDFTests
 			public string autoOpenPage = "";
 		}
 
-		[Fact] void Load()
+		[Fact] void ToFormalize_1()
 		{
 			var a = VDFLoader.ToVDFNode(@"
-name{Root}children:
-	name{Stories}
-	name{Games}children:
-		name{CreativeDefense}children:
-			name{DevelopmentTree}
-			".Trim());
-			a["children"][1]["children"][0]["children"][0]["name"].baseValue.Should().Be("DevelopmentTree");
+>>{>>{
+	name{Road}
+}|{
+	name{RoadAndPath}
+}|{
+	name{SimpleHill}
+}|{
+	name{Test1}
+}|{
+	name{Test1345345}
+}}
+			".Trim()); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
+			a[0].items.Count.Should().Be(5);
+		}
+
+		[Fact] void Load()
+		{
+			var a = VDFLoader.ToVDFNode("id{f3f18ce3-6052-45d3-a225-5cf270e0400b}name{Gun1}pivotPoint_unit{-1,0,-0.75}anchorNormal{0,1,0}scale{2,2,2}controller{true}typeName{MachineGun}", typeof(IList)); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
+			a.items.Count.Should().Be(1);
 		}
 
 		/*[Fact] void Save()

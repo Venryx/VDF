@@ -196,7 +196,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArraysInArrays()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}{2A|2B}{3A}");
+			VDFNode a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|3A");
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be("1B");
 			a[1][0].baseValue.Should().Be("2A");
@@ -205,7 +205,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArraysInArrays_SecondsEmpty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{1A|}{2A|}");
+			VDFNode a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be(null);
 			a[1][0].baseValue.Should().Be("2A");
@@ -213,7 +213,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_ArraysInArrays_FirstsAndSecondsEmpty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{|}{|}");
+			VDFNode a = VDFLoader.ToVDFNode("{|}|{|}");
 			a[0][0].baseValue.Should().Be(null);
 			a[0][1].baseValue.Should().Be(null);
 			a[1][0].baseValue.Should().Be(null);
@@ -221,7 +221,7 @@ three lines".Replace("\r", ""));
 		}
 		[Fact] void Depth1_StringAndArraysInArrays()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{text}{2A|}");
+			VDFNode a = VDFLoader.ToVDFNode("text|{2A|}");
 			a[0].baseValue.Should().Be("text");
 			a[1][0].baseValue.Should().Be("2A");
 			a[1][1].baseValue.Should().Be(null);

@@ -158,13 +158,12 @@ class VDFTokenParser
 				tokens.RemoveAt(i--);
 		}
 
-		// pass 1: add brackets surrounding inline-list items
+		// pass 1: add brackets surrounding inline-list items (the ones that don't already have a set, anyway)
 		// ----------
 
 		var depth_base = 0;
 		var line_indentsReached = 0;
-		var depthStartMarkers = new Dictionary<number, VDFToken>("number", "VDFToken");
-		var depthsOfChildrenData = new List<number>("number"); //HashSet<int>();
+		var depthData = new List<DepthData>("DepthData", new DepthData()); // add empty item, for level-0
 		for (var i = 0; i < tokens.Count; i++)
 		{
 			var token = tokens[i];
@@ -180,40 +179,62 @@ class VDFTokenParser
 
 			if (token.type == VDFTokenType.DataStartMarker)
 			{
+				while (depthData.Count <= depth)
+					depthData.Add(new DepthData());
+				depthData[depth] = new DepthData();
 				if (token != null)
-					depthStartMarkers.Set(depth, token);
+					depthData[depth].startMarker = token;
 			}
 			else if (token.type == VDFTokenType.DataEndMarker)
 			{
-				if (depthsOfChildrenData.Contains(depth + 1))
+				if (depthData.Count > depth + 1 && depthData[depth + 1].hasUnhandledChildrenData)
 				{
-					var firstInDepthTokenIndex = depthStartMarkers.ContainsKey(depth + 1) ? tokens.indexOf(depthStartMarkers.Get(depth + 1)) + 1 : 0;
+					var firstInDepthTokenIndex = depthData[depth + 1].hasUnhandledChildrenData ? tokens.indexOf(depthData[depth + 1].startMarker) + 1 : 0; //tokens.IndexOf(depthData[depth + 1].startMarker) + 1;
 					var itemFirstTokenIndex = firstInDepthTokenIndex;
 					if (tokens[firstInDepthTokenIndex].type == VDFTokenType.WiderMetadataEndMarker)
 						itemFirstTokenIndex = firstInDepthTokenIndex + 1;
 					else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == VDFTokenType.WiderMetadataEndMarker)
 						itemFirstTokenIndex = firstInDepthTokenIndex + 2;
-					if (itemFirstTokenIndex < tokens.Count - 1) // if list has tokens/items (- 1, since there is a fake data-end-marker token)
-					{
-						tokens.Insert(itemFirstTokenIndex, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
-						i++; // increment, since we added the token above
 
-						tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
-						depthsOfChildrenData.Remove(depth_base + 1);
-					}
+					if (itemFirstTokenIndex < tokens.Count - 1) // if list has tokens/items (- 1, since there is a fake data-end-marker token)
+						if (tokens[itemFirstTokenIndex].type != VDFTokenType.DataStartMarker)
+						{
+							tokens.Insert(itemFirstTokenIndex, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
+							i++; // increment, since we added the token above
+
+							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
+							depthData[depth + 1].hasUnhandledChildrenData = false;
+						}
 				}
+				//depthData.RemoveAt(depth);
 			}
 			else if (token.type == VDFTokenType.WiderMetadataEndMarker)
 			{
 				var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
 				if (lastToken == null || lastToken.type != VDFTokenType.MetadataBaseValue || lastToken.text.indexOf(",") == -1) // todo: should check for comma char only at depth 0
-					depthsOfChildrenData.Add(depth);
+					depthData[depth].hasUnhandledChildrenData = true;
 			}
 			else if (token.type == VDFTokenType.ItemSeparator)
 			{
-				tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
-				tokens.Insert(++i, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
-				depthsOfChildrenData.Add(depth);
+				if (depthData[depth].lastItemFirstToken == null) // first item, so we didn't know it was item until now, so only now can we add it
+				{
+					var firstInDepthTokenIndex = tokens.indexOf(depthData[depth].startMarker) + 1; //depthData[depth].hasUnhandledChildrenData ? tokens.IndexOf(depthData[depth].startMarker) + 1 : tokens.IndexOf(depthData[depth].startMarker) + 1;
+					var itemFirstTokenIndex = firstInDepthTokenIndex;
+					if (tokens[firstInDepthTokenIndex].type == VDFTokenType.WiderMetadataEndMarker)
+						itemFirstTokenIndex = firstInDepthTokenIndex + 1;
+					else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == VDFTokenType.WiderMetadataEndMarker)
+						itemFirstTokenIndex = firstInDepthTokenIndex + 2;
+
+					depthData[depth].lastItemFirstToken = tokens[itemFirstTokenIndex];
+				}
+
+				if (depthData[depth].lastItemFirstToken.type != VDFTokenType.DataStartMarker)
+					tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // (position and index are fixed later)
+				if (tokens[i + 1].type != VDFTokenType.DataStartMarker)
+					tokens.Insert(++i, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // (position and index are fixed later)
+				depthData[depth].hasUnhandledChildrenData = true;
+				var nextToken = tokens[i + 1];
+				depthData[depth].lastItemFirstToken = nextToken;
 			}
 		}
 
@@ -311,4 +332,11 @@ class VDFTokenParser
 			textProcessedLength += token.text.length;
 		}
 	}
+}
+
+class DepthData
+{
+	public startMarker: VDFToken;
+	public lastItemFirstToken: VDFToken;
+	public hasUnhandledChildrenData: boolean;
 }
