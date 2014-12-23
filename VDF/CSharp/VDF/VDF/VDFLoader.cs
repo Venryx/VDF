@@ -30,7 +30,7 @@ public static class VDFLoader
 	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions loadOptions = null, int objIndent = 0)
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
-
+		
 		// pre-process/fix tokens
 		// ==========
 

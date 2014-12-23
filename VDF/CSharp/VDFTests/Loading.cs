@@ -314,7 +314,7 @@ messages:{,>>
 			a["otherProperty"].baseValue.Should().Be("false");
 		}
 
-		[Fact] void Depth1_MultilineStringThenProperty()
+		[Fact] void Depth1_Object_MultilineStringThenProperty()
 		{
 			var a = VDFLoader.ToVDFNode(@"text{@@This is a
 multiline string
@@ -322,7 +322,7 @@ of three lines in total.@@}bool{>true}");
 			a["text"].baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
 			((bool)a["bool"]).Should().Be(true);
 		}
-		[Fact] void Depth1_ArrayPoppedOutThenMultilineString()
+		[Fact] void Depth1_Object_PoppedOutStringsThenMultilineString()
 		{
 			var a = VDFLoader.ToVDFNode(@"childTexts:
 	text1
@@ -334,8 +334,31 @@ of three lines in total.@@}bool{>true}");
 			a["childTexts"][1].baseValue.Should().Be("text2");
 			a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
 		}
+		[Fact] void Depth2_List_Lists_PoppedOutObjects()
+		{
+			var a = VDFLoader.ToVDFNode(@"
+>>{>>{
+	name{Road}
+}|{
+	name{RoadAndPath}
+}|{
+	name{SimpleHill}
+}}
+			".Trim()); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
+			a[0].items.Count.Should().Be(3);
+		}
+		[Fact] void List_PoppedOutObjects_MultilineString()
+		{
+			var a = VDFLoader.ToVDFNode(@">>
+	id{1}multilineText{@@line1
+	line2
+	line3@@}
+	id{2}multilineText{@@line1
+	line2@@}");
+			a.items.Count.Should().Be(2);
+		}
 
-		[Fact] void Depth2_ObjectWithArrayProp_PoppedOutObjectWithArrayProp_PoppedOutObject()
+		[Fact] void Depth2_Object_PoppedOutObject_PoppedOutObject()
 		{
 			var a = VDFLoader.ToVDFNode(@"
 name{L0}children:

@@ -266,6 +266,7 @@ class VDFTokenParser
 		var lastLine_indentsReached = 0;
 		line_indentsReached = 0;
 		var line_firstNonIndentCharReached = false;
+		var indentDepthsNeedingEndBracket = new List<number>("number");
 		for (var i = 0; i < tokens.Count; i++)
 		{
 			var token = tokens[i];
@@ -278,34 +279,26 @@ class VDFTokenParser
 				line_firstNonIndentCharReached = false;
 				line_indentsReached = 0;
 			}
-			else if (!line_firstNonIndentCharReached)
+			else if (token.type == VDFTokenType.PoppedOutDataStartMarker)
+			{
+				tokens.Insert(i++, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // add inferred indent-block data-start-marker token (for indent-block)
+				indentDepthsNeedingEndBracket.Add(line_indentsReached + 1);
+			}
+			else if (!line_firstNonIndentCharReached) // if normal char, and first-normal-char-reached flag hasn't been set
 			{
 				line_firstNonIndentCharReached = true;
 				if (i != 0)
 				{
-					if (line_indentsReached > lastLine_indentsReached)
-					{
-						tokens.Insert(i++, new VDFToken(VDFTokenType.DataStartMarker, -1, -1, "{")); // add inferred indent-block data-start-marker token (for indent-block)
-
-						var tokenBeforeLineBreak = tokens[i - line_indentsReached - 3];
-						if (tokenBeforeLineBreak.type == VDFTokenType.WiderMetadataEndMarker) // if list had metadata, move it to after the list's data-start-marker
-						{
-							var tokenBeforeLineBreak_previous = tokens[i - line_indentsReached - 3 - 1];
-							if (tokenBeforeLineBreak_previous.type == VDFTokenType.MetadataBaseValue)
-							{
-								tokens.Remove(tokenBeforeLineBreak_previous); //RemoveAt(i - line_indentsReached - 2);
-								tokens.Insert(i - 1, tokenBeforeLineBreak_previous);
-							}
-							tokens.Remove(tokenBeforeLineBreak); //RemoveAt(i - line_indentsReached - 2);
-							tokens.Insert(i - 1, tokenBeforeLineBreak);
-						}
-					}
-					else
+					if (line_indentsReached <= lastLine_indentsReached) // if indent-depth stayed the same, or decreased, since last line
 					{
 						for (var i2 = lastLine_indentsReached; i2 > line_indentsReached; i2--) // add inferred indent-block data-end-marker tokens
 						{
 							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block last-item
-							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
+							if (indentDepthsNeedingEndBracket.Contains(line_indentsReached + 1))
+							{
+								tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
+								indentDepthsNeedingEndBracket.Remove(line_indentsReached + 1);
+							}
 						}
 						if ([VDFTokenType.PoppedOutDataEndMarker, VDFTokenType.DataEndMarker].indexOf(token.type) == -1) // if not the ^ or } token (i.e. if actually a new item, instead of a prop continution)
 							tokens.Insert(i++, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for current-indent-block last-item
@@ -317,11 +310,15 @@ class VDFTokenParser
 			}
 		}
 
-		// apparently this isn't needed, at the moment; without it, the tokens list is incomplete (missing the end), though
-		for (var i = line_indentsReached; i > 0; i--) // add inferred indent-block data-end-marker tokens
+		for (var i = line_indentsReached; i >= 0; i--) // add inferred indent-block data-end-marker tokens
 		{
-			tokens.Insert(tokens.Count, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block last-item
-			tokens.Insert(tokens.Count, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
+			if (i > 0)
+				tokens.Insert(tokens.Count, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block last-item
+			if (indentDepthsNeedingEndBracket.Contains(0 + 1))
+			{
+				tokens.Insert(tokens.Count, new VDFToken(VDFTokenType.DataEndMarker, -1, -1, "}")); // one for lower-indent-block
+				indentDepthsNeedingEndBracket.Remove(0 + 1);
+			}
 		}
 
 		// pass 3: remove [:, ^, line-break, indent, and |] tokens

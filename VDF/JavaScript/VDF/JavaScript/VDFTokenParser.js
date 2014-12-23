@@ -227,6 +227,7 @@ var VDFTokenParser = (function () {
         var lastLine_indentsReached = 0;
         line_indentsReached = 0;
         var line_firstNonIndentCharReached = false;
+        var indentDepthsNeedingEndBracket = new List("number");
         for (var i = 0; i < tokens.Count; i++) {
             var token = tokens[i];
             if (token.type == 13 /* Indent */)
@@ -236,26 +237,19 @@ var VDFTokenParser = (function () {
 
                 line_firstNonIndentCharReached = false;
                 line_indentsReached = 0;
+            } else if (token.type == 6 /* PoppedOutDataStartMarker */) {
+                tokens.Insert(i++, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // add inferred indent-block data-start-marker token (for indent-block)
+                indentDepthsNeedingEndBracket.Add(line_indentsReached + 1);
             } else if (!line_firstNonIndentCharReached) {
                 line_firstNonIndentCharReached = true;
                 if (i != 0) {
-                    if (line_indentsReached > lastLine_indentsReached) {
-                        tokens.Insert(i++, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // add inferred indent-block data-start-marker token (for indent-block)
-
-                        var tokenBeforeLineBreak = tokens[i - line_indentsReached - 3];
-                        if (tokenBeforeLineBreak.type == 1 /* WiderMetadataEndMarker */) {
-                            var tokenBeforeLineBreak_previous = tokens[i - line_indentsReached - 3 - 1];
-                            if (tokenBeforeLineBreak_previous.type == 2 /* MetadataBaseValue */) {
-                                tokens.Remove(tokenBeforeLineBreak_previous); //RemoveAt(i - line_indentsReached - 2);
-                                tokens.Insert(i - 1, tokenBeforeLineBreak_previous);
-                            }
-                            tokens.Remove(tokenBeforeLineBreak); //RemoveAt(i - line_indentsReached - 2);
-                            tokens.Insert(i - 1, tokenBeforeLineBreak);
-                        }
-                    } else {
+                    if (line_indentsReached <= lastLine_indentsReached) {
                         for (var i2 = lastLine_indentsReached; i2 > line_indentsReached; i2--) {
                             tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block last-item
-                            tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block
+                            if (indentDepthsNeedingEndBracket.Contains(line_indentsReached + 1)) {
+                                tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block
+                                indentDepthsNeedingEndBracket.Remove(line_indentsReached + 1);
+                            }
                         }
                         if ([7 /* PoppedOutDataEndMarker */, 10 /* DataEndMarker */].indexOf(token.type) == -1)
                             tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for current-indent-block last-item
@@ -267,9 +261,13 @@ var VDFTokenParser = (function () {
             }
         }
 
-        for (var i = line_indentsReached; i > 0; i--) {
-            tokens.Insert(tokens.Count, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block last-item
-            tokens.Insert(tokens.Count, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block
+        for (var i = line_indentsReached; i >= 0; i--) {
+            if (i > 0)
+                tokens.Insert(tokens.Count, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block last-item
+            if (indentDepthsNeedingEndBracket.Contains(0 + 1)) {
+                tokens.Insert(tokens.Count, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block
+                indentDepthsNeedingEndBracket.Remove(0 + 1);
+            }
         }
 
         for (var i = 0; i < tokens.Count; i++) {

@@ -28,7 +28,13 @@ var V = new function ()
 	// spans multiple...
 	// lines.
 	//*/}));
-	self.Multiline = function(functionWithInCommentMultiline) { return functionWithInCommentMultiline.toString().replace(/^[^\/]+\/\*/, '').replace(/\*\/(.|\n)*/, ''); };
+	//self.Multiline = function(functionWithInCommentMultiline) { return functionWithInCommentMultiline.toString().replace(/^[^\/]+\/\*/, '').replace(/\*\/(.|\n)*/, ''); };
+	self.Multiline = function(functionWithInCommentMultiline)
+	{
+		var text = functionWithInCommentMultiline.toString().replace(/\r/g, "");
+		var firstCharPos = text.indexOf("\n", text.indexOf("/*"));
+		return text.substring(firstCharPos + 1, text.lastIndexOf("\n"));
+	};
 
 	self.ExtendWith = function(value) { $.extend(this, value); };
 

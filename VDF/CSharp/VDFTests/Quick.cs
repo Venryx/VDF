@@ -38,28 +38,16 @@ namespace VDFTests
 			public string autoOpenPage = "";
 		}
 
-		[Fact] void ToFormalize_1()
-		{
-			var a = VDFLoader.ToVDFNode(@"
->>{>>{
-	name{Road}
-}|{
-	name{RoadAndPath}
-}|{
-	name{SimpleHill}
-}|{
-	name{Test1}
-}|{
-	name{Test1345345}
-}}
-			".Trim()); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
-			a[0].items.Count.Should().Be(5);
-		}
-
 		[Fact] void Load()
 		{
-			var a = VDFLoader.ToVDFNode(">>>19|{string>>}"); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
-			a[1].items.Count.Should().Be(0);
+			var a = VDFLoader.ToVDFNode(@">>
+	id{1}name{Tank}visible{true}tasksScriptText{@@Grab Flag
+	(Storage1 ensure contains EnemyFlag) ensure is false
+	try move to EnemyFlag
+	EnemyFlag put into Storage1@@}
+	id{2}name{UnitWithReallyLongName}visible{true}tasksScriptText{@@Grab Flag for Unit with Really Long Name
+	(Storage1 ensure contains EnemyFlag) ensure is over 9000@@}");
+			a.items.Count.Should().Be(2);
 		}
 
 		/*[Fact] void Save()
