@@ -363,7 +363,7 @@ public static class VDFTokenParser
 		// ----------
 
 		// temp
-		Console.Write(String.Join("", tokens.Select(a=>a.text).ToArray()));
+		//Console.Write(String.Join("", tokens.Select(a=>a.text).ToArray()));
 
 		RefreshTokenPositionAndIndexProperties(tokens);
 	}

@@ -161,7 +161,7 @@ VFileBrowser = function(options)
 			var img = $("<img style='position: absolute; left: -1; top: -1; width: 70; height: 70; border-radius: 10px; border: 1px solid transparent; opacity: .75; display: none;'/>").appendTo(div);
 			var filePath = designer.GetLivePackFolder_UI() + node.path;
 			var fileExtension = filePath.match(/\.([^.]+)$/)[1];
-			if (["jpg", "bmp", "png"].contains(fileExtension))
+			if (["jpg", "bmp", "png"].Contains(fileExtension))
 				$.get(filePath).done(function()
 				{
 					img.css("display", "").attr("src", filePath);
