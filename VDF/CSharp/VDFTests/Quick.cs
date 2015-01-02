@@ -38,7 +38,7 @@ namespace VDFTests
 			public string autoOpenPage = "";
 		}
 
-		[Fact] void Load()
+		/*[Fact] void Load()
 		{
 			var a = VDFLoader.ToVDFNode(@">>
 	id{1}name{Tank}visible{true}tasksScriptText{@@Grab Flag
@@ -48,7 +48,7 @@ namespace VDFTests
 	id{2}name{UnitWithReallyLongName}visible{true}tasksScriptText{@@Grab Flag for Unit with Really Long Name
 	(Storage1 ensure contains EnemyFlag) ensure is over 9000@@}");
 			a.items.Count.Should().Be(2);
-		}
+		}*/
 
 		/*[Fact] void Save()
 		{

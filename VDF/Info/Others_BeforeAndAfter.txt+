@@ -1,0 +1,59 @@
+Map
+==========
+
+	id{a2c69a05-1ac0-4dc6-a51b-6f0bbadf8082}
+	name{Hills}
+	terrain{}
+	regions:
+		id{5c2723fb-62d5-4ce3-859a-5c0474026e1b}name{Base}layer{0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}
+		id{07caffe1-8a40-4a58-880d-d413a1fccaee}name{DarkGrass}layer{1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}
+	prefs{selectedRegionID{System.Guid>07caffe1-8a40-4a58-880d-d413a1fccaee}selectedChunkPosition{Vector3i>0,0,7}}
+	lastCameraPos{4.251065,2.522561,230.9144}
+	lastCameraRot{33.25003,43.49892,2.041822E-06}
+	showRegionOverlay{false}
+----------
+{^}
+	id:"a2c69a05-1ac0-4dc6-a51b-6f0bbadf8082"
+	name:"Hills"
+	terrain:{}
+	regions:[^]
+		id:"5c2723fb-62d5-4ce3-859a-5c0474026e1b",name:"Base",layer:0,soilID:System.Guid>"b7395b9e-77eb-4c88-92a0-34e2f679bde9"
+		id:"07caffe1-8a40-4a58-880d-d413a1fccaee",name:"DarkGrass",layer:1,soilID:System.Guid>"5fda6e73-3433-496a-b776-6d2906f121a9"
+	prefs:{selectedRegionID:System.Guid>"07caffe1-8a40-4a58-880d-d413a1fccaee",selectedChunkPosition:Vector3i>"0,0,7"}
+	lastCameraPos:"4.251065,2.522561,230.9144"
+	lastCameraRot:"33.25003,43.49892,2.041822E-06"
+	showRegionOverlay:false
+
+Part
+==========
+
+	id{f01bfc0d-a369-4177-9fc2-1982d7222fd1}
+	visible{true}
+	addRigidbody{true}
+	linkStrength{10000}
+	maintainAspectRatio{true}
+	pivotPoint_local{.5,0,.5}
+	minScale{.25,.25,.25}
+	spaceColliderCenter{.5,.5,.5}
+	spaceColliderSize{1,1,1}
+	isContainer{true}
+	containerZoneCenter{.5,.5,.5}
+	containerZoneSize{.8,.8,.8}
+	weight{100}
+	woodCost{.01}
+----------
+{^}
+	id:"f01bfc0d-a369-4177-9fc2-1982d7222fd1"
+	visible:true
+	addRigidbody:true
+	linkStrength:10000
+	maintainAspectRatio:true
+	pivotPoint_local:".5,0,.5"
+	minScale:".25,.25,.25"
+	spaceColliderCenter:".5,.5,.5"
+	spaceColliderSize:"1,1,1"
+	isContainer:true
+	containerZoneCenter:".5,.5,.5"
+	containerZoneSize:".8,.8,.8"
+	weight:100
+	woodCost:.01

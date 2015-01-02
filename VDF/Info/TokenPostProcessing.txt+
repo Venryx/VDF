@@ -12,80 +12,770 @@ name{L0}children:{>>
 
 name{L0}children{name{L1}children{name{L2}}}
 ==========
-World>name{Main}vObjectRoot{id{}name{VObjectRoot}children:
-	id{}name{Soils}children:
-		id{}name{Grass}duties:
+World>name{Main}vObjectRoot{name{VObjectRoot}children:
+	name{Soils}children:
+		name{Grass}duties:
 			HoldSoil>texturePath{Grass.png}
-		id{}name{Dirt}duties:
+		name{Dirt}duties:
 			HoldSoil>texturePath{Dirt.png}
-	id{}name{Items}duties:
+	name{Items}duties:
 		Special1>color{White}brightness{.5}
 	^children:
-		id{}name{@@NameThat{NeedsEscaping@gmail.com}@@}
-		id{}name{Camera}duties:
+		name{@@name that {needs escaping}@@}
+		name{Camera}duties:
 			HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
 			HoldMesh>vertexes{9,4,2.5|1,8,9.5435|25,15,5}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}
 			HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties:
 				MoveSelfToInventory>
 				RenderMesh>
-			HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties:
-				MoveSelfToWorld>
-		id{}name{GardenHoe}duties:
+		name{GardenHoe}duties:
 			HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
 			HoldMesh>vertexes{}vertexColors{}
 }stringPropNull{>null}simpleFlag{true}simpleEnum{A}listOfStringLists{{1A|1B|1C}|{2A|2B|2C}|{3A|3B|3C}}
 
 
 
-World>name{Main}vObjectRoot{id{}name{VObjectRoot}children:
-	id{}name{Soils}children:
-		id{}name{Grass}duties:
+World>name{Main}vObjectRoot{name{VObjectRoot}children:
+	name{Soils}children:
+		name{Grass}duties:
 			HoldSoil>texturePath{Grass.png}
-		id{}name{Dirt}duties:
+		name{Dirt}duties:
 			HoldSoil>texturePath{Dirt.png}
-	id{}name{Items}duties:
+	name{Items}duties:
 		Special1>color{White}brightness{.5}
 	^children:
-		id{}name{@@NameThat{NeedsEscaping@gmail.com}@@}
-		id{}name{Camera}duties:
+		name{@@name that {needs escaping}@@}
+		name{Camera}duties:
 			HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
 			HoldMesh>vertexes{{9,4,2.5}|{1,8,9.5435}|{25,15,5}}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}
 			HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties:
 				MoveSelfToInventory>
 				RenderMesh>
-			HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties:
-				MoveSelfToWorld>
-		id{}name{GardenHoe}duties:
+		name{GardenHoe}duties:
 			HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
 			HoldMesh>vertexes{}vertexColors{}
 }stringPropNull{>null}simpleFlag{true}simpleEnum{A}listOfStringLists{{{1A}|{1B}|{1C}}|{{2A}|{2B}|{2C}}|{{3A}|{3B}|{3C}}}
 
 
 
-World>name{Main}vObjectRoot{id{}name{VObjectRoot}children:
-	{{id{}name{Soils}children:
-		{{id{}name{Grass}duties:
+World>name{Main}vObjectRoot{name{VObjectRoot}children:
+	{{name{Soils}children:
+		{{name{Grass}duties:
 			{{HoldSoil>texturePath{Grass.png}
-		}}}{id{}name{Dirt}duties:
+		}}}{name{Dirt}duties:
 			{{HoldSoil>texturePath{Dirt.png}
-	}}}}}{id{}name{Items}duties:
+	}}}}}{name{Items}duties:
 		{{Special1>color{White}brightness{.5}
 	}}^children:
-		{{id{}name{@@NameThat{NeedsEscaping@gmail.com}@@}
-		}{id{}name{Camera}duties:
+		{{name{@@name that {needs escaping}@@}
+		}{name{Camera}duties:
 			{{HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}
 			}{HoldMesh>vertexes{{9,4,2.5}|{1,8,9.5435}|{25,15,5}}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}
 			}{HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties:
 				{{MoveSelfToInventory>
 				}{RenderMesh>
-			}}}{HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties:
-				{{MoveSelfToWorld>
-		}}}}}{id{}name{GardenHoe}duties:
+			}}}
+		}}{name{GardenHoe}duties:
 			{{HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}
 			}{HoldMesh>vertexes{}vertexColors{}
 }}}}}}}stringPropNull{>null}simpleFlag{true}simpleEnum{A}listOfStringLists{{{1A}|{1B}|{1C}}|{{2A}|{2B}|{2C}}|{{3A}|{3B}|{3C}}}
 
 
 
-World>name{Main}vObjectRoot{id{}name{VObjectRoot}children{{id{}name{Soils}children{{id{}name{Grass}duties{{HoldSoil>texturePath{Grass.png}}}}{id{}name{Dirt}duties{{HoldSoil>texturePath{Dirt.png}}}}}}{id{}name{Items}duties{{Special1>color{White}brightness{.5}}}children{{id{}name{@@NameThat{NeedsEscaping@gmail.com}@@}}{id{}name{Camera}duties{{HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}}{HoldMesh>vertexes{{9,4,2.5}{1,8,9.5435}{25,15,5}}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}}{HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{{MoveSelfToInventory>}{RenderMesh>}}}{HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{{MoveSelfToWorld>}}}}}{id{}name{GardenHoe}duties{{HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}}{HoldMesh>vertexes{}vertexColors{}}}}}}}}stringPropNull{>null}simpleFlag{true}simpleEnum{A}listOfStringLists{{{1A}{1B}{1C}}{{2A}{2B}{2C}}{{3A}{3B}{3C}}}
+World>name{Main}vObjectRoot{name{VObjectRoot}children{{name{Soils}children{{name{Grass}duties{{HoldSoil>texturePath{Grass.png}}}}{name{Dirt}duties{{HoldSoil>texturePath{Dirt.png}}}}}}{name{Items}duties{{Special1>color{White}brightness{.5}}}children{{name{@@name that {needs escaping}@@}}{name{Camera}duties{{HoldTransform>position{1,9,2}rotation{25.5,28.9,2404.765}scale{3,4,1}}{HoldMesh>vertexes{{9,4,2.5}{1,8,9.5435}{25,15,5}}vertexColors{9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}}{HoldDuties>dutiesEnabledWhen{SelfIsInWorld}duties{{MoveSelfToInventory>}{RenderMesh>}}}{HoldDuties>dutiesEnabledWhen{!SelfIsInWorld}duties{{MoveSelfToWorld>}}}}}{name{GardenHoe}duties{{HoldTransform>position{0,0,0}rotation{0,0,0}scale{0,0,0}}{HoldMesh>vertexes{}vertexColors{}}}}}}}}stringPropNull{>null}simpleFlag{true}simpleEnum{A}listOfStringLists{{{1A}{1B}{1C}}{{2A}{2B}{2C}}{{3A}{3B}{3C}}}
 ==========
+
+
+
+Type 2
+==========
+World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[#]
+	name{"Soils"}children[#]
+		name{"Grass"}duties[#]
+			HoldSoil>texturePath{"Grass.png"}
+		name{"Dirt"}duties[#]
+			HoldSoil>texturePath{"Dirt.png"}
+	name{"Items"}duties[#]
+		Special1>color{"White"}brightness{.5}
+	^children[#]
+		name{##name that {needs escaping}##}
+		name{"Camera"}duties[#]
+			HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}
+			HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}
+			HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[#]
+				MoveSelfToInventory>""
+				RenderMesh>""
+		name{"GardenHoe"}duties[#]
+			HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}
+			HoldMesh>vertexes[]vertexColors[]
+}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[#]
+	{name{"Soils"}children[#]}
+		{name{"Grass"}duties[#]}
+			{HoldSoil>texturePath{"Grass.png"}}
+		{name{"Dirt"}duties[#]}
+			{HoldSoil>texturePath{"Dirt.png"}}
+	{name{"Items"}duties[#]}
+		{Special1>color{"White"}brightness{.5}}
+	^children[#]
+		{name{##name that {needs escaping}##}}
+		{name{"Camera"}duties[#]}
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			{HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}}
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[#]}
+				{MoveSelfToInventory>""}
+				{RenderMesh>""}
+		{name{"GardenHoe"}duties[#]}
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[#
+	{name{"Soils"}children[#
+		{name{"Grass"}duties[#
+			{HoldSoil>texturePath{"Grass.png"}}
+		]},{name{"Dirt"}duties[#
+			{HoldSoil>texturePath{"Dirt.png"}}
+	]}]},{name{"Items"}duties[#
+		{Special1>color{"White"}brightness{.5}}
+	]^children[#
+		{name{##name that {needs escaping}##}},
+		{name{"Camera"}duties[#
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}},
+			{HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}},
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[#
+				{MoveSelfToInventory>""},
+				{RenderMesh>""}
+			]}
+		]},{name{"GardenHoe"}duties[#
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}},
+			{HoldMesh>vertexes[]vertexColors[]}
+]}]}]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[
+	{name{"Soils"}children[
+		{name{"Grass"}duties[
+			{HoldSoil>texturePath{"Grass.png"}}
+		]},{name{"Dirt"}duties[
+			{HoldSoil>texturePath{"Dirt.png"}}
+	]}]},{name{"Items"}duties[
+		{Special1>color{"White"}brightness{.5}}
+	]children[
+		{name{##name that {needs escaping}##}},
+		{name{"Camera"}duties[
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}},
+			{HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}},
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[
+				{MoveSelfToInventory>""},
+				{RenderMesh>""}
+			]}
+		]},{name{"GardenHoe"}duties[
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}},
+			{HoldMesh>vertexes[]vertexColors[]}
+]}]}]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[{name{"Soils"}children[{name{"Grass"}duties[{HoldSoil>texturePath{"Grass.png"}}]},{name{"Dirt"}duties[{HoldSoil>texturePath{"Dirt.png"}}]}]},{name{"Items"}duties[{Special1>color{"White"}brightness{.5}}]children[{name{##name that {needs escaping}##}},{name{"Camera"}duties[{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}},{HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}},{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[{MoveSelfToInventory>""},{RenderMesh>""}]},{HoldDuties>dutiesEnabledWhen{"!SelfIsInWorld"}duties[{MoveSelfToWorld>""}]}]},{name{"GardenHoe"}duties[{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}},{HoldMesh>vertexes[]vertexColors[]}]}]}]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+Type 3
+==========
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[
+	{name{"Soils"}children[
+		{name{"Grass"}duties[
+			{HoldSoil>texturePath{"Grass.png"}}
+		{name{"Dirt"}duties[
+			{HoldSoil>texturePath{"Dirt.png"}}
+	{name{"Items"}duties[
+		{Special1>color{"White"}brightness{.5}}
+	children[
+		{name{##name that {needs escaping}##}}
+		{name{"Camera"}duties[
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			{HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}}
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[
+				{MoveSelfToInventory>""}
+				{RenderMesh>""}
+		{name{"GardenHoe"}duties[
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[
+	{name{"Soils"}children[
+		{name{"Grass"}duties[
+			{HoldSoil>texturePath{"Grass.png"}}
+		]},{name{"Dirt"}duties[
+			{HoldSoil>texturePath{"Dirt.png"}}
+	]}]},{name{"Items"}duties[
+		{Special1>color{"White"}brightness{.5}}
+	]children[
+		{name{##name that {needs escaping}##}}
+		,{name{"Camera"}duties[
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			,{HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}}
+			,{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[
+				{MoveSelfToInventory>""}
+				,{RenderMesh>""}
+			]}
+		]},{name{"GardenHoe"}duties[
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+]}]}}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+Type 4 - infer list item brackets
+==========
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[^]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+	name{"Soils"}children[^]
+		name{"Grass"}duties[^]
+			HoldSoil>texturePath{"Grass.png"}
+		name{"Dirt"}duties[^]
+			HoldSoil>texturePath{"Dirt.png"}
+	name{"Items"}duties[^]children[^^]
+		Special1>color{"White"}brightness{.5}
+		^^name{"##name that {needs escaping}##"}
+		name{"Camera"}duties[^]
+			HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}
+			HoldMesh>vertexes{"9,4,2.5","1,8,9.5435","25,15,5"}vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}
+			HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[^]
+				MoveSelfToInventory>""
+				RenderMesh>""
+		name{"GardenHoe"}duties[^]
+			HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}
+			HoldMesh>vertexes[]vertexColors[]
+
+
+
+Type 4
+==========
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[^]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+	{name{"Soils"}children[^]}
+		{name{"Grass"}duties[^]}
+			{HoldSoil>texturePath{"Grass.png"}}
+		{name{"Dirt"}duties[^]}
+			{HoldSoil>texturePath{"Dirt.png"}}
+	{name{"Items"}duties[^]children[^^]}
+		{Special1>color{"White"}brightness{.5}}
+		^^{name{"##name that {needs escaping}##"}}
+		{name{"Camera"}duties[^]}
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			{HoldMesh>vertexes["9,4,2.5","1,8,9.5435","25,15,5"]vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}}
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[^]}
+				{MoveSelfToInventory>}
+				{RenderMesh>}
+		{name{"GardenHoe"}duties[^]}
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[
+	{name{"Soils"}children[
+		{name{"Grass"}duties[
+			{HoldSoil>texturePath{"Grass.png"}}
+		]}{name{"Dirt"}duties[
+			{HoldSoil>texturePath{"Dirt.png"}}
+	]}]}{name{"Items"}duties[
+		{Special1>color{"White"}brightness{.5}}
+		]children[{name{"##name that {needs escaping}##"}}
+		{name{"Camera"}duties[
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			{HoldMesh>vertexes["9,4,2.5","1,8,9.5435","25,15,5"]vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}}
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[
+				{MoveSelfToInventory>}
+				{RenderMesh>}
+			]}
+		]}{name{"GardenHoe"}duties[
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+]}]}]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[
+	{name{"Soils"}children[
+		{name{"Grass"}duties[
+			{HoldSoil>texturePath{"Grass.png"}}
+		]}{name{"Dirt"}duties[
+			{HoldSoil>texturePath{"Dirt.png"}}
+	]}]}{name{"Items"}duties[
+		{Special1>color{"White"}brightness{.5}}
+		]children[{name{"##name that {needs escaping}##"}}
+		{name{"Camera"}duties[
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			{HoldMesh>vertexes["9,4,2.5","1,8,9.5435","25,15,5"]vertexColors{9,4,2.5{"Black"}1,8,9.5435{"Gray"}25,15,5{"White"}}}
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[
+				{MoveSelfToInventory>}
+				{RenderMesh>}
+			]}
+		]}{name{"GardenHoe"}duties[
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+]}]}]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+Type 4 - bracket literals wherever they are
+==========
+{World>name{"Main"}vObjectRoot{name{"VObjectRoot"}children[^]}stringPropNull{null}simpleFlag{true}simpleEnum{"A"}listOfStringLists[[{"1A"}{"1B"}{"1C"}],[{"2A"}{"2B"}{"2C"}],[{"3A"}{"3B"}{"3C"}]]}
+	{name{"Soils"}children[^]}
+		{name{"Grass"}duties[^]}
+			{HoldSoil>texturePath{"Grass.png"}}
+		{name{"Dirt"}duties[^]}
+			{HoldSoil>texturePath{"Dirt.png"}}
+	{name{"Items"}duties[^]children[^^]}
+		{Special1>color{"White"}brightness{.5}}
+		^^{name{"##name that {needs escaping}##"}}
+		{name{"Camera"}duties[^]}
+			{HoldTransform>position{"1,9,2"}rotation{"25.5,28.9,2404.765"}scale{"3,4,1"}}
+			{HoldMesh>vertexes[{"9,4,2.5"}{"1,8,9.5435"}{"25,15,5"}]vertexColors{{"9,4,2.5"}{"Black"}{"1,8,9.5435"}{"Gray"}{"25,15,5"}{"White"}}}
+			{HoldDuties>dutiesEnabledWhen{"SelfIsInWorld"}duties[^]}
+				{MoveSelfToInventory>}
+				{RenderMesh>}
+		{name{"GardenHoe"}duties[^]}
+			{HoldTransform>position{"0,0,0"}rotation{"0,0,0"}scale{"0,0,0"}}
+			{HoldMesh>vertexes[]vertexColors[]}
+
+
+
+Type 4 - with colons and commas to separate children
+==========
+{World>name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+	{name:"Soils",children:[^]}
+		{name:"Grass",duties:[^]}
+			{HoldSoil>texturePath:"Grass.png"}
+		{name:"Dirt",duties:[^]}
+			{HoldSoil>texturePath:"Dirt.png"}
+	{name:"Items",duties:[^],children:[^^]}
+		{Special1>color:"White",brightness:.5}
+		^^{name:"##name that {needs escaping}##"}
+		{name:"Camera",duties:[^]}
+			{HoldTransform>position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			{HoldMesh>vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{##9,4,2.5##:"Black",##1,8,9.5435##:"Gray",##25,15,5##:"White"}}
+			{HoldDuties>dutiesEnabledWhen:"SelfIsInWorld",duties:[^]}
+				{MoveSelfToInventory>}
+				{RenderMesh>}
+		{name:"GardenHoe",duties:[^]}
+			{HoldTransform>position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			{HoldMesh>vertexes:[],vertexColors:[]}
+
+
+
+{World>name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
+	{name:"Soils",children:[
+		{name:"Grass",duties:[
+			{HoldSoil>texturePath:"Grass.png"}
+		]}{name:"Dirt",duties:[
+			{HoldSoil>texturePath:"Dirt.png"}
+	]}]}{name:"Items",duties:[
+		{Special1>color:"White",brightness:.5}
+		],children:[{name:"##name that {needs escaping}##"}
+		{name:"Camera",duties:[
+			{HoldTransform>position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			{HoldMesh>vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{##9,4,2.5##:"Black",##1,8,9.5435##:"Gray",##25,15,5##:"White"}}
+			{HoldDuties>dutiesEnabledWhen:"SelfIsInWorld",duties:[
+				{MoveSelfToInventory>}
+				{RenderMesh>}
+			]}
+		]}{name:"GardenHoe",duties:[
+			{HoldTransform>position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			{HoldMesh>vertexes:[],vertexColors:[]}
+]}]}]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+Type 4 - extra
+==========
+
+{name: "<<
+resulting string has no line-breaks; when a line-break exists at the very start and another exists at the very end, they're auto-removed
+>>"}
+
+{name: 'strings can also be specified using single-quotes'}
+
+Type 4 - with colons and commas to separate children - metadata_type outside brackets
+==========
+World> {name: "Main", vObjectRoot: {name: "VObjectRoot", children: [^]}, stringPropNull: null, simpleFlag: true, simpleEnum: "A", listOfStringLists: [["1A", "1B", "1C"], ["2A", "2B", "2C"], ["3A", "3B", "3C"]]}
+	{name: "Soils", children: [^]}
+		{name: "Grass", duties: [^]}
+			HoldSoil> {texturePath: "Grass.png"}
+		{name: "Dirt", duties: [^]}
+			HoldSoil> {texturePath: "Dirt.png"}
+	{name: "Items", duties: [^], children: [^^]}
+		Special1> {color: "White", brightness: .5}
+		^^{name: "<<name that {needs escaping}>>"}
+		{name: "Camera", duties: [^]}
+			HoldTransform> {position: "1,9,2", rotation: "25.5,28.9,2404.765", scale: "3,4,1"}
+			HoldMesh> {vertexes: ["9,4,2.5", "1,8,9.5435", "25,15,5"], vertexColors: {<<9,4,2.5>>: "Black", <<1,8,9.5435>>: "Gray", <<25,15,5>>: "White"}}
+			HoldDuties> {dutiesEnabledWhen: "SelfIsInWorld", duties: [^]}
+				MoveSelfToInventory> {}
+				RenderMesh> {}
+		{name: "GardenHoe", duties: [^]}
+			HoldTransform> {position: "0,0,0", rotation: "0,0,0", scale: "0,0,0"}
+			HoldMesh> {vertexes: [], vertexColors: []}
+
+
+
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+	{name:"Soils",children:[^]}
+		{name:"Grass",duties:[^]}
+			HoldSoil>{texturePath:"Grass.png"}
+		{name:"Dirt",duties:[^]}
+			HoldSoil>{texturePath:"Dirt.png"}
+	{name:"Items",duties:[^],children:[^^]}
+		Special1>{color:"White",brightness:.5}
+		^^{name:"<<name that {needs escaping}>>"}
+		{name:"Camera",duties:[^]}
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
+			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[^]}
+				MoveSelfToInventory>{}
+				RenderMesh>{}
+		{name:"GardenHoe",duties:[^]}
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			HoldMesh>{vertexes:[],vertexColors:[]}
+
+
+
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
+	{name:"Soils",children:[
+		{name:"Grass",duties:[
+			HoldSoil>{texturePath:"Grass.png"}
+		]}{name:"Dirt",duties:[
+			HoldSoil>{texturePath:"Dirt.png"}
+	]}]}{name:"Items",duties:[
+		Special1>{color:"White",brightness:.5}
+		],children:[{name:"<<name that {needs escaping}>>"}
+		{name:"Camera",duties:[
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
+			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[
+				MoveSelfToInventory>{}
+				RenderMesh>{}
+		]}]},{name:"GardenHoe",duties:[
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			HoldMesh>{vertexes:[],vertexColors:[]}
+]}]}]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
+	{name:"Soils",children:[
+		{name:"Grass",duties:[
+			HoldSoil>{texturePath:"Grass.png"}
+		]},{name:"Dirt",duties:[
+			HoldSoil>{texturePath:"Dirt.png"}
+	]}]},{name:"Items",duties:[
+		Special1>{color:"White",brightness:.5}
+		],children:[{name:"<<name that {needs escaping}>>"}
+		{name:"Camera",duties:[
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			,HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
+			,HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[
+				MoveSelfToInventory>{}
+				,RenderMesh>{}
+		]}]},{name:"GardenHoe",duties:[
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			,HoldMesh>{vertexes:[],vertexColors:[]}
+]}]}]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+Comparison (mine is better, imo; it's explicit, but not sprawled out all over)
+==========
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+	{name:"Soils",children:[^]}
+		{name:"Grass",duties:[^]}
+			HoldSoil>{texturePath:"Grass.png"}
+		{name:"Dirt",duties:[^]}
+			HoldSoil>{texturePath:"Dirt.png"}
+	{name:"Items",duties:[^],children:[^^]}
+		Special1>{color:"White",brightness:.5}
+		^^{name:"<<name that {needs escaping}>>"}
+		{name:"Camera",duties:[^]}
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
+			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[^]}
+				MoveSelfToInventory>{}
+				RenderMesh>{}
+		{name:"GardenHoe",duties:[^]}
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			HoldMesh>{vertexes:[],vertexColors:[]}
+
+
+World>{
+	name:"Main",
+	vObjectRoot:{
+		name:"VObjectRoot",
+		children:[
+			{name:"Soils",children:[
+				{name:"Grass",duties:[
+					HoldSoil>{texturePath:"Grass.png"}
+				]},
+				{name:"Dirt",duties:[
+					HoldSoil>{texturePath:"Dirt.png"}
+				]}
+			]},
+			{name:"Items",duties:[
+				Special1>{color:"White",brightness:.5}
+			],children:[
+				{name:"<<name that {needs escaping}>>"},
+				{name:"Camera",duties:[
+					HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"},
+					HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{"9,4,2.5":"Black","1,8,9.5435":"Gray","25,15,5":"White"}},
+					HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[
+						MoveSelfToInventory>{},
+						RenderMesh>{}
+					]}
+				]},
+				{name:"GardenHoe",duties:[
+					HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"},
+					HoldMesh>{vertexes:[],vertexColors:[]}
+				]}
+			]}
+		]
+	},
+	stringPropNull:null,
+	simpleFlag:true,
+	simpleEnum:"A",
+	listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ancient
+==========
+==========
+
+Type 4 - with colons and commas to separate children - metadata_type outside brackets - with inferred type 'object' for property-having-or-data-text-less/non-literal (on-new-line) nodes/objects/children/items
+==========
+World> name: "Main", vObjectRoot: {name: "VObjectRoot", children: [^]}, stringPropNull: null, simpleFlag: true, simpleEnum: "A", listOfStringLists: [["1A", "1B", "1C"], ["2A", "2B", "2C"], ["3A", "3B", "3C"]]
+	name: "Soils", children: [^]
+		name: "Grass", duties: [^]
+			HoldSoil> texturePath: "Grass.png"
+		name: "Dirt", duties: [^]
+			HoldSoil> texturePath: "Dirt.png"
+	name: "Items", duties: [^], children: [^^]
+		Special1> color: "White", brightness: .5
+		^^name: "--name that {needs escaping}--"
+		name: "Camera", duties: [^]
+			HoldTransform> position: "1,9,2", rotation: "25.5,28.9,2404.765", scale: "3,4,1"
+			HoldMesh> vertexes: ["9,4,2.5", "1,8,9.5435", "25,15,5"], vertexColors: {--9,4,2.5--: "Black", --1,8,9.5435--: "Gray", --25,15,5--: "White"}
+			HoldDuties> dutiesEnabledWhen: "SelfIsInWorld", duties: [^]
+				MoveSelfToInventory>
+				RenderMesh>
+		name: "GardenHoe", duties: [^]
+			HoldTransform> position: "0,0,0", rotation: "0,0,0", scale: "0,0,0"
+			HoldMesh> vertexes: [], vertexColors: []
+
+
+
+World>name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]
+	name:"Soils",children:[^]
+		name:"Grass",duties:[^]
+			HoldSoil>texturePath:"Grass.png"
+		name:"Dirt",duties:[^]
+			HoldSoil>texturePath:"Dirt.png"
+	name:"Items",duties:[^],children:[^^]
+		Special1>color:"White",brightness:.5
+		^^name:"--name that {needs escaping}--"
+		name:"Camera",duties:[^]
+			HoldTransform>position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"
+			HoldMesh>vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{--9,4,2.5--:"Black",--1,8,9.5435--:"Gray",--25,15,5--:"White"}
+			HoldDuties>dutiesEnabledWhen:"SelfIsInWorld",duties:[^]
+				MoveSelfToInventory>
+				RenderMesh>
+		name:"GardenHoe",duties:[^]
+			HoldTransform>position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"
+			HoldMesh>vertexes:[],vertexColors:[]
+
+
+
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+	{name:"Soils",children:[^]}
+		{name:"Grass",duties:[^]}
+			HoldSoil>{texturePath:"Grass.png"}
+		{name:"Dirt",duties:[^]}
+			HoldSoil>{texturePath:"Dirt.png"}
+	{name:"Items",duties:[^],children:[^^]}
+		Special1>{color:"White",brightness:.5}
+		^^{name:"--name that {needs escaping}--"}
+		{name:"Camera",duties:[^]}
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{--9,4,2.5--:"Black",--1,8,9.5435--:"Gray",--25,15,5--:"White"}}
+			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[^]}
+				MoveSelfToInventory>{}
+				RenderMesh>{}
+		{name:"GardenHoe",duties:[^]}
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			HoldMesh>{vertexes:[],vertexColors:[]}
+
+
+
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
+	{name:"Soils",children:[
+		{name:"Grass",duties:[
+			HoldSoil>{texturePath:"Grass.png"}
+		]}{name:"Dirt",duties:[
+			HoldSoil>{texturePath:"Dirt.png"}
+	]}]}{name:"Items",duties:[
+		Special1>{color:"White",brightness:.5}
+		],children:[{name:"--name that {needs escaping}--"}
+		{name:"Camera",duties:[
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{--9,4,2.5--:"Black",--1,8,9.5435--:"Gray",--25,15,5--:"White"}}
+			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[
+				MoveSelfToInventory>{}
+				RenderMesh>{}
+		]}]}{name:"GardenHoe",duties:[
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			HoldMesh>{vertexes:[],vertexColors:[]}
+]}]}]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
+	{name:"Soils",children:[
+		{name:"Grass",duties:[
+			HoldSoil>{texturePath:"Grass.png"}
+		]},{name:"Dirt",duties:[
+			HoldSoil>{texturePath:"Dirt.png"}
+	]}]},{name:"Items",duties:[
+		Special1>{color:"White",brightness:.5}
+		],children:[{name:"--name that {needs escaping}--"}
+		{name:"Camera",duties:[
+			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
+			,HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{--9,4,2.5--:"Black",--1,8,9.5435--:"Gray",--25,15,5--:"White"}}
+			,HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[
+				MoveSelfToInventory>{}
+				,RenderMesh>{}
+		]}]},{name:"GardenHoe",duties:[
+			HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"}
+			,HoldMesh>{vertexes:[],vertexColors:[]}
+]}]}]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]}
+
+
+
+Comparison
+==========
+World>name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]
+	name:"Soils",children:[^]
+		name:"Grass",duties:[^]
+			HoldSoil>texturePath:"Grass.png"
+		name:"Dirt",duties:[^]
+			HoldSoil>texturePath:"Dirt.png"
+	name:"Items",duties:[^],children:[^^]
+		Special1>color:"White",brightness:.5
+		^^name:"--name that {needs escaping}--"
+		name:"Camera",duties:[^]
+			HoldTransform>position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"
+			HoldMesh>vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{--9,4,2.5--:"Black",--1,8,9.5435--:"Gray",--25,15,5--:"White"}
+			HoldDuties>dutiesEnabledWhen:"SelfIsInWorld",duties:[^]
+				MoveSelfToInventory>
+				RenderMesh>
+		name:"GardenHoe",duties:[^]
+			HoldTransform>position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"
+			HoldMesh>vertexes:[],vertexColors:[]
+
+
+World>{
+	name:"Main",
+	vObjectRoot:{
+		name:"VObjectRoot",
+		children:[
+			{name:"Soils",children:[
+				{name:"Grass",duties:[
+					HoldSoil>{texturePath:"Grass.png"}
+				]},
+				{name:"Dirt",duties:[
+					HoldSoil>{texturePath:"Dirt.png"}
+				]}
+			]},
+			{name:"Items",duties:[
+				Special1>{color:"White",brightness:.5}
+			],children:[
+				{name:"--name that {needs escaping}--"},
+				{name:"Camera",duties:[
+					HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"},
+					HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{--9,4,2.5--:"Black",--1,8,9.5435--:"Gray",--25,15,5--:"White"}},
+					HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld",duties:[
+						MoveSelfToInventory>{},
+						RenderMesh>{}
+					]}
+				]},
+				{name:"GardenHoe",duties:[
+					HoldTransform>{position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"},
+					HoldMesh>{vertexes:[],vertexColors:[]}
+				]}
+			]}
+		]
+	},
+	stringPropNull:null,
+	simpleFlag:true,
+	simpleEnum:"A",
+	listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]
+}
+
+
+
+Type 5
+==========
+World>name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]
+	name:"Soils",children:[^]
+		name:"Grass",duties:[^]
+			HoldSoil>texturePath:"Grass.png"
+		name:"Dirt",duties:[^]
+			HoldSoil>texturePath:"Dirt.png"
+	name:"Items",duties:[^]
+		Special1>color:"White",brightness:.5
+	^children:[^]
+		name:"<<name that {needs escaping}>>"
+		name:"Camera",duties:
+			HoldTransform>position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"
+			HoldMesh>vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}
+			HoldDuties>dutiesEnabledWhen:"SelfIsInWorld",duties:
+				MoveSelfToInventory>
+				RenderMesh>
+		name:"GardenHoe",duties:
+			HoldTransform>position:"0,0,0",rotation:"0,0,0",scale:"0,0,0"
+			HoldMesh>vertexes:[],vertexColors:[]
+},stringPropNull:null,simpleFlag:true,simpleEnum:"A",listOfStringLists:[["1A","1B","1C"],["2A","2B","2C"],["3A","3B","3C"]]
