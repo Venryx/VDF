@@ -50,7 +50,7 @@ namespace VDFTests
 		}
 		[Fact] void Depth0_Array()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<List<object>>("['Root string 1.','Root string 2.']");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("['Root string 1.' 'Root string 2.']");
 			a[0].baseValue.Should().Be("Root string 1.");
 			a[1].baseValue.Should().Be("Root string 2.");
 		}
@@ -62,7 +62,7 @@ namespace VDFTests
 		}*/
 		[Fact] void Depth0_Array_Objects()
 		{
-			VDFNode a = VDFLoader.ToVDFNode<List<object>>("[{name:'Dan',age:50},{name:'Bob',age:60}]");
+			VDFNode a = VDFLoader.ToVDFNode<List<object>>("[{name:'Dan' age:50} {name:'Bob' age:60}]");
 			((string)a[0]["name"]).Should().Be("Dan");
 			((int)a[0]["age"]).Should().Be(50);
 			((string)a[1]["name"]).Should().Be("Bob");
@@ -71,8 +71,8 @@ namespace VDFTests
 		[Fact] void Depth0_Array_Literals()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<string>>(
-@"['first','<<second
-which is on two lines>>','<<third
+@"['first' '<<second
+which is on two lines>>' '<<third
 which is on
 three lines>>']");
 			((string)a[0]).Should().Be("first");
@@ -98,48 +98,48 @@ three lines");
 		}
 		[Fact] void Depth0_Array_None_Type()
 		{
-			VDFNode a = VDFLoader.ToVDFNode(">>[]");
+			VDFNode a = VDFLoader.ToVDFNode("List[object]>[]");
 			a.items.Count.Should().Be(0);
 		}
 		[Fact] void Depth0_ArrayMetadata1()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("List[int]>>[1,2]");
+			VDFNode a = VDFLoader.ToVDFNode("List[int]>[1 2]");
 			a.metadata_type.Should().Be("List[int]");
 			a[0].metadata_type.Should().Be(null);
 			a[1].metadata_type.Should().Be(null);
 		}
 		[Fact] void Depth0_ArrayMetadata2()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("List[int]>>[int>1,int>2]");
+			VDFNode a = VDFLoader.ToVDFNode("List[int]>[int>1 int>2]");
 			a.metadata_type.Should().Be("List[int]");
 			a[0].metadata_type.Should().Be("int");
 			a[1].metadata_type.Should().Be("int");
 		}
 		[Fact] void Depth0_DictionaryItems()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key1:'Simple string.',key2:{name:'Dan',age:50}}");
+			VDFNode a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:{name:'Dan' age:50}}");
 			a["key1"].baseValue.Should().Be("Simple string.");
 			((int)a["key2"]["age"]).Should().Be(50);
 		}
 		[Fact] void Depth0_DictionaryItems_GetByKey()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key 1:'value 1',key 2:'value 2'}");
+			VDFNode a = VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
 			a["key 1"].baseValue.Should().Be("value 1");
 			a["key 2"].baseValue.Should().Be("value 2");
 		}
 		[Fact] void Depth0_InferDepth2()
 		{
-			var a = VDF.Deserialize<List<object>>(">>[false]");
+			var a = VDF.Deserialize<List<object>>("[false]");
 			a[0].Should().Be(false);
 		}
 		[Fact] void Depth0_InferUnmarkedBaseValueTypeToBeString()
 		{
-			var a = VDF.Deserialize<IList>(">>['SimpleString']");
+			var a = VDF.Deserialize<IList>("['SimpleString']");
 			a[0].Should().Be("SimpleString");
 		}
 		[Fact] void Depth0_InferUnmarkedBaseValueTypeToBeString_EvenWhenTypeSpecifiedAsObject()
 		{
-			var a = VDF.Deserialize<List<object>>(">>['SimpleString']");
+			var a = VDF.Deserialize<List<object>>("['SimpleString']");
 			a[0].Should().Be("SimpleString");
 		}
 		[Fact] void Depth0_MultilineString()
@@ -156,7 +156,7 @@ of three lines in total.");
 
 		[Fact] void Depth1_BaseValuesWithImplicitCasting()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{bool:false,int:5,float:.5,string:'Prop value string.'}");
+			VDFNode a = VDFLoader.ToVDFNode("{bool:false int:5 float:.5 string:'Prop value string.'}");
 			a["bool"].baseValue.Should().Be("false");
 			a["int"].baseValue.Should().Be("5");
 			a["float"].baseValue.Should().Be(".5");
@@ -171,7 +171,7 @@ of three lines in total.");
 		[Fact]
 		void Depth1_BaseValuesWithMarkedTypes()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{bool:bool>false,int:int>5,float:float>.5,string:string>'Prop value string.'}");
+			VDFNode a = VDFLoader.ToVDFNode("{bool:bool>false int:int>5 float:float>.5 string:string>'Prop value string.'}");
 			((bool)a["bool"]).Should().Be(false);
 			((int)a["int"]).Should().Be(5);
 			((float)a["float"]).Should().Be(.5f);
@@ -201,7 +201,7 @@ of three lines in total.");
 		}
 		[Fact] void Depth1_ArraysInArrays()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("[['1A','1B'],['2A','2B'],'3A']");
+			VDFNode a = VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be("1B");
 			a[1][0].baseValue.Should().Be("2A");
@@ -210,7 +210,7 @@ of three lines in total.");
 		}
 		[Fact] void Depth1_ArraysInArrays_SecondsNullAndEmpty()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("[['1A',null],['2A','']]");
+			VDFNode a = VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
 			a[0][0].baseValue.Should().Be("1A");
 			a[0][1].baseValue.Should().Be(null);
 			a[1][0].baseValue.Should().Be("2A");
@@ -218,26 +218,26 @@ of three lines in total.");
 		}
 		[Fact] void Depth1_StringAndArraysInArrays()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("['text',['2A',null]]");
+			VDFNode a = VDFLoader.ToVDFNode("['text' ['2A' null]]");
 			a[0].baseValue.Should().Be("text");
 			a[1][0].baseValue.Should().Be("2A");
 			a[1][1].baseValue.Should().Be(null);
 		}
 		[Fact] void Depth1_Dictionary()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key1:'value1',key2:'value2'}");
+			VDFNode a = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2'}");
 			a["key1"].baseValue.Should().Be("value1");
 			a["key2"].baseValue.Should().Be("value2");
 		}
 		[Fact] void Depth1_Dictionary_Complex()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{},TerrainShape:{showPreview:true,continuousMode:true,strength:.3,size:7},TerrainTexture:{textureName:null,size:7}}>>'},liveTool:'Select'}}");
-			a["uiPrefs"]["toolOptions"].baseValue.Should().Be("{Select:{},TerrainShape:{showPreview:true,continuousMode:true,strength:.3,size:7},TerrainTexture:{textureName:null,size:7}}");
+			VDFNode a = VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>'} liveTool:'Select'}}");
+			a["uiPrefs"]["toolOptions"].baseValue.Should().Be("{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}");
 			a["uiPrefs"]["liveTool"].baseValue.Should().Be("Select");
 		}
 		[Fact] void Depth1_Dictionary_TypesInferredFromGenerics()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{vertexColors:Dictionary[string,Color]>>{<<9,4,2.5>>:'Black',<<1,8,9.5435>>:'Gray',<<25,15,5>>:'White'}}", new VDFLoadOptions
+			VDFNode a = VDFLoader.ToVDFNode("{vertexColors:Dictionary[string Color]>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}", new VDFLoadOptions
 			{
 				typeAliasesByType = new Dictionary<Type, string> {{typeof(Color), "Color"}}
 			});
@@ -264,7 +264,7 @@ of three lines in total.");
 		[Fact] void Depth1_ArraysPoppedOut() // each 'group' is actually just the value-data of one of the parent's properties
 		{
 			VDFNode a = VDFLoader.ToVDFNode(
-@"{names:[^],ages:[^]}
+@"{names:[^] ages:[^]}
 	'Dan'
 	'Bob'
 	^^10
@@ -277,7 +277,7 @@ of three lines in total.");
 		[Fact] void Depth1_InferredDictionaryPoppedOut()
 		{
 			VDFNode a = VDFLoader.ToVDFNode(
-@"{messages:[^],otherProperty:false}
+@"{messages:[^] otherProperty:false}
 	title1:'message1'
 	title2:'message2'");
 			a["messages"].properties.Count.Should().Be(2);
@@ -290,7 +290,7 @@ of three lines in total.");
 /*
 Written as:
 
-{messages:[^],otherProperty:false}
+{messages:[^] otherProperty:false}
 	title1:"message1"
 	title2:"message2"
 
@@ -298,11 +298,11 @@ Parsed as:
 
 {messages:[
 	title1:"message1"
-	,title2:"message2"
-],otherProperty:false}
+	title2:"message2"
+] otherProperty:false}
  */
 			VDFNode a = VDFLoader.ToVDFNode(
-@"{messages:[^],otherProperty:false}
+@"{messages:[^] otherProperty:false}
 	title1:'message1'
 	title2:'message2'");
 			a["messages"].properties.Count.Should().Be(2);
@@ -316,7 +316,7 @@ Parsed as:
 			var a = VDFLoader.ToVDFNode(
 @"{text:'<<This is a
 multiline string
-of three lines in total.>>'},bool:true}");
+of three lines in total.>>'} bool:true}");
 			a["text"].baseValue.Should().Be(
 @"This is a
 multiline string
@@ -326,7 +326,7 @@ of three lines in total.");
 		[Fact] void Depth1_Object_PoppedOutStringsThenMultilineString()
 		{
 			var a = VDFLoader.ToVDFNode(
-@"{childTexts:[^],text:'<<This is a
+@"{childTexts:[^] text:'<<This is a
 	multiline string
 	of three lines in total.>>'}
 	'text1'
@@ -341,20 +341,20 @@ of three lines in total.");
 		[Fact] void Depth2_List_Lists_PoppedOutObjects()
 		{
 			var a = VDFLoader.ToVDFNode(
-@"[[^],[^^],[^^^]]
-	name{Road}
-	^^name{RoadAndPath}
-	^^^name{SimpleHill}"); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
+@"[[^] [^^] [^^^]]
+	{name{Road}}
+	^^{name{RoadAndPath}}
+	^^^{name{SimpleHill}}"); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
 			a[0].items.Count.Should().Be(3);
 		}
 		[Fact] void List_PoppedOutObjects_MultilineString()
 		{
 			var a = VDFLoader.ToVDFNode(
 @"[^]
-	{id:1,multilineText:'<<line1
+	{id:1 multilineText:'<<line1
 	line2
 	line3>>'}
-	{id:2,multilineText:'<<line1
+	{id:2 multilineText:'<<line1
 	line2>>'}");
 			a.items.Count.Should().Be(2);
 		}
@@ -362,26 +362,26 @@ of three lines in total.");
 		[Fact] void Depth2_Object_PoppedOutObject_PoppedOutObject()
 		{
 			var a = VDFLoader.ToVDFNode(
-@"{name:'L0',children:[^]}
-	{name:'L1',children:[^]}
+@"{name:'L0' children:[^]}
+	{name:'L1' children:[^]}
 		{name:'L2'}");
 			a["children"].items.Count.Should().Be(1);
 			a["children"].items[0]["children"].items.Count.Should().Be(1);
 		}
 
-		[Fact] void Depth5_DeepNestedPoppedOutData() // todo; break point
+		[Fact] void Depth5_DeepNestedPoppedOutData()
 		{
 			var vdf =
-@"{name:'Main',worlds:{string,object>>Test1:{vObjectRoot:{name:'VObjectRoot',children:[^]}},Test2:{vObjectRoot:{name:'VObjectRoot',children:[^^]}}}}
-	{id:System.Guid>'025f28a5-a14b-446d-b324-2d274a476a63',name:'#Types',children:[]}
-	^^{id:System.Guid>'08e84f18-aecf-4b80-9c3f-ae0697d9033a',name:'#Types',children:[]}";
+@"{name:'Main' worlds:Dictionary[string object]>{Test1:{vObjectRoot:{name:'VObjectRoot' children:[^]}} Test2:{vObjectRoot:{name:'VObjectRoot' children:[^^]}}}}
+	{id:System.Guid>'025f28a5-a14b-446d-b324-2d274a476a63' name:'#Types' children:[]}
+	^^{id:System.Guid>'08e84f18-aecf-4b80-9c3f-ae0697d9033a' name:'#Types' children:[]}";
 			var livePackNode = VDFLoader.ToVDFNode(vdf);
 			livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
 			livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
 		}
 		[Fact] void Depth5_SpeedTester()
 		{
-			var vdf = @"{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb',visible:true,parts:[^],tasksScriptText:'<<Grab Flag
+			var vdf = @"{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^] tasksScriptText:'<<Grab Flag
 	(Crate ensure contains an EnemyFlag) ensure is false
 	targetFlag be EnemyFlag_OnEnemyGround [objectRefreshInterval: infinity] [lifetime: infinity]
 	targetFlag set tag 'taken'
@@ -406,15 +406,15 @@ Bring Flag to Safer Allied Ground
 Shoot at Enemy Vehicle
 	Gun1 aim at EnemyVehicle_NonBroken
 	Gun1 fire>>'}
-	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966',typeName:'Wood',name:'Body',pivotPoint_unit:'-0.1875,0.4375,-0.6875',anchorNormal:'0,1,0',scale:'0.5,0.25,1.5',controller:true}
-	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5',typeName:'Wood',name:'FrontBar',pivotPoint_unit:'-0.4375,0.5625,0.8125',anchorNormal:'0,0,1',scale:'1,0.25,0.25',controller:false}
-	{id:'52854b70-c200-478f-bcd2-c69a03cd808f',typeName:'Wheel',name:'FrontLeftWheel',pivotPoint_unit:'-0.5,0.5,0.875',anchorNormal:'-1,0,0',scale:'1,1,1',controller:false}
-	{id:'971e394c-b440-4fee-99fd-dceff732cd1e',typeName:'Wheel',name:'BackRightWheel',pivotPoint_unit:'0.5,0.5,-0.875',anchorNormal:'1,0,0',scale:'1,1,1',controller:false}
-	{id:'77d30d72-9845-4b22-8e95-5ba6e29963b9',typeName:'Wheel',name:'FrontRightWheel',pivotPoint_unit:'0.5,0.5,0.875',anchorNormal:'1,0,0',scale:'1,1,1',controller:false}
-	{id:'21ca2a80-6860-4de3-9894-b896ec77ef9e',typeName:'Wheel',name:'BackLeftWheel',pivotPoint_unit:'-0.5,0.5,-0.875',anchorNormal:'-1,0,0',scale:'1,1,1',controller:false}
-	{id:'eea2623a-86d3-4368-b4e0-576956b3ef1d',typeName:'Wood',name:'BackBar',pivotPoint_unit:'-0.4375,0.4375,-0.8125',anchorNormal:'0,0,-1',scale:'1,0.25,0.25',controller:false}
-	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1',typeName:'MachineGun',name:'Gun1',pivotPoint_unit:'0,0.625,0.875',anchorNormal:'0,1,0',scale:'0.5,0.5,0.5',controller:false}
-	{id:'e97f8ee1-320c-4aef-9343-3317accb015b',typeName:'Crate',name:'Crate',pivotPoint_unit:'0,0.625,0',anchorNormal:'0,1,0',scale:'0.5,0.5,0.5',controller:false}";
+	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}
+	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}
+	{id:'52854b70-c200-478f-bcd2-c69a03cd808f' typeName:'Wheel' name:'FrontLeftWheel' pivotPoint_unit:'-0.5,0.5,0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}
+	{id:'971e394c-b440-4fee-99fd-dceff732cd1e' typeName:'Wheel' name:'BackRightWheel' pivotPoint_unit:'0.5,0.5,-0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}
+	{id:'77d30d72-9845-4b22-8e95-5ba6e29963b9' typeName:'Wheel' name:'FrontRightWheel' pivotPoint_unit:'0.5,0.5,0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}
+	{id:'21ca2a80-6860-4de3-9894-b896ec77ef9e' typeName:'Wheel' name:'BackLeftWheel' pivotPoint_unit:'-0.5,0.5,-0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}
+	{id:'eea2623a-86d3-4368-b4e0-576956b3ef1d' typeName:'Wood' name:'BackBar' pivotPoint_unit:'-0.4375,0.4375,-0.8125' anchorNormal:'0,0,-1' scale:'1,0.25,0.25' controller:false}
+	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1' typeName:'MachineGun' name:'Gun1' pivotPoint_unit:'0,0.625,0.875' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}
+	{id:'e97f8ee1-320c-4aef-9343-3317accb015b' typeName:'Crate' name:'Crate' pivotPoint_unit:'0,0.625,0' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}";
 			VDFLoader.ToVDFNode(vdf);
 		}
 
@@ -493,7 +493,7 @@ Shoot at Enemy Vehicle
 		// unique to C# version
 		// ==========
 
-		[Fact] void Depth1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("{scores:{Dan:0,Dan:1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
+		[Fact] void Depth1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("{scores:{Dan:0 Dan:1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
 		class SpecialList3<T> : List<T> {}
 		[Fact] void Depth1_SpecialListItem()
 		{
@@ -508,7 +508,7 @@ Shoot at Enemy Vehicle
 		class TypeWithArray { [VDFProp] public string[] array; }
 		[Fact] void Depth1_ArrayItems()
 		{
-			var a = VDF.Deserialize<TypeWithArray>("{array:['A','B']}");
+			var a = VDF.Deserialize<TypeWithArray>("{array:['A' 'B']}");
 			a.array[0].Should().Be("A");
 			a.array[1].Should().Be("B");
 		}

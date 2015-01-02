@@ -81,7 +81,7 @@ Debug.Log(V.OnMainThread());---"}logRunCSResult{false}callLoggerEnabled{true}cal
 {^}
 	settings:{^}
 		showTooltips:true
-		autoOpenSubmenus:["Frame2","CreativeDefense"]
+		autoOpenSubmenus:["Frame2" "CreativeDefense"]
 		autoOpenPage:""
 		resolutionWidth:640
 		resolutionHeight:480
@@ -98,20 +98,20 @@ Debug.Log(V.OnMainThread());---"}logRunCSResult{false}callLoggerEnabled{true}cal
 	prefs:{^}
 		Maps_liveTool:"Select"
 		Maps_selectedMapID:System.Guid>"a2c69a05-1ac0-4dc6-a51b-6f0bbadf8082"
-		Maps_state:"<<left_width:"15%",right_width:"25%",left_activeTab:0,right_activeTab:1}>>"
+		Maps_state:"<<{left_width:"15%" right_width:"25%" left_activeTab:0 right_activeTab:1}>>"
 		Maps_toolOptions:"--Shape{brushSize{30}strength{1}}Paint{brushSize{0}strength{>1}}--"
-		ConsoleData:"<<<jsCode{"<<Log("JavaScript run");>>"}logRunJSResult{false}csCode{"<<//Debug.Log("C# run");
-Debug.Log(V.OnMainThread());>>"}logRunCSResult{false}callLoggerEnabled{true}calls_maxEntries{300}loggerEnabled{true}logStackTrace{true}>>>"
-		Units_toolOptions:"<<Select{null}Add{null}Resize{null}Remove{null}>>"
+		ConsoleData:"<<<{jsCode:"<<Log("JavaScript run");>>" logRunJSResult:false csCode:"<<//Debug.Log("C# run");
+Debug.Log(V.OnMainThread());>>" logRunCSResult:false callLoggerEnabled:true calls_maxEntries:300 loggerEnabled:true logStackTrace:true}>>>"
+		Units_toolOptions:"<<{Select:null Add:null Resize:null Remove:null}>>"
 		Units_liveTool:"Select"
 		Units_selectedUnitID:System.Guid>"72e0cb99-4766-4162-86ce-45f6bf700650"
 		Units_lastCameraPos:Vector3>"-3.744989,7.362788,-4.518991"
 		Units_lastCameraRot:Vector3>"47.75002,33.99999,1.269804E-06"
-		Units_state:"<<left_width{"28.958333333333336%"}right_width{"40%"}left_activeTab{0}right_activeTab{1}>>"
+		Units_state:"<<{left_width:"28.958333333333336%" right_width:"40%" left_activeTab:0 right_activeTab:1}>>"
 		Matches_selectedMapID:System.Guid>"a2c69a05-1ac0-4dc6-a51b-6f0bbadf8082"
-		Matches_state:"<<left_width{15%}>>"
-		Live_state:"<<left_width{"28.4375%"}right_width{"71.5625%"}left_activeTab{1}>>"
-		Matches_NewPanel_state:"<<wood{10}metal{10}enemyUnits{1}>>"
+		Matches_state:"<<{left_width:"15%"}>>"
+		Live_state:"<<{left_width:"28.4375%" right_width:"71.5625%" left_activeTab:1}>>"
+		Matches_NewPanel_state:"<<{wood:10 metal:10 enemyUnits:1}>>"
 		Units_selectedTargetID:System.Guid>"f01bfc0d-a369-4177-9fc2-1982d7222fe1"
 		Units_selectedPartID:System.Guid>"f01bfc0d-a369-4177-9fc2-1982d7222fd1"
 		Units_selectedScriptID:null
