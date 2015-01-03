@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -54,12 +53,12 @@ public class VDFTypeInfo
 {
 	public bool? includeL2;
 	public bool? popOutChildrenL2;
-	public bool writeEmptyValue;
-	public VDFProp(bool includeL2 = true, bool popOutChildrenL2 = false, bool writeEmptyValue = true)
+	public bool writeDefaultValue;
+	public VDFProp(bool includeL2 = true, bool popOutChildrenL2 = false, bool writeDefaultValue = true)
 	{
 		this.includeL2 = includeL2;
 		this.popOutChildrenL2 = popOutChildrenL2;
-		this.writeEmptyValue = writeEmptyValue;
+		this.writeDefaultValue = writeDefaultValue;
 	}
 }
 public class VDFPropInfo
@@ -86,7 +85,7 @@ public class VDFPropInfo
 		{
 			result.includeL2 = propTag.includeL2;
 			result.popOutChildrenL2 = propTag.popOutChildrenL2;
-			result.writeEmptyValue = propTag.writeEmptyValue;
+			result.writeDefaultValue = propTag.writeDefaultValue;
 		}
 		return result;
 	}
@@ -94,19 +93,19 @@ public class VDFPropInfo
 	public MemberInfo memberInfo;
 	public bool? includeL2;
 	public bool? popOutChildrenL2;
-	public bool writeEmptyValue = true;
+	public bool writeDefaultValue = true;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
-	public bool IsXValueEmpty(object x)
+	public bool IsXValueTheDefault(object x)
 	{
 		if (x == null) // if null
 			return true;
 		if (GetPropType().IsValueType && x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
 			return true;
-		if (x is IList && ((IList)x).Count == 0) // if list, and empty
+		/*if (x is IList && ((IList)x).Count == 0) // if list, and empty
 			return true;
 		if (x is string && ((string)x).Length == 0) // if string, and empty
-			return true;
+			return true;*/
 		return false;
 	}
 	public object GetValue(object objParent)

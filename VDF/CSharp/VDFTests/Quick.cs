@@ -47,7 +47,7 @@ namespace VDFTests
 	EnemyFlag put into Storage1@@}
 	id{2}name{UnitWithReallyLongName}visible{true}tasksScriptText{@@Grab Flag for Unit with Really Long Name
 	(Storage1 ensure contains EnemyFlag) ensure is over 9000@@}");
-			a.items.Count.Should().Be(2);
+			a.listChildren.Count.Should().Be(2);
 		}*/
 
 		/*[Fact] void Save()

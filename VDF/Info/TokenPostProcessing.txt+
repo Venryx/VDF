@@ -411,7 +411,7 @@ World> {name:"Main", vObjectRoot:{name:"VObjectRoot", children:[^]}, stringPropN
 			HoldSoil> {texturePath:"Dirt.png"}
 	{name:"Items", duties:[^], children:[^^]}
 		Special1> {color:"White", brightness:.5}
-		^^{name:"<<name that {needs escaping}>>"}
+		^^{name:<<"name that {needs escaping}">>}
 		{name:"Camera", duties:[^]}
 			HoldTransform> {position:"1,9,2", rotation:"25.5,28.9,2404.765", scale:"3,4,1"}
 			HoldMesh> {vertexes:["9,4,2.5", "1,8,9.5435", "25,15,5"], vertexColors:{<<9,4,2.5>>:"Black", <<1,8,9.5435>>:"Gray", <<25,15,5>>:"White"}}
@@ -432,7 +432,7 @@ World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:
 			HoldSoil>{texturePath:"Dirt.png"}
 	{name:"Items",duties:[^],children:[^^]}
 		Special1>{color:"White",brightness:.5}
-		^^{name:"<<name that {needs escaping}>>"}
+		^^{name:<<"name that {needs escaping}">>}
 		{name:"Camera",duties:[^]}
 			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
 			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
@@ -453,7 +453,7 @@ World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
 			HoldSoil>{texturePath:"Dirt.png"}
 	]}]}{name:"Items",duties:[
 		Special1>{color:"White",brightness:.5}
-		],children:[{name:"<<name that {needs escaping}>>"}
+		],children:[{name:<<"name that {needs escaping}">>}
 		{name:"Camera",duties:[
 			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
 			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
@@ -475,7 +475,7 @@ World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[
 			HoldSoil>{texturePath:"Dirt.png"}
 	]}]},{name:"Items",duties:[
 		Special1>{color:"White",brightness:.5}
-		],children:[{name:"<<name that {needs escaping}>>"}
+		],children:[{name:<<"name that {needs escaping}">>}
 		{name:"Camera",duties:[
 			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
 			,HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
@@ -497,9 +497,9 @@ World>{name:"Main" vObjectRoot:{name:"VObjectRoot" children:[^]} stringPropNull:
 			HoldSoil>{texturePath:"Grass.png"}
 		{name:"Dirt" duties:[^]}
 			HoldSoil>{texturePath:"Dirt.png"}
-	{name:"Items" duties:[^] children:[^^]}
+	{name:"Items" duties:[^] children:[^]}
 		Special1>{color:"White" brightness:.5}
-		^^{name:"<<name that {needs escaping}>>"}
+		^{name:<<"name that {needs escaping}">>}
 		{name:"Camera" duties:[^]}
 			HoldTransform>{position:"1,9,2" rotation:"25.52,8.9240,4.765" scale:"341"}
 			HoldMesh>{vertexes:["9,4,2.5" "1,8,9.5435" "25,15,5"] vertexColors:{9,4,2.5:"Black" 1,8,9.5435:"Gray" 25,15,5:"White"}}
@@ -512,25 +512,30 @@ World>{name:"Main" vObjectRoot:{name:"VObjectRoot" children:[^]} stringPropNull:
 
 
 
-World>{name:"Main" vObjectRoot:{name:"VObjectRoot" children:[
-	{name:"Soils" children:[
-		{name:"Grass" duties:[
+World>{name:"Main" vObjectRoot:{name:"VObjectRoot" children:[^
+	{name:"Soils" children:[^
+		{name:"Grass" duties:[^
 			HoldSoil>{texturePath:"Grass.png"}
-		]}{name:"Dirt" duties:[
+		]}{name:"Dirt" duties:[^
 			HoldSoil>{texturePath:"Dirt.png"}
-	]}]}{name:"Items" duties:[
+	]}]}{name:"Items" duties:[^
 		Special1>{color:"White" brightness:.5}
-		] children:[{name:"<<name that {needs escaping}>>"}
-		{name:"Camera" duties:[
+		]children:[^^{name:<<"name that {needs escaping}">>}
+		{name:"Camera" duties:[^
 			HoldTransform>{position:"1,9,2" rotation:"25.52,8.9240,4.765" scale:"341"}
 			HoldMesh>{vertexes:["9,4,2.5" "1,8,9.5435" "25,15,5"] vertexColors:{9,4,2.5:"Black" 1,8,9.5435:"Gray" 25,15,5:"White"}}
-			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld" duties:[
+			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld" duties:[^
 				MoveSelfToInventory>{}
 				RenderMesh>{}
-		]}]}{name:"GardenHoe" duties:[
+		]}]}{name:"GardenHoe" duties:[^
 			HoldTransform>{position:"0,0,0" rotation:"0,0,0" scale:"0,0,0"}
 			HoldMesh>{vertexes:[] vertexColors:[]}
 ]}]}]} stringPropNull:null simpleFlag:true simpleEnum:"A" listOfStringLists:[["1A" "1B" "1C"] ["2A" "2B" "2C"] ["3A" "3B" "3C"]]}
+
+
+(spaces are added only for separation)
+World { name Main vObjectRoot { name VObjectRoot children [ { name Soils children [ { name Grass duties [ HoldSoil { texturePath Grass.png } ] } { name Dirt duties [ HoldSoil { texturePath Dirt.png} ] } ] } { name Items duties [ Special1 { color White brightness .5 } ] children [ { name name that {needs escaping} } { name Camera duties [ HoldTransform { position 1,9,2 rotation 25.52,8.9240,4.765 scale 341 } HoldMesh { vertexes [ 9,4,2.5 1,8,9.5435 25,15,5 ] vertexColors { 9,4,2.5 Black 1,8,9.5435 Gray 25,15,5 White } } HoldDuties { dutiesEnabledWhen "SelfIsInWorld" duties [ MoveSelfToInventory { } RenderMesh { } ] } ] } { name GardenHoe duties [ HoldTransform { position 0,0,0 rotation 0,0,0 scale 0,0,0 } HoldMesh { vertexes [ ] vertexColors [ ] } ] } ] } ] } stringPropNull null simpleFlag true simpleEnum A listOfStringLists [ [ 1A 1B 1C ] [ 2A 2B 2C ] [ 3A 3B 3C ] ] }
+
 
 
 Comparison (mine is better, imo; it's explicit, but not sprawled out all over)
@@ -551,7 +556,7 @@ World>{
 			{name:"Items",duties:[
 				Special1>{color:"White",brightness:.5}
 			],children:[
-				{name:"<<name that {needs escaping}>>"},
+				{name:"name that \"needs escaping\""},
 				{name:"Camera",duties:[
 					HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"},
 					HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{"9,4,2.5":"Black","1,8,9.5435":"Gray","25,15,5":"White"}},
@@ -583,7 +588,7 @@ World>{name:"Main",vObjectRoot:{name:"VObjectRoot",children:[^]},stringPropNull:
 			HoldSoil>{texturePath:"Dirt.png"}
 	{name:"Items",duties:[^],children:[^^]}
 		Special1>{color:"White",brightness:.5}
-		^^{name:"<<name that {needs escaping}>>"}
+		^^{name:"<<name that "needs escaping">>"}
 		{name:"Camera",duties:[^]}
 			HoldTransform>{position:"1,9,2",rotation:"25.5,28.9,2404.765",scale:"3,4,1"}
 			HoldMesh>{vertexes:["9,4,2.5","1,8,9.5435","25,15,5"],vertexColors:{<<9,4,2.5>>:"Black",<<1,8,9.5435>>:"Gray",<<25,15,5>>:"White"}}
@@ -602,15 +607,15 @@ World>{name:"Main" vObjectRoot:{name:"VObjectRoot" children:[^]} stringPropNull:
 			HoldSoil>{texturePath:"Grass.png"}
 		{name:"Dirt" duties:[^]}
 			HoldSoil>{texturePath:"Dirt.png"}
-	{name:"Items" duties:[^] children:[^^]}
+	{name:"Items" duties:[^] children:[^]}
 		Special1>{color:"White" brightness:.5}
-		^^{name:"<<name that {needs escaping}>>"}
+		^{name:"<<name that "needs escaping">>"}
 		{name:"Camera" duties:[^]}
-			HoldTransform>{position:"1,9,2" rotation:"25.52,8.9240,4.765" scale:"341"}
-			HoldMesh>{vertexes:["9,4,2.5" "1,8,9.5435" "25,15,5"] vertexColors:{9,4,2.5:"Black" 1,8,9.5435:"Gray" 25,15,5:"White"}}
+			HoldTransform>{position:"1 9 2" rotation:"25.52 8.9240 4.765" scale:"3,4,1"}
+			HoldMesh>{vertexes:["9 4 2.5" "1 8 9.5435" "25 15 5"] vertexColors:{9 4 2.5:"Black" 1 8 9.5435:"Gray" 25 15 5:"White"}}
 			HoldDuties>{dutiesEnabledWhen:"SelfIsInWorld" duties:[^]}
 				MoveSelfToInventory>{}
 				RenderMesh>{}
 		{name:"GardenHoe" duties:[^]}
-			HoldTransform>{position:"0,0,0" rotation:"0,0,0" scale:"0,0,0"}
+			HoldTransform>{position:"0 0 0" rotation:"0 0 0" scale:"0 0 0"}
 			HoldMesh>{vertexes:[] vertexColors:[]}

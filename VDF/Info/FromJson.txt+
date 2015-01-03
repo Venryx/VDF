@@ -44,12 +44,12 @@ VDF
 		bones:0
 	scale:1.000000
 	materials:[]
-	vertices:[.4375,-.765625,.164062,-.4375,-.765625,.164062,.5,-.6875,.09375]
+	vertices:[.4375 -.765625 .164062 -.4375 -.765625 .164062 .5 -.6875 .09375]
 	morphTargets:[]
-	normals:[.977691,-.209723,-.011017,.727683,-.205084,-.6545,.604022,-.612171]
+	normals:[.977691 -.209723 -.011017 .727683 -.205084 -.6545 .604022 -.612171]
 	colors:[]
 	uvs:[]
-	faces:[33,46,0,2,44,0,1,2,3,33,3,1,47,45,4,5,6,7,33,44,2,4,42,3,2,8,9,33,5,3,45,43]
+	faces:[33 46 0 2 44 0 1 2 3 33 3 1 47 45 4 5 6 7 33 44 2 4 42 3 2 8 9 33 5 3 45 43]
 	bones:[]
 	skinIndices:[]
 	skinWeights:[]
@@ -331,7 +331,7 @@ VDF Revisions
 		colors:0
 		uvs:[]
 		materials:0
-		morphTargets"0
+		morphTargets:0
 		bones:0
 	scale:1.000000
 	materials:[]
@@ -341,6 +341,46 @@ VDF Revisions
 	colors:[]
 	uvs:[]
 	faces:[33,46,0,2,44,0,1,2,3,33,3,1,47,45,4,5,6,7,33,44,2,4,42,3,2,8,9,33,5,3,45,43]
+	facesPoppedOut:[^]
+		33
+		46
+		0
+		2
+		44
+	bones:[]
+	skinIndices:[]
+	skinWeights:[]
+	animations:[]
+----------
+{^}
+	propertiesInline:{name:"hi" age:200 randomDynamicProp1:"0,20,15"}   ## this is a comment
+	propertiesPoppedOut:{^}
+		name:"hi"
+		age:200
+		randomDynamicProp1:"0,20,15"
+	propertiesPoppedOutEmbeddedVDF:"<<
+		name:"hi"
+		age:200
+		randomDynamicProp1:"0,20,15">>"
+	metadata:{^}
+		formatVersion:3.1
+		generatedBy:"Blender 2.7 Exporter"
+		vertices:507
+		faces:500
+		normals:507
+		colors:0
+		uvs:[]
+		materials:0
+		morphTargets:0
+		bones:0
+	scale:1.000000
+	materials:[]
+	vertices:[.4375 -.765625 .164062 -.4375 -.765625 .164062 .5 -.6875 .09375]
+	morphTargets:[]
+	normals:[.977691 -.209723 -.011017 .727683 -.205084 -.6545 .604022 -.612171]
+	colors:[]
+	uvs:[]
+	faces:[33 46 0 2 44 0 1 2 3 33 3 1 47 45 4 5 6 7 33 44 2 4 42 3 2 8 9 33 5 3 45 43]
 	facesPoppedOut:[^]
 		33
 		46

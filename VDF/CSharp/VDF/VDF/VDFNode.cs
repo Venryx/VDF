@@ -9,211 +9,204 @@ using System.Text.RegularExpressions;
 
 public class VDFNode
 {
-	public string metadata_type;
-	public string baseValue;
-	public List<VDFNode> items = new List<VDFNode>();
-	public Dictionary<string, VDFNode> properties = new Dictionary<string, VDFNode>(); // this also holds Dictionaries' keys/values
+	public string metadata;
+	public object primitiveValue;
+	public List<VDFNode> listChildren = new List<VDFNode>();
+	public Dictionary<string, VDFNode> mapChildren = new Dictionary<string, VDFNode>(); // holds object-properties, as well as dictionary-key-value-pairs
 
-	public VDFNode(string baseValue = null, string metadata_type = null)
+	public VDFNode(string primitiveValue = null, string metadata = null)
 	{
-		this.baseValue = baseValue;
-		this.metadata_type = metadata_type;
+		this.primitiveValue = primitiveValue;
+		this.metadata = metadata;
 	}
 
 	public VDFNode this[int index]
 	{
-		get { return items[index]; }
+		get { return listChildren[index]; }
 		set
 		{
-			if (items.Count == index) // lets you add new items easily: vdfNode[0] = new VDFNode();
-				items.Add(value);
+			if (listChildren.Count == index) // lets you add new items easily: vdfNode[0] = new VDFNode();
+				listChildren.Add(value);
 			else
-				items[index] = value;
+				listChildren[index] = value;
 		}
 	}
 	public VDFNode this[string key]
 	{
-		get { return properties[key]; }
-		set { properties[key] = value; }
+		get { return mapChildren[key]; }
+		set { mapChildren[key] = value; }
 	}
 	public bool Equals(VDFNode other) { return ToVDF() == other.ToVDF(); } // base equality on whether their 'default output' is the same
 	// base-types: ["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"]
-	public static implicit operator bool(VDFNode node) { return bool.Parse(node.baseValue); }
-	public static implicit operator VDFNode(bool val) { return new VDFNode { baseValue = val.ToString().ToLower() }; }
-	public static implicit operator char(VDFNode node) { return char.Parse(node.baseValue); }
-	public static implicit operator VDFNode(char val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator byte(VDFNode node) { return byte.Parse(node.baseValue); }
-	public static implicit operator VDFNode(byte val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator sbyte(VDFNode node) { return sbyte.Parse(node.baseValue); }
-	public static implicit operator VDFNode(sbyte val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator short(VDFNode node) { return short.Parse(node.baseValue); }
-	public static implicit operator VDFNode(short val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator ushort(VDFNode node) { return ushort.Parse(node.baseValue); }
-	public static implicit operator VDFNode(ushort val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator int(VDFNode node) { return int.Parse(node.baseValue); }
-	public static implicit operator VDFNode(int val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator uint(VDFNode node) { return uint.Parse(node.baseValue); }
-	public static implicit operator VDFNode(uint val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator long(VDFNode node) { return long.Parse(node.baseValue); }
-	public static implicit operator VDFNode(long val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator ulong(VDFNode node) { return ulong.Parse(node.baseValue); }
-	public static implicit operator VDFNode(ulong val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator float(VDFNode node) { return float.Parse(node.baseValue); }
-	public static implicit operator VDFNode(float val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator double(VDFNode node) { return double.Parse(node.baseValue); }
-	public static implicit operator VDFNode(double val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator decimal(VDFNode node) { return decimal.Parse(node.baseValue); }
-	public static implicit operator VDFNode(decimal val) { return new VDFNode { baseValue = val.ToString() }; }
-	public static implicit operator string(VDFNode node) { return node.baseValue; }
-	public static implicit operator VDFNode(string val) { return new VDFNode { baseValue = val }; }
+	public static implicit operator bool(VDFNode node) { return (bool)node.primitiveValue; }
+	public static implicit operator VDFNode(bool val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator char(VDFNode node) { return (char)node.primitiveValue; }
+	public static implicit operator VDFNode(char val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator byte(VDFNode node) { return (byte)node.primitiveValue; }
+	public static implicit operator VDFNode(byte val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator sbyte(VDFNode node) { return (sbyte)node.primitiveValue; }
+	public static implicit operator VDFNode(sbyte val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator short(VDFNode node) { return (short)node.primitiveValue; }
+	public static implicit operator VDFNode(short val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator ushort(VDFNode node) { return (ushort)node.primitiveValue; }
+	public static implicit operator VDFNode(ushort val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator int(VDFNode node) { return (int)node.primitiveValue; }
+	public static implicit operator VDFNode(int val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator uint(VDFNode node) { return (uint)node.primitiveValue; }
+	public static implicit operator VDFNode(uint val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator long(VDFNode node) { return (long)node.primitiveValue; }
+	public static implicit operator VDFNode(long val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator ulong(VDFNode node) { return (ulong)node.primitiveValue; }
+	public static implicit operator VDFNode(ulong val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator float(VDFNode node) { return (float)node.primitiveValue; }
+	public static implicit operator VDFNode(float val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator double(VDFNode node) { return (double)node.primitiveValue; }
+	public static implicit operator VDFNode(double val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator decimal(VDFNode node) { return (decimal)node.primitiveValue; }
+	public static implicit operator VDFNode(decimal val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator string(VDFNode node) { return (string)node.primitiveValue; }
+	public static implicit operator VDFNode(string val) { return new VDFNode { primitiveValue = val }; }
 	public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
 
 	// saving
-	// ==================
+	// ==========
 
-	public bool isList;
-	public bool isDictionary;
-	public bool popOutChildren;
-	public bool guardingItsLastLine;
-	static string RawDataStringToFinalized(string rawDataStr, bool disallowRawPipe = false)
+	static string PadString(string unpaddedString)
 	{
-		string result = rawDataStr;
-		if (rawDataStr.Contains(":") || rawDataStr.Contains(">") || rawDataStr.Contains("}") || (disallowRawPipe && rawDataStr.Contains("|")) || rawDataStr.Contains("@@") || rawDataStr.Contains(";;") || rawDataStr.Contains("\n") || rawDataStr.Contains("\t")) // note: tabs can probably be put back in without escaping, in certain cases
-			if (rawDataStr.EndsWith("@") || rawDataStr.EndsWith("|"))
-				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "|@@";
-			else
-				result = "@@" + new Regex("(@{2,})").Replace(rawDataStr, "@$1") + "@@";
+		var result = unpaddedString;
+		if (result.StartsWith("<") || result.StartsWith("#"))
+			result = "#" + result;
+		if (result.EndsWith(">") || result.EndsWith("#"))
+			result += "#";
 		return result;
 	}
-	static string AddIndentToChildText(string childText)
+
+	public bool isList; // can also be inferred from use of list-children collection
+	public bool isMap; // can also be inferred from use of map-children collection
+	public bool popOutChildren;
+	public string ToVDF(int tabDepth = 0) { return ToVDF_InlinePart(tabDepth) + ToVDF_PoppedOutPart(tabDepth); }
+	public string ToVDF_InlinePart(int tabDepth = 0)
 	{
 		var builder = new StringBuilder();
-		builder.Append("\t");
-		bool inLiteralMarkers = false;
-		for (var i = 0; i < childText.Length; i++)
+
+		if (metadata != null)
+			builder.Append(metadata + ">");
+
+		if (primitiveValue == null)
 		{
-			char? lastChar = i - 1 >= 0 ? childText[i - 1] : (char?)null;
-			char ch = childText[i];
-			char? nextChar = i + 1 < childText.Length ? childText[i + 1] : (char?)null;
-			char? nextNextChar = i + 2 < childText.Length ? childText[i + 2] : (char?)null;
-			char? nextNextNextChar = i + 3 < childText.Length ? childText[i + 3] : (char?)null;
-
-			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
-				inLiteralMarkers = true;
-			else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // if first char of literal-end-marker
-				inLiteralMarkers = false;
-
-			if (lastChar == '\n' && !inLiteralMarkers)
-				builder.Append("\t");
-
-			builder.Append(ch);
+			if (!isMap && mapChildren.Count == 0 && !isList && listChildren.Count == 0)
+				builder.Append("null");
 		}
-		return builder.ToString();
-	}
-	public string ToVDF(bool disallowRawPipe = false)
-	{
-		var builder = new StringBuilder();
-		if (metadata_type != null)
-			builder.Append(isList || isDictionary ? metadata_type.Replace(" ", "") + ">>" : metadata_type.Replace(" ", "") + ">");
-
-		if (baseValue != null)
-			builder.Append(RawDataStringToFinalized(baseValue, disallowRawPipe));
-		else if (items.Count > 0)
+		else if (primitiveValue is bool)
+			builder.Append(primitiveValue.ToString().ToLower());
+		else if (primitiveValue is string)
 		{
-			//var hasItemWeMustBracket = items.Any(a=>a.isList || a.popOutChildren);
-			for (var i = 0; i < items.Count; i++)
+			var unpaddedString = (string)primitiveValue;
+			if (unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>")) // the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency
 			{
-				var lastItem = i > 0 ? items[i - 1] : null;
-				var item = items[i];
-
-				var isItemWeMustBracket = item.isList || item.popOutChildren;
-
-				if (lastItem != null && lastItem.guardingItsLastLine)
+				var literalStartMarkerString = "<<";
+				var literalEndMarkerString = ">>";
+				while (unpaddedString.Contains(literalStartMarkerString) || unpaddedString.Contains(literalEndMarkerString))
 				{
-					builder.Append("\n");
-					lastItem.guardingItsLastLine = false;
+					literalStartMarkerString += "<";
+					literalEndMarkerString += ">";
 				}
-
-				if (popOutChildren)
-					builder.Append("\n" + AddIndentToChildText(item.ToVDF()));
-				else
-					if (isItemWeMustBracket) //hasItemWeMustBracket)
-					{
-						var itemVDF = item.ToVDF();
-						var beforeEndBracketExtraText = "";
-						if (item.guardingItsLastLine)
-						{
-							beforeEndBracketExtraText = "\n";
-							item.guardingItsLastLine = false;
-						}
-						builder.Append((i > 0 ? "|" : "") + "{" + itemVDF + beforeEndBracketExtraText + "}");
-					}
-					else
-						builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && !item.baseValue.StartsWith("@@") && item.baseValue.Contains("|")));
+				builder.Append("\"" + literalStartMarkerString + PadString(unpaddedString) + literalEndMarkerString + "\"");
 			}
+			else
+				builder.Append("\"" + unpaddedString + "\"");
+		}
+		else if (primitiveValue.GetType().IsPrimitive) // if number
+			builder.Append(primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
+		else
+			builder.Append("\"" + primitiveValue + "\"");
+
+		if (popOutChildren)
+		{
+			if (isMap || mapChildren.Count > 0)
+				builder.Append(mapChildren.Count > 0 ? "{^}" : "{}");
+			if (isList || listChildren.Count > 0)
+				builder.Append(listChildren.Count > 0 ? "[^]" : "[]");
 		}
 		else
 		{
-			string lastPropName = null;
-			foreach (string propName in properties.Keys)
+			if (isMap || mapChildren.Count > 0)
 			{
-				var lastPropValue = lastPropName != null ? properties[lastPropName] : null;
-				var propValue = properties[propName];
-
-				if (lastPropValue != null && lastPropValue.guardingItsLastLine)
-					if (popOutChildren) // if we're popping out this current child, we can ignore adding a marker for it, because it's supposed to be on its own line
-						lastPropValue.guardingItsLastLine = false;
-					else
-					{
-						builder.Append("\n");
-						lastPropValue.guardingItsLastLine = false;
-						if (lastPropValue.popOutChildren)
-							builder.Append("^");
-					}
-
-				string propNameAndValueVDF;
-				if (propValue.popOutChildren)
-					propNameAndValueVDF = propName + ":" + propValue.ToVDF();
-				else
-				{
-					var propValueVDF = propValue.ToVDF();
-					if (propValue.guardingItsLastLine)
-					{
-						propValueVDF += "\n";
-						propValue.guardingItsLastLine = false;
-					}
-					propNameAndValueVDF = propName + "{" + propValueVDF + "}";
-				}
-				if (popOutChildren)
-					builder.Append("\n" + AddIndentToChildText(propNameAndValueVDF));
-				else
-					builder.Append(propNameAndValueVDF);
-
-				lastPropName = propName;
+				builder.Append("{");
+				var propertyPairs = mapChildren.ToList();
+				for (var i = 0; i < propertyPairs.Count; i++)
+					builder.Append((i == 0 ? "" : " ") + propertyPairs[i].Key + ":" + propertyPairs[i].Value.ToVDF_InlinePart(tabDepth));
+				builder.Append("}");
+			}
+			if (isList || listChildren.Count > 0)
+			{
+				builder.Append("[");
+				for (var i = 0; i < listChildren.Count; i++)
+					builder.Append((i == 0 ? "" : " ") + listChildren[i].ToVDF_InlinePart(tabDepth));
+				builder.Append("]");
 			}
 		}
 
-		guardingItsLastLine = (popOutChildren && (items.Count > 0 || properties.Count > 0));
-		if (items.Any(a=>a.guardingItsLastLine))
+		return builder.ToString();
+	}
+	public string ToVDF_PoppedOutPart(int tabDepth = 0)
+	{
+		var builder = new StringBuilder();
+
+		// include popped-out-content of direct children (i.e. a single directly-under group)
+		if (popOutChildren)
 		{
-			guardingItsLastLine = true;
-			items.First(a=>a.guardingItsLastLine).guardingItsLastLine = false; // we've taken it as our own
+			var childTabStr = "";
+			for (var i = 0; i < tabDepth + 1; i++)
+				childTabStr += "\t";
+			if (isMap || mapChildren.Count > 0)
+				foreach (KeyValuePair<string, VDFNode> pair in mapChildren)
+				{
+					builder.Append("\n" + childTabStr + pair.Key + ":" + pair.Value.ToVDF_InlinePart(tabDepth + 1));
+					var poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(tabDepth + 1);
+					if (poppedOutChildText.Length > 0)
+						builder.Append(poppedOutChildText);
+				}
+			if (isList || listChildren.Count > 0)
+				foreach (VDFNode item in listChildren)
+				{
+					builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(tabDepth + 1));
+					var poppedOutChildText = item.ToVDF_PoppedOutPart(tabDepth + 1);
+					if (poppedOutChildText.Length > 0)
+						builder.Append(poppedOutChildText);
+				}
 		}
-		else if (properties.Values.Any(a=>a.guardingItsLastLine))
+		else // include popped-out-content of inline-items' descendents (i.e. one or more pulled-up groups)
 		{
-			guardingItsLastLine = true;
-			properties.Values.First(a=>a.guardingItsLastLine).guardingItsLastLine = false; // we've taken it as our own
+			var poppedOutChildTexts = new List<string>();
+			string poppedOutChildText;
+			if (isMap || mapChildren.Count > 0)
+				foreach (KeyValuePair<string, VDFNode> pair in mapChildren)
+					if ((poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(tabDepth)).Length > 0)
+						poppedOutChildTexts.Add(poppedOutChildText);
+			if (isList || listChildren.Count > 0)
+				foreach (VDFNode item in listChildren.ToList())
+					if ((poppedOutChildText = item.ToVDF_PoppedOutPart(tabDepth)).Length > 0)
+						poppedOutChildTexts.Add(poppedOutChildText);
+			for (var i = 0; i < poppedOutChildTexts.Count; i++)
+			{
+				poppedOutChildText = poppedOutChildTexts[i];
+				var insertPoint = 0;
+				while (poppedOutChildText[insertPoint] == '\n' || poppedOutChildText[insertPoint] == '\t')
+					insertPoint++;
+				builder.Append((insertPoint > 0 ? poppedOutChildText.Substring(0, insertPoint) : "") + (i == 0 ? "" : "^") + poppedOutChildText.Substring(insertPoint));
+			}
 		}
 
 		return builder.ToString();
 	}
 
 	// loading
-	// ==================
+	// ==========
 
 	static object CreateNewInstanceOfType(Type type)
 	{
-		if (typeof(Array).IsAssignableFrom(type)) // if array, we start out with a List, and then turn it into array at the end
+		if (typeof(Array).IsAssignableFrom(type)) // if array, we start out with a list, and then turn it into an array at the end
 			return Activator.CreateInstance(typeof(List<>).MakeGenericType(type.GetElementType()), true);
 		if (typeof(IList).IsAssignableFrom(type) || typeof(IDictionary).IsAssignableFrom(type)) // special cases, which require that we call the constructor
 			return Activator.CreateInstance(type, true);
@@ -226,54 +219,44 @@ public class VDFNode
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
-		var finalMetadata_type = metadata_type;
-		if (finalMetadata_type == "") // empty string for metadata_type, so infer type
-		{
-			if (baseValue == "null")
-				return null;
-			if (baseValue == "empty")
-				return "";
-			if (new[] {"true", "false"}.Contains(baseValue))
-				finalMetadata_type = "bool";
-			else if (baseValue.Contains("."))
-				finalMetadata_type = "float";
-			else
-				finalMetadata_type = "int";
-		}
-		else if (finalMetadata_type == "System.Collections.IList")
-			finalMetadata_type = "List[object]";
-		else if (finalMetadata_type == "System.Collections.IDictionary")
-			finalMetadata_type = "Dictionary[object,object]";
+		var fromVDFTypeString = "object";
+		if (metadata != null)
+			fromVDFTypeString = metadata;
+		else if (primitiveValue is bool)
+			fromVDFTypeString = "bool";
+		else if (primitiveValue is int)
+			fromVDFTypeString = "int";
+		else if (primitiveValue is double)
+			fromVDFTypeString = "double";
+		else if (primitiveValue is string)
+			fromVDFTypeString = "string";
+		else if (primitiveValue == null)
+			if (isList || listChildren.Count > 0)
+				fromVDFTypeString = "List(object)";
+			else if (isMap || mapChildren.Count > 0)
+				fromVDFTypeString = "Dictionary(object object)"; //"object";
 
 		Type finalType = declaredType;
-		if (finalMetadata_type != null && finalMetadata_type.Length > 0)
-		{
-			var fromMetadataType = VDF.GetTypeByVName(finalMetadata_type, loadOptions);
-			if (finalType == null || finalType.IsAssignableFrom(fromMetadataType)) // if there is no declared type, or the from-metadata type is more specific than the declared type
-				finalType = fromMetadataType;
-		}
-
-		// note; C# 3.5 doesn't have anonymous objects, so we can't replicate the infer-compatible-types-for-unknown-types option that we have in the JS version
-		// if the type isn't specified in the VDF text itself, or as a declared type, infer that it's a string (string is the default type)
-		if (finalType == null)
-			finalType = typeof(string); // string is the default/fallback type
+		var fromVDFType = VDF.GetTypeByVName(fromVDFTypeString, loadOptions);
+		if (finalType == null || finalType.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
+			finalType = fromVDFType;
 		
 		object result;
 		if (VDF.typeImporters_inline.ContainsKey(finalType))
-			result = VDF.typeImporters_inline[finalType](baseValue, finalType.GetGenericArguments().ToList());
+			result = VDF.typeImporters_inline[finalType]((string)primitiveValue, finalType.GetGenericArguments().ToList());
 		else if (finalType.IsGenericType && VDF.typeImporters_inline.ContainsKey(finalType.GetGenericTypeDefinition()))
-			result = VDF.typeImporters_inline[finalType.GetGenericTypeDefinition()](baseValue, finalType.GetGenericArguments().ToList());
-		else if (finalType.IsEnum)
-			result = Enum.Parse(finalType, baseValue);
-		else if (finalType.IsPrimitive || finalType == typeof(string))
-			result = Convert.ChangeType(baseValue, finalType);
-		else if (baseValue != null) // (non-importer-registered objects, the only alternative to base-value-fallback-strings left, doesn't store base-values)
-			result = Convert.ChangeType(baseValue, typeof(string));
+			result = VDF.typeImporters_inline[finalType.GetGenericTypeDefinition()]((string)primitiveValue, finalType.GetGenericArguments().ToList());
+		else if (finalType == typeof(object))
+			result = null;
+		else if (finalType.IsEnum) // helper importer for enums
+			result = Enum.Parse(finalType, primitiveValue.ToString()); //primitiveValue);
+		else if (primitiveValue != null)
+			result = Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
 		else
 		{
 			result = CreateNewInstanceOfType(finalType);
-			IntoObject(result, loadOptions, (declaredType != null && declaredType.IsGenericType) || (metadata_type != "System.Collections.IList" && metadata_type != "System.Collections.IDictionary"));
-			if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp List object for item population; so, now, replace the temp-list with an array
+			IntoObject(result, loadOptions);
+			if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
 			{
 				var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
 				((IList)result).CopyTo(newResult, 0);
@@ -283,7 +266,7 @@ public class VDFNode
 
 		return result;
 	}
-	public void IntoObject(object obj, VDFLoadOptions loadOptions = null, bool typeGenericArgumentsAreReal = true)
+	public void IntoObject(object obj, VDFLoadOptions loadOptions = null)
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
@@ -296,28 +279,27 @@ public class VDFNode
 		foreach (VDFMethodInfo method in typeInfo.methodInfo.Where(methodInfo=>methodInfo.memberInfo is MethodInfo && methodInfo.preDeserializeMethod))
 			method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {loadOptions.message} : new object[0]);
 
-		for (var i = 0; i < items.Count; i++)
+		for (var i = 0; i < listChildren.Count; i++)
 			if (obj is Array)
-				((Array)obj).SetValue(items[i].ToObject(type.GetElementType(), loadOptions), i);
+				((Array)obj).SetValue(listChildren[i].ToObject(type.GetElementType(), loadOptions), i);
 			else if (obj is IList)
-				((IList)obj).Add(items[i].ToObject(typeGenericArgumentsAreReal ? type.GetGenericArguments()[0] : null, loadOptions));
-		foreach (string propName in properties.Keys)
+				((IList)obj).Add(listChildren[i].ToObject(type.GetGenericArguments()[0], loadOptions));
+		foreach (string keyString in mapChildren.Keys)
 			try
 			{
 				if (obj is IDictionary)
 				{
-					object key = propName; // in most cases, the Dictionary's in-code key-type will be a string, so we can just use the in-VDF raw-key-string directly
-					if (typeGenericArgumentsAreReal)
-						if (VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]))
-							key = VDF.typeImporters_inline[type.GetGenericArguments()[0]](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
-						else if (type.GetGenericArguments()[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0].GetGenericTypeDefinition()))
-							key = VDF.typeImporters_inline[type.GetGenericArguments()[0].GetGenericTypeDefinition()](propName, type.GetGenericArguments()[0].GetGenericArguments().ToList());
-					((IDictionary)obj).Add(key, properties[propName].ToObject(typeGenericArgumentsAreReal ? type.GetGenericArguments()[1] : null, loadOptions));
+					object key = keyString; // in most cases, the dictionary's in-code key-type will be a string, so we can just use the in-VDF key-string directly
+					if (VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]))
+						key = VDF.typeImporters_inline[type.GetGenericArguments()[0]](keyString, type.GetGenericArguments()[0].GetGenericArguments().ToList());
+					else if (type.GetGenericArguments()[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0].GetGenericTypeDefinition()))
+						key = VDF.typeImporters_inline[type.GetGenericArguments()[0].GetGenericTypeDefinition()](keyString, type.GetGenericArguments()[0].GetGenericArguments().ToList());
+					((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(type.GetGenericArguments()[1], loadOptions));
 				}
 				else
-					typeInfo.propInfoByName[propName].SetValue(obj, properties[propName].ToObject(typeGenericArgumentsAreReal ? typeInfo.propInfoByName[propName].GetPropType() : null, loadOptions));
+					typeInfo.propInfoByName[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.propInfoByName[keyString].GetPropType(), loadOptions));
 			}
-			catch (Exception ex) { throw new VDFException("Error loading key-value-pair or property '" + propName + "'.", ex); }
+			catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }
 
 		// call post-deserialize constructors before post-deserialize normal methods
 		foreach (VDFMethodInfo method in typeInfo.methodInfo.Where(methodInfo=>methodInfo.memberInfo is ConstructorInfo && methodInfo.postDeserializeMethod))

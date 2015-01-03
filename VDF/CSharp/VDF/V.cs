@@ -1,4 +1,4 @@
-﻿// note: don't have the VDF system use anything in this file; it's just for quick use while debugging
+﻿// don't have the VDF system use anything in this file; it's just for quick use while debugging
 
 using System;
 using System.Collections.Generic;
