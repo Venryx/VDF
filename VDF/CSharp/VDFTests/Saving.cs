@@ -340,6 +340,11 @@ that needs escaping.>>""".Fix());
 			var a = VDFSaver.ToVDFNode(new Dictionary<object, object>{{"key1", 0}, {"key2", 1}}, new VDFSaveOptions(useStringKeys: true));
 			a.ToVDF(new VDFSaveOptions(useStringKeys: true)).Should().Be("{\"key1\":0 \"key2\":1}");
 		}
+		[Fact] void D1_Map_DoublesWithNumberTrimmingDisabled()
+		{
+			var a = VDFSaver.ToVDFNode(new List<object>{.1, 1.1}, new VDFSaveOptions(useNumberTrimming: false));
+			a.ToVDF(new VDFSaveOptions(useNumberTrimming: false)).Should().Be("[0.1 1.1]");
+		}
 		[Fact] void D1_List_IntsWithCommaSeparators()
 		{
 			var a = VDFSaver.ToVDFNode(new List<object>{0, 1}, new VDFSaveOptions(useCommaSeparators: true));

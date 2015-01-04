@@ -120,7 +120,7 @@ public class VDFNode
 				builder.Append("\"" + unpaddedString + "\"");
 		}
 		else if (primitiveValue.GetType().IsPrimitive) // if number
-			builder.Append(primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
+			builder.Append(options.useNumberTrimming && primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
 		else
 			builder.Append("\"" + primitiveValue + "\"");
 

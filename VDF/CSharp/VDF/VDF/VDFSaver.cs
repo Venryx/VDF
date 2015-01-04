@@ -20,6 +20,7 @@ public class VDFSaveOptions
 	public bool useMetadata;
 	public bool useChildPopOut;
 	public bool useStringKeys;
+	public bool useNumberTrimming; // e.g. trims 0.123 to .123
 	public bool useCommaSeparators; // currently only applies to non-popped-out children
 
 	// CS only
@@ -30,7 +31,7 @@ public class VDFSaveOptions
 	public Dictionary<Type, string> typeAliasesByType;
 
 	public VDFSaveOptions(object message = null, VDFTypeMarking typeMarking = VDFTypeMarking.Internal,
-		bool useMetadata = true, bool useChildPopOut = true, bool useStringKeys = false, bool useCommaSeparators = false, 
+		bool useMetadata = true, bool useChildPopOut = true, bool useStringKeys = false, bool useNumberTrimming = true, bool useCommaSeparators = false, 
 		IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
 		this.message = message;
@@ -38,6 +39,7 @@ public class VDFSaveOptions
 		this.useMetadata = useMetadata;
 		this.useChildPopOut = useChildPopOut;
 		this.useStringKeys = useStringKeys;
+		this.useNumberTrimming = useNumberTrimming;
 		this.useCommaSeparators = useCommaSeparators;
 		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
 		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
@@ -50,8 +52,9 @@ public class VDFSaveOptions
 	{
 		useMetadata = false;
 		useChildPopOut = false;
-		useStringKeys = false;
-		useCommaSeparators = false;
+		useStringKeys = true;
+		useNumberTrimming = false;
+		useCommaSeparators = true;
 		return this;
 	}
 }
