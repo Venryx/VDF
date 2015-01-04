@@ -7,11 +7,11 @@
 var V = new function () {
     var self = this;
 
-    /*function AddClosureFunctionsToX(newHolder)
+    /*self.AddClosureFunctionsToX = function(newHolder, nameMatchStartStr = "")
     {
-    var names = arguments.callee.caller.toString().matches(/function\s*([\w\d]+)\s*\(/g);
-    for (var name in names.strings())
-    try { newHolder[name] = eval(name); } catch(e) {}
+    var names = arguments.callee.caller.toString().match(new RegExp("function\\s+(" + nameMatchStartStr + "[\\w\\d]+)\\s*\\(", "g"));
+    for (var i = 0; i < names.length; i++)
+    try { newHolder[names[i]] = eval(names[i]); } catch(e) {}
     }
     AddClosureFunctionsToX(self);*/
     self.CloneObject = function (obj) {

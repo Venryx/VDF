@@ -19,15 +19,17 @@
         $("#runSavingTests").click(function()
         {
         	var startTime = new Date().getTime();
-        	Saving.Init();
-        	Saving.RunTests();
+        	//Saving.Init();
+        	//Saving.RunTests();
+        	Saving_RunTests();
         	$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
         });
         $("#runLoadingTests").click(function()
         {
         	var startTime = new Date().getTime();
-	        Loading.Init();
-	        Loading.RunTests();
+	        //Loading.Init();
+        	//Loading.RunTests();
+			Loading_RunTests();
 	        $("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
         });
     });
