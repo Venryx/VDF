@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using FluentAssertions;
 using Xunit;
@@ -319,6 +320,33 @@ that needs escaping.>>""".Fix());
 	otherProperty:false".Replace("\r", ""));
 		}
 
+		// for JSON compatibility
+		// ==========
+
+		class D0_MapWithMetadataDisabled_Class {}
+		[Fact] void D0_MapWithMetadataDisabled()
+		{
+			var a = VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaveOptions(useMetadata: false));
+			a.metadata.Should().Be(null);
+		}
+		class D0_Map_List_BoolsWithPopOutDisabled_Class { [VDFProp(true, true)] List<int> ints = new List<int>{0, 1}; }
+		[Fact] void D0_Map_List_BoolsWithPopOutDisabled()
+		{
+			var a = VDFSaver.ToVDFNode<D0_Map_List_BoolsWithPopOutDisabled_Class>(new D0_Map_List_BoolsWithPopOutDisabled_Class(), new VDFSaveOptions(useChildPopOut: false));
+			a.ToVDF().Should().Be("{ints:[0 1]}");
+		}
+		[Fact] void D1_Map_IntsWithStringKeys()
+		{
+			var a = VDFSaver.ToVDFNode(new Dictionary<object, object>{{"key1", 0}, {"key2", 1}}, new VDFSaveOptions(useStringKeys: true));
+			a.ToVDF(new VDFSaveOptions(useStringKeys: true)).Should().Be("{\"key1\":0 \"key2\":1}");
+		}
+		[Fact] void D1_List_IntsWithCommaSeparators()
+		{
+			var a = VDFSaver.ToVDFNode(new List<object>{0, 1}, new VDFSaveOptions(useCommaSeparators: true));
+			a.listChildren.Count.Should().Be(2);
+			a.ToVDF(new VDFSaveOptions(useCommaSeparators: true)).Should().Be("[0,1]");
+		}
+
 		// unique to C# version
 		// ==========
 
@@ -329,10 +357,16 @@ that needs escaping.>>""".Fix());
 			var a = new SpecialList2<string>{"A", "B", "C"};
 			VDF.Serialize<SpecialList2<string>>(a).Should().Be("\"You'll never see the items!\"");
 		}
-		class TypeWithList { [VDFProp] string[] array = {"A", "B"}; }
-		[Fact] void D1_ListItems()
+		class D1_ListOfTypeArray_Strings_Class { [VDFProp] string[] array = { "A", "B" }; }
+		[Fact] void D1_ListOfTypeArray_Strings()
 		{
-			var a = VDFSaver.ToVDFNode<TypeWithList>(new TypeWithList());
+			var a = VDFSaver.ToVDFNode<D1_ListOfTypeArray_Strings_Class>(new D1_ListOfTypeArray_Strings_Class());
+			a.ToVDF().Should().Be("{array:[\"A\" \"B\"]}");
+		}
+		class D1_ListOfTypeArrayList_Strings_Class { [VDFProp] ArrayList array = new ArrayList{ "A", "B" }; }
+		[Fact] void D1_ListOfTypeArrayList_Strings()
+		{
+			var a = VDFSaver.ToVDFNode<D1_ListOfTypeArrayList_Strings_Class>(new D1_ListOfTypeArrayList_Strings_Class());
 			a.ToVDF().Should().Be("{array:[\"A\" \"B\"]}");
 		}
 	}

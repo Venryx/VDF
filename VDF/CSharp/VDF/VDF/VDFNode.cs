@@ -66,7 +66,8 @@ public class VDFNode
 	public static implicit operator VDFNode(decimal val) { return new VDFNode { primitiveValue = val }; }
 	public static implicit operator string(VDFNode node) { return (string)node.primitiveValue; }
 	public static implicit operator VDFNode(string val) { return new VDFNode { primitiveValue = val }; }
-	public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
+	//public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
+	public override string ToString() { return primitiveValue.ToString(); } // helpful for debugging
 
 	// saving
 	// ==========
@@ -84,12 +85,14 @@ public class VDFNode
 	public bool isList; // can also be inferred from use of list-children collection
 	public bool isMap; // can also be inferred from use of map-children collection
 	public bool popOutChildren;
-	public string ToVDF(int tabDepth = 0) { return ToVDF_InlinePart(tabDepth) + ToVDF_PoppedOutPart(tabDepth); }
-	public string ToVDF_InlinePart(int tabDepth = 0)
+	public string ToVDF(VDFSaveOptions options = null, int tabDepth = 0) { return ToVDF_InlinePart(options, tabDepth) + ToVDF_PoppedOutPart(options, tabDepth); }
+	public string ToVDF_InlinePart(VDFSaveOptions options = null, int tabDepth = 0)
 	{
+		options = options ?? new VDFSaveOptions();
+
 		var builder = new StringBuilder();
 
-		if (metadata != null)
+		if (options.useMetadata && metadata != null)
 			builder.Append(metadata + ">");
 
 		if (primitiveValue == null)
@@ -121,7 +124,7 @@ public class VDFNode
 		else
 			builder.Append("\"" + primitiveValue + "\"");
 
-		if (popOutChildren)
+		if (options.useChildPopOut && popOutChildren)
 		{
 			if (isMap || mapChildren.Count > 0)
 				builder.Append(mapChildren.Count > 0 ? "{^}" : "{}");
@@ -133,28 +136,30 @@ public class VDFNode
 			if (isMap || mapChildren.Count > 0)
 			{
 				builder.Append("{");
-				var propertyPairs = mapChildren.ToList();
-				for (var i = 0; i < propertyPairs.Count; i++)
-					builder.Append((i == 0 ? "" : " ") + propertyPairs[i].Key + ":" + propertyPairs[i].Value.ToVDF_InlinePart(tabDepth));
+				var pairs = mapChildren.ToList();
+				for (var i = 0; i < pairs.Count; i++)
+					builder.Append((i == 0 ? "" : (options.useCommaSeparators ? "," : " ")) + (options.useStringKeys ? "\"" : "") + pairs[i].Key + (options.useStringKeys ? "\"" : "") + ":" + pairs[i].Value.ToVDF_InlinePart(options, tabDepth));
 				builder.Append("}");
 			}
 			if (isList || listChildren.Count > 0)
 			{
 				builder.Append("[");
 				for (var i = 0; i < listChildren.Count; i++)
-					builder.Append((i == 0 ? "" : " ") + listChildren[i].ToVDF_InlinePart(tabDepth));
+					builder.Append((i == 0 ? "" : (options.useCommaSeparators ? "," : " ")) + listChildren[i].ToVDF_InlinePart(options, tabDepth));
 				builder.Append("]");
 			}
 		}
 
 		return builder.ToString();
 	}
-	public string ToVDF_PoppedOutPart(int tabDepth = 0)
+	public string ToVDF_PoppedOutPart(VDFSaveOptions options = null, int tabDepth = 0)
 	{
+		options = options ?? new VDFSaveOptions();
+
 		var builder = new StringBuilder();
 
 		// include popped-out-content of direct children (i.e. a single directly-under group)
-		if (popOutChildren)
+		if (options.useChildPopOut && popOutChildren)
 		{
 			var childTabStr = "";
 			for (var i = 0; i < tabDepth + 1; i++)
@@ -162,16 +167,16 @@ public class VDFNode
 			if (isMap || mapChildren.Count > 0)
 				foreach (KeyValuePair<string, VDFNode> pair in mapChildren)
 				{
-					builder.Append("\n" + childTabStr + pair.Key + ":" + pair.Value.ToVDF_InlinePart(tabDepth + 1));
-					var poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(tabDepth + 1);
+					builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + pair.Key + (options.useStringKeys ? "\"" : "") + ":" + pair.Value.ToVDF_InlinePart(options, tabDepth + 1));
+					var poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(options, tabDepth + 1);
 					if (poppedOutChildText.Length > 0)
 						builder.Append(poppedOutChildText);
 				}
 			if (isList || listChildren.Count > 0)
 				foreach (VDFNode item in listChildren)
 				{
-					builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(tabDepth + 1));
-					var poppedOutChildText = item.ToVDF_PoppedOutPart(tabDepth + 1);
+					builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(options, tabDepth + 1));
+					var poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth + 1);
 					if (poppedOutChildText.Length > 0)
 						builder.Append(poppedOutChildText);
 				}
@@ -182,11 +187,11 @@ public class VDFNode
 			string poppedOutChildText;
 			if (isMap || mapChildren.Count > 0)
 				foreach (KeyValuePair<string, VDFNode> pair in mapChildren)
-					if ((poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(tabDepth)).Length > 0)
+					if ((poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(options, tabDepth)).Length > 0)
 						poppedOutChildTexts.Add(poppedOutChildText);
 			if (isList || listChildren.Count > 0)
 				foreach (VDFNode item in listChildren.ToList())
-					if ((poppedOutChildText = item.ToVDF_PoppedOutPart(tabDepth)).Length > 0)
+					if ((poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth)).Length > 0)
 						poppedOutChildTexts.Add(poppedOutChildText);
 			for (var i = 0; i < poppedOutChildTexts.Count; i++)
 			{
@@ -271,6 +276,7 @@ public class VDFNode
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
 		var type = obj.GetType();
+		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
 		var typeInfo = VDFTypeInfo.Get(type);
 
 		// call pre-deserialize constructors before pre-deserialize normal methods
@@ -281,20 +287,20 @@ public class VDFNode
 
 		for (var i = 0; i < listChildren.Count; i++)
 			if (obj is Array)
-				((Array)obj).SetValue(listChildren[i].ToObject(type.GetElementType(), loadOptions), i);
+				((Array)obj).SetValue(listChildren[i].ToObject(typeGenericArgs[0], loadOptions), i);
 			else if (obj is IList)
-				((IList)obj).Add(listChildren[i].ToObject(type.GetGenericArguments()[0], loadOptions));
+				((IList)obj).Add(listChildren[i].ToObject(typeGenericArgs[0], loadOptions));
 		foreach (string keyString in mapChildren.Keys)
 			try
 			{
 				if (obj is IDictionary)
 				{
 					object key = keyString; // in most cases, the dictionary's in-code key-type will be a string, so we can just use the in-VDF key-string directly
-					if (VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0]))
-						key = VDF.typeImporters_inline[type.GetGenericArguments()[0]](keyString, type.GetGenericArguments()[0].GetGenericArguments().ToList());
-					else if (type.GetGenericArguments()[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(type.GetGenericArguments()[0].GetGenericTypeDefinition()))
-						key = VDF.typeImporters_inline[type.GetGenericArguments()[0].GetGenericTypeDefinition()](keyString, type.GetGenericArguments()[0].GetGenericArguments().ToList());
-					((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(type.GetGenericArguments()[1], loadOptions));
+					if (VDF.typeImporters_inline.ContainsKey(typeGenericArgs[0]))
+						key = VDF.typeImporters_inline[typeGenericArgs[0]](keyString, typeGenericArgs[0].GetGenericArguments().ToList());
+					else if (typeGenericArgs[0].IsGenericType && VDF.typeImporters_inline.ContainsKey(typeGenericArgs[0].GetGenericTypeDefinition()))
+						key = VDF.typeImporters_inline[typeGenericArgs[0].GetGenericTypeDefinition()](keyString, typeGenericArgs[0].GetGenericArguments().ToList());
+					((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], loadOptions));
 				}
 				else
 					typeInfo.propInfoByName[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.propInfoByName[keyString].GetPropType(), loadOptions));

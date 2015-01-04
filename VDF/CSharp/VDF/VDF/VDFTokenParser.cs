@@ -26,7 +26,7 @@ public enum VDFTokenType
 	StringStartMarker,
 	StringEndMarker,
 	InLineComment,
-	SpaceSpan,
+	SpaceOrCommaSpan,
 
 	None,
 	Tab,
@@ -34,8 +34,8 @@ public enum VDFTokenType
 
 	Metadata,
 	MetadataEndMarker,
-	PropertyName,
-	PropertyNameValueSeparator,
+	Key,
+	KeyValueSeparator,
 	PoppedOutChildGroupMarker,
 	
 	Null,
@@ -73,13 +73,14 @@ public static class VDFTokenParser
 {
 	static List<char> charsAToZ = new Regex(".").Matches("abcdefghijklmnopqrstuvwxyz").OfType<Match>().Select(a=>a.Value[0]).ToList();
 	static List<char> chars0To9AndDot = new Regex(".").Matches("0123456789.").OfType<Match>().Select(a=>a.Value[0]).ToList();
-	public static List<VDFToken> ParseTokens(string text, bool postProcessTokens = true)
+	public static List<VDFToken> ParseTokens(string text, bool postProcessTokens = true, VDFLoadOptions options = null)
 	{
 		text = (text ?? "").Replace("\r\n", "\n"); // maybe temp
+		options = options ?? new VDFLoadOptions();
 
 		var result = new List<VDFToken>();
 
-		int currentTokenFirstCharPos = 0;
+		var currentTokenFirstCharPos = 0;
 		var currentTokenTextBuilder = new StringBuilder();
 		var currentTokenType = VDFTokenType.None;
 		string activeLiteralStartChars = null;
@@ -143,8 +144,8 @@ public static class VDFTokenParser
 					currentTokenType = VDFTokenType.InLineComment;
 					i += currentTokenTextBuilder.Length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
 				}
-				else if (currentTokenTextBuilder.ToString().TrimStart(new[] {' '}).Length == 0 && ch == ' ' && nextChar != ' ') // if last char of space-span
-					currentTokenType = VDFTokenType.SpaceSpan;
+				else if (currentTokenTextBuilder.ToString().Trim(options.allowCommaSeparators ? new[] {' ', ','} : new[] {' '}).Length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ','))) // if last char of space-or-comma-span
+					currentTokenType = VDFTokenType.SpaceOrCommaSpan;
 
 				else if (ch == '\t')
 					currentTokenType = VDFTokenType.Tab;
@@ -156,9 +157,9 @@ public static class VDFTokenParser
 				else if (ch == '>')
 					currentTokenType = VDFTokenType.MetadataEndMarker;
 				else if (nextNonSpaceChar == ':')
-					currentTokenType = VDFTokenType.PropertyName;
+					currentTokenType = VDFTokenType.Key;
 				else if (ch == ':')
-					currentTokenType = VDFTokenType.PropertyNameValueSeparator;
+					currentTokenType = VDFTokenType.KeyValueSeparator;
 				else if (ch == '^')
 					currentTokenType = VDFTokenType.PoppedOutChildGroupMarker;
 
@@ -166,7 +167,7 @@ public static class VDFTokenParser
 					currentTokenType = VDFTokenType.Null;
 				else if (((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (!nextChar.HasValue || !charsAToZ.Contains(nextChar.Value)))
 					currentTokenType = VDFTokenType.Boolean;
-				else if (chars0To9AndDot.Contains(currentTokenTextBuilder[0]) && (!nextChar.HasValue || !chars0To9AndDot.Contains(nextChar.Value)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.MetadataEndMarker || result.Last().type == VDFTokenType.PropertyNameValueSeparator))
+				else if (chars0To9AndDot.Contains(currentTokenTextBuilder[0]) && (!nextChar.HasValue || !chars0To9AndDot.Contains(nextChar.Value)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
 					currentTokenType = VDFTokenType.Number;
 				else if ((activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"'))
 				{
@@ -195,7 +196,7 @@ public static class VDFTokenParser
 
 			if (currentTokenType != VDFTokenType.None)
 			{
-				if (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceSpan)
+				if (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker)
 					result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 				if (currentTokenType == VDFTokenType.StringStartMarker && ch == nextChar) // special case; empty string
 					result.Add(new VDFToken(VDFTokenType.String, -1, result.Count, "")); // char-pos has invalid value (should be fine, though)
@@ -207,7 +208,7 @@ public static class VDFTokenParser
 		}
 
 		if (postProcessTokens)
-			PostProcessTokens(result);
+			PostProcessTokens(result, options);
 
 		return result;
 	}
@@ -228,9 +229,17 @@ public static class VDFTokenParser
 		return result;
 	}
 
-	static void PostProcessTokens(List<VDFToken> tokens)
+	static void PostProcessTokens(List<VDFToken> tokens, VDFLoadOptions options)
 	{
-		// pass 1: re-wrap popped-out-children with parent brackets/braces
+		// pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (for JSON compatibility)
+		// ----------
+
+		if (options.allowStringKeys)
+			for (var i = 0; i < tokens.Count; i++)
+				if (tokens[i].type == VDFTokenType.String && i + 1 < tokens.Count && tokens[i + 1].type == VDFTokenType.KeyValueSeparator)
+					tokens[i].type = VDFTokenType.Key;
+
+		// pass 2: re-wrap popped-out-children with parent brackets/braces
 		// ----------
 
 		tokens.Add(new VDFToken(VDFTokenType.None, -1, -1, "")); // maybe temp: add depth-0-ender helper token
@@ -239,8 +248,8 @@ public static class VDFTokenParser
 		var tabDepth_popOutBlockEndWrapTokens = new Dictionary<int, List<VDFToken>>();
 		for (var i = 0; i < tokens.Count; i++)
 		{
-			var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
-			var token = tokens[i];
+			VDFToken lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
+			VDFToken token = tokens[i];
 			if (token.type == VDFTokenType.Tab)
 				line_tabsReached++;
 			else if (token.type == VDFTokenType.LineBreak)
@@ -288,17 +297,14 @@ public static class VDFTokenParser
 
 		tokens.RemoveAt(tokens.Count - 1); // maybe temp: remove depth-0-ender helper token
 
-		// pass 2: remove all now-useless tokens
+		// pass 3: remove all now-useless tokens
 		// ----------
 
 		for (var i = tokens.Count - 1; i >= 0; i--)
-		{
-			var token = tokens[i];
-			if (token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.PropertyNameValueSeparator || token.type == VDFTokenType.PoppedOutChildGroupMarker)
+			if (tokens[i].type == VDFTokenType.Tab || tokens[i].type == VDFTokenType.LineBreak || tokens[i].type == VDFTokenType.MetadataEndMarker || tokens[i].type == VDFTokenType.KeyValueSeparator || tokens[i].type == VDFTokenType.PoppedOutChildGroupMarker)
 				tokens.RemoveAt(i);
-		}
 
-		// pass 3: fix token position-and-index properties
+		// pass 4: fix token position-and-index properties
 		// ----------
 
 		RefreshTokenPositionAndIndexProperties(tokens);

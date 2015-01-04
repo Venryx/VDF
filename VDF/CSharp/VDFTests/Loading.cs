@@ -66,10 +66,10 @@ namespace VDFTests
 		[Fact] void D0_List_Objects()
 		{
 			VDFNode a = VDFLoader.ToVDFNode<List<object>>("[{name:'Dan' age:50} {name:'Bob' age:60}]");
-			((string)a[0]["name"]).Should().Be("Dan");
-			((int)a[0]["age"]).Should().Be(50);
-			((string)a[1]["name"]).Should().Be("Bob");
-			((int)a[1]["age"]).Should().Be(60);
+			a[0]["name"].primitiveValue.Should().Be("Dan");
+			a[0]["age"].primitiveValue.Should().Be(50);
+			a[1]["name"].primitiveValue.Should().Be("Bob");
+			a[1]["age"].primitiveValue.Should().Be(60);
 		}
 		[Fact] void D0_List_Literals()
 		{
@@ -78,11 +78,11 @@ namespace VDFTests
 which is on two lines>>' '<<third
 which is on
 three lines>>']");
-			((string)a[0]).Should().Be("first");
-			((string)a[1]).Should().Be(
+			a[0].primitiveValue.Should().Be("first");
+			a[1].primitiveValue.Should().Be(
 @"second
 which is on two lines".Fix());
-			((string)a[2]).Should().Be(
+			a[2].primitiveValue.Should().Be(
 @"third
 which is on
 three lines".Fix());
@@ -141,7 +141,7 @@ of three lines in total.".Fix());
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:{name:'Dan' age:50}}");
 			a["key1"].primitiveValue.Should().Be("Simple string.");
-			((int)a["key2"]["age"]).Should().Be(50);
+			a["key2"]["age"].primitiveValue.Should().Be(50);
 		}
 		[Fact] void D1_Map_ChildrenThatAreRetrievedByKey()
 		{
@@ -487,6 +487,22 @@ Shoot at Enemy Vehicle
 			a.messages["title1"].Should().Be("message1");
 			a.messages["title2"].Should().Be("message2");
 			a.otherProperty.Should().Be(true);
+		}
+
+		// for JSON compatibility
+		// ==========
+
+		[Fact] void D1_Map_IntsWithStringKeys()
+		{
+			var a = VDFLoader.ToVDFNode("{\"key1\":0 \"key2\":1}", new VDFLoadOptions(allowStringKeys: true));
+			a.mapChildren.Count.Should().Be(2);
+			a["key1"].primitiveValue.Should().Be(0);
+		}
+		[Fact] void D1_List_IntsWithCommaSeparators()
+		{
+			var a = VDFLoader.ToVDFNode("[0,1]", new VDFLoadOptions(allowCommaSeparators: true));
+			a.listChildren.Count.Should().Be(2);
+			a[0].primitiveValue.Should().Be(0);
 		}
 
 		// unique to C# version

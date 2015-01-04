@@ -7,27 +7,40 @@ public class VDFLoadOptions
 {
 	public object message;
 
+	// for JSON compatibility
+	public bool allowStringKeys;
+	public bool allowCommaSeparators;
+
 	// CS only
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
 	//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
-	public VDFLoadOptions(object message = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	public VDFLoadOptions(object message = null, bool allowStringKeys = false, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
 		this.message = message;
+		this.allowStringKeys = allowStringKeys;
+		this.allowCommaSeparators = allowCommaSeparators;
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
+	}
+
+	public VDFLoadOptions ForJSON() // helper function for JSON compatibility
+	{
+		allowStringKeys = true;
+		allowCommaSeparators = true;
+		return this;
 	}
 }
 
 public static class VDFLoader
 {
-	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions loadOptions = null) { return ToVDFNode(text, typeof(T), loadOptions); }
-	public static VDFNode ToVDFNode(string text, VDFLoadOptions loadOptions, Type declaredType = null) { return ToVDFNode(text, declaredType, loadOptions); }
-	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions loadOptions = null) { return ToVDFNode(VDFTokenParser.ParseTokens(text), declaredType, loadOptions); }
-	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions loadOptions = null)
+	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions options = null) { return ToVDFNode(text, typeof(T), options); }
+	public static VDFNode ToVDFNode(string text, VDFLoadOptions options, Type declaredType = null) { return ToVDFNode(text, declaredType, options); }
+	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions options = null) { return ToVDFNode(VDFTokenParser.ParseTokens(text, true, options), declaredType, options); }
+	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null)
 	{
-		loadOptions = loadOptions ?? new VDFLoadOptions();
+		options = options ?? new VDFLoadOptions();
 
 		// figure out obj-type
 		// ==========
@@ -65,10 +78,11 @@ public static class VDFLoader
 		Type objType = declaredType;
 		if (fromVDFTypeString != null && fromVDFTypeString.Length > 0)
 		{
-			var fromVDFType = VDF.GetTypeByVName(fromVDFTypeString, loadOptions);
+			var fromVDFType = VDF.GetTypeByVName(fromVDFTypeString, options);
 			if (objType == null || objType.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 				objType = fromVDFType;
 		}
+		var objTypeGenericArgs = VDF.GetGenericArgumentsOfType(objType);
 		var objTypeInfo = VDFTypeInfo.Get(objType);
 
 		// create the object's VDFNode, and load in the data
@@ -99,7 +113,7 @@ public static class VDFLoader
 				{
 					var itemFirstToken = tokens[token.index];
 					var itemEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker);
-					objNode.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), objType.IsGenericType ? objType.GetGenericArguments()[0] : null, loadOptions));
+					objNode.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), objTypeGenericArgs[0], options));
 					if (itemFirstToken.type == VDFTokenType.Metadata) // if item had metadata, skip an extra token (since it had two non-end tokens)
 						i++;
 				}
@@ -110,18 +124,18 @@ public static class VDFLoader
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
 			{
 				var token = tokensAtDepth1[i];
-				if (token.type == VDFTokenType.PropertyName)
+				if (token.type == VDFTokenType.Key)
 				{
 					var propName = token.text;
 					Type propValueType;
 					if (typeof(IDictionary).IsAssignableFrom(objType))
-						propValueType = objType.IsGenericType ? objType.GetGenericArguments()[1] : null;
+						propValueType = objTypeGenericArgs[1];
 					else
 						propValueType = objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
 
 					var propValueFirstToken = tokensAtDepth1[i + 1];
-					var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.PropertyName);
-					objNode.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, loadOptions));
+					var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.Key);
+					objNode.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
 				}
 			}
 
