@@ -119,7 +119,7 @@ public class VDFNode
 			else
 				builder.Append("\"" + unpaddedString + "\"");
 		}
-		else if (primitiveValue.GetType().IsPrimitive) // if number
+		else if (VDF.GetIsTypePrimitive(primitiveValue.GetType())) // if number
 			builder.Append(options.useNumberTrimming && primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
 		else
 			builder.Append("\"" + primitiveValue + "\"");
@@ -190,7 +190,7 @@ public class VDFNode
 					if ((poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(options, tabDepth)).Length > 0)
 						poppedOutChildTexts.Add(poppedOutChildText);
 			if (isList || listChildren.Count > 0)
-				foreach (VDFNode item in listChildren.ToList())
+				foreach (VDFNode item in listChildren)
 					if ((poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth)).Length > 0)
 						poppedOutChildTexts.Add(poppedOutChildText);
 			for (var i = 0; i < poppedOutChildTexts.Count; i++)
@@ -224,25 +224,25 @@ public class VDFNode
 	{
 		loadOptions = loadOptions ?? new VDFLoadOptions();
 
-		var fromVDFTypeString = "object";
+		var fromVDFTypeName = "object";
 		if (metadata != null)
-			fromVDFTypeString = metadata;
+			fromVDFTypeName = metadata;
 		else if (primitiveValue is bool)
-			fromVDFTypeString = "bool";
+			fromVDFTypeName = "bool";
 		else if (primitiveValue is int)
-			fromVDFTypeString = "int";
+			fromVDFTypeName = "int";
 		else if (primitiveValue is double)
-			fromVDFTypeString = "double";
+			fromVDFTypeName = "double";
 		else if (primitiveValue is string)
-			fromVDFTypeString = "string";
+			fromVDFTypeName = "string";
 		else if (primitiveValue == null)
 			if (isList || listChildren.Count > 0)
-				fromVDFTypeString = "List(object)";
+				fromVDFTypeName = "List(object)";
 			else if (isMap || mapChildren.Count > 0)
-				fromVDFTypeString = "Dictionary(object object)"; //"object";
+				fromVDFTypeName = "Dictionary(object object)"; //"object";
 
 		Type finalType = declaredType;
-		var fromVDFType = VDF.GetTypeByVName(fromVDFTypeString, loadOptions);
+		var fromVDFType = VDF.GetTypeByName(fromVDFTypeName, loadOptions);
 		if (finalType == null || finalType.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 			finalType = fromVDFType;
 		

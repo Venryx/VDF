@@ -18,7 +18,24 @@ var V = new function()
 	AddClosureFunctionsToX(self);*/
 
 	self.CloneObject = function(obj) { return $.extend({}, obj); }; //deep: JSON.parse(JSON.stringify(obj));
-	self.CloneArray = function (array) { return Array.prototype.slice.call(array, 0); }; //array.slice(0); //deep: JSON.parse(JSON.stringify(array));
+	self.CloneArray = function(array) { return Array.prototype.slice.call(array, 0); }; //array.slice(0); //deep: JSON.parse(JSON.stringify(array));
+	self.Map = function(list, mapFunc)
+	{
+		var result = [];
+		for (var i = 0; i < list.length; i++)
+			result[i] = mapFunc(list[i]);
+		return result;
+	}
+
+	self.GetMatches = function(str, regex, groupIndex)
+	{
+		groupIndex = groupIndex || 1; // default to the first capturing group
+		var matches = [];
+		var match;
+		while (match = regex.exec(str))
+			matches.push(match[groupIndex]);
+		return matches;
+	};
 
 	//self.Multiline = function (functionWithInCommentMultiline) { return functionWithInCommentMultiline.toString().replace(/^[^\/]+\/\*!?/, '').replace(/\*\/[^\/]+$/, ''); };
 	// example:

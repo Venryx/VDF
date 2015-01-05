@@ -1,25 +1,29 @@
-﻿var VDF_SetUp;
-(function (VDF_SetUp) {
-    Object.defineProperty(Object.prototype, "GetTypeName", {
-        enumerable: false,
-        value: function () {
-            //var results = this["constructor"].toString().match(/function (.{1,})\(/);
-            //return (results && results.length > 1) ? results[1] : "";
-            return this.constructor.name;
-        }
-    });
-    Object.defineProperty(Object.prototype, "GetType", {
-        enumerable: false,
-        value: function () {
-            //var results = this["constructor"].toString().match(/function (.{1,})\(/);
-            //return window[(results && results.length > 1) ? results[1] : ""];
-            return window[this.constructor.name];
-        }
-    });
+﻿// init
+// ==========
+String.prototype.Contains = String.prototype.Contains || function (str) {
+    return this.indexOf(str) != -1;
+};
+String.prototype.StartsWith = String.prototype.StartsWith || function (str) {
+    return this.indexOf(str) == 0;
+};
+String.prototype.EndsWith = String.prototype.EndsWith || function (str) {
+    var expectedPos = this.length - str.length;
+    return this.indexOf(str, expectedPos) == expectedPos;
+};
+String.prototype.TrimStart = String.prototype.TrimStart || function (chars) {
+    var result = "";
+    for (var i = 0; i < this.length; i++)
+        if (!chars.Contains(this[i]))
+            result += this[i];
+    return result;
+};
 
-    if (window["OnVDFReady"])
-        window["OnVDFReady"]();
-})(VDF_SetUp || (VDF_SetUp = {}));
+Array.prototype.Contains = Array.prototype.Contains || function (item) {
+    return this.indexOf(item) != -1;
+};
+
+// classes
+// ==========
 var VDF = (function () {
     function VDF() {
     }
@@ -30,78 +34,82 @@ var VDF = (function () {
         VDF.typeImporters_inline[type] = importer;
     };
 
-    VDF.GetType = function (vTypeName) {
-        return window[vTypeName];
+    // v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
+    VDF.GetGenericArgumentsOfType = function (typeName) {
+        var genericArgumentTypes = new Array();
+        var depth = 0;
+        var lastStartBracketPos = -1;
+        if (typeName != null)
+            for (var i = 0; i < typeName.length; i++) {
+                var ch = typeName[i];
+                if (ch == ')')
+                    depth--;
+                if ((depth == 0 && ch == ')') || (depth == 1 && ch == ' '))
+                    genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
+                if ((depth == 0 && ch == '(') || (depth == 1 && ch == ' '))
+                    lastStartBracketPos = i;
+                if (ch == '(')
+                    depth++;
+            }
+        return genericArgumentTypes;
     };
-    VDF.GetVTypeNameOfObject = function (obj) {
-        if (obj.constructor == {}.constructor || obj.constructor == object)
-            return null;
+
+    VDF.GetIsTypePrimitive = function (typeName) {
+        return ["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "bool", "char", "string"].Contains(typeName);
+    };
+    VDF.GetIsTypeAnonymous = function (typeName) {
+        return typeName != null && typeName == "object";
+    };
+    VDF.GetTypeNameOfObject = function (obj) {
         var rawType = typeof obj;
         if (rawType == "object") {
-            if (obj.realVTypeName)
-                return obj.realVTypeName;
-            var type = obj.GetTypeName();
-            if (type == "Boolean")
-                return "bool";
-            if (type == "Number")
-                return obj.toString().contains(".") ? "float" : "int";
-            if (type == "String")
-                return "string";
-            if (type == "Object")
+            if (obj.realTypeName)
+                return obj.realTypeName;
+            var nativeTypeName = obj.constructor.name;
+
+            /*if (nativeTypeName == "Boolean")
+            return "bool";
+            if (nativeTypeName == "Number")
+            return obj.toString().Contains(".") ? "double" : "int";
+            if (nativeTypeName == "String")
+            return "string";*/
+            if (nativeTypeName == "Object")
                 return "object";
-            return type;
+            return nativeTypeName;
         }
         if (rawType == "boolean")
             return "bool";
         if (rawType == "number")
-            return obj.toString().contains(".") ? "float" : "int";
-        return rawType;
-    };
-    VDF.GetGenericParametersOfTypeName = function (typeName) {
-        var genericArgumentTypes = new Array();
-        var depth = 0;
-        var lastStartBracketPos = -1;
-        for (var i = 0; i < typeName.length; i++) {
-            var ch = typeName[i];
-            if (ch == ']')
-                depth--;
-            if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
-                genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
-            if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
-                lastStartBracketPos = i;
-            if (ch == '[')
-                depth++;
-        }
-        return genericArgumentTypes;
+            return obj.toString().Contains(".") ? "double" : "int";
+        if (rawType == "string")
+            return "string";
+
+        //return rawType; // string
+        //return null;
+        //return "object"; // consider objects with raw-types of undefined, function, etc. to just be anonymous-objects
+        return "object";
     };
 
-    VDF.Serialize = function (obj, declaredTypeName_orSaveOptions, saveOptions_orDeclaredTypeName) {
-        var declaredTypeName;
-        var saveOptions;
-        if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions) {
-            declaredTypeName = declaredTypeName_orSaveOptions;
-            saveOptions = saveOptions_orDeclaredTypeName;
-        } else {
-            declaredTypeName = saveOptions_orDeclaredTypeName;
-            saveOptions = declaredTypeName_orSaveOptions;
-        }
-        return VDFSaver.ToVDFNode(obj, declaredTypeName, saveOptions).ToVDF();
+    VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {
+        if (declaredTypeName_orOptions instanceof VDFSaveOptions)
+            return VDF.Serialize(obj, null, declaredTypeName_orOptions);
+
+        var declaredTypeName = declaredTypeName_orOptions;
+        var options = options_orNothing;
+
+        return VDFSaver.ToVDFNode(obj, declaredTypeName, options).ToVDF(options);
     };
 
-    VDF.Deserialize = function (vdf, declaredTypeName_orLoadOptions, loadOptions_orDeclaredTypeName) {
-        var declaredTypeName;
-        var loadOptions;
-        if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions) {
-            declaredTypeName = declaredTypeName_orLoadOptions;
-            loadOptions = loadOptions_orDeclaredTypeName;
-        } else {
-            declaredTypeName = loadOptions_orDeclaredTypeName;
-            loadOptions = declaredTypeName_orLoadOptions;
-        }
-        return VDFLoader.ToVDFNode(vdf, declaredTypeName, loadOptions).ToObject(declaredTypeName, loadOptions);
+    VDF.Deserialize = function (vdf, declaredTypeName_orOptions, options_orNothing) {
+        if (declaredTypeName_orOptions instanceof VDFLoadOptions)
+            return VDF.Deserialize(vdf, null, declaredTypeName_orOptions);
+
+        var declaredTypeName = declaredTypeName_orOptions;
+        var options = options_orNothing;
+        return VDFLoader.ToVDFNode(vdf, declaredTypeName, options).ToObject(declaredTypeName, options);
     };
-    VDF.DeserializeInto = function (vdf, obj, loadOptions) {
-        VDFLoader.ToVDFNode(vdf, VDF.GetVTypeNameOfObject(obj), loadOptions).IntoObject(obj, loadOptions);
+    VDF.DeserializeInto = function (vdf, obj, options) {
+        VDFLoader.ToVDFNode(vdf, VDF.GetTypeNameOfObject(obj), options).IntoObject(obj, options);
     };
     VDF.typeExporters_inline = {};
     VDF.typeImporters_inline = {};
@@ -113,66 +121,70 @@ var VDF = (function () {
 
 // helper classes
 // ==================
-var VDFUtils = (function () {
-    function VDFUtils() {
-    }
-    VDFUtils.SetUpHiddenFields = function (obj, addSetters) {
-        var fieldNames = [];
-        for (var _i = 0; _i < (arguments.length - 2); _i++) {
-            fieldNames[_i] = arguments[_i + 2];
-        }
-        if (addSetters && !obj._hiddenFieldStore)
-            Object.defineProperty(obj, "_hiddenFieldStore", { enumerable: false, value: {} });
-        for (var i in fieldNames)
-            (function () {
-                var propName = fieldNames[i];
-                var origValue = obj[propName];
-                if (addSetters)
-                    Object.defineProperty(obj, propName, {
-                        enumerable: false,
-                        get: function () {
-                            return obj["_hiddenFieldStore"][propName];
-                        },
-                        set: function (value) {
-                            return obj["_hiddenFieldStore"][propName] = value;
-                        }
-                    });
-                else
-                    Object.defineProperty(obj, propName, {
-                        enumerable: false,
-                        value: origValue
-                    });
-                obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
-            })();
-    };
-    VDFUtils.MakePropertiesHidden = function (obj, alsoMakeFunctionsHidden, addSetters) {
-        for (var propName in obj) {
-            var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
-            if (propDescriptor) {
-                propDescriptor.enumerable = false;
-                Object.defineProperty(obj, propName, propDescriptor);
-            } else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
-                VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
-        }
-    };
-    return VDFUtils;
+/*class VDFUtils
+{
+static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
+{
+if (addSetters && !obj._hiddenFieldStore)
+Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
+for (var i in fieldNames)
+(()=>{
+var propName = fieldNames[i];
+var origValue = obj[propName];
+if (addSetters)
+Object.defineProperty(obj, propName,
+{
+enumerable: false,
+get: ()=>obj["_hiddenFieldStore"][propName],
+set: value=>obj["_hiddenFieldStore"][propName] = value
+});
+else
+Object.defineProperty(obj, propName,
+{
+enumerable: false,
+value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
+});
+obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
 })();
+}
+static MakePropertiesHidden(obj, alsoMakeFunctionsHidden?: boolean, addSetters?: boolean)
+{
+for (var propName in obj)
+{
+var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
+if (propDescriptor)
+{
+propDescriptor.enumerable = false;
+Object.defineProperty(obj, propName, propDescriptor);
+}
+else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
+VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
+}
+}
+}*/
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.data = [];
-        if (startData)
+        this.Length = 0;
+        if (startData) {
             this.data.push(startData);
+            this.Length += startData.length;
+        }
     }
     StringBuilder.prototype.Append = function (str) {
         this.data.push(str);
+        this.Length += str.length;
         return this;
     };
     StringBuilder.prototype.Insert = function (index, str) {
         this.data.splice(index, 0, str);
+        this.Length += str.length;
         return this;
     };
     StringBuilder.prototype.Remove = function (index, count) {
-        this.data.splice(index, count || 1);
+        var removedItems = this.data.splice(index, count || 1);
+        for (var i = 0; i < removedItems.length; i++)
+            this.Length -= removedItems[i].length;
         return this;
     };
     StringBuilder.prototype.Clear = function () {
@@ -186,14 +198,19 @@ var StringBuilder = (function () {
 
 // VDF-usable data wrappers
 // ==================
+//class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
+// for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)
+//var object = Object;
+//object["typeInfo"] = new VDFTypeInfo(null, true);
 var object = (function () {
     function object() {
     }
     return object;
 })();
+
 var EnumValue = (function () {
     function EnumValue(enumTypeName, intValue) {
-        this.realVTypeName = enumTypeName;
+        this.realTypeName = enumTypeName;
 
         //this.intValue = intValue;
         this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
@@ -203,8 +220,10 @@ var EnumValue = (function () {
     };
 
     EnumValue.IsEnum = function (typeName) {
-        return eval("window['" + typeName + "'] && " + typeName + "['_IsEnum'] === 0");
+        return window[typeName] && window[typeName]["_IsEnum"] === 0;
     };
+
+    //static IsEnum(typeName: string): boolean { return window[typeName] && /}\)\((\w+) \|\| \(\w+ = {}\)\);/.test(window[typeName].toString()); }
     EnumValue.GetEnumIntForStringValue = function (enumTypeName, stringValue) {
         return eval(enumTypeName + "[\"" + stringValue + "\"]");
     };
@@ -223,7 +242,7 @@ window["List"] = function List(itemType) {
     self = (Array.apply(self, items) || self);
     self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
     self.constructor = List; // makes "(new List()).constructor == List" be true
-    self.realVTypeName = "List[" + itemType + "]";
+    self.realTypeName = "List(" + itemType + ")";
     self.itemType = itemType;
     return self;
 };
@@ -237,7 +256,7 @@ window["List"] = function List(itemType) {
         } });
 
     // new methods
-    self.indexes = function () {
+    self.Indexes = function () {
         var result = {};
         for (var i = 0; i < this.length; i++)
             result[i] = this[i];
@@ -264,13 +283,13 @@ window["List"] = function List(itemType) {
         this.splice(index, 1);
     };
     self.Any = function (matchFunc) {
-        for (var i in this.indexes())
+        for (var i in this.Indexes())
             if (matchFunc.call(this[i], this[i]))
                 return true;
         return false;
     };
     self.All = function (matchFunc) {
-        for (var i in this.indexes())
+        for (var i in this.Indexes())
             if (!matchFunc.call(this[i], this[i]))
                 return false;
         return true;
@@ -283,7 +302,7 @@ window["List"] = function List(itemType) {
     };
     self.FirstOrDefault = function (matchFunc) {
         if (matchFunc) {
-            for (var i in this.indexes())
+            for (var i in this.Indexes())
                 if (matchFunc.call(this[i], this[i]))
                     return this[i];
             return null;
@@ -318,8 +337,8 @@ window["List"] = function List(itemType) {
 
 var Dictionary = (function () {
     function Dictionary(keyType, valueType, keyValuePairsObj) {
-        //VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
-        this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
+        //VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
+        this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
         this.keyType = keyType;
         this.valueType = valueType;
         this.keys = [];
@@ -366,7 +385,13 @@ var Dictionary = (function () {
             throw new Error("Dictionary already contains key '" + key + "'.");
         this.Set(key, value);
     };
+    Dictionary.prototype.Remove = function (key) {
+        var itemIndex = this.keys.indexOf(key);
+        this.keys.splice(itemIndex, 1);
+        this.values.splice(itemIndex, 1);
+        delete this[key];
+    };
     return Dictionary;
 })();
-VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
+//VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
 //# sourceMappingURL=VDF.js.map

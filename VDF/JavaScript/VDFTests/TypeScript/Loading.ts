@@ -138,8 +138,8 @@ three lines".Fix());
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("List(int)>[1 2]");
 			a.metadata.Should().Be("List(int)");
-			a[0].metadata.Should().Be(null);
-			a[1].metadata.Should().Be(null);
+			ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
+			ok(a[1].metadata == null); //a[1].metadata.Should().Be(null);
 		});
 		test("D0_ListMetadata2", ()=>
 		{
@@ -201,10 +201,10 @@ of three lines in total.".Fix());
 		test("D1_BaseValuesWithMarkedTypes", ()=>
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
-			a["bool"].AsBool.Should().Be(false);
-			a["int"].AsInt.Should().Be(5);
-			a["double"].AsDouble.Should().Be(.5);
-			a["string"].AsString.Should().Be("Prop value string.");
+			a["bool"].primitiveValue.Should().Be(false);
+			a["int"].primitiveValue.Should().Be(5);
+			a["double"].primitiveValue.Should().Be(.5);
+			a["string"].primitiveValue.Should().Be("Prop value string.");
 		});
 		test("D1_Literal", ()=>
 		{
@@ -225,8 +225,8 @@ of three lines in total.".Fix());
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
 			a["level1"].primitiveValue.Should().Be("{level2:'<<{level3:'Base string.'}>>'}");
-			VDFLoader.ToVDFNode(a["level1"])["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
-			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"])["level2"])["level3"].primitiveValue.Should().Be("Base string.");
+			VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
+			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue)["level3"].primitiveValue.Should().Be("Base string.");
 		});
 		test("D1_ArraysInArrays", ()=>
 		{
@@ -241,7 +241,7 @@ of three lines in total.".Fix());
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
 			a[0][0].primitiveValue.Should().Be("1A");
-			a[0][1].primitiveValue.Should().Be(null);
+			ok(a[0][1].primitiveValue == null); //a[0][1].primitiveValue.Should().Be(null);
 			a[1][0].primitiveValue.Should().Be("2A");
 			a[1][1].primitiveValue.Should().Be("");
 		});
@@ -250,7 +250,7 @@ of three lines in total.".Fix());
 			var a: VDFNode = VDFLoader.ToVDFNode("['text' ['2A' null]]");
 			a[0].primitiveValue.Should().Be("text");
 			a[1][0].primitiveValue.Should().Be("2A");
-			a[1][1].primitiveValue.Should().Be(null);
+			ok(a[1][1].primitiveValue == null); //a[1][1].primitiveValue.Should().Be(null);
 		});
 		test("D1_Dictionary", ()=>
 		{
@@ -347,7 +347,7 @@ of three lines in total.>>' bool:true}");
 "This is a\n\
 multiline string\n\
 of three lines in total.".Fix());
-			a["bool"].AsBool.Should().Be(true);
+			a["bool"].primitiveValue.Should().Be(true);
 		});
 		test("D1_Object_PoppedOutStringsThenMultilineString", ()=>
 		{
@@ -442,12 +442,17 @@ Shoot at Enemy Vehicle\n\
 	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1' typeName:'MachineGun' name:'Gun1' pivotPoint_unit:'0,0.625,0.875' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}\n\
 	{id:'e97f8ee1-320c-4aef-9343-3317accb015b' typeName:'Crate' name:'Crate' pivotPoint_unit:'0,0.625,0' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}";
 			VDFLoader.ToVDFNode(vdf);
+			ok(true);
 		});
 
 		// to object
 		// ==========
 
-		test("D0_Null", ()=> { VDF.Deserialize("null").Should().Be(null); });
+		test("D0_Null", ()=>
+		{
+			ok(VDF.Deserialize("null") == null);
+			//VDF.Deserialize("null").Should().Be(null);
+		});
 		//test("D0_Nothing() { VDF.Deserialize("").Should().Be(null); });
 		//test("D0_Nothing_TypeSpecified() { VDF.Deserialize("string>").Should().Be(null); });
 		test("D0_EmptyString", ()=> { VDF.Deserialize("''").Should().Be(""); });
@@ -489,7 +494,7 @@ Shoot at Enemy Vehicle\n\
 			{
 				flag: new VDFPropInfo("bool")
 			});
-			flag: boolean;
+			flag = false;
 			VDFPostDeserialize(message: any): void { if (<string>message == "RequiredMessage") this.flag = true; }
 		}
 		test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", ()=> { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, "WrongMessage")).flag.Should().Be(false); });
@@ -567,22 +572,31 @@ Shoot at Enemy Vehicle\n\
 		test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOn_String", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions(null, null, true));
-			a["string"].baseValue.Should().Be("Prop value string.");
+			a["string"].primitiveValue.Should().Be("Prop value string.");
 		});
-		test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOff_String", ()=>
+		/*test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOff_String", ()=>
 		{
 			throws(()=>VDFLoader.ToVDFNode("UnknownType>{string:'Prop value string.'}"), "Type \"UnknownType\" not found.");
-		});
+		});*/
 		test("Depth1_InferCompatibleTypesForUnknownTypes_BaseValue", ()=>
 		{
 			var a = VDFLoader.ToVDFNode("{string:UnkownBaseType>'Prop value string.'}", new VDFLoadOptions(null, null, true));
-			a["string"].baseValue.Should().Be("Prop value string.");
+			a["string"].primitiveValue.Should().Be("Prop value string.");
 		});
 		test("AsObject", ()=>
 		{
-			var a = <any>VDF.Deserialize("{bool:bool>false,double:double>3.5}", "object");
+			var a = <any>VDF.Deserialize("{bool:bool>false double:double>3.5}", "object");
 			a.bool.Should().Be(false);
 			a.double.Should().Be(3.5);
 		});
+
+		// export all classes/enums to global scope
+		var arguments;
+		var names = V.GetMatches(arguments.callee.toString(), /        var (\w+) = \(function \(\) {/g, 1);
+		for (var i = 0; i < names.length; i++)
+			try { window[names[i]] = eval(names[i]); } catch(e) {}
+		var enumNames = V.GetMatches(arguments.callee.toString(), /        }\)\((\w+) \|\| \(\w+ = {}\)\);/g, 1);
+		for (var i = 0; i < enumNames.length; i++)
+			try { window[enumNames[i]] = eval(enumNames[i]); } catch(e) {}
 	}
 }

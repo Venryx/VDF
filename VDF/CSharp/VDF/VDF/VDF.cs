@@ -38,10 +38,10 @@ public static class VDF
 	{
 		builtInTypeAliasesByType = new Dictionary<Type, string>
 		{
-			{typeof(Byte), "byte"}, {typeof(SByte), "sbyte"}, {typeof(Int16), "short"}, {typeof(UInt16), "ushort"},
-			{typeof(Int32), "int"}, {typeof(UInt32), "uint"}, {typeof(Int64), "long"}, {typeof(UInt64), "ulong"},
-			{typeof(Single), "float"}, {typeof(Double), "double"}, {typeof(Decimal), "decimal"},
-			{typeof(Boolean), "bool"}, {typeof(Char), "char"}, {typeof(String), "string"}, {typeof(Object), "object"},
+			{typeof(byte), "byte"}, {typeof(sbyte), "sbyte"}, {typeof(short), "short"}, {typeof(ushort), "ushort"},
+			{typeof(int), "int"}, {typeof(uint), "uint"}, {typeof(long), "long"}, {typeof(ulong), "ulong"},
+			{typeof(float), "float"}, {typeof(double), "double"}, {typeof(decimal), "decimal"},
+			{typeof(bool), "bool"}, {typeof(char), "char"}, {typeof(string), "string"}, {typeof(object), "object"},
 			{typeof(List<>), "List"}, {typeof(Dictionary<,>), "Dictionary"}
 		};
 
@@ -57,55 +57,55 @@ public static class VDF
 	public static void RegisterTypeImporter_Inline(Type type, Func<string, object> importer) { typeImporters_inline[type] = (str, genericArgs)=>importer(str); }
 	public static void RegisterTypeImporter_Inline(Type type, Func<string, List<Type>, object> importer) { typeImporters_inline[type] = importer; } // generic-args lets you write an importer for classes of type Wrapper<T>
 
-	// v-name examples: "List[string]", "System.Collections.Generic.List[string]"
-	static int GetGenericParamsCountOfVName(string vName)
+	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
+	static int GetGenericParamsCountOfTypeName(string typeName)
 	{
-		if (!vName.Contains("("))
+		if (!typeName.Contains("("))
 			return 0;
 		int result = 1;
 		int depth = 0;
-		foreach (char ch in vName)
+		foreach (char ch in typeName)
 			if (ch == '(' || ch == ')')
 				depth += ch == '(' ? 1 : -1;
 			else if (depth == 1 && ch == ' ')
 				result++;
 		return result;
 	}
-	static Type GetTypeByVNameRoot(string vNameRoot, int genericsParams, VDFLoadOptions options)
+	static Type GetTypeByNameRoot(string nameRoot, int genericsParams, VDFLoadOptions options)
 	{
-		if (options.typeAliasesByType.Values.Contains(vNameRoot))
-			return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vNameRoot).Key;
-		if (builtInTypeAliasesByType.Values.Contains(vNameRoot))
-			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vNameRoot).Key;
+		if (options.typeAliasesByType.Values.Contains(nameRoot))
+			return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
+		if (builtInTypeAliasesByType.Values.Contains(nameRoot))
+			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
 
-		var result = Type.GetType(vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
+		var result = Type.GetType(nameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		if (result != null)
 			return result;
-		var namespaceAlias = vNameRoot.Contains(".") ? vNameRoot.Substring(0, vNameRoot.LastIndexOf(".")) : null;
+		var namespaceAlias = nameRoot.Contains(".") ? nameRoot.Substring(0, nameRoot.LastIndexOf(".")) : null;
 		if (namespaceAlias != null) // if alias value when saving was not an empty string
 		{
 			foreach (KeyValuePair<string, string> pair in options.namespaceAliasesByName)
 				if (pair.Value == namespaceAlias)
-					return Type.GetType(pair.Key + "." + vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
+					return Type.GetType(pair.Key + "." + nameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		}
 		else
 			foreach (KeyValuePair<string, string> pair in options.namespaceAliasesByName)
-				if (pair.Value == null && Type.GetType(pair.Key + "." + vNameRoot + (genericsParams > 0 ? "`" + genericsParams : "")) != null)
-					return Type.GetType(pair.Key + "." + vNameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
+				if (pair.Value == null && Type.GetType(pair.Key + "." + nameRoot + (genericsParams > 0 ? "`" + genericsParams : "")) != null)
+					return Type.GetType(pair.Key + "." + nameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		return null;
 	}
-	public static Type GetTypeByVName(string vTypeName, VDFLoadOptions options = null)
+	public static Type GetTypeByName(string typeName, VDFLoadOptions options = null)
 	{
 		options = options ?? new VDFLoadOptions();
-		if (options.typeAliasesByType.Values.Contains(vTypeName))
-			return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
-		if (builtInTypeAliasesByType.Values.Contains(vTypeName))
-			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == vTypeName).Key;
+		if (options.typeAliasesByType.Values.Contains(typeName))
+			return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
+		if (builtInTypeAliasesByType.Values.Contains(typeName))
+			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
 
-		var rootName = vTypeName.Contains("(") ? vTypeName.Substring(0, vTypeName.IndexOf("(")) : vTypeName;
+		var rootName = typeName.Contains("(") ? typeName.Substring(0, typeName.IndexOf("(")) : typeName;
 		if (options.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
 			rootName = options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[] {'`'})[0];
-		var rootType = GetTypeByVNameRoot(rootName, GetGenericParamsCountOfVName(vTypeName), options);
+		var rootType = GetTypeByNameRoot(rootName, GetGenericParamsCountOfTypeName(typeName), options);
 		if (rootType == null)
 			throw new VDFException("Could not find type \"" + rootName + "\".");
 		if (rootType.IsGenericType)
@@ -113,13 +113,13 @@ public static class VDF
 			var genericArgumentTypes = new List<Type>();
 			int depth = 0;
 			int lastStartBracketPos = -1;
-			for (var i = 0; i < vTypeName.Length; i++)
+			for (var i = 0; i < typeName.Length; i++)
 			{
-				char ch = vTypeName[i];
+				char ch = typeName[i];
 				if (ch == ')')
 					depth--;
 				if ((depth == 0 && ch == ')') || (depth == 1 && ch == ' '))
-					genericArgumentTypes.Add(GetTypeByVName(vTypeName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)), options)); // get generic-parameter type, by sending its parsed real-name back into this method
+					genericArgumentTypes.Add(GetTypeByName(typeName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)), options)); // get generic-parameter type, by sending its parsed real-name back into this method
 				if ((depth == 0 && ch == '(') || (depth == 1 && ch == ' '))
 					lastStartBracketPos = i;
 				if (ch == '(')
@@ -130,7 +130,9 @@ public static class VDF
 		return rootType;
 	}
 
-	public static string GetVNameOfType(Type type, VDFSaveOptions options)
+	public static bool GetIsTypePrimitive(Type type) { return type.IsPrimitive || type == typeof(string); } // (technically strings are not primitives in C#, but we consider them such)
+	public static bool GetIsTypeAnonymous(Type type) { return type != null && type.Name.StartsWith("<>"); }
+	public static string GetNameOfType(Type type, VDFSaveOptions options)
 	{
 		if (options.typeAliasesByType.ContainsKey(type))
 			return options.typeAliasesByType[type];
@@ -141,7 +143,7 @@ public static class VDF
 		{
 			var rootType = type.GetGenericTypeDefinition();
 			if (options.typeAliasesByType.ContainsKey(rootType))
-				return options.typeAliasesByType[rootType] + "(" + String.Join(" ", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, options)).ToArray()) + ")";
+				return options.typeAliasesByType[rootType] + "(" + String.Join(" ", type.GetGenericArguments().Select(type2=>GetNameOfType(type2, options)).ToArray()) + ")";
 
 			var rootTypeName = rootType.FullName.Substring(0, rootType.FullName.IndexOf("`"));
 			rootTypeName = rootTypeName.Contains("+") ? rootTypeName.Substring(rootTypeName.IndexOf("+") + 1) : rootTypeName; // remove assembly name, if specified in string (may want to ensure this doesn't break anything)
@@ -150,7 +152,7 @@ public static class VDF
 			else if (typeof(Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
 				rootTypeName = "Dictionary";
 
-			string result = rootTypeName + "(" + String.Join(" ", type.GetGenericArguments().Select(type2=>GetVNameOfType(type2, options)).ToArray()) + ")";
+			string result = rootTypeName + "(" + String.Join(" ", type.GetGenericArguments().Select(type2=>GetNameOfType(type2, options)).ToArray()) + ")";
 			foreach (KeyValuePair<string, string> pair in options.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
 				if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'('})[0].Contains("."))
 					result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
@@ -170,16 +172,14 @@ public static class VDF
 	{
 		if (typeof(IList).IsAssignableFrom(type))
 			return new List<Type> {type.HasElementType ? type.GetElementType() : type.GetGenericArguments().FirstOrDefault()};
-		if (typeof(IDictionary).IsAssignableFrom(type))
-			return type.GetGenericArguments().ToList();
-		return null;
+		return type != null ? type.GetGenericArguments().ToList() : null;
 	}
 
 	public static string Serialize<T>(object obj, VDFSaveOptions options = null) { return Serialize(obj, typeof(T), options); }
-	public static string Serialize(object obj, VDFSaveOptions options, Type declaredType = null) { return Serialize(obj, declaredType, options); }
+	public static string Serialize(object obj, VDFSaveOptions options) { return Serialize(obj, null, options); }
 	public static string Serialize(object obj, Type declaredType = null, VDFSaveOptions options = null) { return VDFSaver.ToVDFNode(obj, declaredType, options).ToVDF(options); }
 	public static T Deserialize<T>(string vdf, VDFLoadOptions options = null) { return (T)Deserialize(vdf, typeof(T), options);}
-	public static object Deserialize(string vdf, VDFLoadOptions options, Type declaredType = null) { return Deserialize(vdf, declaredType, options); }
+	public static object Deserialize(string vdf, VDFLoadOptions options) { return Deserialize(vdf, null, options); }
 	public static object Deserialize(string vdf, Type declaredType = null, VDFLoadOptions options = null) { return VDFLoader.ToVDFNode(vdf, declaredType, options).ToObject(declaredType, options); }
 	public static void DeserializeInto(string vdf, object obj, VDFLoadOptions options = null) { VDFLoader.ToVDFNode(vdf, obj.GetType(), options).IntoObject(obj, options); }
 }

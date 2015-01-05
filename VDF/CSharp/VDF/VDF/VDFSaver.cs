@@ -61,48 +61,48 @@ public class VDFSaveOptions
 
 public static class VDFSaver
 {
-	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions options = null) { return ToVDFNode(obj, typeof(T), options); }
-	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options) { return ToVDFNode(obj, null, options); }
+	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions options = null, bool declaredTypeFromParent = false) { return ToVDFNode(obj, typeof(T), options, declaredTypeFromParent); }
+	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options, bool declaredTypeFromParent = false) { return ToVDFNode(obj, null, options, declaredTypeFromParent); }
 	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, bool declaredTypeFromParent = false)
 	{
 		options = options ?? new VDFSaveOptions();
 		
-		var objNode = new VDFNode();
+		var node = new VDFNode();
 		Type type = obj != null ? obj.GetType() : null;
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
-		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null;
+		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
 				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {options.message} : new object[0]);
 
 		if (obj != null && VDF.typeExporters_inline.ContainsKey(type))
-			objNode.primitiveValue = VDF.typeExporters_inline[type](obj);
+			node.primitiveValue = VDF.typeExporters_inline[type](obj);
 		else if (obj != null && type.IsGenericType && VDF.typeExporters_inline.ContainsKey(type.GetGenericTypeDefinition()))
-			objNode.primitiveValue = VDF.typeExporters_inline[type.GetGenericTypeDefinition()](obj);
+			node.primitiveValue = VDF.typeExporters_inline[type.GetGenericTypeDefinition()](obj);
 		else if (obj == null)
-			objNode.primitiveValue = null;
-		else if (type.IsPrimitive || type == typeof(string)) // if primitive (technically the C# string is 'not a primitive', but we consider it one)
-			objNode.primitiveValue = obj;
+			node.primitiveValue = null;
+		else if (VDF.GetIsTypePrimitive(type))
+			node.primitiveValue = obj;
 		else if (type.IsEnum) // helper exporter for enums
-			objNode.primitiveValue = obj.ToString();
+			node.primitiveValue = obj.ToString();
 		else if (obj is IList) // this saves arrays also
 		{
-			objNode.isList = true;
+			node.isList = true;
 			var objAsList = (IList)obj;
 			for (var i = 0; i < objAsList.Count; i++)
-				objNode.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, true));
+				node.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, true));
 		}
 		else if (obj is IDictionary)
 		{
-			objNode.isMap = true;
+			node.isMap = true;
 			var objAsDictionary = (IDictionary)obj;
 			foreach (object key in objAsDictionary.Keys)
-				objNode.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, true));
+				node.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, true), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, true));
 		}
 		else // if an object, with properties
 		{
-			objNode.isMap = true;
+			node.isMap = true;
 			foreach (string propName in typeInfo.propInfoByName.Keys)
 				try
 				{
@@ -122,37 +122,33 @@ public static class VDFSaver
 					// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
 					var propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : null, options);
 					propValueNode.popOutChildren = options.useChildPopOut && (propInfo.popOutChildrenL2.HasValue ? propInfo.popOutChildrenL2.Value : propValueNode.popOutChildren);
-					objNode.mapChildren.Add(propName, propValueNode);
+					node.mapChildren.Add(propName, propValueNode);
 				}
 				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
 		}
 
-		if (declaredType != null && declaredType.Name.StartsWith("<>")) // if anonymous type, consider just an object, as the name would not be usable (note; this may not actually be true; should test it sometime)
-			declaredType = typeof(object);
 		if (declaredType == null)
-			if (objNode.isList || objNode.listChildren.Count > 0)
+			if (node.isList || node.listChildren.Count > 0)
 				declaredType = typeof(List<object>);
-			else if (objNode.isMap || objNode.mapChildren.Count > 0)
+			else if (node.isMap || node.mapChildren.Count > 0)
 				declaredType = typeof(Dictionary<object, object>);
 			else
 				declaredType = typeof(object);
-		if (type != null && type.Name.StartsWith("<>")) // if anonymous type, consider just an object, as the name would not be usable (note; this may not actually be true; should test it sometime)
-			type = typeof(object);
-		if (options.useMetadata && type != null && !type.IsPrimitive && type != typeof(string) &&
+		if (options.useMetadata && type != null && !VDF.GetIsTypeAnonymous(type) &&
 		(
-			(options.typeMarking == VDFTypeMarking.Internal && type != declaredType) ||
-			(options.typeMarking == VDFTypeMarking.External && (type != declaredType || !declaredTypeFromParent) && type != typeof(object)) ||
+			(options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(type) && type != declaredType) ||
+			(options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(type) && (type != declaredType || !declaredTypeFromParent)) ||
 			options.typeMarking == VDFTypeMarking.ExternalNoCollapse
 		))
-			objNode.metadata = VDF.GetVNameOfType(type, options);
+			node.metadata = VDF.GetNameOfType(type, options);
 
 		if (options.useChildPopOut && typeInfo != null && typeInfo.popOutChildrenL1)
-			objNode.popOutChildren = true;
+			node.popOutChildren = true;
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.postSerializeMethod))
 				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {options.message} : new object[0]);
 
-		return objNode;
+		return node;
 	}
 }

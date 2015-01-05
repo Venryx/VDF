@@ -36,7 +36,7 @@ namespace VDFTests
 			var a = VDFSaver.ToVDFNode(new List<string>(), new VDFSaveOptions {typeMarking = VDFTypeMarking.ExternalNoCollapse});
 			a.ToVDF().Should().Be("List(string)>[]");
 			a = VDFSaver.ToVDFNode(new List<List<string>> {new List<string> {"1A", "1B", "1C"}}, new VDFSaveOptions {typeMarking = VDFTypeMarking.ExternalNoCollapse});
-			a.ToVDF().Should().Be("List(List(string))>[List(string)>[\"1A\" \"1B\" \"1C\"]]");
+			a.ToVDF().Should().Be("List(List(string))>[List(string)>[string>\"1A\" string>\"1B\" string>\"1C\"]]");
 		}
 		enum Enum1 { A, B, C }
 		[Fact] void D0_EnumDefault()
@@ -206,7 +206,7 @@ that needs escaping.>>""".Fix());
 		[Fact] void D1_TypeProperties_MarkForExternalNoCollapse()
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(typeMarking: VDFTypeMarking.ExternalNoCollapse));
-			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:true Int:5 Double:.5 String:\"Prop value string.\" list:List(string)>[\"2A\" \"2B\"] nestedList:List(List(string))>[List(string)>[\"1A\"]]}");
+			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:bool>true Int:int>5 Double:double>.5 String:string>\"Prop value string.\" list:List(string)>[string>\"2A\" string>\"2B\"] nestedList:List(List(string))>[List(string)>[string>\"1A\"]]}");
 		}
 
 		class D1_Object_DictionaryPoppedOutThenBool_Class1

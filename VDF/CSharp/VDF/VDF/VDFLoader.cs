@@ -60,60 +60,60 @@ public static class VDFLoader
 				depth++;
 		}
 
-		string fromVDFTypeString = "object";
+		var fromVDFTypeName = "object";
 		var firstNonMetadataToken = tokensAtDepth0.First(a=>a.type != VDFTokenType.Metadata);
 		if (tokensAtDepth0[0].type == VDFTokenType.Metadata)
-			fromVDFTypeString = tokensAtDepth0[0].text;
+			fromVDFTypeName = tokensAtDepth0[0].text;
 		else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
-			fromVDFTypeString = "bool";
+			fromVDFTypeName = "bool";
 		else if (firstNonMetadataToken.type == VDFTokenType.Number)
-			fromVDFTypeString = firstNonMetadataToken.text.Contains(".") ? "double" : "int";
+			fromVDFTypeName = firstNonMetadataToken.text.Contains(".") ? "double" : "int";
 		else if (firstNonMetadataToken.type == VDFTokenType.String)
-			fromVDFTypeString = "string";
+			fromVDFTypeName = "string";
 		else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
-			fromVDFTypeString = "List(object)";
+			fromVDFTypeName = "List(object)";
 		else if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
-			fromVDFTypeString = "Dictionary(object object)"; //"object";
+			fromVDFTypeName = "Dictionary(object object)"; //"object";
 
-		Type objType = declaredType;
-		if (fromVDFTypeString != null && fromVDFTypeString.Length > 0)
+		Type type = declaredType;
+		if (fromVDFTypeName != null && fromVDFTypeName.Length > 0)
 		{
-			var fromVDFType = VDF.GetTypeByVName(fromVDFTypeString, options);
-			if (objType == null || objType.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
-				objType = fromVDFType;
+			var fromVDFType = VDF.GetTypeByName(fromVDFTypeName, options);
+			if (type == null || type.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
+				type = fromVDFType;
 		}
-		var objTypeGenericArgs = VDF.GetGenericArgumentsOfType(objType);
-		var objTypeInfo = VDFTypeInfo.Get(objType);
+		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
+		var typeInfo = VDFTypeInfo.Get(type);
 
 		// create the object's VDFNode, and load in the data
 		// ==========
 
-		var objNode = new VDFNode();
-		objNode.metadata = tokensAtDepth0[0].type == VDFTokenType.Metadata ? fromVDFTypeString : null;
+		var node = new VDFNode();
+		node.metadata = tokensAtDepth0[0].type == VDFTokenType.Metadata ? fromVDFTypeName : null;
 		
 		// if primitive, parse value
 		if (firstNonMetadataToken.type == VDFTokenType.Null)
-			objNode.primitiveValue = null;
+			node.primitiveValue = null;
 		else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
-			objNode.primitiveValue = bool.Parse(firstNonMetadataToken.text);
+			node.primitiveValue = bool.Parse(firstNonMetadataToken.text);
 		else if (firstNonMetadataToken.type == VDFTokenType.Number)
 			if (firstNonMetadataToken.text.Contains("."))
-				objNode.primitiveValue = double.Parse(firstNonMetadataToken.text);
+				node.primitiveValue = double.Parse(firstNonMetadataToken.text);
 			else
-				objNode.primitiveValue = int.Parse(firstNonMetadataToken.text);
+				node.primitiveValue = int.Parse(firstNonMetadataToken.text);
 		else if (firstNonMetadataToken.type == VDFTokenType.String)
-			objNode.primitiveValue = firstNonMetadataToken.text;
+			node.primitiveValue = firstNonMetadataToken.text;
 
 		// if list, parse items
-		else if (typeof(IList).IsAssignableFrom(objType))
+		else if (typeof(IList).IsAssignableFrom(type))
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
 			{
 				var token = tokensAtDepth1[i];
-				if (/*token.type != VDFTokenType.Metadata && */token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker)
+				if (token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker)
 				{
 					var itemFirstToken = tokens[token.index];
 					var itemEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker);
-					objNode.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), objTypeGenericArgs[0], options));
+					node.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
 					if (itemFirstToken.type == VDFTokenType.Metadata) // if item had metadata, skip an extra token (since it had two non-end tokens)
 						i++;
 				}
@@ -128,18 +128,18 @@ public static class VDFLoader
 				{
 					var propName = token.text;
 					Type propValueType;
-					if (typeof(IDictionary).IsAssignableFrom(objType))
-						propValueType = objTypeGenericArgs[1];
+					if (typeof(IDictionary).IsAssignableFrom(type))
+						propValueType = typeGenericArgs[1];
 					else
-						propValueType = objTypeInfo.propInfoByName.ContainsKey(propName) ? objTypeInfo.propInfoByName[propName].GetPropType() : null;
+						propValueType = typeInfo.propInfoByName.ContainsKey(propName) ? typeInfo.propInfoByName[propName].GetPropType() : null;
 
 					var propValueFirstToken = tokensAtDepth1[i + 1];
 					var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.Key);
-					objNode.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
+					node.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
 				}
 			}
 
-		return objNode;
+		return node;
 	}
 	static List<VDFToken> GetTokenRange_Tokens(List<VDFToken> tokens, VDFToken firstToken, VDFToken enderToken)
 	{

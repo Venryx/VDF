@@ -1,30 +1,37 @@
-﻿interface Object { GetTypeName(): string; GetType(): string; }
-module VDF_SetUp
-{
-	Object.defineProperty(Object.prototype, "GetTypeName", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
-	{
-		enumerable: false,
-		value: function ()
-		{
-			//var results = this["constructor"].toString().match(/function (.{1,})\(/);
-			//return (results && results.length > 1) ? results[1] : "";
-			return this.constructor.name;
-		}
-	});
-	Object.defineProperty(Object.prototype, "GetType", // 'silent' is implied, as functions added should, by default, not be 'enumerable'
-	{
-		enumerable: false,
-		value: function()
-		{
-			//var results = this["constructor"].toString().match(/function (.{1,})\(/);
-			//return window[(results && results.length > 1) ? results[1] : ""];
-			return window[this.constructor.name];
-		}
-	});
+﻿// init
+// ==========
 
-	if (window["OnVDFReady"])
-		window["OnVDFReady"]();
+interface String
+{
+	Contains(str: string): boolean;
+	StartsWith(str: string): boolean;
+	EndsWith(str: string): boolean;
+	TrimStart(chars: Array<string>): string;
 }
+String.prototype.Contains = String.prototype.Contains || function(str) { return this.indexOf(str) != -1; };
+String.prototype.StartsWith = String.prototype.StartsWith || function(str) { return this.indexOf(str) == 0; };
+String.prototype.EndsWith = String.prototype.EndsWith || function(str)
+{
+	var expectedPos = this.length - str.length;
+	return this.indexOf(str, expectedPos) == expectedPos;
+};
+String.prototype.TrimStart = String.prototype.TrimStart || function(chars: Array<string>)
+{
+	var result = "";
+	for (var i = 0; i < this.length; i++)
+		if (!chars.Contains(this[i]))
+			result += this[i];
+	return result;
+};
+interface Array<T>
+{
+	Contains(str: T): boolean;
+}
+Array.prototype.Contains = Array.prototype.Contains || function(item) { return this.indexOf(item) != -1; };
+
+// classes
+// ==========
+
 class VDF
 {
 	static typeExporters_inline = {};
@@ -37,84 +44,91 @@ class VDF
 	static RegisterTypeExporter_Inline(type: string, exporter: Function) { VDF.typeExporters_inline[type] = exporter; }
 	static RegisterTypeImporter_Inline<T>(type: string, importer: Function) { VDF.typeImporters_inline[type] = importer; }
 
-	static GetType(vTypeName: string) { return window[vTypeName]; }
-	static GetVTypeNameOfObject(obj)
+	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
+	static GetGenericArgumentsOfType(typeName: string): string[]
 	{
-		if (obj.constructor == (<any>{}).constructor || obj.constructor == object) // if true anonymous object, or if VDF-anonymous-object
-			return null; // return null, as the name would not be usable (note; this may not actually be true; should test it sometime)
+		var genericArgumentTypes = new Array<string>(); //<string[]>[];
+		var depth = 0;
+		var lastStartBracketPos = -1;
+		if (typeName != null)
+			for (var i = 0; i < typeName.length; i++)
+			{
+				var ch = typeName[i];
+				if (ch == ')')
+					depth--;
+				if ((depth == 0 && ch == ')') || (depth == 1 && ch == ' '))
+					genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
+				if ((depth == 0 && ch == '(') || (depth == 1 && ch == ' '))
+					lastStartBracketPos = i;
+				if (ch == '(')
+					depth++;
+			}
+		return genericArgumentTypes;
+	}
+
+	static GetIsTypePrimitive(typeName: string): boolean // (technically strings are not primitives in C#, but we consider them such)
+		{ return ["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "bool", "char", "string"].Contains(typeName); }
+	static GetIsTypeAnonymous(typeName: string): boolean { return typeName != null && typeName == "object"; }
+	static GetTypeNameOfObject(obj)
+	{
 		var rawType = typeof obj;
 		if (rawType == "object") // if an object (i.e. a thing with real properties that could indicate a more specific type)
 		{
-			if (obj.realVTypeName)
-				return obj.realVTypeName;
-			var type = obj.GetTypeName();
-			if (type == "Boolean")
+			if (obj.realTypeName)
+				return obj.realTypeName;
+			var nativeTypeName = obj.constructor.name;
+			/*if (nativeTypeName == "Boolean")
 				return "bool";
-			if (type == "Number")
-				return obj.toString().contains(".") ? "float" : "int";
-			if (type == "String")
-				return "string";
-			if (type == "Object")
+			if (nativeTypeName == "Number")
+				return obj.toString().Contains(".") ? "double" : "int";
+			if (nativeTypeName == "String")
+				return "string";*/
+			if (nativeTypeName == "Object") // if anonymous-object
 				return "object";
-			return type;
+			return nativeTypeName;
 		}
 		if (rawType == "boolean")
 			return "bool";
 		if (rawType == "number")
-			return obj.toString().contains(".") ? "float" : "int";
-		return rawType;
-	}
-	static GetGenericParametersOfTypeName(typeName: string): string[]
-	{
-		var genericArgumentTypes = new Array<string>();
-		var depth = 0;
-		var lastStartBracketPos = -1;
-		for (var i = 0; i < typeName.length; i++)
-		{
-			var ch = typeName[i];
-			if (ch == ']')
-				depth--;
-			if ((depth == 0 && ch == ']') || (depth == 1 && ch == ','))
-				genericArgumentTypes.push(typeName.substring(lastStartBracketPos + 1, i)); // get generic-parameter type-str
-			if ((depth == 0 && ch == '[') || (depth == 1 && ch == ','))
-				lastStartBracketPos = i;
-			if (ch == '[')
-				depth++;
-		}
-		return genericArgumentTypes;
+			return obj.toString().Contains(".") ? "double" : "int";
+		if (rawType == "string")
+			return "string";
+		//return rawType; // string
+		//return null;
+		//return "object"; // consider objects with raw-types of undefined, function, etc. to just be anonymous-objects
+		return "object"; // consider everything else to be an anonymous-object
 	}
 
-	static Serialize(obj: any, saveOptions: VDFSaveOptions, declaredTypeName?: string): string;
+	static Serialize(obj: any, options: VDFSaveOptions): string;
 	static Serialize(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions): string;
-	static Serialize(obj: any, declaredTypeName_orSaveOptions?: any, saveOptions_orDeclaredTypeName?: any): string
+	static Serialize(obj: any, declaredTypeName_orOptions?: any, options_orNothing?: any): string
 	{
-		var declaredTypeName: string;
-		var saveOptions: VDFSaveOptions;
-		if (typeof declaredTypeName_orSaveOptions == "string" || saveOptions_orDeclaredTypeName instanceof VDFSaveOptions)
-			{declaredTypeName = declaredTypeName_orSaveOptions; saveOptions = saveOptions_orDeclaredTypeName;}
-		else
-			{declaredTypeName = saveOptions_orDeclaredTypeName; saveOptions = declaredTypeName_orSaveOptions;}
-		return VDFSaver.ToVDFNode(obj, declaredTypeName, saveOptions).ToVDF();
+		if (declaredTypeName_orOptions instanceof VDFSaveOptions)
+			return VDF.Serialize(obj, null, declaredTypeName_orOptions);
+
+		var declaredTypeName: string = declaredTypeName_orOptions;
+		var options: VDFSaveOptions = options_orNothing;
+		
+		return VDFSaver.ToVDFNode(obj, declaredTypeName, options).ToVDF(options);
 	}
-	static Deserialize(vdf: string, loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
-	static Deserialize(vdf: string, declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;
-	static Deserialize(vdf: string, declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any
+	static Deserialize(vdf: string, options: VDFLoadOptions): any;
+	static Deserialize(vdf: string, declaredTypeName?: string, options?: VDFLoadOptions): any;
+	static Deserialize(vdf: string, declaredTypeName_orOptions?: any, options_orNothing?: any): any
 	{
-		var declaredTypeName: string;
-		var loadOptions: VDFLoadOptions;
-		if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions)
-			{declaredTypeName = declaredTypeName_orLoadOptions; loadOptions = loadOptions_orDeclaredTypeName;}
-		else
-			{ declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions; }
-		return VDFLoader.ToVDFNode(vdf, declaredTypeName, loadOptions).ToObject(declaredTypeName, loadOptions);
+		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
+			return VDF.Deserialize(vdf, null, declaredTypeName_orOptions);
+
+		var declaredTypeName: string = declaredTypeName_orOptions;
+		var options: VDFLoadOptions = options_orNothing;
+		return VDFLoader.ToVDFNode(vdf, declaredTypeName, options).ToObject(declaredTypeName, options);
 	}
-	static DeserializeInto(vdf: string, obj: object, loadOptions?: VDFLoadOptions): void { VDFLoader.ToVDFNode(vdf, VDF.GetVTypeNameOfObject(obj), loadOptions).IntoObject(obj, loadOptions); }
+	static DeserializeInto(vdf: string, obj: any, options?: VDFLoadOptions): void { VDFLoader.ToVDFNode(vdf, VDF.GetTypeNameOfObject(obj), options).IntoObject(obj, options); }
 }
 
 // helper classes
 // ==================
 
-class VDFUtils
+/*class VDFUtils
 {
 	static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
 	{
@@ -154,18 +168,28 @@ class VDFUtils
 				VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
 		}
 	}
-}
+}*/
 class StringBuilder
 {
 	public data: Array<string> = [];
+	public Length: number = 0;
 	constructor(startData?: string)
 	{
 		if (startData)
+		{
 			this.data.push(startData);
+			this.Length += startData.length;
+		}
 	}
-	Append(str) { this.data.push(str); return this; } // adds string str to the StringBuilder
-	Insert(index, str) { this.data.splice(index, 0, str); return this; } // inserts string 'str' at 'index'
-	Remove(index, count) { this.data.splice(index, count || 1); return this; } // starting at 'index', removes specified number of elements (if not specified, count defaults to 1)
+	Append(str) { this.data.push(str); this.Length += str.length; return this; } // adds string str to the StringBuilder
+	Insert(index, str) { this.data.splice(index, 0, str); this.Length += str.length; return this; } // inserts string 'str' at 'index'
+	Remove(index, count) // starting at 'index', removes specified number of elements (if not specified, count defaults to 1)
+	{
+		var removedItems = this.data.splice(index, count || 1);
+		for (var i = 0; i < removedItems.length; i++)
+			this.Length -= removedItems[i].length;
+		return this;
+	}
 	Clear() { this.Remove(0, this.data.length); }
 	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
 }
@@ -173,21 +197,27 @@ class StringBuilder
 // VDF-usable data wrappers
 // ==================
 
-class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
+//class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
+// for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)
+//var object = Object;
+//object["typeInfo"] = new VDFTypeInfo(null, true);
+class object {} // just an alias for Object, to be consistent with C# version
+
 class EnumValue
 {
-	realVTypeName: string; // prop-name is special; used to identify 'true' or 'represented' type of object
+	realTypeName: string; // prop-name is special; used to identify 'true' or 'represented' type of object
 	//intValue: number;
 	stringValue: string;
 	constructor(enumTypeName: string, intValue: number)
 	{
-		this.realVTypeName = enumTypeName;
+		this.realTypeName = enumTypeName;
 		//this.intValue = intValue;
 		this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
 	}
 	toString() { return this.stringValue; }
 
-	static IsEnum(typeName: string): boolean { return eval("window['" + typeName + "'] && " + typeName + "['_IsEnum'] === 0"); }
+	static IsEnum(typeName: string): boolean { return window[typeName] && window[typeName]["_IsEnum"] === 0; }
+	//static IsEnum(typeName: string): boolean { return window[typeName] && /}\)\((\w+) \|\| \(\w+ = {}\)\);/.test(window[typeName].toString()); }
 	static GetEnumIntForStringValue(enumTypeName: string, stringValue: string) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); }
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
@@ -198,7 +228,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	self = (Array.apply(self, items) || self);
 	self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
 	self.constructor = List; // makes "(new List()).constructor == List" be true
-	self.realVTypeName = "List[" + itemType + "]";
+	self.realTypeName = "List(" + itemType + ")";
 	self.itemType = itemType;
 	return self;
 };
@@ -211,7 +241,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	Object.defineProperty(self, "Count", { enumerable: false, get: function() { return this.length; } });
 
 	// new methods
-	self.indexes = function()
+	self.Indexes = function()
 	{
 		var result = {};
 		for (var i = 0; i < this.length; i++)
@@ -229,14 +259,14 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	self.RemoveAt = function(index) { this.splice(index, 1); };
 	self.Any = function(matchFunc)
 	{
-		for (var i in this.indexes())
+		for (var i in this.Indexes())
 			if (matchFunc.call(this[i], this[i]))
 				return true;
 		return false;
 	};
 	self.All = function(matchFunc)
 	{
-		for (var i in this.indexes())
+		for (var i in this.Indexes())
 			if (!matchFunc.call(this[i], this[i]))
 				return false;
 		return true;
@@ -252,7 +282,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	{
 		if (matchFunc)
 		{
-			for (var i in this.indexes())
+			for (var i in this.Indexes())
 				if (matchFunc.call(this[i], this[i]))
 					return this[i];
 			return null;
@@ -295,12 +325,12 @@ declare var List: // static/constructor declaration stuff
 interface List<T> extends Array<T> // class/instance declaration stuff
 {
 	// new properties
-	realVTypeName: string;
+	realTypeName: string;
 	itemType: string;
 	Count: number;
 
 	// new methods
-	indexes(): any;
+	Indexes(): any;
 	Add(...items): number;
 	AddRange(items: Array<T>): void;
 	Insert(index, item): void;
@@ -318,15 +348,15 @@ interface List<T> extends Array<T> // class/instance declaration stuff
 
 class Dictionary<K, V>
 {
-	realVTypeName: string;
+	realTypeName: string;
 	keyType: string;
 	valueType: string;
-	keys: any[];
-	values: any[];
+	private keys: K[];
+	private values: V[];
 	constructor(keyType?: string, valueType?: string, keyValuePairsObj?)
 	{
-		//VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
-		this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
+		//VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
+		this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
 		this.keyType = keyType;
 		this.valueType = valueType;
 		this.keys = [];
@@ -342,7 +372,7 @@ class Dictionary<K, V>
 	{
 		var result = {};
 		for (var i = 0; i < this.keys.length; i++)
-			result[this.keys[i]] = null;
+			result[<any>this.keys[i]] = null;
 		return result;
 	}
 	get Count() { return this.keys.length; }
@@ -363,5 +393,12 @@ class Dictionary<K, V>
 			throw new Error("Dictionary already contains key '" + key + "'.");
 		this.Set(key, value);
 	}
+	Remove(key: K)
+	{
+		var itemIndex = this.keys.indexOf(key);
+		this.keys.splice(itemIndex, 1);
+		this.values.splice(itemIndex, 1);
+		delete (<any>this)[key];
+	}
 }
-VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
+//VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);

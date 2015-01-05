@@ -1,191 +1,171 @@
 ﻿class VDFNode
 {
-	metadata_type: string;
-	baseValue: string;
-	items = new List<VDFNode>("VDFNode");
-	properties = new Dictionary<string, VDFNode>("string", "VDFNode"); // this also holds Dictionaries' keys/values
+	metadata: string;
+	primitiveValue: any;
+	listChildren = new List<VDFNode>("VDFNode");
+	mapChildren = new Dictionary<string, VDFNode>("string", "VDFNode"); // this also holds Dictionaries' keys/values
 	
-	constructor(baseValue?: string, metadata_type?: string)
+	constructor(primitiveValue?: any, metadata?: string)
 	{
-		this.baseValue = baseValue;
-		this.metadata_type = metadata_type;
+		this.primitiveValue = primitiveValue;
+		this.metadata = metadata;
 	}
 
-	// in TypeScript/JavaScript we don't have implicit casts, so we have to use these (either that or convert the VDFNode to an anonymous object)
-	get AsBool() { return new VDFNode(this.baseValue).ToObject("bool"); }
-	set AsBool(value: boolean) { this.baseValue = value.toString(); }
-	get AsInt() { return new VDFNode(this.baseValue).ToObject("int"); }
-	set AsInt(value: number) { this.baseValue = parseInt(value.toString()).toString(); }
-	get AsFloat() { return new VDFNode(this.baseValue).ToObject("float"); }
-	set AsFloat(value: number) { this.baseValue = value.toString(); }
-	get AsString() { return this.baseValue; }
-	set AsString(value: string) { this.baseValue = value; }
-	toString(): string { return this.AsString; } // another way of calling the above as-string getter; equivalent to: vdfNode.AsString
-
-	SetItem(index: number, value: any)
+	SetListChild(index: number, value: any)
 	{
-		this.items[index] = value;
+		this.listChildren[index] = value;
 		this[index] = value;
 	}
-	AddItem(value: any) { this.SetItem(this.items.length, value); }
-	InsertItem(index: number, value: any)
+	/*InsertListChild(index: number, value: any)
 	{
-		var oldItems = this.items;
+		var oldItems = this.listChildren;
 		for (var i = 0; i < oldItems.length; i++) // we need to first remove old values, so the slate is clean for manual re-adding/re-ordering
 			delete this[i];
 		for (var i = 0; i < oldItems.length + 1; i++) // now add them all back in, in the correct order
-			this.AddItem(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
-	}
-	SetProperty(key: string, value: any)
+			this.AddListChild(i == 0 ? value : (i < index ? oldItems[i] : oldItems[i - 1]));
+	}*/
+	AddListChild(value: any) { this.SetListChild(this.listChildren.length, value); }
+	SetMapChild(key: string, value: any)
 	{
-		this.properties.Set(key, value);
+		this.mapChildren.Set(key, value);
 		this[key] = value;
 	}
+
+	toString() { return this.primitiveValue.toString(); } // helpful for debugging
 
 	// saving
 	// ==================
 
-	isList: boolean;
-	isDictionary: boolean;
-	popOutChildren: boolean;
-	guardingItsLastLine: boolean;
-	static RawDataStringToFinalized(rawDataStr: string, disallowRawPipe?: boolean): string
+	static PadString(unpaddedString: string): string
 	{
-		var result = rawDataStr;
-		if (rawDataStr.indexOf(":") != -1 || rawDataStr.indexOf(">") != -1 || rawDataStr.indexOf("}") != -1 || (disallowRawPipe && rawDataStr.indexOf("|") != -1) || rawDataStr.indexOf("@@") != -1 || rawDataStr.indexOf(";;") != -1 || rawDataStr.indexOf("\n") != -1 || rawDataStr.indexOf("\t") != -1) // note: tabs can probably be put back in without escaping, in certain cases
-			if (rawDataStr.lastIndexOf("@") == rawDataStr.length - 1 || rawDataStr.lastIndexOf("|") == rawDataStr.length - 1)
-				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "|@@";
-			else
-				result = "@@" + rawDataStr.replace(/(@{2,})/g, "@$1") + "@@";
+		var result = unpaddedString;
+		if (result.StartsWith("<") || result.StartsWith("#"))
+			result = "#" + result;
+		if (result.EndsWith(">") || result.EndsWith("#"))
+			result += "#";
 		return result;
 	}
-	static AddIndentToChildText(childText: string): string
+
+	isList: boolean; // can also be inferred from use of list-children collection
+	isMap: boolean; // can also be inferred from use of map-children collection
+	popOutChildren: boolean;
+	ToVDF(options: VDFSaveOptions = null, tabDepth = 0): string { return this.ToVDF_InlinePart(options, tabDepth) + this.ToVDF_PoppedOutPart(options, tabDepth); }
+	ToVDF_InlinePart(options: VDFSaveOptions = null, tabDepth = 0): string
 	{
+		options = options || new VDFSaveOptions();
+
 		var builder = new StringBuilder();
-		builder.Append("\t");
-		var inLiteralMarkers = false;
-		for (var i = 0; i < childText.length; i++)
+
+		if (options.useMetadata && this.metadata != null)
+			builder.Append(this.metadata + ">");
+
+		if (this.primitiveValue == null)
 		{
-			var lastChar = i - 1 >= 0 ? childText[i - 1] : null;
-			var ch = childText[i];
-			var nextChar = i + 1 < childText.length ? childText[i + 1] : null;
-			var nextNextChar = i + 2 < childText.length ? childText[i + 2] : null;
-			var nextNextNextChar = i + 3 < childText.length ? childText[i + 3] : null;
-
-			if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') // if first char of literal-start-marker
-				inLiteralMarkers = true;
-			else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) // if first char of literal-end-marker
-				inLiteralMarkers = false;
-
-			if (lastChar == '\n' && !inLiteralMarkers)
-				builder.Append("\t");
-
-			builder.Append(ch);
+			if (!this.isMap && this.mapChildren.Count == 0 && !this.isList && this.listChildren.Count == 0)
+				builder.Append("null");
 		}
+		else if (typeof this.primitiveValue == "boolean")
+			builder.Append(this.primitiveValue.toString().toLowerCase());
+		else if (typeof this.primitiveValue == "string")
+		{
+			var unpaddedString = <string>this.primitiveValue;
+			if (unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>")) // the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency
+			{
+				var literalStartMarkerString = "<<";
+				var literalEndMarkerString = ">>";
+				while (unpaddedString.Contains(literalStartMarkerString) || unpaddedString.Contains(literalEndMarkerString))
+				{
+					literalStartMarkerString += "<";
+					literalEndMarkerString += ">";
+				}
+				builder.Append("\"" + literalStartMarkerString + VDFNode.PadString(unpaddedString) + literalEndMarkerString + "\"");
+			}
+			else
+				builder.Append("\"" + unpaddedString + "\"");
+		}
+		else if (VDF.GetIsTypePrimitive(VDF.GetTypeNameOfObject(this.primitiveValue))) // if number
+			builder.Append(options.useNumberTrimming && this.primitiveValue.toString().StartsWith("0.") ? this.primitiveValue.toString().substr(1) : this.primitiveValue);
+		else
+			builder.Append("\"" + this.primitiveValue + "\"");
+
+		if (options.useChildPopOut && this.popOutChildren)
+		{
+			if (this.isMap || this.mapChildren.Count > 0)
+				builder.Append(this.mapChildren.Count > 0 ? "{^}" : "{}");
+			if (this.isList || this.listChildren.Count > 0)
+				builder.Append(this.listChildren.Count > 0 ? "[^]" : "[]");
+		}
+		else
+		{
+			if (this.isMap || this.mapChildren.Count > 0)
+			{
+				builder.Append("{");
+				for (var key in this.mapChildren.Keys)
+					builder.Append((key == Object.keys(this.mapChildren.Keys)[0] ? "" : (options.useCommaSeparators ? "," : " ")) + (options.useStringKeys ? "\"" : "") + key + (options.useStringKeys ? "\"" : "") + ":" + this.mapChildren[key].ToVDF_InlinePart(options, tabDepth));
+				builder.Append("}");
+			}
+			if (this.isList || this.listChildren.Count > 0)
+			{
+				builder.Append("[");
+				for (var i = 0; i < this.listChildren.Count; i++)
+					builder.Append((i == 0 ? "" : (options.useCommaSeparators ? "," : " ")) + this.listChildren[i].ToVDF_InlinePart(options, tabDepth));
+				builder.Append("]");
+			}
+		}
+
 		return builder.ToString();
 	}
-	ToVDF(disallowRawPipe?: boolean): string
+	ToVDF_PoppedOutPart(options: VDFSaveOptions = null, tabDepth = 0): string
 	{
+		options = options || new VDFSaveOptions();
+
 		var builder = new StringBuilder();
-		if (this.metadata_type != null)
-			builder.Append(this.isList || this.isDictionary ? this.metadata_type.replace(/ /g, "") + ">>" : this.metadata_type.replace(/ /g, "") + ">");
-		
-		if (this.baseValue != null)
-			builder.Append(VDFNode.RawDataStringToFinalized(this.baseValue, disallowRawPipe));
-		else if (this.items.length > 0)
+
+		// include popped-out-content of direct children (i.e. a single directly-under group)
+		if (options.useChildPopOut && this.popOutChildren)
 		{
-			//var hasItemWeMustBracket = this.items.filter(a=>a.isList || a.popOutChildren).length;
-			for (var i = 0; i < this.items.length; i++)
-			{
-				var lastItem = i > 0 ? this.items[i - 1] : null;
-				var item = this.items[i];
-
-				var isItemWeMustBracket = item.isList || item.popOutChildren;
-
-				if (lastItem != null && lastItem.guardingItsLastLine)
+			var childTabStr = "";
+			for (var i = 0; i < tabDepth + 1; i++)
+				childTabStr += "\t";
+			if (this.isMap || this.mapChildren.Count > 0)
+				for (var key in this.mapChildren.Keys)
 				{
-					builder.Append("\n");
-					lastItem.guardingItsLastLine = false;
+					builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + key + (options.useStringKeys ? "\"" : "") + ":" + this.mapChildren[key].ToVDF_InlinePart(options, tabDepth + 1));
+					var poppedOutChildText: string = this.mapChildren[key].ToVDF_PoppedOutPart(options, tabDepth + 1);
+					if (poppedOutChildText.length > 0)
+						builder.Append(poppedOutChildText);
 				}
-
-				if (this.popOutChildren)
-					builder.Append("\n" + VDFNode.AddIndentToChildText(item.ToVDF()));
-				else
-					if (isItemWeMustBracket) //hasItemWeMustBracket)
-					{
-						var itemVDF = item.ToVDF();
-						var beforeEndBracketExtraText = "";
-						if (item.guardingItsLastLine)
-						{
-							beforeEndBracketExtraText = "\n";
-							item.guardingItsLastLine = false;
-						}
-						builder.Append((i > 0 ? "|" : "") + "{" + itemVDF + beforeEndBracketExtraText + "}");
-					}
-					else
-						builder.Append((i > 0 ? "|" : "") + item.ToVDF(item.baseValue != null && item.baseValue.indexOf("@@") != 0 && item.baseValue.indexOf("|") != -1));
+			if (this.isList || this.listChildren.Count > 0)
+				for (var i in this.listChildren.Indexes())
+				{
+					var item = this.listChildren[i];
+					builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(options, tabDepth + 1));
+					var poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth + 1);
+					if (poppedOutChildText.length > 0)
+						builder.Append(poppedOutChildText);
+				}
+		}
+		else // include popped-out-content of inline-items' descendents (i.e. one or more pulled-up groups)
+		{
+			var poppedOutChildTexts = new List<string>("string");
+			var poppedOutChildText: string;
+			if (this.isMap || this.mapChildren.Count > 0)
+				for (var key in this.mapChildren.Keys)
+					if ((poppedOutChildText = this.mapChildren[key].ToVDF_PoppedOutPart(options, tabDepth)).length)
+						poppedOutChildTexts.Add(poppedOutChildText);
+			if (this.isList || this.listChildren.Count > 0)
+				for (var i in this.listChildren.Indexes())
+					if ((poppedOutChildText = this.listChildren[i].ToVDF_PoppedOutPart(options, tabDepth)).length)
+						poppedOutChildTexts.Add(poppedOutChildText);
+			for (var i = 0; i < poppedOutChildTexts.Count; i++)
+			{
+				poppedOutChildText = poppedOutChildTexts[i];
+				var insertPoint = 0;
+				while (poppedOutChildText[insertPoint] == '\n' || poppedOutChildText[insertPoint] == '\t')
+					insertPoint++;
+				builder.Append((insertPoint > 0 ? poppedOutChildText.substr(0, insertPoint) : "") + (i == 0 ? "" : "^") + poppedOutChildText.substr(insertPoint));
 			}
 		}
-		else
-		{
-			var lastPropName: string = null;
-			for (var propName in this.properties.Keys)
-			{
-				var lastPropValue = lastPropName != null ? this.properties.Get(lastPropName) : null;
-				var propValue = this.properties.Get(propName);
-
-				if (lastPropValue != null && lastPropValue.guardingItsLastLine)
-					if (this.popOutChildren) // if we're popping out this current child, we can ignore adding a marker for it, because it's supposed to be on its own line
-						lastPropValue.guardingItsLastLine = false;
-					else
-					{
-						builder.Append("\n");
-						lastPropValue.guardingItsLastLine = false;
-						if (lastPropValue.popOutChildren)
-							builder.Append("^");
-					}
-
-				var propNameAndValueVDF: string;
-				if (propValue.popOutChildren)
-					propNameAndValueVDF = propName + ":" + propValue.ToVDF();
-				else
-				{
-					var propValueVDF = propValue.ToVDF();
-					if (propValue.guardingItsLastLine)
-					{
-						propValueVDF += "\n";
-						propValue.guardingItsLastLine = false;
-					}
-					propNameAndValueVDF = propName + "{" + propValueVDF + "}";
-				}
-				if (this.popOutChildren)
-					builder.Append("\n" + VDFNode.AddIndentToChildText(propNameAndValueVDF));
-				else
-					builder.Append(propNameAndValueVDF);
-
-				lastPropName = propName;
-			}
-		}
-
-		this.guardingItsLastLine = (this.popOutChildren && (this.items.length > 0 || this.properties.Count > 0));
-		if (this.items.filter(a=>a.guardingItsLastLine).length > 0)
-		{
-			this.guardingItsLastLine = true; 
-			for (var i = 0; i < this.items.length; i++)
-				if (this.items[i].guardingItsLastLine)
-				{
-					this.items[i].guardingItsLastLine = false; // we've taken it as our own
-					break;
-				}
-		}
-		else
-			for (var key in this.properties.Keys)
-				if (this.properties.Get(key).guardingItsLastLine)
-				{
-					this.guardingItsLastLine = true;
-					this.properties.Get(key).guardingItsLastLine = false; // we've taken it as our own
-					break;
-				}
 
 		return builder.ToString();
 	}
@@ -193,134 +173,94 @@
 	// loading
 	// ==================
 
-	static CreateNewInstanceOfType(typeName: string, loadOptions: VDFLoadOptions)
+	static CreateNewInstanceOfType(typeName: string)
 	{
-		// no need to "instantiate" primitives, strings, and enums (we create them straight-forwardly later on)
-		if (["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"].indexOf(typeName) != -1 || EnumValue.IsEnum(typeName))
-			return null;
-		var genericParameters = VDF.GetGenericParametersOfTypeName(typeName);
-		if (typeName.indexOf("List[") == 0)
+		var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
+		if (typeName.StartsWith("List("))
 			return new List(genericParameters[0]);
-		if (typeName.indexOf("Dictionary[") == 0)
+		if (typeName.StartsWith("Dictionary("))
 			return new Dictionary(genericParameters[0], genericParameters[1]);
 		return new window[typeName];
 	}
-	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.properties.Count ? "object" : (node.items.length ? "List[object]" : "string"); }
+	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 
-	ToObject(loadOptions: VDFLoadOptions, declaredTypeName?: string): any;
-	ToObject(declaredTypeName?: string, loadOptions?: VDFLoadOptions): any;
-	ToObject(declaredTypeName_orLoadOptions?: any, loadOptions_orDeclaredTypeName?: any): any
+	ToObject(options: VDFLoadOptions): any;
+	ToObject(declaredTypeName?: string, options?: VDFLoadOptions): any;
+	ToObject(declaredTypeName_orOptions?: any, options_orNothing?: any): any
 	{
-		var declaredTypeName: string;
-		var loadOptions: VDFLoadOptions;
-		if (typeof declaredTypeName_orLoadOptions == "string" || loadOptions_orDeclaredTypeName instanceof VDFLoadOptions)
-			{declaredTypeName = declaredTypeName_orLoadOptions; loadOptions = loadOptions_orDeclaredTypeName;}
-		else
-			{declaredTypeName = loadOptions_orDeclaredTypeName; loadOptions = declaredTypeName_orLoadOptions;}
-		loadOptions = loadOptions || new VDFLoadOptions();
+		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
+			return this.ToObject(null, declaredTypeName_orOptions);
 
-		var finalMetadata_type = this.metadata_type;
-		if (finalMetadata_type == "") // empty string for metadata_type, so infer type
-		{
-			if (this.baseValue == "null")
-				return null;
-			if (this.baseValue == "empty")
-				return "";
-			if (["true", "false"].indexOf(this.baseValue) != -1)
-				finalMetadata_type = "bool";
-			else if (this.baseValue.indexOf(".") != -1)
-				finalMetadata_type = "float";
-			else
-				finalMetadata_type = "int";
-		}
-		else if (finalMetadata_type == "IList")
-			finalMetadata_type = "List[object]";
-		else if (finalMetadata_type == "IDictionary")
-			finalMetadata_type = "Dictionary[object,object]";
+		var declaredTypeName: string = declaredTypeName_orOptions;
+		var options: VDFLoadOptions = options_orNothing || new VDFLoadOptions();
+
+		var fromVDFTypeName = "object";
+		if (this.metadata != null)
+			fromVDFTypeName = this.metadata;
+		else if (typeof this.primitiveValue == "boolean")
+			fromVDFTypeName = "bool";
+		else if (typeof this.primitiveValue == "number")
+			fromVDFTypeName = this.primitiveValue.toString().Contains(".") ? "double" : "int";
+		else if (typeof this.primitiveValue == "string")
+			fromVDFTypeName = "string";
+		else if (this.primitiveValue == null)
+			if (this.isList || this.listChildren.Count > 0)
+				fromVDFTypeName = "List(object)"; //"array";
+			else if (this.isMap || this.mapChildren.Count > 0)
+				fromVDFTypeName = "Dictionary(object object)"; //"object-anonymous"; //"object";
 
 		var finalTypeName = declaredTypeName;
-		if (finalMetadata_type != null && finalMetadata_type.length > 0)
-		{
-			// porting-note: this is only a limited implementation of CS functionality of making sure metadata-type (finalMetadata_type) is more specific than declared-type (finalTypeName)
-			if (finalTypeName == null || ["object", "IList", "IDictionary"].indexOf(finalTypeName) != -1) // if there is no declared type, or the from-metadata type is more specific than the declared type
-				finalTypeName = finalMetadata_type;
-		}
-
-		// porting-added; special type-mapping from C# types to JS types
-		if (["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal"].indexOf(finalTypeName) != -1)
-			finalTypeName = "number";
-		else if (finalTypeName == "char")
-			finalTypeName = "string";
-
-		var finalTypeName_root = finalTypeName != null && (finalTypeName.indexOf("[") != -1 ? finalTypeName.substring(0, finalTypeName.indexOf("[")) : finalTypeName);
-		if (finalTypeName_root) // if type specified
-		{
-			if (!VDF.typeImporters_inline[finalTypeName] && !EnumValue.IsEnum(finalTypeName) && !(window[finalTypeName_root] instanceof Function) && ["bool", "number", "string"].indexOf(finalTypeName_root) == -1) // if type doesn't exist
-				if (loadOptions.inferCompatibleTypesForUnknownTypes)
-					finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this); // infer a compatible, anonymous-like type from the node-data
-				else
-					throw new Error("Type \"" + finalMetadata_type + "\" not found."); // throw an error, because we can't go on without a final-type
-		}
-		else // if no metadata-type, and no declared-type
-			if (loadOptions.inferCompatibleTypesForUnknownTypes) // if inference allowed, infer a compatible, anonymous-like type from the node-data (final-type must be something)
-				finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
-			else // otherwise, infer that it's a string (string is the default type)
-				finalTypeName = "string"; // string is the default/fallback type
-
+		// porting-note: this is only a limited implementation of CS functionality of making sure from-vdf-type is more specific than declared-type
+		if (finalTypeName == null || ["object", "IList", "IDictionary"].Contains(finalTypeName)) // if there is no declared type, or the from-metadata type is more specific than the declared type
+			finalTypeName = fromVDFTypeName;
+		
 		var result;
 		if (VDF.typeImporters_inline[finalTypeName])
-			result = VDF.typeImporters_inline[finalTypeName](this.baseValue);
-		else if (EnumValue.IsEnum(finalTypeName))
-			result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.baseValue);
-		else if (finalTypeName == "bool")
-			result = this.baseValue == "true" ? true : false;
-		else if (finalTypeName == "number")
-			result = parseFloat(this.baseValue);
-		else if (finalTypeName == "string")
-			result = this.baseValue;
-		else if (this.baseValue != null) // (non-importer-registered objects, the only alternative to base-value-fallback-strings left, doesn't store base-values)
-			result = this.baseValue;
+			result = VDF.typeImporters_inline[finalTypeName](this.primitiveValue);
+		else if (finalTypeName == "object")
+			result = null;
+		else if (EnumValue.IsEnum(finalTypeName)) // helper importer for enums
+			result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
+		else if (this.primitiveValue != null)
+			result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
 		else
 		{
-			result = VDFNode.CreateNewInstanceOfType(finalTypeName, loadOptions);
-			this.IntoObject(result, loadOptions, (declaredTypeName != null && (declaredTypeName.indexOf("List[") == 0 || declaredTypeName.indexOf("Dictionary[") == 0)) || (this.metadata_type != "IList" && this.metadata_type != "IDictionary"));
+			result = VDFNode.CreateNewInstanceOfType(finalTypeName);
+			this.IntoObject(result, options);
 		}
 
 		return result;
 	}
-	IntoObject(obj: any, loadOptions?: VDFLoadOptions, typeGenericArgumentsAreReal: boolean = true)
+	IntoObject(obj: any, loadOptions: VDFLoadOptions = null): void
 	{
 		loadOptions = loadOptions || new VDFLoadOptions();
+
+		var typeName = VDF.GetTypeNameOfObject(obj);
+		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
+		var typeInfo = VDFTypeInfo.Get(typeName);
 
 		if (obj && obj.VDFPreDeserialize)
 			obj.VDFPreDeserialize(loadOptions.message);
 
-		var finalTypeName = VDF.GetVTypeNameOfObject(obj);
-		if (finalTypeName == null) // if no metadata-type, and no declared-type, infer a compatible, anonymous-like type from the node-data (final-type must be something)
-			finalTypeName = VDFNode.GetCompatibleTypeNameForNode(this);
-		var typeGenericParameters = VDF.GetGenericParametersOfTypeName(finalTypeName);
-		var finalTypeInfo = VDFTypeInfo.Get(finalTypeName);
-		if (obj.push) // if push method actually exists // maybe todo: remove/rework this
-			for (var i = 0; i < this.items.length; i++)
-				(<List<any>>obj).push(this.items[i].ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[0] : null, loadOptions));
-		for (var propName in this.properties.Keys)
+		for (var i = 0; i < this.listChildren.Count; i++)
+			obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], loadOptions));
+		for (var keyString in this.mapChildren.Keys)
 			try
 			{
-				if (obj instanceof Dictionary)
+				if (obj instanceof Dictionary) //is IDictionary)
 				{
-					var key: any = propName; // in most cases, the Dictionary's in-code key-type will be a string, so we can just use the in-VDF raw-key-string directly
-					if (typeGenericArgumentsAreReal)
-						if (VDF.typeImporters_inline[typeGenericParameters[0]]) // porting-note: the JS version doesn't let you register importer-func's for generic-type-definitions
-							key = VDF.typeImporters_inline[typeGenericParameters[0]](propName);
-					(<Dictionary<any, any>>obj).Set(key, this.properties.Get(propName).ToObject(typeGenericArgumentsAreReal ? typeGenericParameters[1] : null, loadOptions));
+					var key = keyString; // in most cases, the dictionary's in-code key-type will be a string, so we can just use the in-VDF key-string directly
+					if (VDF.typeImporters_inline[<any>typeGenericArgs[0]]) // porting-note: the JS version doesn't let you register importer-func's for generic-type-definitions
+						key = VDF.typeImporters_inline[<any>typeGenericArgs[0]](keyString);
+					obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], loadOptions));
 				}
 				else
-					obj[propName] = this.properties.Get(propName).ToObject(typeGenericArgumentsAreReal ? finalTypeInfo && finalTypeInfo.propInfoByName[propName] && finalTypeInfo.propInfoByName[propName].propVTypeName : null, loadOptions);
+					obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.propInfoByName[keyString].propTypeName, loadOptions);
 			}
-			catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading key-value-pair or property '" + propName + "'.") + "\n"); }
+			catch(ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"); }
 
 		if (obj && obj.VDFPostDeserialize)
 			obj.VDFPostDeserialize(loadOptions.message);
 	}
 }
-VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
+//VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

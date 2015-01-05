@@ -1,13 +1,18 @@
 ﻿class VDFTypeInfo
 {
-	static Get(vTypeName: string): VDFTypeInfo { return (window[vTypeName] || {}).typeInfo || new VDFTypeInfo(); }
+	static Get(typeName: string): VDFTypeInfo
+	{
+		if (VDF.GetIsTypeAnonymous(typeName))
+			return new VDFTypeInfo(null, true);
+		return (window[typeName] || {}).typeInfo || new VDFTypeInfo();
+	}
 
-	propInfoByName: Object;
+	propInfoByName: any;
 	props_includeL1: boolean;
 	popOutChildrenL1: boolean;
-	constructor(propInfoByPropName?: Object, props_includeL1?: boolean, popOutChildrenL1?: boolean)
+	constructor(propInfoByName?: any, props_includeL1?: boolean, popOutChildrenL1?: boolean)
 	{
-		this.propInfoByName = propInfoByPropName || {};
+		this.propInfoByName = propInfoByName || {};
 		this.props_includeL1 = props_includeL1;
 		this.popOutChildrenL1 = popOutChildrenL1;
 	}
@@ -16,29 +21,29 @@
 
 class VDFPropInfo
 {
-	propVTypeName: string;
+	propTypeName: string;
 	includeL2: boolean;
 	popOutChildrenL2: boolean;
-	writeEmptyValue: boolean;
-	constructor(propType: string, includeL2: boolean = true, popOutChildrenL2: boolean = false, writeEmptyValue: boolean = true)
+	writeDefaultValue: boolean;
+	constructor(propType: string, includeL2: boolean = true, popOutChildrenL2: boolean = false, writeDefaultValue: boolean = true)
 	{
-		this.propVTypeName = propType;
+		this.propTypeName = propType;
 		this.includeL2 = includeL2;
 		this.popOutChildrenL2 = popOutChildrenL2;
-		this.writeEmptyValue = writeEmptyValue;
+		this.writeDefaultValue = writeDefaultValue;
 	}
 
-	IsXValueEmpty(x: any)
+	IsXValueTheDefault(x: any)
 	{
 		if (x == null) // if null
 			return true;
 		if (x === false || x === 0) // if struct, and equal to struct's default value
 			return true;
-		var vTypeName = VDF.GetVTypeNameOfObject(x);
-		if (vTypeName && vTypeName.startsWith("List[") && x.length == 0) // if list, and empty
+		/*var typeName = VDF.GetTypeNameOfObject(x);
+		if (typeName && typeName.startsWith("List(") && x.length == 0) // if list, and empty
 			return true;
-		if (vTypeName == "string" && !x.length) // if string, and empty
-			return true;
+		if (typeName == "string" && !x.length) // if string, and empty
+			return true;*/
 		return false;
 	}
 }

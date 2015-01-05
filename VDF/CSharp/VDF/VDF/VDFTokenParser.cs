@@ -88,11 +88,8 @@ public static class VDFTokenParser
 		string lastScopeIncreaseChar = null;
 		for (var i = 0; i < text.Length; i++)
 		{
-			//char? lastChar = i - 1 >= 0 ? text[i - 1] : (char?)null;
 			char ch = text[i];
 			char? nextChar = i + 1 < text.Length ? text[i + 1] : (char?)null;
-			//char? nextNextChar = i + 2 < text.Length ? text[i + 2] : (char?)null;
-			//char? nextNextNextChar = i + 3 < text.Length ? text[i + 3] : (char?)null;
 
 			int nextNonSpaceCharPos = FindNextNonXCharPosition(text, i + 1, ' ');
 			char? nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : (char?)null;
@@ -144,7 +141,7 @@ public static class VDFTokenParser
 					currentTokenType = VDFTokenType.InLineComment;
 					i += currentTokenTextBuilder.Length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
 				}
-				else if (currentTokenTextBuilder.ToString().Trim(options.allowCommaSeparators ? new[] {' ', ','} : new[] {' '}).Length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ','))) // if last char of space-or-comma-span
+				else if (currentTokenTextBuilder.ToString().TrimStart(options.allowCommaSeparators ? new[] {' ', ','} : new[] {' '}).Length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ','))) // if last char of space-or-comma-span
 					currentTokenType = VDFTokenType.SpaceOrCommaSpan;
 
 				else if (ch == '\t')
@@ -311,7 +308,7 @@ public static class VDFTokenParser
 
 		//Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
 	}
-	public static void RefreshTokenPositionAndIndexProperties(List<VDFToken> tokens)
+	static void RefreshTokenPositionAndIndexProperties(List<VDFToken> tokens)
 	{
 		var textProcessedLength = 0;
 		for (var i = 0; i < tokens.Count; i++)

@@ -38,7 +38,7 @@ Object.prototype._AddFunction_Inline = function Should()
 	};
 };
 interface String { Fix(): string; }
-String.prototype._AddFunction_Inline = function Fix() { return this; }; // filler function for C# method to allow for copying, with fewer manual changes
+String.prototype._AddFunction_Inline = function Fix() { return this.toString(); }; // filler function for C# method to allow for copying, with fewer manual changes
 //interface Object { AddTest(testFunc: Function): void; }
 //Object.prototype._AddGetterSetter(null, function AddTest/*Inline*/(testFunc) { saving[testFunc.name] = testFunc; });
 //saving.AddTest = function testName() { ok(null == null); };
@@ -92,13 +92,19 @@ module VDFTests // added to match C# indentation
 			var a = VDFSaver.ToVDFNode(new List<string>("string"), new VDFSaveOptions({typeMarking: VDFTypeMarking.ExternalNoCollapse}));
 			a.ToVDF().Should().Be("List(string)>[]");
 			a = VDFSaver.ToVDFNode(new List<List<string>>("List(string)", new List<string>("string", "1A", "1B", "1C")), new VDFSaveOptions({typeMarking: VDFTypeMarking.ExternalNoCollapse}));
-			a.ToVDF().Should().Be("List(List(string))>[List(string)>[\"1A\" \"1B\" \"1C\"]]");
+			a.ToVDF().Should().Be("List(List(string))>[List(string)>[string>\"1A\" string>\"1B\" string>\"1C\"]]");
 		});
-		enum Enum1 { A, B, C }
+		enum Enum1 { _IsEnum, A, B, C }
+		//enum Enum1 { A, B, C }
 		test("D0_EnumDefault", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(Enum1.A, "Enum1");
 			a.ToVDF().Should().Be("\"A\"");
+		});
+		test("D0_EnumDefault_IncludeType", ()=>
+		{
+			var a = VDFSaver.ToVDFNode(Enum1.A, "Enum1", new VDFSaveOptions({typeMarking: VDFTypeMarking.External}));
+			a.ToVDF().Should().Be("Enum1>\"A\"");
 		});
 		test("D0_EscapedString", ()=>
 		{
@@ -119,24 +125,24 @@ that needs escaping.>>\"".Fix());
 		test("D1_ListInferredFromHavingItem_String", ()=>
 		{
 			var a = new VDFNode();
-			a[0] = new VDFNode("String item.");
+			a.SetListChild(0, new VDFNode("String item."));
 			a.ToVDF().Should().Be("[\"String item.\"]");
 		});
 		test("D1_Object_Primitives", ()=>
 		{
 			var a = new VDFNode();
-			a["bool"] = new VDFNode(false);
-			a["int"] = new VDFNode(5);
-			a["double"] = new VDFNode(.5);
-			a["string"] = new VDFNode("Prop value string.");
+			a.SetMapChild("bool", new VDFNode(false));
+			a.SetMapChild("int", new VDFNode(5));
+			a.SetMapChild("double", new VDFNode(.5));
+			a.SetMapChild("string", new VDFNode("Prop value string."));
 			a.ToVDF().Should().Be("{bool:false int:5 double:.5 string:\"Prop value string.\"}");
 		});
 		test("D1_List_EscapedStrings", ()=>
 		{
 			var a = new VDFNode();
-			a.SetItem(0, new VDFNode("This is a list item \"that needs escaping\"."));
-			a.SetItem(1, new VDFNode("Here's <<another>>."));
-			a.SetItem(2, new VDFNode("This one doesn't need escaping."));
+			a.SetListChild(0, new VDFNode("This is a list item \"that needs escaping\"."));
+			a.SetListChild(1, new VDFNode("Here's <<another>>."));
+			a.SetListChild(2, new VDFNode("This one doesn't need escaping."));
 			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<<Here's <<another>>.>>>\" \"This one doesn't need escaping.\"]");
 		});
 
@@ -163,20 +169,20 @@ that needs escaping.>>\"".Fix());
 				strings: new VDFPropInfo("List(string)"),
 				strings2: new VDFPropInfo("List(string)")
 			});
-			obj: object;
+			obj: any;
 			strings: List<string>;
 			strings2 = new List<string>("string");
 		}
 		test("D1_NullValues", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
-			a["obj"].metadata.Should().Be(null);
-			a["obj"].primitiveValue.Should().Be(null);
-			a["strings"].metadata.Should().Be(null);
-			a["strings"].primitiveValue.Should().Be(null);
-			//a["strings2"].metadata.Should().Be(null); // unmarked type
-			a["strings2"].metadata.Should().Be(null); // old: auto-marked as list (needed, to specify sort of type, as required)
-			a["strings2"].primitiveValue.Should().Be(null); // it's a List, so it shouldn't have a base-value
+			ok(a["obj"].metadata == null); //a["obj"].metadata.Should().Be(null);
+			ok(a["obj"].primitiveValue == null); //a["obj"].primitiveValue.Should().Be(null);
+			ok(a["strings"].metadata == null); //a["strings"].metadata.Should().Be(null);
+			ok(a["strings"].primitiveValue == null); //a["strings"].primitiveValue.Should().Be(null);
+			//ok(a["strings2"].metadata == null); //a["strings2"].metadata.Should().Be(null); // unmarked type
+			ok(a["strings2"].metadata == null); //a["strings2"].metadata.Should().Be(null); // old: auto-marked as list (needed, to specify sort of type, as required)
+			ok(a["strings2"].primitiveValue == null); //a["strings2"].primitiveValue.Should().Be(null); // it's a List, so it shouldn't have a base-value
 			a["strings2"].listChildren.Count.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>{obj:null strings:null strings2:[]}");
 		});
@@ -198,8 +204,8 @@ that needs escaping.>>\"".Fix());
 		test("D1_ListItems_Null", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new List<string>("string", null));
-			a[0].metadata.Should().Be(null);
-			a[0].primitiveValue.Should().Be(null);
+			ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
+			ok(a[0].primitiveValue == null); //a[0].primitiveValue.Should().Be(null);
 			a.ToVDF().Should().Be("List(string)>[null]");
 		});
 		test("D1_SingleListItemWithAssemblyKnownTypeShouldStillSpecifySortOfType", ()=>
@@ -213,8 +219,8 @@ that needs escaping.>>\"".Fix());
 			var dictionary = new Dictionary<string, string>("string", "string");
 			dictionary.Add("key1", null);
 			var a = VDFSaver.ToVDFNode(dictionary);
-			a["key1"].metadata.Should().Be(null); 
-			a["key1"].primitiveValue.Should().Be(null);
+			ok(a["key1"].metadata == null); //a["key1"].metadata.Should().Be(null);
+			ok(a["key1"].primitiveValue == null); //a["key1"].primitiveValue.Should().Be(null);
 			a.ToVDF().Should().Be("Dictionary(string string)>{key1:null}");
 		});
 		test("D1_AnonymousTypeProperties_MarkNoTypes", ()=>
@@ -237,13 +243,13 @@ that needs escaping.>>\"".Fix());
 			{
 				preSerializeWasCalled: new VDFPropInfo("bool")
 			});
-			preSerializeWasCalled: boolean;
+			preSerializeWasCalled;
 			VDFPreSerialize(): void { this.preSerializeWasCalled = true; }
 		}
 		test("D1_PreSerializePreparation", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod(), "TypeWithPreSerializePrepMethod");
-			a["preSerializeWasCalled"].AsBool.Should().Be(true);
+			a["preSerializeWasCalled"].primitiveValue.Should().Be(true);
 			a.ToVDF().Should().Be("{preSerializeWasCalled:true}");
 		});
 		class TypeWithPostSerializeCleanupMethod
@@ -252,13 +258,13 @@ that needs escaping.>>\"".Fix());
 			{
 				postSerializeWasCalled: new VDFPropInfo("bool")
 			});
-			postSerializeWasCalled: boolean;
+			postSerializeWasCalled = false;
 			VDFPostSerialize(): void { this.postSerializeWasCalled = true; }
 		}
 		test("D1_PostSerializeCleanup", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new TypeWithPostSerializeCleanupMethod(), "TypeWithPostSerializeCleanupMethod");
-			a["postSerializeWasCalled"].AsBool.Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
+			a["postSerializeWasCalled"].primitiveValue.Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
 			a.ToVDF().Should().Be("{postSerializeWasCalled:false}");
 		});
 		class TypeWithMixOfProps
@@ -303,8 +309,8 @@ that needs escaping.>>\"".Fix());
 		});
 		test("D1_TypeProperties_MarkForExternalNoCollapse", ()=>
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions({typeMarking: VDFTypeMarking.ExternalNoCollapse));
-			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:true Int:5 Double:.5 String:\"Prop value string.\" list:List(string)>[\"2A\" \"2B\"] nestedList:List(List(string))>[List(string)>[\"1A\"]]}");
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions({typeMarking: VDFTypeMarking.ExternalNoCollapse}));
+			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:bool>true Int:int>5 Double:double>.5 String:string>\"Prop value string.\" list:List(string)>[string>\"2A\" string>\"2B\"] nestedList:List(List(string))>[List(string)>[string>\"1A\"]]}");
 		});
 
 		class D1_Object_DictionaryPoppedOutThenBool_Class1
@@ -314,7 +320,7 @@ that needs escaping.>>\"".Fix());
 				messages: new VDFPropInfo("Dictionary(string string)", true, true),
 				otherProperty: new VDFPropInfo("bool")
 			});
-			messages = new Dictionary<string, string>("string", "string", ["title1", "message1"], ["title2", "message2"]);
+			messages = new Dictionary<string, string>("string", "string", {title1: "message1", title2:"message2"});
 			otherProperty = true;
 		}
 		test("D1_DictionaryPoppedOutThenBool", ()=>
@@ -332,10 +338,10 @@ that needs escaping.>>\"".Fix());
 				otherProperty: new VDFPropInfo("bool")
 			}, false, true);
 			messages = new Dictionary<string, string>("string", "string",
-			[
-				["title1", "message1"],
-				["title2", "message2"]
-			]);
+			{
+				title1: "message1",
+				title2: "message2"
+			});
 			otherProperty = true;
 		}
 		test("D1_Map_PoppedOutDictionary_PoppedOutPairs", ()=>
@@ -361,8 +367,7 @@ that needs escaping.>>\"".Fix());
 			static typeInfo = new VDFTypeInfo(
 			{
 				messages: new VDFPropInfo("List(string)", true, true),
-				strings: new VDFPropInfo("List(string)"),
-				strings2: new VDFPropInfo("List(string)")
+				otherProperty: new VDFPropInfo("bool"),
 			});
 			messages = new List<string>("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
 			otherProperty = true;
@@ -500,7 +505,7 @@ that needs escaping.>>\"".Fix());
 		test("D0_MapWithMetadataDisabled", ()=>
 		{
 			var a = VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaveOptions({useMetadata: false}));
-			a.metadata.Should().Be(null);
+			ok(a.metadata == null); //a.metadata.Should().Be(null);
 		});
 		class D0_Map_List_BoolsWithPopOutDisabled_Class
 		{
@@ -535,5 +540,14 @@ that needs escaping.>>\"".Fix());
 			a.listChildren.Count.Should().Be(2);
 			a.ToVDF(new VDFSaveOptions({useCommaSeparators: true})).Should().Be("[0,1]");
 		});
+
+		// export all classes/enums to global scope
+		var arguments;
+		var classNames = V.GetMatches(arguments.callee.toString(), /        var (\w+) = \(function \(\) {/g, 1);
+		for (var i = 0; i < classNames.length; i++)
+			try { window[classNames[i]] = eval(classNames[i]); } catch(e) {}
+		var enumNames = V.GetMatches(arguments.callee.toString(), /        }\)\((\w+) \|\| \(\w+ = {}\)\);/g, 1);
+		for (var i = 0; i < enumNames.length; i++)
+			try { window[enumNames[i]] = eval(enumNames[i]); } catch(e) {}
 	}
 }

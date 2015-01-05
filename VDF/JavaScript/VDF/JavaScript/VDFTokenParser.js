@@ -1,22 +1,43 @@
 ﻿var VDFTokenType;
 (function (VDFTokenType) {
-    VDFTokenType[VDFTokenType["None"] = 0] = "None";
-    VDFTokenType[VDFTokenType["WiderMetadataEndMarker"] = 1] = "WiderMetadataEndMarker";
-    VDFTokenType[VDFTokenType["MetadataBaseValue"] = 2] = "MetadataBaseValue";
-    VDFTokenType[VDFTokenType["MetadataEndMarker"] = 3] = "MetadataEndMarker";
-
+    //WiderMetadataEndMarker,
+    //MetadataBaseValue,
     //LiteralStartMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
     //LiteralEndMarker
-    VDFTokenType[VDFTokenType["DataPropName"] = 4] = "DataPropName";
-    VDFTokenType[VDFTokenType["DataStartMarker"] = 5] = "DataStartMarker";
-    VDFTokenType[VDFTokenType["PoppedOutDataStartMarker"] = 6] = "PoppedOutDataStartMarker";
-    VDFTokenType[VDFTokenType["PoppedOutDataEndMarker"] = 7] = "PoppedOutDataEndMarker";
-    VDFTokenType[VDFTokenType["ItemSeparator"] = 8] = "ItemSeparator";
-    VDFTokenType[VDFTokenType["DataBaseValue"] = 9] = "DataBaseValue";
-    VDFTokenType[VDFTokenType["DataEndMarker"] = 10] = "DataEndMarker";
-    VDFTokenType[VDFTokenType["LineBreak"] = 11] = "LineBreak";
-    VDFTokenType[VDFTokenType["InLineComment"] = 12] = "InLineComment";
-    VDFTokenType[VDFTokenType["Indent"] = 13] = "Indent";
+    //DataPropName,
+    //DataStartMarker,
+    //PoppedOutDataStartMarker,
+    //PoppedOutDataEndMarker,
+    //ItemSeparator,
+    //DataBaseValue,
+    //DataEndMarker,
+    //Indent,
+    // helper tokens for token-parser (or reader)
+    VDFTokenType[VDFTokenType["LiteralStartMarker"] = 0] = "LiteralStartMarker";
+    VDFTokenType[VDFTokenType["LiteralEndMarker"] = 1] = "LiteralEndMarker";
+    VDFTokenType[VDFTokenType["StringStartMarker"] = 2] = "StringStartMarker";
+    VDFTokenType[VDFTokenType["StringEndMarker"] = 3] = "StringEndMarker";
+    VDFTokenType[VDFTokenType["InLineComment"] = 4] = "InLineComment";
+    VDFTokenType[VDFTokenType["SpaceOrCommaSpan"] = 5] = "SpaceOrCommaSpan";
+
+    VDFTokenType[VDFTokenType["None"] = 6] = "None";
+    VDFTokenType[VDFTokenType["Tab"] = 7] = "Tab";
+    VDFTokenType[VDFTokenType["LineBreak"] = 8] = "LineBreak";
+
+    VDFTokenType[VDFTokenType["Metadata"] = 9] = "Metadata";
+    VDFTokenType[VDFTokenType["MetadataEndMarker"] = 10] = "MetadataEndMarker";
+    VDFTokenType[VDFTokenType["Key"] = 11] = "Key";
+    VDFTokenType[VDFTokenType["KeyValueSeparator"] = 12] = "KeyValueSeparator";
+    VDFTokenType[VDFTokenType["PoppedOutChildGroupMarker"] = 13] = "PoppedOutChildGroupMarker";
+
+    VDFTokenType[VDFTokenType["Null"] = 14] = "Null";
+    VDFTokenType[VDFTokenType["Boolean"] = 15] = "Boolean";
+    VDFTokenType[VDFTokenType["Number"] = 16] = "Number";
+    VDFTokenType[VDFTokenType["String"] = 17] = "String";
+    VDFTokenType[VDFTokenType["ListStartMarker"] = 18] = "ListStartMarker";
+    VDFTokenType[VDFTokenType["ListEndMarker"] = 19] = "ListEndMarker";
+    VDFTokenType[VDFTokenType["MapStartMarker"] = 20] = "MapStartMarker";
+    VDFTokenType[VDFTokenType["MapEndMarker"] = 21] = "MapEndMarker";
 })(VDFTokenType || (VDFTokenType = {}));
 var VDFToken = (function () {
     function VDFToken(type, position, index, text) {
@@ -30,259 +51,204 @@ var VDFToken = (function () {
 var VDFTokenParser = (function () {
     function VDFTokenParser() {
     }
-    VDFTokenParser.ParseTokens = function (text, postProcessTokens) {
+    VDFTokenParser.ParseTokens = function (text, postProcessTokens, options) {
         if (typeof postProcessTokens === "undefined") { postProcessTokens = true; }
-        text = (text || "").replace(/\r\n/, "\n");
+        text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
+        options = options || new VDFLoadOptions();
 
         var result = new List("VDFToken");
 
-        var inLiteralMarkers = false;
         var currentTokenFirstCharPos = 0;
-        var currentTokenType = 0 /* None */;
         var currentTokenTextBuilder = new StringBuilder();
-        for (var i = 0; i < text.length && currentTokenType == 0 /* None */; i++) {
-            var lastChar = i - 1 >= 0 ? text[i - 1] : null;
+        var currentTokenType = 6 /* None */;
+        var activeLiteralStartChars = null;
+        var activeStringStartChar = null;
+        var lastScopeIncreaseChar = null;
+        for (var i = 0; i < text.length; i++) {
             var ch = text[i];
             var nextChar = i + 1 < text.length ? text[i + 1] : null;
-            var nextNextChar = i + 2 < text.length ? text[i + 2] : null;
-            var nextNextNextChar = i + 3 < text.length ? text[i + 3] : null;
 
-            var grabExtraCharsAsOwnAndSkipTheirProcessing = function (count, addToTokenTextBuilder) {
-                if (addToTokenTextBuilder)
-                    currentTokenTextBuilder.Append(text.substr(i + 1, count));
-                i += count;
-            };
+            var nextNonSpaceCharPos = VDFTokenParser.FindNextNonXCharPosition(text, i + 1, ' ');
+            var nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : null;
 
-            if (!inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@') {
-                grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
-                inLiteralMarkers = true;
-            } else if (inLiteralMarkers && lastChar != '@' && ch == '@' && nextChar == '@' && ((nextNextChar == '|' && nextNextNextChar != '|') || nextNextChar == '}' || nextNextChar == '\n' || nextNextChar == null)) {
-                grabExtraCharsAsOwnAndSkipTheirProcessing(1, false);
-                currentTokenTextBuilder = new StringBuilder(VDFTokenParser.FinalizedDataStringToRaw(currentTokenTextBuilder.ToString()));
-                inLiteralMarkers = false;
-                currentTokenType = 9 /* DataBaseValue */; // cause the return of chars as DataBaseValue token
-            } else
-                currentTokenTextBuilder.Append(ch);
+            currentTokenTextBuilder.Append(ch);
 
-            if (inLiteralMarkers)
-                continue;
+            if (activeLiteralStartChars == null) {
+                if (ch == '<' && nextChar == '<') {
+                    activeLiteralStartChars = "";
+                    while (i + activeLiteralStartChars.length < text.length && text[i + activeLiteralStartChars.length] == '<')
+                        activeLiteralStartChars += "<";
+                    currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars);
+                    currentTokenType = 0 /* LiteralStartMarker */;
+                    i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after comment (i.e. the line-break char)
+                }
+            } else if (i + activeLiteralStartChars.length <= text.length && text.substr(i, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">")) {
+                currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars.replace(/</g, ">"));
+                currentTokenType = 1 /* LiteralEndMarker */;
+                i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after literal-end-marker
+                activeLiteralStartChars = null;
+            }
+            if (activeStringStartChar == null) {
+                if (ch == '\'' || ch == '"') {
+                    activeStringStartChar = ch.toString();
+                    currentTokenType = 2 /* StringStartMarker */;
+                }
+            } else if (((activeStringStartChar == "'" && ch == '\'') || (activeStringStartChar == "\"" && ch == '"')) && activeLiteralStartChars == null) {
+                currentTokenType = 3 /* StringEndMarker */;
+                activeStringStartChar = null;
+            }
 
-            if (ch == '>')
-                if (nextChar == '>') {
-                    currentTokenType = 1 /* WiderMetadataEndMarker */;
-                    grabExtraCharsAsOwnAndSkipTheirProcessing(1, true);
-                } else
-                    currentTokenType = 3 /* MetadataEndMarker */;
-            else if (ch == '{')
-                currentTokenType = 5 /* DataStartMarker */;
-            else if (ch == '}')
-                currentTokenType = 10 /* DataEndMarker */;
-            else if (ch == ':')
-                currentTokenType = 6 /* PoppedOutDataStartMarker */;
-            else if (ch == '^')
-                currentTokenType = 7 /* PoppedOutDataEndMarker */;
-            else if (ch == '\n')
-                currentTokenType = 11 /* LineBreak */;
-            else if (ch == ';' && nextChar == ';') {
-                currentTokenType = 12 /* InLineComment */;
-                var newNextCharPos = VDFTokenParser.FindNextLineBreakCharPos(text, i + 2);
-                grabExtraCharsAsOwnAndSkipTheirProcessing((newNextCharPos != -1 ? newNextCharPos + 1 : text.length) - (i + 1), true);
-            } else if (ch == '\t')
-                currentTokenType = 13 /* Indent */;
-            else if (ch == '|')
-                currentTokenType = 8 /* ItemSeparator */;
-            else if (nextChar == '>')
-                currentTokenType = 2 /* MetadataBaseValue */;
-            else if (nextChar == '{' || nextChar == ':')
-                currentTokenType = 4 /* DataPropName */;
-            else if (nextChar == '}' || nextChar == ':' || nextChar == '|' || (nextChar == ';' && nextNextChar == ';') || nextChar == '\n' || nextChar == null)
-                currentTokenType = 9 /* DataBaseValue */;
+            var lastCharInLiteral = activeLiteralStartChars != null && i + 1 + activeLiteralStartChars.length <= text.length && text.substr(i + 1, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">");
+            if (lastCharInLiteral)
+                nextChar = i + 1 + activeLiteralStartChars.length < text.length ? text[i + 1 + activeLiteralStartChars.length] : null; // shift next-char to one right after literal-end-marker (i.e. pretend it isn't there)
+            var lastCharInString = (activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"');
+            if (currentTokenType == 6 /* None */ && (activeLiteralStartChars == null || lastCharInLiteral) && (activeStringStartChar == null || lastCharInString)) {
+                if (ch == '#' && nextChar == '#') {
+                    currentTokenTextBuilder = new StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
+                    currentTokenType = 4 /* InLineComment */;
+                    i += currentTokenTextBuilder.Length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
+                } else if (currentTokenTextBuilder.ToString().TrimStart(options.allowCommaSeparators ? [' ', ','] : [' ']).length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ',')))
+                    currentTokenType = 5 /* SpaceOrCommaSpan */;
+                else if (ch == '\t')
+                    currentTokenType = 7 /* Tab */;
+                else if (ch == '\n')
+                    currentTokenType = 8 /* LineBreak */;
+                else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
+                    currentTokenType = 9 /* Metadata */;
+                else if (ch == '>')
+                    currentTokenType = 10 /* MetadataEndMarker */;
+                else if (nextNonSpaceChar == ':')
+                    currentTokenType = 11 /* Key */;
+                else if (ch == ':')
+                    currentTokenType = 12 /* KeyValueSeparator */;
+                else if (ch == '^')
+                    currentTokenType = 13 /* PoppedOutChildGroupMarker */;
+                else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
+                    currentTokenType = 14 /* Null */;
+                else if (((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
+                    currentTokenType = 15 /* Boolean */;
+                else if (VDFTokenParser.chars0To9AndDot.Contains(currentTokenTextBuilder.data[0]) && (nextChar == null || !VDFTokenParser.chars0To9AndDot.Contains(nextChar)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == 9 /* Metadata */ || result.Last().type == 12 /* KeyValueSeparator */))
+                    currentTokenType = 16 /* Number */;
+                else if ((activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"')) {
+                    if (activeLiteralStartChars != null) {
+                        currentTokenFirstCharPos++;
+                        currentTokenTextBuilder = new StringBuilder(VDFTokenParser.UnpadString(currentTokenTextBuilder.ToString()));
+                    }
+                    currentTokenType = 17 /* String */;
+                } else if (ch == '[') {
+                    currentTokenType = 18 /* ListStartMarker */;
+                    lastScopeIncreaseChar = ch;
+                } else if (ch == ']')
+                    currentTokenType = 19 /* ListEndMarker */;
+                else if (ch == '{') {
+                    currentTokenType = 20 /* MapStartMarker */;
+                    lastScopeIncreaseChar = ch;
+                } else if (ch == '}')
+                    currentTokenType = 21 /* MapEndMarker */;
+            }
 
-            if (currentTokenType != 0 /* None */) {
-                result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
+            if (currentTokenType != 6 /* None */) {
+                if (currentTokenType != 0 /* LiteralStartMarker */ && currentTokenType != 1 /* LiteralEndMarker */ && currentTokenType != 2 /* StringStartMarker */ && currentTokenType != 3 /* StringEndMarker */ && currentTokenType != 4 /* InLineComment */ && currentTokenType != 5 /* SpaceOrCommaSpan */ && currentTokenType != 10 /* MetadataEndMarker */)
+                    result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
+                if (currentTokenType == 2 /* StringStartMarker */ && ch == nextChar)
+                    result.Add(new VDFToken(17 /* String */, -1, result.Count, "")); // char-pos has invalid value (should be fine, though)
 
                 currentTokenFirstCharPos = i + 1;
-                currentTokenType = 0 /* None */;
                 currentTokenTextBuilder.Clear();
+                currentTokenType = 6 /* None */;
             }
         }
 
         if (postProcessTokens)
-            VDFTokenParser.PostProcessTokens(result);
+            VDFTokenParser.PostProcessTokens(result, options);
 
         return result;
     };
-    VDFTokenParser.FindNextLineBreakCharPos = function (text, searchStartPos) {
-        for (var i = searchStartPos; i < text.length; i++)
-            if (text[i] == '\n')
+    VDFTokenParser.FindNextNonXCharPosition = function (text, startPos, x) {
+        for (var i = startPos; i < text.length; i++)
+            if (text[i] != x)
                 return i;
         return -1;
     };
-    VDFTokenParser.FinalizedDataStringToRaw = function (finalizedDataStr) {
-        var result = finalizedDataStr;
-        if ((result[result.length - 2] == '@' || result[result.length - 2] == '|') && result.lastIndexOf("|") == result.length - 1)
-            result = result.substr(0, result.length - 1); // chop off last char, as it was just added by the serializer for separation
-        result = result.replace(/@(@{2,})/g, "$1"); // chop off last '@' from in-data '@@...' strings (to undo '@@...' string escaping)
+    VDFTokenParser.UnpadString = function (paddedString) {
+        var result = paddedString;
+        if (result.StartsWith("#"))
+            result = result.substr(1); // chop off first char, as it was just added by the serializer for separation
+        if (result.EndsWith("#"))
+            result = result.substr(0, result.length - 1);
         return result;
     };
 
-    VDFTokenParser.PostProcessTokens = function (tokens) {
-        // maybe temp
-        tokens.Insert(0, new VDFToken(5 /* DataStartMarker */, -1, -1, "{"));
-        tokens.Add(new VDFToken(10 /* DataEndMarker */, 0, 0, "}"));
-
-        for (var i = 0; i < tokens.Count; i++) {
-            var token = tokens[i];
-            if ([12 /* InLineComment */].indexOf(token.type) != -1)
-                tokens.RemoveAt(i--);
-        }
-
-        // pass 1: add brackets surrounding inline-list items (the ones that don't already have a set, anyway)
+    VDFTokenParser.PostProcessTokens = function (tokens, options) {
+        // pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (for JSON compatibility)
         // ----------
-        var depth_base = 0;
-        var line_indentsReached = 0;
-        var depthData = new List("DepthData", new DepthData());
-        for (var i = 0; i < tokens.Count; i++) {
-            var token = tokens[i];
-            if (token.type == 5 /* DataStartMarker */)
-                depth_base++;
-            else if (token.type == 10 /* DataEndMarker */)
-                depth_base--;
-            else if (token.type == 13 /* Indent */)
-                line_indentsReached++;
-            else if (token.type == 11 /* LineBreak */)
-                line_indentsReached = 0;
-            var depth = depth_base + line_indentsReached;
+        if (options.allowStringKeys)
+            for (var i = 0; i < tokens.Count; i++)
+                if (tokens[i].type == 17 /* String */ && i + 1 < tokens.Count && tokens[i + 1].type == 12 /* KeyValueSeparator */)
+                    tokens[i].type = 11 /* Key */;
 
-            if (token.type == 5 /* DataStartMarker */) {
-                while (depthData.Count <= depth)
-                    depthData.Add(new DepthData());
-                depthData[depth] = new DepthData();
-                if (token != null)
-                    depthData[depth].startMarker = token;
-            } else if (token.type == 10 /* DataEndMarker */) {
-                if (depthData.Count > depth + 1 && (depthData[depth + 1].needsChildStartBracket || depthData[depth + 1].needsChildEndBracket)) {
-                    var firstInDepthTokenIndex = (depthData[depth + 1].needsChildStartBracket || depthData[depth + 1].needsChildEndBracket) ? tokens.indexOf(depthData[depth + 1].startMarker) + 1 : 0;
-                    var itemFirstTokenIndex = firstInDepthTokenIndex;
-                    if (tokens[firstInDepthTokenIndex].type == 1 /* WiderMetadataEndMarker */)
-                        itemFirstTokenIndex = firstInDepthTokenIndex + 1;
-                    else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == 1 /* WiderMetadataEndMarker */)
-                        itemFirstTokenIndex = firstInDepthTokenIndex + 2;
-
-                    if (depthData[depth + 1].lastItemFirstToken == null)
-                        depthData[depth + 1].lastItemFirstToken = tokens[itemFirstTokenIndex];
-
-                    if (itemFirstTokenIndex < i) {
-                        if (depthData[depth + 1].needsChildStartBracket)
-                            if (tokens[itemFirstTokenIndex].type != 5 /* DataStartMarker */) {
-                                tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                                i++; // increment, since we added the token above
-                                depthData[depth + 1].needsChildStartBracket = false;
-                            }
-
-                        if (depthData[depth + 1].needsChildEndBracket)
-                            if (depthData[depth + 1].lastItemFirstToken != null && depthData[depth + 1].lastItemFirstToken.type != 5 /* DataStartMarker */) {
-                                tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
-                                depthData[depth + 1].needsChildEndBracket = false;
-                            }
-                    }
-                }
-                //depthData.RemoveAt(depth);
-            } else if (token.type == 1 /* WiderMetadataEndMarker */) {
-                var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
-                if (lastToken == null || lastToken.type != 2 /* MetadataBaseValue */ || lastToken.text.indexOf(",") == -1) {
-                    depthData[depth].needsChildStartBracket = true;
-                    depthData[depth].needsChildEndBracket = true;
-                }
-            } else if (token.type == 8 /* ItemSeparator */) {
-                if (depthData[depth].lastItemFirstToken == null) {
-                    var firstInDepthTokenIndex = tokens.indexOf(depthData[depth].startMarker) + 1;
-                    var itemFirstTokenIndex = firstInDepthTokenIndex;
-                    if (tokens[firstInDepthTokenIndex].type == 1 /* WiderMetadataEndMarker */)
-                        itemFirstTokenIndex = firstInDepthTokenIndex + 1;
-                    else if (tokens.Count > firstInDepthTokenIndex + 1 && tokens[firstInDepthTokenIndex + 1].type == 1 /* WiderMetadataEndMarker */)
-                        itemFirstTokenIndex = firstInDepthTokenIndex + 2;
-
-                    depthData[depth].lastItemFirstToken = tokens[itemFirstTokenIndex];
-
-                    if (tokens[itemFirstTokenIndex].type != 5 /* DataStartMarker */) {
-                        tokens.Insert(itemFirstTokenIndex, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                        i++; // increment, since we added the token above
-                    }
-                }
-
-                if (depthData[depth].lastItemFirstToken.type != 5 /* DataStartMarker */)
-                    tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // (position and index are fixed later)
-                if (tokens[i + 1].type != 5 /* DataStartMarker */) {
-                    tokens.Insert(++i, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // (position and index are fixed later)
-                    depthData[depth].needsChildEndBracket = true;
-                }
-                var nextToken = tokens[i + 1];
-                depthData[depth].lastItemFirstToken = nextToken;
-            }
-        }
-
-        // pass 2: add inferred indent-block data-[start/end]-marker tokens
+        // pass 2: re-wrap popped-out-children with parent brackets/braces
         // ----------
-        var lastLine_indentsReached = 0;
-        line_indentsReached = 0;
-        var line_firstNonIndentCharReached = false;
-        var indentDepthsNeedingEndBracket = new List("number");
-        for (var i = 0; i < tokens.Count; i++) {
-            var token = tokens[i];
-            if (token.type == 13 /* Indent */)
-                line_indentsReached++;
-            else if (token.type == 11 /* LineBreak */) {
-                lastLine_indentsReached = line_indentsReached;
+        tokens.Add(new VDFToken(6 /* None */, -1, -1, "")); // maybe temp: add depth-0-ender helper token
 
-                line_firstNonIndentCharReached = false;
-                line_indentsReached = 0;
-            } else if (token.type == 6 /* PoppedOutDataStartMarker */) {
-                tokens.Insert(i++, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // add inferred indent-block data-start-marker token (for indent-block)
-                indentDepthsNeedingEndBracket.Add(line_indentsReached + 1);
-            } else if (!line_firstNonIndentCharReached) {
-                line_firstNonIndentCharReached = true;
-                if (i != 0) {
-                    if (line_indentsReached <= lastLine_indentsReached) {
-                        for (var i2 = lastLine_indentsReached; i2 > line_indentsReached; i2--) {
-                            tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block last-item
-                            if (indentDepthsNeedingEndBracket.Contains(line_indentsReached + 1)) {
-                                tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block
-                                indentDepthsNeedingEndBracket.Remove(line_indentsReached + 1);
+        var line_tabsReached = 0;
+        var tabDepth_popOutBlockEndWrapTokens = new Dictionary("int", "List(VDFToken)");
+        for (var i = 0; i < tokens.Count; i++) {
+            var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
+            var token = tokens[i];
+            if (token.type == 7 /* Tab */)
+                line_tabsReached++;
+            else if (token.type == 8 /* LineBreak */)
+                line_tabsReached = 0;
+            else if (token.type == 13 /* PoppedOutChildGroupMarker */) {
+                if (lastToken.type == 18 /* ListStartMarker */ || lastToken.type == 20 /* MapStartMarker */) {
+                    var enderTokenIndex = i + 1;
+                    while (enderTokenIndex < tokens.Count - 1 && tokens[enderTokenIndex].type != 8 /* LineBreak */ && (tokens[enderTokenIndex].type != 13 /* PoppedOutChildGroupMarker */ || tokens[enderTokenIndex - 1].type == 18 /* ListStartMarker */ || tokens[enderTokenIndex - 1].type == 20 /* MapStartMarker */))
+                        enderTokenIndex++;
+                    var wrapGroupTabDepth = tokens[enderTokenIndex].type == 13 /* PoppedOutChildGroupMarker */ ? line_tabsReached - 1 : line_tabsReached;
+                    tabDepth_popOutBlockEndWrapTokens.Set(wrapGroupTabDepth, tokens.GetRange(i + 1, enderTokenIndex - (i + 1)));
+                    i = enderTokenIndex - 1; // have next token processed be the ender-token (^^[...] or line-break)
+                } else if (lastToken.type == 7 /* Tab */) {
+                    var wrapGroupTabDepth = lastToken.type == 7 /* Tab */ ? line_tabsReached - 1 : line_tabsReached;
+                    for (var i2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Indexes()) {
+                        var token2 = tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][i2];
+                        tokens.Remove(token2);
+                        tokens.Insert(i - 1, token2);
+                    }
+                    i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
+                    tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
+                }
+            } else if (lastToken != null && (lastToken.type == 8 /* LineBreak */ || lastToken.type == 7 /* Tab */ || token.type == 6 /* None */)) {
+                if (token.type == 6 /* None */)
+                    line_tabsReached = 0;
+                if (tabDepth_popOutBlockEndWrapTokens.Count > 0) {
+                    var maxTabDepth = -1;
+                    for (var key in tabDepth_popOutBlockEndWrapTokens.Keys)
+                        if (parseInt(key) > maxTabDepth)
+                            maxTabDepth = parseInt(key);
+                    for (var tabDepth = maxTabDepth; tabDepth >= line_tabsReached; tabDepth--)
+                        if (tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth)) {
+                            for (var i2 in tabDepth_popOutBlockEndWrapTokens[tabDepth].Indexes()) {
+                                var token2 = tabDepth_popOutBlockEndWrapTokens[tabDepth][i2];
+                                tokens.Remove(token2);
+                                tokens.Insert(i - 1, token2);
                             }
+                            tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
                         }
-                        if ([7 /* PoppedOutDataEndMarker */, 10 /* DataEndMarker */].indexOf(token.type) == -1)
-                            tokens.Insert(i++, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for current-indent-block last-item
-                    }
-
-                    if ([7 /* PoppedOutDataEndMarker */, 10 /* DataEndMarker */].indexOf(token.type) == -1)
-                        tokens.Insert(i++, new VDFToken(5 /* DataStartMarker */, -1, -1, "{")); // add inferred indent-block data-start-marker token (for item)
                 }
             }
         }
 
-        for (var i = line_indentsReached; i >= 0; i--) {
-            if (i > 0)
-                tokens.Insert(tokens.Count, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block last-item
-            if (indentDepthsNeedingEndBracket.Contains(0 + 1)) {
-                tokens.Insert(tokens.Count, new VDFToken(10 /* DataEndMarker */, -1, -1, "}")); // one for lower-indent-block
-                indentDepthsNeedingEndBracket.Remove(0 + 1);
-            }
-        }
+        tokens.RemoveAt(tokens.Count - 1); // maybe temp: remove depth-0-ender helper token
 
-        for (var i = 0; i < tokens.Count; i++) {
-            var token = tokens[i];
-            if ([6 /* PoppedOutDataStartMarker */, 7 /* PoppedOutDataEndMarker */, 11 /* LineBreak */, 13 /* Indent */, 8 /* ItemSeparator */].indexOf(token.type) != -1)
-                tokens.RemoveAt(i--);
-        }
-
-        // maybe temp
-        tokens.RemoveAt(0);
-        tokens.RemoveAt(tokens.Count - 1);
+        for (var i = tokens.Count - 1; i >= 0; i--)
+            if (tokens[i].type == 7 /* Tab */ || tokens[i].type == 8 /* LineBreak */ || tokens[i].type == 10 /* MetadataEndMarker */ || tokens[i].type == 12 /* KeyValueSeparator */ || tokens[i].type == 13 /* PoppedOutChildGroupMarker */)
+                tokens.RemoveAt(i);
 
         // pass 4: fix token position-and-index properties
         // ----------
         VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
+        //Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
     };
     VDFTokenParser.RefreshTokenPositionAndIndexProperties = function (tokens) {
         var textProcessedLength = 0;
@@ -293,12 +259,8 @@ var VDFTokenParser = (function () {
             textProcessedLength += token.text.length;
         }
     };
+    VDFTokenParser.charsAToZ = List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
+    VDFTokenParser.chars0To9AndDot = List.apply(null, ["string"].concat("0123456789\.".match(/./g)));
     return VDFTokenParser;
-})();
-
-var DepthData = (function () {
-    function DepthData() {
-    }
-    return DepthData;
 })();
 //# sourceMappingURL=VDFTokenParser.js.map
