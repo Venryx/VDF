@@ -36,7 +36,7 @@ public class VDFLoadOptions
 public static class VDFLoader
 {
 	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions options = null) { return ToVDFNode(text, typeof(T), options); }
-	public static VDFNode ToVDFNode(string text, VDFLoadOptions options, Type declaredType = null) { return ToVDFNode(text, declaredType, options); }
+	public static VDFNode ToVDFNode(string text, VDFLoadOptions options) { return ToVDFNode(text, null, options); }
 	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions options = null) { return ToVDFNode(VDFTokenParser.ParseTokens(text, true, options), declaredType, options); }
 	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null)
 	{

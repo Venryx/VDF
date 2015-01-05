@@ -289,7 +289,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 })();
 declare var List: // static/constructor declaration stuff
 {
-	new <T>(itemType: string, ...items: T[]): List<T>;
+	new <T>(itemType?: string, ...items: T[]): List<T>;
 	prototype: List<any>;
 }
 interface List<T> extends Array<T> // class/instance declaration stuff
@@ -323,7 +323,7 @@ class Dictionary<K, V>
 	valueType: string;
 	keys: any[];
 	values: any[];
-	constructor(keyType?: string, valueType?: string, ...keyValuePairs: Array<Array<any>>)
+	constructor(keyType?: string, valueType?: string, keyValuePairsObj?)
 	{
 		//VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
 		this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
@@ -332,9 +332,9 @@ class Dictionary<K, V>
 		this.keys = [];
 		this.values = [];
 
-		if (keyValuePairs)
-			for (var i = 0; i < keyValuePairs.length; i++)
-				this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
+		if (keyValuePairsObj)
+			for (var key in keyValuePairsObj)
+				this.Set(key, keyValuePairsObj[key]);
 	}
 
 	// properties
@@ -353,15 +353,13 @@ class Dictionary<K, V>
 	Set(key: K, value: V)
 	{
 		if (this.keys.indexOf(key) == -1)
-		{
 			this.keys.push(key);
-			(<any>this)[key] = value; // make value accessible directly on Dictionary object
-		}
 		this.values[this.keys.indexOf(key)] = value;
+		(<any>this)[key] = value; // make value accessible directly on Dictionary object
 	}
 	Add(key: K, value: V)
 	{
-		if (this.Get(key) != undefined)
+		if (this.keys.indexOf(key) != -1)
 			throw new Error("Dictionary already contains key '" + key + "'.");
 		this.Set(key, value);
 	}

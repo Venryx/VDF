@@ -62,7 +62,7 @@ public class VDFSaveOptions
 public static class VDFSaver
 {
 	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions options = null) { return ToVDFNode(obj, typeof(T), options); }
-	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options, Type declaredType = null) { return ToVDFNode(obj, declaredType, options); }
+	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options) { return ToVDFNode(obj, null, options); }
 	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, bool declaredTypeFromParent = false)
 	{
 		options = options ?? new VDFSaveOptions();

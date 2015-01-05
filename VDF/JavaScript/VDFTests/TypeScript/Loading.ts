@@ -1,60 +1,4 @@
-﻿interface Object { Should(): { obj: any; Be(value, message?: string); BeExactly(value, message?: string); } }
-/*window["oldTest"] = test;
-window["test"] = (title: string, testFunc: ()=> any) => // overwrite/wrap actual test func
-{
-	Loading.Init();
-	window["oldTest"](title, testFunc);
-}*/
-
-class TypeWithPreDeserializeMethod
-{
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
-	{
-		flag: new VDFPropInfo("bool")
-	});
-	flag = false;
-	VDFPreDeserialize(): void { this.flag = true; }
-}
-class TypeWithPostDeserializeMethod
-{
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
-	{
-		flag: new VDFPropInfo("bool")
-	});
-	flag = false;
-	VDFPostDeserialize(): void { this.flag = true; }
-}
-class TypeInstantiatedManuallyThenFilled
-{
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
-	{
-		flag: new VDFPropInfo("bool")
-	});
-	flag: boolean;
-}
-class Depth1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
-{
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, true,
-	{
-		messages: new VDFPropInfo("Dictionary[string,string]", true, true),
-		otherProperty: new VDFPropInfo("bool")
-	});
-
-	messages = new Dictionary<string, string>("string", "string");
-	otherProperty: boolean;
-}
-
-class TypeWithPostDeserializeMethod_CustomMessageRequired
-{
-	static typeInfo: VDFTypeInfo = new VDFTypeInfo(false, false,
-	{
-		flag: new VDFPropInfo("bool")
-	});
-	flag = false;
-	VDFPostDeserialize(message: any): void { if (message == "RequiredMessage") this.flag = true; }
-}
-
-/*class Loading
+﻿/*class Loading
 {
 	static initialized: boolean;
 	static Init()
@@ -76,11 +20,12 @@ class TypeWithPostDeserializeMethod_CustomMessageRequired
 	{
 		/*test("testName()
 		{
+			ok(null == null);
 		});*#/
 	}
 }*/
 
-// Init
+// init
 // ==========
 
 var loading = {};
@@ -92,383 +37,377 @@ function Loading_RunTests()
 
 window["test"] = function(name, func) { loading[name] = func; };
 
-// to VDFNode
+// tests
 // ==========
 
-test("Depth0_Comment", ()=>
+module VDFTests // added to match C# indentation
 {
-	var a = VDFLoader.ToVDFNode(";; comment\n\
-Root string.");
-	a.baseValue.Should().Be("Root string.");
-});
-test("Depth0_Comment2", ()=>
-{
-	var a = VDFLoader.ToVDFNode("Root string ends here.;; comment");
-	a.baseValue.Should().Be("Root string ends here.");
-});
-test("Depth0_BaseValue", ()=>
-{
-	var a = VDFLoader.ToVDFNode("Root string.");
-	a.baseValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
-});
-test("Depth0_BaseValue_SaveThenLoad", ()=>
-{
-	var vdf = VDF.Serialize("Root string.");
-	var a = VDFLoader.ToVDFNode(vdf);
-	a.baseValue.Should().Be("Root string.");
-	a.items.length.Should().Be(0); // it should assume it's a base-value, unless indicated otherwise
-	a.ToVDF().Should().Be("Root string.");
-});
-test("Depth0_BaseValue_Literal", ()=>
-{
-	var a = VDFLoader.ToVDFNode("@@\tBase-value string that {needs escaping}.@@");
-	a.baseValue.Should().Be("\tBase-value string that {needs escaping}.");
-});
-test("Depth0_Metadata_Type", ()=>
-{
-	var a = VDFLoader.ToVDFNode("string>Root string.");
-	a.metadata_type.Should().Be("string");
-});
-test("Depth0_Array", ()=>
-{
-	var a = VDFLoader.ToVDFNode("Root string 1.|Root string 2.");
-	a[0].baseValue.Should().Be("Root string 1.");
-	a[1].baseValue.Should().Be("Root string 2.");
-});
-/*test("Depth0_Array_ExplicitStartAndEndMarkers", ()=>
-{
-	var a = VDFLoader.ToVDFNode("{Root string 1.}{Root string 2.}", "List[object]");
-	a[0].baseValue.Should().Be("Root string 1.");
-	a[1].baseValue.Should().Be("Root string 2.");
-});*/
-test("Depth0_Array_Objects", ()=>
-{
-	var a = VDFLoader.ToVDFNode("name{Dan}age{50}|name{Bob}age{60}", "List[object]");
-	a[0]["name"].AsString.Should().Be("Dan");
-	a[0]["age"].AsInt.Should().Be(50);
-	a[1]["name"].AsString.Should().Be("Bob");
-	a[1]["age"].AsInt.Should().Be(60);
-});
-test("Depth0_Array_Literals", ()=>
-{
-	var a = VDFLoader.ToVDFNode("first|@@second\n\
-which is on two lines@@|@@third\n\
+	module Loading
+	{
+		// to VDFNode
+		// ==========
+
+		test("D0_Comment", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"## comment\n\
+'Root string.'");
+			a.primitiveValue.Should().Be("Root string.");
+		});
+		test("D0_Comment2", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("'Root string ends here.'## comment");
+			a.primitiveValue.Should().Be("Root string ends here.");
+		});
+		test("D0_BaseValue", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("'Root string.'");
+			a.primitiveValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
+		});
+		test("D0_BaseValue_SaveThenLoad", ()=>
+		{
+			var vdf = VDF.Serialize("Root string.");
+			vdf.Should().Be("\"Root string.\"");
+			var a = VDFLoader.ToVDFNode(vdf);
+			a.primitiveValue.Should().Be("Root string.");
+		});
+		test("D0_BaseValue_Literal", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
+			a.primitiveValue.Should().Be("\tBase-value string that {needs escaping}.");
+		});
+		test("D0_Metadata_Type", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("string>'Root string.'");
+			a.metadata.Should().Be("string");
+		});
+		test("D0_List", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("['Root string 1.' 'Root string 2.']", "List(object)");
+			a[0].primitiveValue.Should().Be("Root string 1.");
+			a[1].primitiveValue.Should().Be("Root string 2.");
+		});
+		/*test("D0_List_ExplicitStartAndEndMarkers", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
+			a[0].primitiveValue.Should().Be("Root string 1.");
+			a[1].primitiveValue.Should().Be("Root string 2.");
+		});*/
+		test("D0_List_Objects", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
+			a[0]["name"].primitiveValue.Should().Be("Dan");
+			a[0]["age"].primitiveValue.Should().Be(50);
+			a[1]["name"].primitiveValue.Should().Be("Bob");
+			a[1]["age"].primitiveValue.Should().Be(60);
+		});
+		test("D0_List_Literals", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"['first' '<<second\n\
+which is on two lines>>' '<<third\n\
 which is on\n\
-three lines@@", "List[string]");
-	a[0].AsString.Should().Be("first");
-	a[1].AsString.Should().Be("second\n\
-which is on two lines");
-	a[2].AsString.Should().Be("third\n\
+three lines>>']", "List(string)");
+			a[0].primitiveValue.Should().Be("first");
+			a[1].primitiveValue.Should().Be(
+"second\n\
+which is on two lines".Fix());
+			a[2].primitiveValue.Should().Be(
+"third\n\
 which is on\n\
-three lines");
-});
-/*test("Depth0_Array_Empty", ()=> // for now at least, it's against the rules to have items without a char of their own
-{
-	var a = VDFLoader.ToVDFNode("|", "List[object]");
-	ok(a[0].baseValue == null);
-	ok(a[1].baseValue == null);
-});*/
-test("Depth0_Array_None_NoType", ()=>
-{
-	var a = VDFLoader.ToVDFNode("", "List[object]");
-	a.items.Count.Should().Be(0);
-});
-test("Depth0_Array_None_Type", ()=>
-{
-	var a = VDFLoader.ToVDFNode(">>");
-	a.items.Count.Should().Be(0);
-});
-test("Depth0_ArrayMetadata1", ()=>
-{
-	var a = VDFLoader.ToVDFNode("List[int]>>1|2");
-	a.metadata_type.Should().Be("List[int]");
-	ok(a[0].metadata_type == null);
-	ok(a[1].metadata_type == null);
-});
-test("Depth0_ArrayMetadata2", ()=>
-{
-	var a = VDFLoader.ToVDFNode("List[int]>>int>1|int>2");
-	a.metadata_type.Should().Be("List[int]");
-	a[0].metadata_type.Should().Be("int");
-	a[1].metadata_type.Should().Be("int");
-});
-test("Depth0_DictionaryItems", ()=>
-{
-	var a = VDFLoader.ToVDFNode("key1{Simple string.}key2{name{Dan}age{50}}");
-	a["key1"].baseValue.Should().Be("Simple string.");
-	a["key2"]["age"].AsFloat.Should().Be(50);
-});
-test("Depth0_DictionaryItems_GetByKey", ()=>
-{
-	var a = VDFLoader.ToVDFNode("key 1{value 1}key 2{value 2}");
-	a["key 1"].baseValue.Should().Be("value 1");
-	a["key 2"].baseValue.Should().Be("value 2");
-});
-test("Depth0_InferDepth2", ()=>
-{
-	var a = VDF.Deserialize(">>>false", "List[object]");
-	a[0].Should().Be(false);
-});
-test("Depth0_InferUnmarkedBaseValueTypeToBeString", ()=>
-{
-	var a = VDF.Deserialize(">>SimpleString", "IList");
-	a[0].Should().Be("SimpleString");
-});
-test("Depth0_InferUnmarkedBaseValueTypeToBeString_EvenWhenTypeSpecifiedAsObject", ()=>
-{
-	var a = VDF.Deserialize(">>SimpleString", "List[object]");
-	a[0].Should().Be("SimpleString");
-});
-test("Depth0_MultilineString", ()=>
-{
-	var a = VDFLoader.ToVDFNode("@@This is a\nmultiline string\nof three lines in total.@@");
-	a.baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
-});
-
-test("Depth1_BaseValuesWithExplicitCasting", ()=>
-{
-	var a = VDFLoader.ToVDFNode("bool{false}int{5}float{.5}string{Prop value string.}");
-	a["bool"].baseValue.Should().Be("false");
-	a["int"].baseValue.Should().Be("5");
-	a["float"].baseValue.Should().Be(".5");
-	a["string"].baseValue.Should().Be("Prop value string.");
-
-	a["bool"].AsBool.Should().Be(false);
-	a["int"].AsInt.Should().Be(5);
-	a["float"].AsFloat.Should().Be(.5);
-	a["string"].AsString.Should().Be("Prop value string.");
-});
-test("Depth1_BaseValuesWithMarkedTypes", ()=>
-{
-	var a = VDFLoader.ToVDFNode("bool{bool>false}int{int>5}float{float>.5}string{string>Prop value string.}");
-	a["bool"].AsBool.Should().Be(false);
-	a["int"].AsInt.Should().Be(5);
-	a["float"].AsFloat.Should().Be(.5);
-	a["string"].AsString.Should().Be("Prop value string.");
-});
-test("Depth1_Literal", ()=>
-{
-	var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@}");
-	a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.");
-});
-test("Depth1_TroublesomeLiteral1", ()=>
-{
-	var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@@|@@}");
-	a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@");
-});
-test("Depth1_TroublesomeLiteral2", ()=>
-{
-	var a = VDFLoader.ToVDFNode("string{@@Prop value string that {needs escaping}.@@||@@}");
-	a["string"].baseValue.Should().Be("Prop value string that {needs escaping}.@@|");
-});
-test("Depth1_TroublesomeLiteral3", ()=>
-{
-	var a = VDFLoader.ToVDFNode("@@@@@Prop value string that needs escaping.@@@|@@");
-	a.baseValue.Should().Be("@@Prop value string that needs escaping.@@");
-});
-test("Depth1_VDFWithVDFWithVDF", ()=>
-{
-	var a = VDFLoader.ToVDFNode("level1{@@level2{@@@level3{Base string.}@@@}@@}");
-	a["level1"].baseValue.Should().Be("level2{@@level3{Base string.}@@}");
-	VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue.Should().Be("level3{Base string.}");
-	VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].baseValue)["level2"].baseValue)["level3"].baseValue.Should().Be("Base string.");
-});
-test("Depth1_ArraysInArrays", ()=>
-{
-	var a = VDFLoader.ToVDFNode("{1A|1B}|{2A|2B}|3A");
-	a[0][0].baseValue.Should().Be("1A");
-	a[0][1].baseValue.Should().Be("1B");
-	a[1][0].baseValue.Should().Be("2A");
-	a[1][1].baseValue.Should().Be("2B");
-	a[2].baseValue.Should().Be("3A");
-});
-test("Depth1_ArraysInArrays_SecondsEmpty", ()=>
-{
-	var a = VDFLoader.ToVDFNode("{1A|}|{2A|}");
-	a[0][0].baseValue.Should().Be("1A");
-	ok(a[0][1].baseValue == null);
-	a[1][0].baseValue.Should().Be("2A");
-	ok(a[1][1].baseValue == null);
-});
-test("Depth1_ArraysInArrays_FirstsAndSecondsEmpty", ()=>
-{
-	var a = VDFLoader.ToVDFNode("{|}|{|}");
-	ok(a[0][0].baseValue == null);
-	ok(a[0][1].baseValue == null);
-	ok(a[1][0].baseValue == null);
-	ok(a[1][1].baseValue == null);
-});
-test("Depth1_StringAndArraysInArrays", ()=>
-{
-	var a = VDFLoader.ToVDFNode("text|{2A|}");
-	a[0].baseValue.Should().Be("text");
-	a[1][0].baseValue.Should().Be("2A");
-	ok(a[1][1].baseValue == null);
-});
-test("Depth1_Dictionary", ()=>
-{
-	var a = VDFLoader.ToVDFNode("key1{value1}key2{value2}");
-	a["key1"].baseValue.Should().Be("value1");
-	a["key2"].baseValue.Should().Be("value2");
-});
-test("Depth1_Dictionary_Complex", ()=>
-{
-	var a = VDFLoader.ToVDFNode("uiPrefs{toolOptions{@@Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{>null}size{7}}@@}liveTool{Select}}");
-	a["uiPrefs"]["toolOptions"].baseValue.Should().Be("Select{}TerrainShape{showPreview{true}continuousMode{true}strength{.3}size{7}}TerrainTexture{textureName{>null}size{7}}");
-	a["uiPrefs"]["liveTool"].baseValue.Should().Be("Select");
-});
-test("Depth1_Dictionary_TypesInferredFromGenerics", ()=>
-{
-	var a = VDFLoader.ToVDFNode("vertexColors{Dictionary[string,Color]>>9,4,2.5{Black}1,8,9.5435{Gray}25,15,5{White}}");
-	a["vertexColors"]["9,4,2.5"].baseValue.Should().Be("Black");
-	a["vertexColors"]["1,8,9.5435"].baseValue.Should().Be("Gray");
-	a["vertexColors"]["25,15,5"].baseValue.Should().Be("White");
-});
-
-// note: if only one item (when parsed as List), assume by default obj is an object; if more than one, assume by default obj is a List or Dictionary
-test("Depth1_ArrayPoppedOut_NoItems", ()=>
-{
-	var a = VDFLoader.ToVDFNode("names:");
-	a["names"].properties.Count.Should().Be(0);
-});
-test("Depth1_ArrayPoppedOut", ()=>
-{
-	var a = VDFLoader.ToVDFNode("names:\n\
-	Dan\n\
-	Bob");
-	a["names"][0].baseValue.Should().Be("Dan");
-	a["names"][1].baseValue.Should().Be("Bob");
-});
-test("Depth1_ArraysPoppedOut", ()=> // each 'group' is actually just the value-data of one of the parent's properties
-{
-	var a = VDFLoader.ToVDFNode("names:\n\
-	Dan\n\
-	Bob\n\
-^ages:\n\
-	10\n\
-	20");
-	a["names"][0].baseValue.Should().Be("Dan");
-	a["names"][1].baseValue.Should().Be("Bob");
-	a["ages"][0].baseValue.Should().Be("10");
-	a["ages"][1].baseValue.Should().Be("20");
-});
-test("Depth1_InferredDictionaryPoppedOut", ()=>
-{
-	var a = VDFLoader.ToVDFNode("messages:,>>\n\
-	title1{message1}\n\
-	title2{message2}\n\
-^otherProperty{false}");
-	a["messages"].properties.Count.Should().Be(2);
-	a["messages"]["title1"].baseValue.Should().Be("message1");
-	a["messages"]["title2"].baseValue.Should().Be("message2");
-	a["otherProperty"].baseValue.Should().Be("false");
-});
-test("Depth1_DictionaryPoppedOut", ()=>
-{
-/*
-Written As:
-
-messages:,>>
-	title1{message1}
-	title2{message2}
-^otherProperty{false}
-
-Parsed As:
-
-messages:{,>>
-	title1{message1}
-	title2{message2}
-}^otherProperty{false}
- */
-	var a = VDFLoader.ToVDFNode("messages:,>>\n\
-	title1{message1}\n\
-	title2{message2}\n\
-^otherProperty{false}");
-	a["messages"].properties.Count.Should().Be(2);
-	a["messages"]["title1"].baseValue.Should().Be("message1");
-	a["messages"]["title2"].baseValue.Should().Be("message2");
-	a["otherProperty"].baseValue.Should().Be("false");
-});
-
-test("Depth1_Object_MultilineStringThenProperty", ()=>
-{
-	var a = VDFLoader.ToVDFNode("text{@@This is a\n\
+three lines".Fix());
+		});
+		/*test("D0_EmptyList", ()=> // for now at least, it's against the rules to have items without a char of their own
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("|", "List(object)");
+			//a.mapChildren.Count.Should().Be(0);
+			a[0].primitiveValue.Should().Be(null);
+			a[1].primitiveValue.Should().Be(null);
+		});*/
+		test("D0_EmptyListWithNoTypeSpecified", () =>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("[]", "List(object)");
+			a.listChildren.Count.Should().Be(0);
+		});
+		test("D0_EmptyListWithTypeSpecified", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("List(object)>[]");
+			a.listChildren.Count.Should().Be(0);
+		});
+		test("D0_ListMetadata", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("List(int)>[1 2]");
+			a.metadata.Should().Be("List(int)");
+			a[0].metadata.Should().Be(null);
+			a[1].metadata.Should().Be(null);
+		});
+		test("D0_ListMetadata2", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
+			a.metadata.Should().Be("List(object)");
+			a[0].metadata.Should().Be("string");
+			a[1].metadata.Should().Be("string");
+		});
+		test("D0_Map_ChildMetadata", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("Dictionary(object object)>[a:string>\"1\" b:string>\"2\"]");
+			a.metadata.Should().Be("Dictionary(object object)");
+			a["a"].metadata.Should().Be("string");
+			a["b"].metadata.Should().Be("string");
+		});
+		test("D0_MultilineString", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"'<<This is a\n\
 multiline string\n\
-of three lines in total.@@}bool{>true}");
-	a["text"].baseValue.Should().Be("This is a\nmultiline string\nof three lines in total.");
-	a["bool"].AsBool.Should().Be(true);
-});
-test("Depth1_Object_PoppedOutStringsThenMultilineString", ()=>
-{
-	var a = VDFLoader.ToVDFNode("childTexts:\n\
-	text1\n\
-	text2\n\
-^text{@@This is a\n\
-	multiline string\n\
-	of three lines in total.@@}");
-	a["childTexts"][0].baseValue.Should().Be("text1");
-	a["childTexts"][1].baseValue.Should().Be("text2");
-	a["text"].baseValue.Should().Be("This is a\n	multiline string\n	of three lines in total.");
-});
-test("Depth2_List_Lists_PoppedOutObjects", ()=>
-{
-	var a = VDFLoader.ToVDFNode("\n\
->>{>>{\n\
-	name{Road}\n\
-}|{\n\
-	name{RoadAndPath}\n\
-}|{\n\
-	name{SimpleHill}\n\
-}}\n\
-	".trim()); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
-	a[0].items.Count.Should().Be(3);
-});
-test("List_PoppedOutObjects_MultilineString", ()=>
-{
-	var a = VDFLoader.ToVDFNode(">>\n\
-	id{1}multilineText{@@line1\n\
+of three lines in total.>>'");
+			a.primitiveValue.Should().Be(
+"This is a\n\
+multiline string\n\
+of three lines in total.".Fix());
+		});
+
+		test("D1_Map_Children", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:{name:'Dan' age:50}}");
+			a["key1"].primitiveValue.Should().Be("Simple string.");
+			a["key2"]["age"].primitiveValue.Should().Be(50);
+		});
+		test("D1_Map_ChildrenThatAreRetrievedByKey", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
+			a["key 1"].primitiveValue.Should().Be("value 1");
+			a["key 2"].primitiveValue.Should().Be("value 2");
+		});
+		test("D1_List_StringThatKeepsStringTypeFromVDFEvenWithObjectTypeFromCode", ()=>
+		{
+			var a = VDF.Deserialize("['SimpleString']", "List(object)");
+			a[0].Should().Be("SimpleString");
+		});
+		test("D1_BaseValuesWithImplicitCasting", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{bool:false int:5 double:.5 string:'Prop value string.'}");
+			a["bool"].primitiveValue.Should().Be(false);
+			a["int"].primitiveValue.Should().Be(5);
+			a["double"].primitiveValue.Should().Be(.5);
+			a["string"].primitiveValue.Should().Be("Prop value string.");
+
+			// uses implicit casting
+			/*Assert.True(a["bool"] == false);
+			Assert.True(a["int"] == 5);
+			Assert.True(a["double"] == .5);
+			Assert.True(a["string"] == "Prop value string.");*/
+		});
+		test("D1_BaseValuesWithMarkedTypes", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
+			a["bool"].AsBool.Should().Be(false);
+			a["int"].AsInt.Should().Be(5);
+			a["double"].AsDouble.Should().Be(.5);
+			a["string"].AsString.Should().Be("Prop value string.");
+		});
+		test("D1_Literal", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{string:'<<<Prop value string that <<needs escaping>>.>>>'}");
+			a["string"].primitiveValue.Should().Be("Prop value string that <<needs escaping>>.");
+		});
+		test("D1_TroublesomeLiteral1", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{string:'<<<#<<Prop value string that <<needs escaping>>.>>#>>>'}");
+			a["string"].primitiveValue.Should().Be("<<Prop value string that <<needs escaping>>.>>");
+		});
+		test("D1_TroublesomeLiteral2", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{string:'<<<##Prop value string that <<needs escaping>>.##>>>'}");
+			a["string"].primitiveValue.Should().Be("#Prop value string that <<needs escaping>>.#");
+		});
+		test("D1_VDFWithVDFWithVDF", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
+			a["level1"].primitiveValue.Should().Be("{level2:'<<{level3:'Base string.'}>>'}");
+			VDFLoader.ToVDFNode(a["level1"])["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
+			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"])["level2"])["level3"].primitiveValue.Should().Be("Base string.");
+		});
+		test("D1_ArraysInArrays", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
+			a[0][0].primitiveValue.Should().Be("1A");
+			a[0][1].primitiveValue.Should().Be("1B");
+			a[1][0].primitiveValue.Should().Be("2A");
+			a[1][1].primitiveValue.Should().Be("2B");
+			a[2].primitiveValue.Should().Be("3A");
+		});
+		test("D1_ArraysInArrays_SecondsNullAndEmpty", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
+			a[0][0].primitiveValue.Should().Be("1A");
+			a[0][1].primitiveValue.Should().Be(null);
+			a[1][0].primitiveValue.Should().Be("2A");
+			a[1][1].primitiveValue.Should().Be("");
+		});
+		test("D1_StringAndArraysInArrays", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("['text' ['2A' null]]");
+			a[0].primitiveValue.Should().Be("text");
+			a[1][0].primitiveValue.Should().Be("2A");
+			a[1][1].primitiveValue.Should().Be(null);
+		});
+		test("D1_Dictionary", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2'}");
+			a["key1"].primitiveValue.Should().Be("value1");
+			a["key2"].primitiveValue.Should().Be("value2");
+		});
+		test("D1_Dictionary_Complex", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
+			a["uiPrefs"]["toolOptions"].primitiveValue.Should().Be("{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}");
+			a["uiPrefs"]["liveTool"].primitiveValue.Should().Be("Select");
+		});
+		test("D1_Dictionary_TypesInferredFromGenerics", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}");
+			a["vertexColors"]["9,4,2.5"].primitiveValue.Should().Be("Black");
+			a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
+			a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
+		});
+
+		test("D1_ArrayPoppedOut_NoItems", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode("{names:[^]}");
+			a["names"].listChildren.Count.Should().Be(0);
+			a["names"].mapChildren.Count.Should().Be(0);
+		});
+		test("D1_ArrayPoppedOut", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"{names:[^]}\n\
+	'Dan'\n\
+	'Bob'");
+			a["names"][0].primitiveValue.Should().Be("Dan");
+			a["names"][1].primitiveValue.Should().Be("Bob");
+		});
+		test("D1_ArraysPoppedOut", ()=> // each 'group' is actually just the value-data of one of the parent's properties
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"{names:[^] ages:[^]}\n\
+	'Dan'\n\
+	'Bob'\n\
+	^10\n\
+	20");
+			a["names"][0].primitiveValue.Should().Be("Dan");
+			a["names"][1].primitiveValue.Should().Be("Bob");
+			a["ages"][0].primitiveValue.Should().Be(10);
+			a["ages"][1].primitiveValue.Should().Be(20);
+		});
+		test("D1_InferredDictionaryPoppedOut", ()=>
+		{
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"{messages:{^} otherProperty:false}\n\
+	title1:'message1'\n\
+	title2:'message2'");
+			a["messages"].mapChildren.Count.Should().Be(2);
+			a["messages"]["title1"].primitiveValue.Should().Be("message1");
+			a["messages"]["title2"].primitiveValue.Should().Be("message2");
+			a["otherProperty"].primitiveValue.Should().Be(false);
+		});
+		test("D1_Map_PoppedOutMap", ()=>
+		{
+/*
+Written as:
+
+{messages:{^} otherProperty:false}
+	title1:"message1"
+	title2:"message2"
+
+Parsed as:
+
+{messages:{
+	title1:"message1"
+	title2:"message2"
+} otherProperty:false}
+ */
+			var a: VDFNode = VDFLoader.ToVDFNode(
+"{messages:{^} otherProperty:false}\n\
+	title1:'message1'\n\
+	title2:'message2'");
+			a["messages"].mapChildren.Count.Should().Be(2);
+			a["messages"]["title1"].primitiveValue.Should().Be("message1");
+			a["messages"]["title2"].primitiveValue.Should().Be("message2");
+			a["otherProperty"].primitiveValue.Should().Be(false);
+		});
+
+		test("D1_Object_MultilineStringThenProperty", ()=>
+		{
+			var a = VDFLoader.ToVDFNode(
+"{text:'<<This is a\n\
+multiline string\n\
+of three lines in total.>>' bool:true}");
+			a["text"].primitiveValue.Should().Be(
+"This is a\n\
+multiline string\n\
+of three lines in total.".Fix());
+			a["bool"].AsBool.Should().Be(true);
+		});
+		test("D1_Object_PoppedOutStringsThenMultilineString", ()=>
+		{
+			var a = VDFLoader.ToVDFNode(
+"{childTexts:[^] text:'<<This is a\n\
+multiline string\n\
+of three lines in total.>>'}\n\
+	'text1'\n\
+	'text2'");
+			a["childTexts"][0].primitiveValue.Should().Be("text1");
+			a["childTexts"][1].primitiveValue.Should().Be("text2");
+			a["text"].primitiveValue.Should().Be(
+"This is a\n\
+multiline string\n\
+of three lines in total.".Fix());
+		});
+		test("D2_List_Lists_PoppedOutObjects", ()=>
+		{
+			var a = VDFLoader.ToVDFNode(
+"[[^] [^] [^]]\n\
+	{name{Road}}\n\
+	^{name{RoadAndPath}}\n\
+	^{name{SimpleHill}}"); //, new VDFLoadOptions({inferStringTypeForUnknownTypes: true}));
+			a.listChildren.Count.Should().Be(3);
+		});
+		test("D2_List_PoppedOutObjects_MultilineString", ()=>
+		{
+			var a = VDFLoader.ToVDFNode(
+"[^]\n\
+	{id:1 multilineText:'<<line1\n\
 	line2\n\
-	line3@@}\n\
-	id{2}multilineText{@@line1\n\
-	line2@@}");
-	a.items.Count.Should().Be(2);
-});
+	line3>>'}\n\
+	{id:2 multilineText:'<<line1\n\
+	line2>>'}");
+			a.listChildren.Count.Should().Be(2);
+		});
 
-test("Depth2_Object_PoppedOutObject_PoppedOutObject", ()=>
-{
-	var a = VDFLoader.ToVDFNode("\n\
-name{L0}children:\n\
-	name{L1}children:\n\
-		name{L2}\n\
-	".trim());
-	a["children"].items.Count.Should().Be(1);
-	a["children"].items[0]["children"].items.Count.Should().Be(1);
-});
+		test("D2_Object_PoppedOutObject_PoppedOutObject", ()=>
+		{
+			var a = VDFLoader.ToVDFNode(
+"{name:'L0' children:[^]}\n\
+	{name:'L1' children:[^]}\n\
+		{name:'L2'}");
+			a["children"].listChildren.Count.Should().Be(1);
+			a["children"].listChildren[0]["children"].listChildren.Count.Should().Be(1);
+		});
 
-test("Depth5_DeepNestedPoppedOutData", ()=>
-{
-	var vdf = "name{Main}worlds{string,object>>Test1{vObjectRoot{name{VObjectRoot}children:\n\
-	id{System.Guid>025f28a5-a14b-446d-b324-2d274a476a63}name{#Types}children{}\n\
-}}Test2{vObjectRoot{name{VObjectRoot}children:\n\
-	id{System.Guid>08e84f18-aecf-4b80-9c3f-ae0697d9033a}name{#Types}children{}\n\
-}}}";
-	var livePackNode = VDFLoader.ToVDFNode(vdf);
-	livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
-	livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].baseValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
-});
-test("Depth5_SpeedTester", ()=>
-{
-	var vdf = "id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:\n\
-	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}\n\
-	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}\n\
-	id{52854b70-c200-478f-bcd2-c69a03cd808f}typeName{Wheel}name{FrontLeftWheel}pivotPoint_unit{-0.5,0.5,0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}\n\
-	id{971e394c-b440-4fee-99fd-dceff732cd1e}typeName{Wheel}name{BackRightWheel}pivotPoint_unit{0.5,0.5,-0.875}anchorNormal{1,0,0}scale{1,1,1}controller{false}\n\
-	id{77d30d72-9845-4b22-8e95-5ba6e29963b9}typeName{Wheel}name{FrontRightWheel}pivotPoint_unit{0.5,0.5,0.875}anchorNormal{1,0,0}scale{1,1,1}controller{false}\n\
-	id{21ca2a80-6860-4de3-9894-b896ec77ef9e}typeName{Wheel}name{BackLeftWheel}pivotPoint_unit{-0.5,0.5,-0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}\n\
-	id{eea2623a-86d3-4368-b4e0-576956b3ef1d}typeName{Wood}name{BackBar}pivotPoint_unit{-0.4375,0.4375,-0.8125}anchorNormal{0,0,-1}scale{1,0.25,0.25}controller{false}\n\
-	id{f1edc5a1-d544-4993-bdad-11167704a1e1}typeName{MachineGun}name{Gun1}pivotPoint_unit{0,0.625,0.875}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false\n\
-	id{e97f8ee1-320c-4aef-9343-3317accb015b}typeName{Crate}name{Crate}pivotPoint_unit{0,0.625,0}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}\n\
-^tasksScriptText{@@Grab Flag\n\
+		test("D5_DeepNestedPoppedOutData", ()=>
+		{
+			var vdf =
+"{name:'Main' worlds:Dictionary(string object)>{Test1:{vObjectRoot:{name:'VObjectRoot' children:[^]}} Test2:{vObjectRoot:{name:'VObjectRoot' children:[^]}}}}\n\
+	{id:System.Guid>'025f28a5-a14b-446d-b324-2d274a476a63' name:'#Types' children:[]}\n\
+	^{id:System.Guid>'08e84f18-aecf-4b80-9c3f-ae0697d9033a' name:'#Types' children:[]}";
+			var livePackNode = VDFLoader.ToVDFNode(vdf);
+			livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].primitiveValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
+			livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].primitiveValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
+		});
+		test("D5_SpeedTester", ()=>
+		{
+			var vdf = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^] tasksScriptText:'<<Grab Flag\n\
 	(Crate ensure contains an EnemyFlag) ensure is false\n\
 	targetFlag be EnemyFlag_OnEnemyGround [objectRefreshInterval: infinity] [lifetime: infinity]\n\
 	targetFlag set tag 'taken'\n\
@@ -492,195 +431,158 @@ Bring Flag to Safer Allied Ground\n\
 				\n\
 Shoot at Enemy Vehicle\n\
 	Gun1 aim at EnemyVehicle_NonBroken\n\
-	Gun1 fire@@}";
-	VDFLoader.ToVDFNode(vdf);
-	ok(true);
-});
+	Gun1 fire>>'}\n\
+	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}\n\
+	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}\n\
+	{id:'52854b70-c200-478f-bcd2-c69a03cd808f' typeName:'Wheel' name:'FrontLeftWheel' pivotPoint_unit:'-0.5,0.5,0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'971e394c-b440-4fee-99fd-dceff732cd1e' typeName:'Wheel' name:'BackRightWheel' pivotPoint_unit:'0.5,0.5,-0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'77d30d72-9845-4b22-8e95-5ba6e29963b9' typeName:'Wheel' name:'FrontRightWheel' pivotPoint_unit:'0.5,0.5,0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'21ca2a80-6860-4de3-9894-b896ec77ef9e' typeName:'Wheel' name:'BackLeftWheel' pivotPoint_unit:'-0.5,0.5,-0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'eea2623a-86d3-4368-b4e0-576956b3ef1d' typeName:'Wood' name:'BackBar' pivotPoint_unit:'-0.4375,0.4375,-0.8125' anchorNormal:'0,0,-1' scale:'1,0.25,0.25' controller:false}\n\
+	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1' typeName:'MachineGun' name:'Gun1' pivotPoint_unit:'0,0.625,0.875' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}\n\
+	{id:'e97f8ee1-320c-4aef-9343-3317accb015b' typeName:'Crate' name:'Crate' pivotPoint_unit:'0,0.625,0' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}";
+			VDFLoader.ToVDFNode(vdf);
+		});
 
-// to object
-// ==================
+		// to object
+		// ==========
 
-test("Depth0_Null", ()=>ok(VDF.Deserialize(">null") == null));
-test("Depth0_Nothing", ()=>ok(VDF.Deserialize("") == null));
-test("Depth0_Nothing_TypeSpecified", ()=>ok(VDF.Deserialize("string>") == null));
-test("Depth0_EmptyString", ()=>VDF.Deserialize(">empty").Should().Be(""));
-test("Depth0_Bool", ()=>VDF.Deserialize("true", "bool").Should().Be(true));
-test("Depth0_Float", ()=>VDF.Deserialize("1.5", "float").Should().Be(1.5));
+		test("D0_Null", ()=> { VDF.Deserialize("null").Should().Be(null); });
+		//test("D0_Nothing() { VDF.Deserialize("").Should().Be(null); });
+		//test("D0_Nothing_TypeSpecified() { VDF.Deserialize("string>").Should().Be(null); });
+		test("D0_EmptyString", ()=> { VDF.Deserialize("''").Should().Be(""); });
+		test("D0_Bool", ()=> { VDF.Deserialize("true", "bool").Should().Be(true); });
+		test("D0_Double", ()=> { VDF.Deserialize("1.5").Should().Be(1.5); });
+		//test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
 
-test("Depth1_EmptyStringInList", ()=> ok(VDF.Deserialize("text1|", "List[string]")[1] == null));
-test("Depth1_PreDeserializeMethod", ()=>
-{
-	var a = VDF.Deserialize("", "TypeWithPreDeserializeMethod");
-	a.flag.Should().Be(true);
-});
-test("Depth1_PostDeserializeMethod", ()=>
-{
-	var a = VDF.Deserialize("", "TypeWithPostDeserializeMethod");
-	a.flag.Should().Be(true);
-});
-test("Depth1_PostDeserializeMethod_CustomMessageRequired", ()=>{ VDF.Deserialize("", "TypeWithPostDeserializeMethod_CustomMessageRequired", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); });
-test("Depth1_InstantiateTypeManuallyThenFill", ()=>
-{
-	var a = new TypeInstantiatedManuallyThenFilled();
-	VDF.DeserializeInto("flag{true}", a);
-	a.flag.Should().Be(true);
-});
-test("Depth1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
-{
-	var a = VDF.Deserialize("\n\
-	messages:\n\
-		title1{message1}\n\
-		title2{message2}\n\
-	otherProperty{true}", "Depth1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1");
-	a.messages.Count.Should().Be(2);
-	a.messages["title1"].Should().Be("message1");
-	a.messages["title2"].Should().Be("message2");
-	a.otherProperty.Should().Be(true);
-});
+		class TypeWithPreDeserializeMethod
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				flag: new VDFPropInfo("bool")
+			});
+			flag: boolean;
+			VDFPreDeserialize(): void { this.flag = true; }
+		}
+		test("D1_PreDeserializeMethod", ()=>
+		{
+			var a = VDF.Deserialize("{}", "TypeWithPreDeserializeMethod");
+			a.flag.Should().Be(true);
+		});
+		class TypeWithPostDeserializeMethod
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				flag: new VDFPropInfo("bool")
+			});
+			flag: boolean;
+			VDFPostDeserialize(): void { this.flag = true; }
+		}
+		test("D1_PostDeserializeMethod", ()=>
+		{
+			var a = VDF.Deserialize("{}", "TypeWithPostDeserializeMethod");
+			a.flag.Should().Be(true);
+		});
+		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				flag: new VDFPropInfo("bool")
+			});
+			flag: boolean;
+			VDFPostDeserialize(message: any): void { if (<string>message == "RequiredMessage") this.flag = true; }
+		}
+		test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", ()=> { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, "WrongMessage")).flag.Should().Be(false); });
+		/*class ObjectWithPostDeserializeConstructor_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				flag: new VDFPropInfo("bool")
+			});
+			flag: boolean;
+			ObjectWithPostDeserializeConstructor_Class() { flag = true; }
+		}
+		test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
+		class TypeInstantiatedManuallyThenFilled
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				flag: new VDFPropInfo("bool")
+			});
+			flag: boolean;
+		}
+		test("D1_InstantiateTypeManuallyThenFill", ()=>
+		{
+			var a = new TypeInstantiatedManuallyThenFilled();
+			VDF.DeserializeInto("{flag:true}", a);
+			a.flag.Should().Be(true);
+		});
+		class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				messages: new VDFPropInfo("Dictionary(string string)", true, true),
+				otherProperty: new VDFPropInfo("bool")
+			}, false, true);
+			messages = new Dictionary<string, string>("string", "string",
+			{
+				title1: "message1",
+				title2: "message2"
+			});
+			otherProperty: boolean;
+		}
+		test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
+		{
+			var a = VDF.Deserialize(
+"{^}\n\
+	messages:{^}\n\
+		title1:'message1'\n\
+		title2:'message2'\n\
+	otherProperty:true", "D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1");
+			a.messages.Count.Should().Be(2);
+			a.messages["title1"].Should().Be("message1");
+			a.messages["title2"].Should().Be("message2");
+			a.otherProperty.Should().Be(true);
+		});
 
-// unique to JavaScript version
-// ==================
+		// for JSON compatibility
+		// ==========
 
-test("Depth0_InferCompatibleTypesForUnknownTypes_Object", ()=>
-{
-	var a = VDFLoader.ToVDFNode("UnknownType>string{Prop value string.}", new VDFLoadOptions(null, true));
-	a["string"].baseValue.Should().Be("Prop value string.");
-});
-test("Depth0_InferCompatibleTypesForUnknownTypes_BaseValue", ()=>
-{
-	var a = VDFLoader.ToVDFNode("string{UnkownBaseType>Prop value string.}", new VDFLoadOptions(null, true));
-	a["string"].baseValue.Should().Be("Prop value string.");
-});
-test("AsObject", ()=>
-{
-	var a = <any>VDF.Deserialize("bool{bool>false}float{float>3.5}", "object");
-	a.bool.Should().Be(false);
-	a.float.Should().BeExactly(3.5);
-});
-test("AsObject_NestedList_InferCompatibleTypesOff", () =>
-{
-	var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}");
-	ok(a == null);
-});
-test("AsObject_NestedList_InferCompatibleTypesOn", ()=>
-{
-	var a = VDF.Deserialize("name{Soils}children{id{1.1.1.1}name{Grass}|id{1.1.1.2}name{Dirt}|id{1.1.1.3}name{Snow}}", new VDFLoadOptions(null, true));
-	a["children"].length.Should().Be(3);
-});
+		test("D1_Map_IntsWithStringKeys", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("{\"key1\":0 \"key2\":1}", new VDFLoadOptions({allowStringKeys: true}));
+			a.mapChildren.Count.Should().Be(2);
+			a["key1"].primitiveValue.Should().Be(0);
+		});
+		test("D1_List_IntsWithCommaSeparators", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("[0,1]", new VDFLoadOptions({allowCommaSeparators: true}));
+			a.listChildren.Count.Should().Be(2);
+			a[0].primitiveValue.Should().Be(0);
+		});
 
+		// unique to JavaScript version
+		// ==========
 
-test("Depth2_ComplexPoppedOutItems", ()=>
-{
-	var a = VDF.Deserialize("id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:>>\n\
-	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}\n\
-	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}\n\
-	id{e97f8ee1-320c-4aef-9343-3317accb015b}typeName{Crate}name{Crate}pivotPoint_unit{0,0.625,0}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}", new VDFLoadOptions(true, true));
-	a.parts.Count.Should().Be(3);
-});
-test("Depth2_ComplexPoppedOutItemsThenBool", ()=>
-{
-	var a = VDF.Deserialize("id{595880cd-13cd-4578-9ef1-bd3175ac72bb}visible{true}parts:\n\
-	id{ba991aaf-447a-4a03-ade8-f4a11b4ea966}typeName{Wood}name{Body}pivotPoint_unit{-0.1875,0.4375,-0.6875}anchorNormal{0,1,0}scale{0.5,0.25,1.5}controller{true}\n\
-	id{743f64f2-8ece-4dd3-bdf5-bbb6378ffce5}typeName{Wood}name{FrontBar}pivotPoint_unit{-0.4375,0.5625,0.8125}anchorNormal{0,0,1}scale{1,0.25,0.25}controller{false}\n\
-	id{52854b70-c200-478f-bcd2-c69a03cd808f}typeName{Wheel}name{FrontLeftWheel}pivotPoint_unit{-0.5,0.5,0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}\n\
-	id{971e394c-b440-4fee-99fd-dceff732cd1e}typeName{Wheel}name{BackRightWheel}pivotPoint_unit{0.5,0.5,-0.875}anchorNormal{1,0,0}scale{1,1,1}controller{false}\n\
-	id{77d30d72-9845-4b22-8e95-5ba6e29963b9}typeName{Wheel}name{FrontRightWheel}pivotPoint_unit{0.5,0.5,0.875}anchorNormal{1,0,0}scale{1,1,1}controller{false}\n\
-	id{21ca2a80-6860-4de3-9894-b896ec77ef9e}typeName{Wheel}name{BackLeftWheel}pivotPoint_unit{-0.5,0.5,-0.875}anchorNormal{-1,0,0}scale{1,1,1}controller{false}\n\
-	id{eea2623a-86d3-4368-b4e0-576956b3ef1d}typeName{Wood}name{BackBar}pivotPoint_unit{-0.4375,0.4375,-0.8125}anchorNormal{0,0,-1}scale{1,0.25,0.25}controller{false}\n\
-	id{f1edc5a1-d544-4993-bdad-11167704a1e1}typeName{MachineGun}name{Gun1}pivotPoint_unit{0,0.625,0.875}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}\n\
-	id{e97f8ee1-320c-4aef-9343-3317accb015b}typeName{Crate}name{Crate}pivotPoint_unit{0,0.625,0}anchorNormal{0,1,0}scale{0.5,0.5,0.5}controller{false}\n\
-^tasksScriptText{@@Grab Flag\n\
-	(Crate ensure contains an EnemyFlag) ensure is false\n\
-	targetFlag be EnemyFlag_OnEnemyGround [objectRefreshInterval: infinity] [lifetime: infinity]\n\
-	targetFlag set tag `taken`\n\
-	FrontLeftWheel turn to targetFlag [with: FrontRightWheel]\n\
-	FrontLeftWheel roll forward\n\
-	FrontRightWheel roll forward\n\
-	BackLeftWheel roll forward\n\
-	BackRightWheel roll forward\n\
-	targetFlag put into Crate\n\
-Shoot at Enemy Vehicle\n\
-	Gun1 aim at EnemyVehicle_NonBroken\n\
-	Gun1 fire@@}", new VDFLoadOptions(true, true));
-	a.parts.Count.Should().Be(9);
-});
-
-// quick/temp tests
-// ==========
-
-test("Load_Quick", ()=>
-{
-	var a = VDFLoader.ToVDFNode("\n\
->>{Map>>{\n\
-	id{System.Guid>e10fffb1-b5f7-4404-9e77-508f8aaa73f3}\n\
-	name{Road}\n\
-	terrain{VTerrain>}\n\
-	regions:Region>>\n\
-		id{System.Guid>e5b9f479-deb7-4596-9a6f-910c7e297cbb}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
-		id{System.Guid>e908f0c0-c24c-482c-a210-0206e9b4c54f}name{Gravel}layer{>1}soilID{System.Guid>25fb1b3e-5290-420e-a321-6b0811b06816}\n\
-		id{System.Guid>bf5b4247-d667-45d2-837b-7e6534627a16}name{Path}layer{>4}soilID{System.Guid>ddc82700-51ca-43c1-b7ae-e53f72c3296b}\n\
-		id{System.Guid>f89e76b7-064d-40fc-9369-24c3c0e1a46a}name{DarkGrass}layer{>2}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
-		id{System.Guid>1ca9dac7-ab7e-4610-b84f-a61495c18c34}name{RocksAndGrass}layer{>3}soilID{System.Guid>a015276b-a061-44c5-8f80-b8083222ac8d}\n\
-	prefs{string,object>>selectedRegionID{>null}}\n\
-	lastCameraPos{Vector3>62.77748,72.13427,-32.98473}\n\
-	lastCameraRot{Vector3>43.25,0.2498523,0}\n\
-	showRegionOverlay{>false}\n\
-}|{\n\
-	id{System.Guid>78eff07d-1876-4139-beaf-21822c0dc0cb}\n\
-	name{RoadAndPath}\n\
-	terrain{VTerrain>}\n\
-	regions:Region>>\n\
-		id{System.Guid>e5b9f479-deb7-4596-9a6f-910c7e297cbb}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
-		id{System.Guid>bf5b4247-d667-45d2-837b-7e6534627a16}name{Path}layer{>7}soilID{System.Guid>188ed914-f208-4adb-a4e6-75867160e7bc}\n\
-		id{System.Guid>f89e76b7-064d-40fc-9369-24c3c0e1a46a}name{DarkGrass}layer{>6}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
-		id{System.Guid>65183f26-6c2f-4d25-93e9-3c2e53b9d2fe}name{GravelPath}layer{>6}soilID{System.Guid>25fb1b3e-5290-420e-a321-6b0811b06816}\n\
-	prefs{string,object>>selectedRegionID{System.Guid>65183f26-6c2f-4d25-93e9-3c2e53b9d2fe}}\n\
-	lastCameraPos{Vector3>53.48114,78.86283,-75.72661}\n\
-	lastCameraRot{Vector3>33.75,10.75037,0}\n\
-	showRegionOverlay{>false}\n\
-}|{\n\
-	id{System.Guid>04662d18-0c74-45ad-bddf-755320b08aad}\n\
-	name{SimpleHill}\n\
-	terrain{VTerrain>}\n\
-	regions:Region>>\n\
-		id{System.Guid>e7ff881b-3625-4213-a3fb-fb65de4c22a7}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
-		id{System.Guid>e53f3844-a12a-4d7c-bff5-0155cbe05f46}name{DarkGrass}layer{>1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
-	prefs{string,object>>selectedChunkPosition{Vector3i>0,0,0}selectedRegionID{System.Guid>e53f3844-a12a-4d7c-bff5-0155cbe05f46}}\n\
-	lastCameraPos{Vector3>102.5171,89.69484,-31.49277}\n\
-	lastCameraRot{Vector3>34.50011,12.25032,0}\n\
-	showRegionOverlay{>false}\n\
-}|{\n\
-	id{System.Guid>a2c69a05-1ac0-4dc6-a51b-6f0bbadf8082}\n\
-	name{Test1}\n\
-	terrain{VTerrain>}\n\
-	regions:Region>>\n\
-		id{System.Guid>5c2723fb-62d5-4ce3-859a-5c0474026e1b}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
-		id{System.Guid>07caffe1-8a40-4a58-880d-d413a1fccaee}name{DarkGrass}layer{>1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
-	prefs{string,object>>selectedRegionID{System.Guid>07caffe1-8a40-4a58-880d-d413a1fccaee}selectedChunkPosition{Vector3i>4,0,4}}\n\
-	lastCameraPos{Vector3>161.7268,43.22983,156.8803}\n\
-	lastCameraRot{Vector3>27.24998,167.9989,0}\n\
-	showRegionOverlay{>false}\n\
-}|{\n\
-	id{System.Guid>c18d38e0-61f8-4b3d-a31e-041913b8bad0}\n\
-	name{Test1345345}\n\
-	terrain{VTerrain>}\n\
-	regions:Region>>\n\
-		id{System.Guid>15041c99-fac3-44a6-ad2e-098374d56f72}name{Base}layer{>0}soilID{System.Guid>b7395b9e-77eb-4c88-92a0-34e2f679bde9}\n\
-		id{System.Guid>3ed40004-8633-46aa-89a4-0bc0016a9e7f}name{Test1}layer{>1}soilID{System.Guid>5fda6e73-3433-496a-b776-6d2906f121a9}\n\
-	prefs{string,object>>selectedRegionID{System.Guid>3ed40004-8633-46aa-89a4-0bc0016a9e7f}}\n\
-	lastCameraPos{Vector3>91.30679,38.33265,69.90929}\n\
-	lastCameraRot{Vector3>45.75002,233.2497,0}\n\
-	showRegionOverlay{>false}\n\
-}}\n\
-	".trim().replace(/    /g, "\t"));
-	a[0].items.Count.Should().Be(5);
-
-	var b = VDF.Deserialize("\n\
-name{Root}children:\n\
-	name{Stories}\n\
-	name{Games}children:\n\
-		name{CreativeDefense}children:\n\
-			name{DevelopmentTree}\n\
-	".trim().replace(/    /g, "\t"), new VDFLoadOptions(null, true));
-	b["children"][1]["children"][0]["children"][0]["name"].Should().Be("DevelopmentTree");
-});
+		test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOn_String", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions(null, null, true));
+			a["string"].baseValue.Should().Be("Prop value string.");
+		});
+		test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOff_String", ()=>
+		{
+			throws(()=>VDFLoader.ToVDFNode("UnknownType>{string:'Prop value string.'}"), "Type \"UnknownType\" not found.");
+		});
+		test("Depth1_InferCompatibleTypesForUnknownTypes_BaseValue", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("{string:UnkownBaseType>'Prop value string.'}", new VDFLoadOptions(null, null, true));
+			a["string"].baseValue.Should().Be("Prop value string.");
+		});
+		test("AsObject", ()=>
+		{
+			var a = <any>VDF.Deserialize("{bool:bool>false,double:double>3.5}", "object");
+			a.bool.Should().Be(false);
+			a.double.Should().Be(3.5);
+		});
+	}
+}

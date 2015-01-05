@@ -2,14 +2,14 @@
 {
 	static Get(vTypeName: string): VDFTypeInfo { return (window[vTypeName] || {}).typeInfo || new VDFTypeInfo(); }
 
+	propInfoByName: Object;
 	props_includeL1: boolean;
 	popOutChildrenL1: boolean;
-	propInfoByName: Object;
-	constructor(props_includeL1?: boolean, popOutChildrenL1?: boolean, propInfoByPropName?: Object)
+	constructor(propInfoByPropName?: Object, props_includeL1?: boolean, popOutChildrenL1?: boolean)
 	{
+		this.propInfoByName = propInfoByPropName || {};
 		this.props_includeL1 = props_includeL1;
 		this.popOutChildrenL1 = popOutChildrenL1;
-		this.propInfoByName = propInfoByPropName || {};
 	}
 	//SetPropInfo(propName: string, propInfo: VDFPropInfo) { this.propInfoByName[propName] = propInfo; }
 }

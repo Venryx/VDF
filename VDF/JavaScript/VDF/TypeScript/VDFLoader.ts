@@ -5,8 +5,12 @@
 	// JS only
 	inferCompatibleTypesForUnknownTypes: boolean;
 
-	constructor(message?: any, inferCompatibleTypesForUnknownTypes: boolean = false)
+	constructor(initializerObj?: any, message?: any, inferCompatibleTypesForUnknownTypes: boolean = false)
 	{
+		if (initializerObj)
+			for (var key in initializerObj)
+				this[key] = initializerObj[key];
+
 		this.message = message;
 		this.inferCompatibleTypesForUnknownTypes = inferCompatibleTypesForUnknownTypes;
 	}

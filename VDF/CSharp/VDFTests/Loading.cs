@@ -237,9 +237,9 @@ of three lines in total.".Fix());
 		[Fact] void D1_Dictionary_TypesInferredFromGenerics()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}", new VDFLoadOptions
-			{
-				typeAliasesByType = new Dictionary<Type, string> {{typeof(Color), "Color"}}
-			});
+			(
+				typeAliasesByType: new Dictionary<Type, string> {{typeof(Color), "Color"}}
+			));
 			a["vertexColors"]["9,4,2.5"].primitiveValue.Should().Be("Black");
 			a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
 			a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
@@ -343,7 +343,7 @@ of three lines in total.".Fix());
 @"[[^] [^] [^]]
 	{name{Road}}
 	^{name{RoadAndPath}}
-	^{name{SimpleHill}}"); //, new VDFLoadOptions {inferStringTypeForUnknownTypes = true});
+	^{name{SimpleHill}}"); //, new VDFLoadOptions(inferStringTypeForUnknownTypes: true));
 			a.listChildren.Count.Should().Be(3);
 		}
 		[Fact] void D2_List_PoppedOutObjects_MultilineString()
@@ -425,7 +425,8 @@ Shoot at Enemy Vehicle
 		//[Fact] void D0_Nothing_TypeSpecified() { VDF.Deserialize("string>").Should().Be(null); }
 		[Fact] void D0_EmptyString() { VDF.Deserialize("''").Should().Be(""); }
 		[Fact] void D0_Bool() { VDF.Deserialize<bool>("true").Should().Be(true); }
-		[Fact] void D0_Double() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
+		[Fact] void D0_Double() { VDF.Deserialize("1.5").Should().Be(1.5); }
+		[Fact] void D0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
 
 		class TypeWithPreDeserializeMethod
 		{
@@ -447,18 +448,18 @@ Shoot at Enemy Vehicle
 			var a = VDF.Deserialize<TypeWithPostDeserializeMethod>("{}");
 			a.flag.Should().Be(true);
 		}
-		class TypeWithPostDeserializeMethod_CustomMessageRequired
+		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
 			public bool flag;
 			[VDFPostDeserialize] void VDFPostDeserialize(object message) { if ((string)message == "RequiredMessage") flag = true; }
 		}
-		[Fact] void D1_PostDeserializeConstructor_CustomMessageRequired() { VDF.Deserialize<TypeWithPostDeserializeMethod_CustomMessageRequired>("{}", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); }
-		class TypeWithConstructorAsPostDeserializeMethod
+		[Fact] void D0_ObjectWithPostDeserializeMethodRequiringCustomMessage() { VDF.Deserialize<ObjectWithPostDeserializeMethodRequiringCustomMessage_Class>("{}", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); }
+		class ObjectWithPostDeserializeConstructor_Class
 		{
 			public bool flag;
-			[VDFPostDeserialize] TypeWithConstructorAsPostDeserializeMethod() { flag = true; }
+			[VDFPostDeserialize] ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
-		[Fact] void D1_PostDeserializeConstructor() { VDF.Deserialize<TypeWithConstructorAsPostDeserializeMethod>("{}").flag.Should().Be(true); }
+		[Fact] void D1_ObjectWithPostDeserializeConstructor() { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); }
 		class TypeInstantiatedManuallyThenFilled { [VDFProp] public bool flag; }
 		[Fact] void D1_InstantiateTypeManuallyThenFill()
 		{
@@ -508,7 +509,7 @@ Shoot at Enemy Vehicle
 		// unique to C# version
 		// ==========
 
-		[Fact] void D1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("{scores:{Dan:0 Dan:1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
+		//[Fact] void D1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("{scores:{Dan:0 Dan:1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
 		class SpecialList3<T> : List<T> {}
 		[Fact] void D1_SpecialListItem()
 		{
@@ -520,12 +521,17 @@ Shoot at Enemy Vehicle
 			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), (obj, genericArgs)=>new SpecialList3<string>{"Obvious first-item data; of type: " + genericArgs.First().Name.ToLower()}); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
 			VDF.Deserialize<SpecialList3<string>>("'<<Fake data-string that doesn't matter.>>'").Should().BeEquivalentTo(new SpecialList3<string> {"Obvious first-item data; of type: string"});
 		}
-		class TypeWithArray { [VDFProp] public string[] array; }
-		[Fact] void D1_ArrayItems()
+		[Fact] void D1_ListOfTypeArray()
 		{
-			var a = VDF.Deserialize<TypeWithArray>("{array:['A' 'B']}");
-			a.array[0].Should().Be("A");
-			a.array[1].Should().Be("B");
+			var a = VDF.Deserialize<int[]>("[0 1]");
+			a[0].Should().Be(0);
+			a[1].Should().Be(1);
+		}
+		[Fact] void D1_ListOfTypeArrayList()
+		{
+			var a = VDF.Deserialize<ArrayList>("[0 1]");
+			a[0].Should().Be(0);
+			a[1].Should().Be(1);
 		}
 	}
 }

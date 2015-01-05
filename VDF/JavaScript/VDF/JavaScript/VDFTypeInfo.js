@@ -1,8 +1,8 @@
 ﻿var VDFTypeInfo = (function () {
-    function VDFTypeInfo(props_includeL1, popOutChildrenL1, propInfoByPropName) {
+    function VDFTypeInfo(propInfoByPropName, props_includeL1, popOutChildrenL1) {
+        this.propInfoByName = propInfoByPropName || {};
         this.props_includeL1 = props_includeL1;
         this.popOutChildrenL1 = popOutChildrenL1;
-        this.propInfoByName = propInfoByPropName || {};
     }
     VDFTypeInfo.Get = function (vTypeName) {
         return (window[vTypeName] || {}).typeInfo || new VDFTypeInfo();

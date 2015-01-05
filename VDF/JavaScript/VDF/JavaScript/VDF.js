@@ -317,11 +317,7 @@ window["List"] = function List(itemType) {
 })();
 
 var Dictionary = (function () {
-    function Dictionary(keyType, valueType) {
-        var keyValuePairs = [];
-        for (var _i = 0; _i < (arguments.length - 2); _i++) {
-            keyValuePairs[_i] = arguments[_i + 2];
-        }
+    function Dictionary(keyType, valueType, keyValuePairsObj) {
         //VDFUtils.SetUpHiddenFields(this, true, "realVTypeName", "keyType", "valueType", "keys", "values");
         this.realVTypeName = "Dictionary[" + keyType + "," + valueType + "]";
         this.keyType = keyType;
@@ -329,9 +325,9 @@ var Dictionary = (function () {
         this.keys = [];
         this.values = [];
 
-        if (keyValuePairs)
-            for (var i = 0; i < keyValuePairs.length; i++)
-                this.Set(keyValuePairs[i][0], keyValuePairs[i][1]);
+        if (keyValuePairsObj)
+            for (var key in keyValuePairsObj)
+                this.Set(key, keyValuePairsObj[key]);
     }
     Object.defineProperty(Dictionary.prototype, "Keys", {
         // properties
@@ -360,14 +356,13 @@ var Dictionary = (function () {
         return this.values[this.keys.indexOf(key)];
     };
     Dictionary.prototype.Set = function (key, value) {
-        if (this.keys.indexOf(key) == -1) {
+        if (this.keys.indexOf(key) == -1)
             this.keys.push(key);
-            this[key] = value; // make value accessible directly on Dictionary object
-        }
         this.values[this.keys.indexOf(key)] = value;
+        this[key] = value; // make value accessible directly on Dictionary object
     };
     Dictionary.prototype.Add = function (key, value) {
-        if (this.Get(key) != undefined)
+        if (this.keys.indexOf(key) != -1)
             throw new Error("Dictionary already contains key '" + key + "'.");
         this.Set(key, value);
     };

@@ -10,8 +10,12 @@ class VDFSaveOptions
 	message: any;
 	typeMarking: VDFTypeMarking;
 
-	constructor(message?: any, typeMarking: VDFTypeMarking = VDFTypeMarking.Assembly)
+	constructor(initializerObj?: any, message?: any, typeMarking: VDFTypeMarking = VDFTypeMarking.Assembly)
 	{
+		if (initializerObj)
+			for (var key in initializerObj)
+				this[key] = initializerObj[key];
+
 		this.message = message;
 		this.typeMarking = typeMarking;
 	}

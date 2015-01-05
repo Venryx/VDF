@@ -6,8 +6,12 @@
     VDFTypeMarking[VDFTypeMarking["AssemblyExternalNoCollapse"] = 3] = "AssemblyExternalNoCollapse";
 })(VDFTypeMarking || (VDFTypeMarking = {}));
 var VDFSaveOptions = (function () {
-    function VDFSaveOptions(message, typeMarking) {
+    function VDFSaveOptions(initializerObj, message, typeMarking) {
         if (typeof typeMarking === "undefined") { typeMarking = 1 /* Assembly */; }
+        if (initializerObj)
+            for (var key in initializerObj)
+                this[key] = initializerObj[key];
+
         this.message = message;
         this.typeMarking = typeMarking;
     }

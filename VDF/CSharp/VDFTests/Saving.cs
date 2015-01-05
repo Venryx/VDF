@@ -138,7 +138,7 @@ that needs escaping.>>""".Fix());
 		}
 		[Fact] void D1_AnonymousTypeProperties_MarkNoTypes()
 		{
-			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Double = .5, String = "Prop value string."}, new VDFSaveOptions{typeMarking = VDFTypeMarking.None});
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Double = .5, String = "Prop value string."}, new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
 			a["Bool"].primitiveValue.Should().Be(false);
 			a["Int"].primitiveValue.Should().Be(5);
 			a["Double"].primitiveValue.Should().Be(.5);
@@ -147,7 +147,7 @@ that needs escaping.>>""".Fix());
 		}
 		[Fact] void D1_AnonymousTypeProperties_MarkAllTypes()
 		{
-			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Double = .5, String = "Prop value string."}, new VDFSaveOptions{typeMarking = VDFTypeMarking.External});
+			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Double = .5, String = "Prop value string."}, new VDFSaveOptions(typeMarking: VDFTypeMarking.External));
 			a.ToVDF().Should().Be("{Bool:false Int:5 Double:.5 String:\"Prop value string.\"}");
 		}
 		class TypeWithPreSerializePrepMethod
@@ -183,7 +183,7 @@ that needs escaping.>>""".Fix());
 		}
 		[Fact] void D1_TypeProperties_MarkForNone()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions {typeMarking = VDFTypeMarking.None});
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
 			a["Bool"].primitiveValue.Should().Be(true);
 			a["Int"].primitiveValue.Should().Be(5);
 			a["Double"].primitiveValue.Should().Be(.5);
@@ -195,17 +195,17 @@ that needs escaping.>>""".Fix());
 		}
 		[Fact] void D1_TypeProperties_MarkForInternal()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions{typeMarking = VDFTypeMarking.Internal});
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(typeMarking: VDFTypeMarking.Internal));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:true Int:5 Double:.5 String:\"Prop value string.\" list:[\"2A\" \"2B\"] nestedList:[[\"1A\"]]}");
 		}
 		[Fact] void D1_TypeProperties_MarkForExternal()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions{typeMarking = VDFTypeMarking.External});
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(typeMarking: VDFTypeMarking.External));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:true Int:5 Double:.5 String:\"Prop value string.\" list:List(string)>[\"2A\" \"2B\"] nestedList:List(List(string))>[[\"1A\"]]}");
 		}
 		[Fact] void D1_TypeProperties_MarkForExternalNoCollapse()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions{typeMarking = VDFTypeMarking.ExternalNoCollapse});
+			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions(typeMarking: VDFTypeMarking.ExternalNoCollapse));
 			a.ToVDF().Should().Be("TypeWithMixOfProps>{Bool:true Int:5 Double:.5 String:\"Prop value string.\" list:List(string)>[\"2A\" \"2B\"] nestedList:List(List(string))>[List(string)>[\"1A\"]]}");
 		}
 
@@ -362,7 +362,7 @@ that needs escaping.>>""".Fix());
 			var a = new SpecialList2<string>{"A", "B", "C"};
 			VDF.Serialize<SpecialList2<string>>(a).Should().Be("\"You'll never see the items!\"");
 		}
-		class D1_ListOfTypeArray_Strings_Class { [VDFProp] string[] array = { "A", "B" }; }
+		class D1_ListOfTypeArray_Strings_Class { [VDFProp] string[] array = {"A", "B"}; }
 		[Fact] void D1_ListOfTypeArray_Strings()
 		{
 			var a = VDFSaver.ToVDFNode<D1_ListOfTypeArray_Strings_Class>(new D1_ListOfTypeArray_Strings_Class());
