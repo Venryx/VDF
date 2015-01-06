@@ -1,26 +1,38 @@
 ﻿// init
 // ==========
-String.prototype.Contains = String.prototype.Contains || function (str) {
+
+// the below lets you easily add non-enumerable properties
+Object.defineProperty(Object.prototype, "_AddProperty", {
+    enumerable: false,
+    value: function (name, value) {
+        Object.defineProperty(this, name, {
+            enumerable: false,
+            value: value
+        });
+    }
+});
+
+String.prototype._AddProperty("Contains", function (str) {
     return this.indexOf(str) != -1;
-};
-String.prototype.StartsWith = String.prototype.StartsWith || function (str) {
+});
+String.prototype._AddProperty("StartsWith", function (str) {
     return this.indexOf(str) == 0;
-};
-String.prototype.EndsWith = String.prototype.EndsWith || function (str) {
+});
+String.prototype._AddProperty("EndsWith", function (str) {
     var expectedPos = this.length - str.length;
     return this.indexOf(str, expectedPos) == expectedPos;
-};
-String.prototype.TrimStart = String.prototype.TrimStart || function (chars) {
+});
+String.prototype._AddProperty("TrimStart", function (chars) {
     var result = "";
     for (var i = 0; i < this.length; i++)
         if (!chars.Contains(this[i]))
             result += this[i];
     return result;
-};
+});
 
-Array.prototype.Contains = Array.prototype.Contains || function (item) {
+Array.prototype._AddProperty("Contains", function (item) {
     return this.indexOf(item) != -1;
-};
+});
 
 // classes
 // ==========
