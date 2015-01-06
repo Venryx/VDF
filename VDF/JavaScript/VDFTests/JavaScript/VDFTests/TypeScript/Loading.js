@@ -52,11 +52,11 @@ var VDFTests;
             var a = VDFLoader.ToVDFNode("'Root string ends here.'## comment");
             a.primitiveValue.Should().Be("Root string ends here.");
         });
-        test("D0_BaseValue", function () {
+        test("D0_String", function () {
             var a = VDFLoader.ToVDFNode("'Root string.'");
             a.primitiveValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
         });
-        test("D0_BaseValue_SaveThenLoad", function () {
+        test("D0_StringWithSaveThenLoad", function () {
             var vdf = VDF.Serialize("Root string.");
             vdf.Should().Be("\"Root string.\"");
             var a = VDFLoader.ToVDFNode(vdf);

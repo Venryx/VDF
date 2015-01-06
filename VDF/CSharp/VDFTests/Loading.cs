@@ -29,12 +29,12 @@ namespace VDFTests
 			VDFNode a = VDFLoader.ToVDFNode("'Root string ends here.'## comment");
 			a.primitiveValue.Should().Be("Root string ends here.");
 		}
-		[Fact] void D0_BaseValue()
+		[Fact] void D0_String()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("'Root string.'");
 			a.primitiveValue.Should().Be("Root string."); // note; remember that for ambiguous cases like this, the base-like-value is added both as the obj's base-value and as its solitary item
 		}
-		[Fact] void D0_BaseValue_SaveThenLoad()
+		[Fact] void D0_StringWithSaveThenLoad()
 		{
 			var vdf = VDF.Serialize("Root string.");
 			vdf.Should().Be("\"Root string.\"");
@@ -506,6 +506,12 @@ Shoot at Enemy Vehicle
 		// unique to C# version
 		// ==========
 
+		[Fact] void D0_FloatAutoCastToDouble()
+		{
+			var a = VDFLoader.ToVDFNode("1.5");
+			float b = a;
+			b.Should().Be(1.5f);
+		}
 		//[Fact] void D1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("{scores:{Dan:0 Dan:1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
 		class SpecialList3<T> : List<T> {}
 		[Fact] void D1_SpecialListItem()
