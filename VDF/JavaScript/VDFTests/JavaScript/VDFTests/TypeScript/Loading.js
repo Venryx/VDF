@@ -519,9 +519,11 @@ Shoot at Enemy Vehicle\n\
             a["string"].Should().Be("Prop value string.");
         });
         test("Depth1_UnknownTypeWithFixOff_String", function () {
-            throws(function () {
-                return VDF.Deserialize("UnknownType>{string:'Prop value string.'}");
-            }, "is not a function");
+            try  {
+                VDF.Deserialize("UnknownType>{string:'Prop value string.'}");
+            } catch (ex) {
+                ok(ex.message == "Could not find type \"UnknownType\".");
+            }
         });
         test("Depth1_Object_UnknownTypeWithFixOn", function () {
             var a = VDF.Deserialize("{string:UnkownBaseType>'Prop value string.'}", new VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));

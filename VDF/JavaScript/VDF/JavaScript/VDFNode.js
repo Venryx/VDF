@@ -158,6 +158,8 @@
             return new List(genericParameters[0]);
         if (typeName.StartsWith("Dictionary("))
             return new Dictionary(genericParameters[0], genericParameters[1]);
+        if (!(window[typeName] instanceof Function))
+            throw new Error("Could not find type \"" + typeName + "\".");
         return new window[typeName];
     };
     VDFNode.GetCompatibleTypeNameForNode = function (node) {
