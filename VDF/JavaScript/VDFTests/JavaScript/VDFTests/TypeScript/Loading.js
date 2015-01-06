@@ -516,18 +516,18 @@ Shoot at Enemy Vehicle\n\
 
         // unique to JavaScript version
         // ==========
-        test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOn_String", function () {
-            var a = VDFLoader.ToVDFNode("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions(null, null, true));
-            a["string"].primitiveValue.Should().Be("Prop value string.");
+        test("Depth1_UnknownTypeWithFixOn_String", function () {
+            var a = VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
+            a["string"].Should().Be("Prop value string.");
         });
-
-        /*test("Depth1_ObjectWithInferCompatibleTypesForUnknownTypesOff_String", ()=>
-        {
-        throws(()=>VDFLoader.ToVDFNode("UnknownType>{string:'Prop value string.'}"), "Type \"UnknownType\" not found.");
-        });*/
-        test("Depth1_InferCompatibleTypesForUnknownTypes_BaseValue", function () {
-            var a = VDFLoader.ToVDFNode("{string:UnkownBaseType>'Prop value string.'}", new VDFLoadOptions(null, null, true));
-            a["string"].primitiveValue.Should().Be("Prop value string.");
+        test("Depth1_UnknownTypeWithFixOff_String", function () {
+            throws(function () {
+                return VDF.Deserialize("UnknownType>{string:'Prop value string.'}");
+            }, "is not a function");
+        });
+        test("Depth1_Object_UnknownTypeWithFixOn", function () {
+            var a = VDF.Deserialize("{string:UnkownBaseType>'Prop value string.'}", new VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
+            a["string"].Should().Be("Prop value string.");
         });
         test("AsObject", function () {
             var a = VDF.Deserialize("{bool:bool>false double:double>3.5}", "object");

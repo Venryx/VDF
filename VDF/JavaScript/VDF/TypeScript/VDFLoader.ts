@@ -6,11 +6,15 @@
 	allowStringKeys: boolean;
 	allowCommaSeparators: boolean;
 
-	constructor(initializerObj?: any, message?: any, allowStringKeys = false, allowCommaSeparators = false)
+	// JS only
+	loadUnknownTypesAsBasicTypes: boolean;
+
+	constructor(initializerObj?: any, message?: any, allowStringKeys = false, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
 	{
 		this.message = message;
 		this.allowStringKeys = allowStringKeys;
 		this.allowCommaSeparators = allowCommaSeparators;
+		this.loadUnknownTypesAsBasicTypes = loadUnknownTypesAsBasicTypes;
 
 		if (initializerObj)
 			for (var key in initializerObj)

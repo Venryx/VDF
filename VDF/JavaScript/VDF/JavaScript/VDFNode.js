@@ -172,7 +172,7 @@
         var options = options_orNothing || new VDFLoadOptions();
 
         var fromVDFTypeName = "object";
-        if (this.metadata != null)
+        if (this.metadata != null && (window[this.metadata] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
             fromVDFTypeName = this.metadata;
         else if (typeof this.primitiveValue == "boolean")
             fromVDFTypeName = "bool";

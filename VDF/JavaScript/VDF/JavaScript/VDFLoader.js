@@ -1,10 +1,12 @@
 ﻿var VDFLoadOptions = (function () {
-    function VDFLoadOptions(initializerObj, message, allowStringKeys, allowCommaSeparators) {
+    function VDFLoadOptions(initializerObj, message, allowStringKeys, allowCommaSeparators, loadUnknownTypesAsBasicTypes) {
         if (typeof allowStringKeys === "undefined") { allowStringKeys = false; }
         if (typeof allowCommaSeparators === "undefined") { allowCommaSeparators = false; }
+        if (typeof loadUnknownTypesAsBasicTypes === "undefined") { loadUnknownTypesAsBasicTypes = false; }
         this.message = message;
         this.allowStringKeys = allowStringKeys;
         this.allowCommaSeparators = allowCommaSeparators;
+        this.loadUnknownTypesAsBasicTypes = loadUnknownTypesAsBasicTypes;
 
         if (initializerObj)
             for (var key in initializerObj)
