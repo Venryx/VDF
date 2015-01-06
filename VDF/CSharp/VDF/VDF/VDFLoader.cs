@@ -106,6 +106,8 @@ public static class VDFLoader
 
 		// if list, parse items
 		else if (typeof(IList).IsAssignableFrom(type))
+		{
+			node.isList = true;
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
 			{
 				var token = tokensAtDepth1[i];
@@ -118,9 +120,12 @@ public static class VDFLoader
 						i++;
 				}
 			}
+		}
 
 		// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
 		else //if (!typeof(IList).IsAssignableFrom(objType))
+		{
+			node.isMap = true;
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
 			{
 				var token = tokensAtDepth1[i];
@@ -138,6 +143,7 @@ public static class VDFLoader
 					node.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
 				}
 			}
+		}
 
 		return node;
 	}

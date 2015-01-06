@@ -99,16 +99,7 @@ three lines".Fix());
 			a[0].primitiveValue.Should().Be(null);
 			a[1].primitiveValue.Should().Be(null);
 		}*/
-		[Fact] void D0_EmptyListWithNoTypeSpecified()
-		{
-			VDFNode a = VDFLoader.ToVDFNode<List<object>>("[]");
-			a.listChildren.Count.Should().Be(0);
-		}
-		[Fact] void D0_EmptyListWithTypeSpecified()
-		{
-			VDFNode a = VDFLoader.ToVDFNode("List(object)>[]");
-			a.listChildren.Count.Should().Be(0);
-		}
+		[Fact] void D0_EmptyList() { ((List<object>)VDF.Deserialize("[]")).Count.Should().Be(0); }
 		[Fact] void D0_ListMetadata()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("List(int)>[1 2]");
@@ -123,6 +114,7 @@ three lines".Fix());
 			a[0].metadata.Should().Be("string");
 			a[1].metadata.Should().Be("string");
 		}
+		[Fact] void D0_EmptyMap() { ((Dictionary<object, object>)VDF.Deserialize("{}")).Count.Should().Be(0); }
 		[Fact] void D0_Map_ChildMetadata()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("Dictionary(object object)>[a:string>\"1\" b:string>\"2\"]");

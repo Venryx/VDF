@@ -91,7 +91,8 @@ var VDFLoader = (function () {
             node.primitiveValue = parseFloat(firstNonMetadataToken.text);
         else if (firstNonMetadataToken.type == 17 /* String */)
             node.primitiveValue = firstNonMetadataToken.text;
-        else if (typeName.StartsWith("List("))
+        else if (typeName.StartsWith("List(")) {
+            node.isList = true;
             for (var i = 0; i < tokensAtDepth1.Count; i++) {
                 var token = tokensAtDepth1[i];
                 if (token.type != 19 /* ListEndMarker */ && token.type != 21 /* MapEndMarker */) {
@@ -104,7 +105,8 @@ var VDFLoader = (function () {
                         i++;
                 }
             }
-        else
+        } else {
+            node.isMap = true;
             for (var i = 0; i < tokensAtDepth1.Count; i++) {
                 var token = tokensAtDepth1[i];
                 if (token.type == 11 /* Key */) {
@@ -122,6 +124,7 @@ var VDFLoader = (function () {
                     node.SetMapChild(propName, VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueTypeName, options));
                 }
             }
+        }
 
         return node;
     };

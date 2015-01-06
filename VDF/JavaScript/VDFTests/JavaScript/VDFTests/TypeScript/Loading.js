@@ -113,13 +113,8 @@ three lines".Fix());
         a[0].primitiveValue.Should().Be(null);
         a[1].primitiveValue.Should().Be(null);
         });*/
-        test("D0_EmptyListWithNoTypeSpecified", function () {
-            var a = VDFLoader.ToVDFNode("[]", "List(object)");
-            a.listChildren.Count.Should().Be(0);
-        });
-        test("D0_EmptyListWithTypeSpecified", function () {
-            var a = VDFLoader.ToVDFNode("List(object)>[]");
-            a.listChildren.Count.Should().Be(0);
+        test("D0_EmptyList", function () {
+            VDF.Deserialize("[]").Count.Should().Be(0);
         });
         test("D0_ListMetadata", function () {
             var a = VDFLoader.ToVDFNode("List(int)>[1 2]");
@@ -132,6 +127,9 @@ three lines".Fix());
             a.metadata.Should().Be("List(object)");
             a[0].metadata.Should().Be("string");
             a[1].metadata.Should().Be("string");
+        });
+        test("D0_EmptyMap", function () {
+            VDF.Deserialize("{}").Count.Should().Be(0);
         });
         test("D0_Map_ChildMetadata", function () {
             var a = VDFLoader.ToVDFNode("Dictionary(object object)>[a:string>\"1\" b:string>\"2\"]");
