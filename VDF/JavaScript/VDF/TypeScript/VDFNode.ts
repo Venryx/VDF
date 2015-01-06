@@ -221,7 +221,7 @@
 			result = null;
 		else if (EnumValue.IsEnum(finalTypeName)) // helper importer for enums
 			result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
-		else if (this.primitiveValue != null)
+		else if (VDF.GetIsTypePrimitive(finalTypeName)) //primitiveValue != null)
 			result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
 		else
 		{

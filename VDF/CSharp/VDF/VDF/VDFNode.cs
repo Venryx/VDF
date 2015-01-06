@@ -255,7 +255,7 @@ public class VDFNode
 			result = null;
 		else if (finalType.IsEnum) // helper importer for enums
 			result = Enum.Parse(finalType, primitiveValue.ToString()); //primitiveValue);
-		else if (primitiveValue != null)
+		else if (VDF.GetIsTypePrimitive(finalType)) //primitiveValue != null)
 			result = Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
 		else
 		{

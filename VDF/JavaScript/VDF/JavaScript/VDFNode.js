@@ -199,7 +199,7 @@
             result = null;
         else if (EnumValue.IsEnum(finalTypeName))
             result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
-        else if (this.primitiveValue != null)
+        else if (VDF.GetIsTypePrimitive(finalTypeName))
             result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
         else {
             result = VDFNode.CreateNewInstanceOfType(finalTypeName);

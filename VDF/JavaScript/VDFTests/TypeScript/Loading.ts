@@ -71,6 +71,11 @@ module VDFTests // added to match C# indentation
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.primitiveValue.Should().Be("Root string.");
 		});
+		test("D0_StringAsNull", ()=>
+		{
+			var a = VDF.Deserialize("null", "string");
+			ok(a == null);
+		});
 		test("D0_BaseValue_Literal", ()=>
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");

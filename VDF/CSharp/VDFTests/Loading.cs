@@ -41,6 +41,11 @@ namespace VDFTests
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.primitiveValue.Should().Be("Root string.");
 		}
+		[Fact] void D0_StringAsNull()
+		{
+			var a = VDF.Deserialize<string>("null");
+			a.Should().Be(null);
+		}
 		[Fact] void D0_BaseValue_Literal()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
