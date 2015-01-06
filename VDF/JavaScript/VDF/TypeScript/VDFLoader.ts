@@ -40,7 +40,7 @@ class VDFLoader
 		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
 			return VDFLoader.ToVDFNode(tokens_orText, null, declaredTypeName_orOptions);
 		if (typeof tokens_orText == "string")
-			return VDFLoader.ToVDFNode(VDFTokenParser.ParseTokens(tokens_orText, true, options_orNothing), declaredTypeName_orOptions, options_orNothing);
+			return VDFLoader.ToVDFNode(VDFTokenParser.ParseTokens(tokens_orText, options_orNothing), declaredTypeName_orOptions, options_orNothing);
 
 		var tokens: List<VDFToken> = tokens_orText;
 		var declaredTypeName: string = declaredTypeName_orOptions;

@@ -73,7 +73,7 @@ public static class VDFTokenParser
 {
 	static List<char> charsAToZ = new Regex(".").Matches("abcdefghijklmnopqrstuvwxyz").OfType<Match>().Select(a=>a.Value[0]).ToList();
 	static List<char> chars0To9DotAndNegative = new Regex(".").Matches("0123456789.-").OfType<Match>().Select(a=>a.Value[0]).ToList();
-	public static List<VDFToken> ParseTokens(string text, bool postProcessTokens = true, VDFLoadOptions options = null)
+	public static List<VDFToken> ParseTokens(string text, VDFLoadOptions options = null, bool parseAllTokens = false, bool postProcessTokens = true)
 	{
 		text = (text ?? "").Replace("\r\n", "\n"); // maybe temp
 		options = options ?? new VDFLoadOptions();
@@ -194,10 +194,10 @@ public static class VDFTokenParser
 
 			if (currentTokenType != VDFTokenType.None)
 			{
-				if (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker)
-					result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 				if (currentTokenType == VDFTokenType.StringStartMarker && ch == nextChar) // special case; empty string
-					result.Add(new VDFToken(VDFTokenType.String, -1, result.Count, "")); // char-pos has invalid value (should be fine, though)
+					result.Add(new VDFToken(VDFTokenType.String, currentTokenFirstCharPos, result.Count, ""));
+				if (parseAllTokens || (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker))
+					result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 
 				currentTokenFirstCharPos = i + 1;
 				currentTokenTextBuilder.Length = 0; // clear

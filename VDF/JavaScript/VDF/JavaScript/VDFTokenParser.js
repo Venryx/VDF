@@ -51,7 +51,8 @@ var VDFToken = (function () {
 var VDFTokenParser = (function () {
     function VDFTokenParser() {
     }
-    VDFTokenParser.ParseTokens = function (text, postProcessTokens, options) {
+    VDFTokenParser.ParseTokens = function (text, options, parseAllTokens, postProcessTokens) {
+        if (typeof parseAllTokens === "undefined") { parseAllTokens = false; }
         if (typeof postProcessTokens === "undefined") { postProcessTokens = true; }
         text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
         options = options || new VDFLoadOptions();
@@ -149,10 +150,10 @@ var VDFTokenParser = (function () {
             }
 
             if (currentTokenType != 6 /* None */) {
-                if (currentTokenType != 0 /* LiteralStartMarker */ && currentTokenType != 1 /* LiteralEndMarker */ && currentTokenType != 2 /* StringStartMarker */ && currentTokenType != 3 /* StringEndMarker */ && currentTokenType != 4 /* InLineComment */ && currentTokenType != 5 /* SpaceOrCommaSpan */ && currentTokenType != 10 /* MetadataEndMarker */)
-                    result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
                 if (currentTokenType == 2 /* StringStartMarker */ && ch == nextChar)
-                    result.Add(new VDFToken(17 /* String */, -1, result.Count, "")); // char-pos has invalid value (should be fine, though)
+                    result.Add(new VDFToken(17 /* String */, currentTokenFirstCharPos, result.Count, ""));
+                if (parseAllTokens || (currentTokenType != 0 /* LiteralStartMarker */ && currentTokenType != 1 /* LiteralEndMarker */ && currentTokenType != 2 /* StringStartMarker */ && currentTokenType != 3 /* StringEndMarker */ && currentTokenType != 4 /* InLineComment */ && currentTokenType != 5 /* SpaceOrCommaSpan */ && currentTokenType != 10 /* MetadataEndMarker */))
+                    result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 
                 currentTokenFirstCharPos = i + 1;
                 currentTokenTextBuilder.Clear();

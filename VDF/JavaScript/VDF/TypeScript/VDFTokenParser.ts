@@ -58,7 +58,7 @@ class VDFTokenParser
 {
 	static charsAToZ: List<string> = <List<string>>List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
 	static chars0To9DotAndNegative: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.\-".match(/./g)));
-	public static ParseTokens(text: string, postProcessTokens = true, options?: VDFLoadOptions): List<VDFToken>
+	public static ParseTokens(text: string, options?: VDFLoadOptions, parseAllTokens = false, postProcessTokens = true): List<VDFToken>
 	{
 		text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
 		options = options || new VDFLoadOptions();
@@ -179,10 +179,10 @@ class VDFTokenParser
 
 			if (currentTokenType != VDFTokenType.None)
 			{
-				if (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker)
-					result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 				if (currentTokenType == VDFTokenType.StringStartMarker && ch == nextChar) // special case; empty string
-					result.Add(new VDFToken(VDFTokenType.String, -1, result.Count, "")); // char-pos has invalid value (should be fine, though)
+					result.Add(new VDFToken(VDFTokenType.String, currentTokenFirstCharPos, result.Count, ""));
+				if (parseAllTokens || (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker))
+					result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 
 				currentTokenFirstCharPos = i + 1;
 				currentTokenTextBuilder.Clear();
