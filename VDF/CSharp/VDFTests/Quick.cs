@@ -40,7 +40,7 @@ namespace VDFTests
 
 		[Fact] void Load()
 		{
-			var a = VDF.Deserialize<string>("null", new VDFLoadOptions().ForJSON()); // todo; break point
+			var a = VDFLoader.ToVDFNode("[\"<<JS) Uncaught TypeError: undefined is not a function (161; coui://ui/Main/Packages/VDF/VDFNode.js)\n\n>>\"]");
 			V.Nothing();
 		}
 

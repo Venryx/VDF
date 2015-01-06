@@ -103,25 +103,26 @@ var VDFTokenParser = (function () {
                 nextChar = i + 1 + activeLiteralStartChars.length < text.length ? text[i + 1 + activeLiteralStartChars.length] : null; // shift next-char to one right after literal-end-marker (i.e. pretend it isn't there)
             var lastCharInString = (activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"');
             if (currentTokenType == 6 /* None */ && (activeLiteralStartChars == null || lastCharInLiteral) && (activeStringStartChar == null || lastCharInString)) {
-                if (ch == '#' && nextChar == '#') {
+                var firstTokenChar = currentTokenTextBuilder.Length == 1;
+                if (ch == '#' && nextChar == '#' && firstTokenChar) {
                     currentTokenTextBuilder = new StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
                     currentTokenType = 4 /* InLineComment */;
                     i += currentTokenTextBuilder.Length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
                 } else if (currentTokenTextBuilder.ToString().TrimStart(options.allowCommaSeparators ? [' ', ','] : [' ']).length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ',')))
                     currentTokenType = 5 /* SpaceOrCommaSpan */;
-                else if (ch == '\t')
+                else if (ch == '\t' && firstTokenChar)
                     currentTokenType = 7 /* Tab */;
-                else if (ch == '\n')
+                else if (ch == '\n' && firstTokenChar)
                     currentTokenType = 8 /* LineBreak */;
                 else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
                     currentTokenType = 9 /* Metadata */;
-                else if (ch == '>')
+                else if (ch == '>' && firstTokenChar)
                     currentTokenType = 10 /* MetadataEndMarker */;
                 else if (nextNonSpaceChar == ':')
                     currentTokenType = 11 /* Key */;
-                else if (ch == ':')
+                else if (ch == ':' && firstTokenChar)
                     currentTokenType = 12 /* KeyValueSeparator */;
-                else if (ch == '^')
+                else if (ch == '^' && firstTokenChar)
                     currentTokenType = 13 /* PoppedOutChildGroupMarker */;
                 else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
                     currentTokenType = 14 /* Null */;
@@ -135,15 +136,15 @@ var VDFTokenParser = (function () {
                         currentTokenTextBuilder = new StringBuilder(VDFTokenParser.UnpadString(currentTokenTextBuilder.ToString()));
                     }
                     currentTokenType = 17 /* String */;
-                } else if (ch == '[') {
+                } else if (ch == '[' && firstTokenChar) {
                     currentTokenType = 18 /* ListStartMarker */;
                     lastScopeIncreaseChar = ch;
-                } else if (ch == ']')
+                } else if (ch == ']' && firstTokenChar)
                     currentTokenType = 19 /* ListEndMarker */;
-                else if (ch == '{') {
+                else if (ch == '{' && firstTokenChar) {
                     currentTokenType = 20 /* MapStartMarker */;
                     lastScopeIncreaseChar = ch;
-                } else if (ch == '}')
+                } else if (ch == '}' && firstTokenChar)
                     currentTokenType = 21 /* MapEndMarker */;
             }
 

@@ -120,7 +120,8 @@ class VDFTokenParser
 			var lastCharInString = (activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"');
 			if (currentTokenType == VDFTokenType.None && (activeLiteralStartChars == null || lastCharInLiteral) && (activeStringStartChar == null || lastCharInString)) // if not in pass-through-span
 			{
-				if (ch == '#' && nextChar == '#') // if first char of in-line-comment
+				var firstTokenChar = currentTokenTextBuilder.Length == 1;
+				if (ch == '#' && nextChar == '#' && firstTokenChar) // if first char of in-line-comment
 				{
 					currentTokenTextBuilder = new StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
 					currentTokenType = VDFTokenType.InLineComment;
@@ -129,20 +130,20 @@ class VDFTokenParser
 				else if (currentTokenTextBuilder.ToString().TrimStart(options.allowCommaSeparators ? [' ', ','] : [' ']).length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ','))) // if last char of space-or-comma-span
 					currentTokenType = VDFTokenType.SpaceOrCommaSpan;
 
-				else if (ch == '\t')
+				else if (ch == '\t' && firstTokenChar)
 					currentTokenType = VDFTokenType.Tab;
-				else if (ch == '\n')
+				else if (ch == '\n' && firstTokenChar)
 					currentTokenType = VDFTokenType.LineBreak;
 
 				else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
 					currentTokenType = VDFTokenType.Metadata;
-				else if (ch == '>')
+				else if (ch == '>' && firstTokenChar)
 					currentTokenType = VDFTokenType.MetadataEndMarker;
 				else if (nextNonSpaceChar == ':')
 					currentTokenType = VDFTokenType.Key;
-				else if (ch == ':')
+				else if (ch == ':' && firstTokenChar)
 					currentTokenType = VDFTokenType.KeyValueSeparator;
-				else if (ch == '^')
+				else if (ch == '^' && firstTokenChar)
 					currentTokenType = VDFTokenType.PoppedOutChildGroupMarker;
 
 				else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar))) // if text-so-far is 'null', and there's no more letters
@@ -160,19 +161,19 @@ class VDFTokenParser
 					}
 					currentTokenType = VDFTokenType.String;
 				}
-				else if (ch == '[')
+				else if (ch == '[' && firstTokenChar)
 				{
 					currentTokenType = VDFTokenType.ListStartMarker;
 					lastScopeIncreaseChar = ch;
 				}
-				else if (ch == ']')
+				else if (ch == ']' && firstTokenChar)
 					currentTokenType = VDFTokenType.ListEndMarker;
-				else if (ch == '{')
+				else if (ch == '{' && firstTokenChar)
 				{
 					currentTokenType = VDFTokenType.MapStartMarker;
 					lastScopeIncreaseChar = ch;
 				}
-				else if (ch == '}')
+				else if (ch == '}' && firstTokenChar)
 					currentTokenType = VDFTokenType.MapEndMarker;
 			}
 

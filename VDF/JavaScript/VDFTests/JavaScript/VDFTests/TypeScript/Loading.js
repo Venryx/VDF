@@ -316,9 +316,9 @@ of three lines in total.".Fix());
         });
         test("D2_List_Lists_PoppedOutObjects", function () {
             var a = VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
-	{name{Road}}\n\
-	^{name{RoadAndPath}}\n\
-	^{name{SimpleHill}}");
+	{name:'Road'}\n\
+	^{name:'RoadAndPath'}\n\
+	^{name:'SimpleHill'}");
             a.listChildren.Count.Should().Be(3);
         });
         test("D2_List_PoppedOutObjects_MultilineString", function () {
