@@ -72,7 +72,7 @@ public class VDFToken
 public static class VDFTokenParser
 {
 	static List<char> charsAToZ = new Regex(".").Matches("abcdefghijklmnopqrstuvwxyz").OfType<Match>().Select(a=>a.Value[0]).ToList();
-	static List<char> chars0To9AndDot = new Regex(".").Matches("0123456789.").OfType<Match>().Select(a=>a.Value[0]).ToList();
+	static List<char> chars0To9DotAndNegative = new Regex(".").Matches("0123456789.-").OfType<Match>().Select(a=>a.Value[0]).ToList();
 	public static List<VDFToken> ParseTokens(string text, bool postProcessTokens = true, VDFLoadOptions options = null)
 	{
 		text = (text ?? "").Replace("\r\n", "\n"); // maybe temp
@@ -165,7 +165,7 @@ public static class VDFTokenParser
 					currentTokenType = VDFTokenType.Null;
 				else if (((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (!nextChar.HasValue || !charsAToZ.Contains(nextChar.Value)))
 					currentTokenType = VDFTokenType.Boolean;
-				else if (chars0To9AndDot.Contains(currentTokenTextBuilder[0]) && (!nextChar.HasValue || !chars0To9AndDot.Contains(nextChar.Value)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
+				else if (chars0To9DotAndNegative.Contains(currentTokenTextBuilder[0]) && (!nextChar.HasValue || !chars0To9DotAndNegative.Contains(nextChar.Value)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
 					currentTokenType = VDFTokenType.Number;
 				else if ((activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"'))
 				{

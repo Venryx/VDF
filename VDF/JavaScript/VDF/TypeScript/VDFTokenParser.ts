@@ -57,7 +57,7 @@ class VDFToken
 class VDFTokenParser
 {
 	static charsAToZ: List<string> = <List<string>>List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-	static chars0To9AndDot: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.".match(/./g)));
+	static chars0To9DotAndNegative: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.\-".match(/./g)));
 	public static ParseTokens(text: string, postProcessTokens = true, options?: VDFLoadOptions): List<VDFToken>
 	{
 		text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
@@ -150,7 +150,7 @@ class VDFTokenParser
 					currentTokenType = VDFTokenType.Null;
 				else if (((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
 					currentTokenType = VDFTokenType.Boolean;
-				else if (VDFTokenParser.chars0To9AndDot.Contains(currentTokenTextBuilder.data[0]) && (nextChar == null || !VDFTokenParser.chars0To9AndDot.Contains(nextChar)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
+				else if (VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.data[0]) && (nextChar == null || !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
 					currentTokenType = VDFTokenType.Number;
 				else if ((activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"'))
 				{
