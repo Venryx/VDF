@@ -119,7 +119,7 @@ var VDFTokenParser = (function () {
                     currentTokenType = 9 /* Metadata */;
                 else if (ch == '>' && firstTokenChar)
                     currentTokenType = 10 /* MetadataEndMarker */;
-                else if (nextNonSpaceChar == ':')
+                else if (nextNonSpaceChar == ':' && ch != ' ')
                     currentTokenType = 11 /* Key */;
                 else if (ch == ':' && firstTokenChar)
                     currentTokenType = 12 /* KeyValueSeparator */;
@@ -262,7 +262,7 @@ var VDFTokenParser = (function () {
         }
     };
     VDFTokenParser.charsAToZ = List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-    VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-".match(/./g)));
+    VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
     return VDFTokenParser;
 })();
 //# sourceMappingURL=VDFTokenParser.js.map

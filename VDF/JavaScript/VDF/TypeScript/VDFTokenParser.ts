@@ -57,7 +57,7 @@ class VDFToken
 class VDFTokenParser
 {
 	static charsAToZ: List<string> = <List<string>>List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-	static chars0To9DotAndNegative: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.\-".match(/./g)));
+	static chars0To9DotAndNegative: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
 	public static ParseTokens(text: string, options?: VDFLoadOptions, parseAllTokens = false, postProcessTokens = true): List<VDFToken>
 	{
 		text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
@@ -139,7 +139,7 @@ class VDFTokenParser
 					currentTokenType = VDFTokenType.Metadata;
 				else if (ch == '>' && firstTokenChar)
 					currentTokenType = VDFTokenType.MetadataEndMarker;
-				else if (nextNonSpaceChar == ':')
+				else if (nextNonSpaceChar == ':' && ch != ' ')
 					currentTokenType = VDFTokenType.Key;
 				else if (ch == ':' && firstTokenChar)
 					currentTokenType = VDFTokenType.KeyValueSeparator;

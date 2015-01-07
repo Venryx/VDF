@@ -72,7 +72,7 @@ public class VDFToken
 public static class VDFTokenParser
 {
 	static List<char> charsAToZ = new Regex(".").Matches("abcdefghijklmnopqrstuvwxyz").OfType<Match>().Select(a=>a.Value[0]).ToList();
-	static List<char> chars0To9DotAndNegative = new Regex(".").Matches("0123456789.-").OfType<Match>().Select(a=>a.Value[0]).ToList();
+	static List<char> chars0To9DotAndNegative = new Regex(".").Matches("0123456789.-+eE").OfType<Match>().Select(a=>a.Value[0]).ToList();
 	public static List<VDFToken> ParseTokens(string text, VDFLoadOptions options = null, bool parseAllTokens = false, bool postProcessTokens = true)
 	{
 		text = (text ?? "").Replace("\r\n", "\n"); // maybe temp
@@ -154,7 +154,7 @@ public static class VDFTokenParser
 					currentTokenType = VDFTokenType.Metadata;
 				else if (ch == '>' && firstTokenChar)
 					currentTokenType = VDFTokenType.MetadataEndMarker;
-				else if (nextNonSpaceChar == ':')
+				else if (nextNonSpaceChar == ':' && ch != ' ')
 					currentTokenType = VDFTokenType.Key;
 				else if (ch == ':' && firstTokenChar)
 					currentTokenType = VDFTokenType.KeyValueSeparator;

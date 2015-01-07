@@ -585,6 +585,11 @@ Shoot at Enemy Vehicle\n\
 			a.listChildren.Count.Should().Be(2);
 			a[0].primitiveValue.Should().Be(0);
 		});
+		test("D3_List_NumbersWithScientificNotation", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("[-7.45058e-09,0.1,-1.49012e-08]", new VDFLoadOptions().ForJSON());
+			a[0].primitiveValue.Should().Be(-7.45058e-09);
+		});
 
 		// unique to JavaScript version
 		// ==========
