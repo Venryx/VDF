@@ -200,6 +200,36 @@ var StringBuilder = (function () {
     return StringBuilder;
 })();
 
+// attributes
+// ----------
+var AttributesWrapper = (function () {
+    function AttributesWrapper(attributes) {
+        this.attributes = attributes;
+    }
+    Object.defineProperty(AttributesWrapper.prototype, "type", {
+        set: function (type) {
+            type.attributes = this.attributes;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(AttributesWrapper.prototype, "method", {
+        set: function (method) {
+            method.attributes = this.attributes;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return AttributesWrapper;
+})();
+function AddAttributes() {
+    var attributes = [];
+    for (var _i = 0; _i < (arguments.length - 0); _i++) {
+        attributes[_i] = arguments[_i + 0];
+    }
+    return new AttributesWrapper(attributes);
+}
+
 // VDF-usable data wrappers
 // ==================
 //class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object

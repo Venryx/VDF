@@ -68,7 +68,6 @@ public static class VDFSaver
 	{
 		options = options ?? new VDFSaveOptions();
 		
-		var node = new VDFNode();
 		Type type = obj != null ? obj.GetType() : null;
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
 		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
@@ -77,59 +76,75 @@ public static class VDFSaver
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.tags.Any(b=>b is VDFPreSerialize)))
 				method.Call(obj, prop, options);
 
+		VDFNode result = null;
+		bool serializedByCustomMethod = false;
 		if (obj != null && VDFTypeInfo.Get(type).methods.Values.Any(a=>a.tags.Any(b=>b is VDFSerialize)))
-			node = (VDFNode)VDFTypeInfo.Get(type).methods.Values.First(a=>a.tags.Any(b=>b is VDFSerialize)).Call(obj, prop, options);
-		else if (obj == null)
-			node.primitiveValue = null;
-		else if (VDF.GetIsTypePrimitive(type))
-			node.primitiveValue = obj;
-		else if (type.IsEnum) // helper exporter for enums
-			node.primitiveValue = obj.ToString();
-		else if (obj is IList) // this saves arrays also
 		{
-			node.isList = true;
-			var objAsList = (IList)obj;
-			for (var i = 0; i < objAsList.Count; i++)
-				node.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
+			object serializeResult = VDFTypeInfo.Get(type).methods.Values.First(a=>a.tags.Any(b=>b is VDFSerialize)).Call(obj, prop, options);
+			if (serializeResult != VDF.NoActionTaken)
+			{
+				result = (VDFNode)serializeResult;
+				serializedByCustomMethod = true;
+			}
 		}
-		else if (obj is IDictionary)
-		{
-			node.isMap = true;
-			var objAsDictionary = (IDictionary)obj;
-			foreach (object key in objAsDictionary.Keys)
-				node.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, prop, true), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
-		}
-		else // if an object, with properties
-		{
-			node.isMap = true;
-			foreach (string propName in typeInfo.props.Keys)
-				try
-				{
-					VDFPropInfo propInfo = typeInfo.props[propName];
-					bool include = typeInfo.propIncludeRegexL1 != null ? new Regex(typeInfo.propIncludeRegexL1).IsMatch(propName) : false; //new Regex("^" + typeInfo.propIncludeRegexL1 + "$").IsMatch(propName);
-					include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
-					include = options.propIncludesL3.Contains(propInfo.memberInfo) || options.propIncludesL3.Contains(VDF.AnyMember) ? true : include;
-					include = options.propExcludesL4.Contains(propInfo.memberInfo) || options.propExcludesL4.Contains(VDF.AnyMember) ? false : include;
-					include = options.propIncludesL5.Contains(propInfo.memberInfo) || options.propIncludesL5.Contains(VDF.AnyMember) ? true : include;
-					if (!include)
-						continue;
 
-					object propValue = propInfo.GetValue(obj);
-					if (propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
-						continue;
+		if (!serializedByCustomMethod)
+		{
+			result = new VDFNode();
+			if (obj == null) {} //result.primitiveValue = null;}
+			else if (VDF.GetIsTypePrimitive(type))
+				result.primitiveValue = obj;
+			else if (type.IsEnum) // helper exporter for enums
+				result.primitiveValue = obj.ToString();
+			else if (obj is IList) // this saves arrays also
+			{
+				result.isList = true;
+				var objAsList = (IList)obj;
+				for (var i = 0; i < objAsList.Count; i++)
+					result.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
+			}
+			else if (obj is IDictionary)
+			{
+				result.isMap = true;
+				var objAsDictionary = (IDictionary)obj;
+				foreach (object key in objAsDictionary.Keys)
+					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, prop, true), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
+			}
+			else // if an object, with properties
+			{
+				result.isMap = true;
+				foreach (string propName in typeInfo.props.Keys)
+					try
+					{
+						VDFPropInfo propInfo = typeInfo.props[propName];
+						bool include = typeInfo.propIncludeRegexL1 != null ? new Regex(typeInfo.propIncludeRegexL1).IsMatch(propName) : false; //new Regex("^" + typeInfo.propIncludeRegexL1 + "$").IsMatch(propName);
+						include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
+						include = options.propIncludesL3.Contains(propInfo.memberInfo) || options.propIncludesL3.Contains(VDF.AnyMember) ? true : include;
+						include = options.propExcludesL4.Contains(propInfo.memberInfo) || options.propExcludesL4.Contains(VDF.AnyMember) ? false : include;
+						include = options.propIncludesL5.Contains(propInfo.memberInfo) || options.propIncludesL5.Contains(VDF.AnyMember) ? true : include;
+						if (!include)
+							continue;
 
-					// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
-					var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, propInfo);
-					propValueNode.childPopOut = options.useChildPopOut && (propInfo.popOutL2.HasValue ? propInfo.popOutL2.Value : propValueNode.childPopOut);
-					node.mapChildren.Add(propName, propValueNode);
-				}
-				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
+						object propValue = propInfo.GetValue(obj);
+						if (propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
+							continue;
+
+						// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
+						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, propInfo);
+						propValueNode.childPopOut = options.useChildPopOut && (propInfo.popOutL2.HasValue ? propInfo.popOutL2.Value : propValueNode.childPopOut);
+						result.mapChildren.Add(propName, propValueNode);
+					}
+					catch (Exception ex)
+					{
+						throw new VDFException("Error saving property '" + propName + "'.", ex);
+					}
+			}
 		}
 
 		if (declaredType == null)
-			if (node.isList || node.listChildren.Count > 0)
+			if (result.isList || result.listChildren.Count > 0)
 				declaredType = typeof(List<object>);
-			else if (node.isMap || node.mapChildren.Count > 0)
+			else if (result.isMap || result.mapChildren.Count > 0)
 				declaredType = typeof(Dictionary<object, object>);
 			else
 				declaredType = typeof(object);
@@ -139,15 +154,15 @@ public static class VDFSaver
 			(options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(type) && (type != declaredType || !declaredTypeInParentVDF)) ||
 			options.typeMarking == VDFTypeMarking.ExternalNoCollapse
 		))
-			node.metadata = VDF.GetNameOfType(type, options);
+			result.metadata = VDF.GetNameOfType(type, options);
 
 		if (options.useChildPopOut && typeInfo != null && typeInfo.childPopOutL1)
-			node.childPopOut = true;
+			result.childPopOut = true;
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.tags.Any(b=>b is VDFPostSerialize)))
 				method.Call(obj, prop, options);
 
-		return node;
+		return result;
 	}
 }

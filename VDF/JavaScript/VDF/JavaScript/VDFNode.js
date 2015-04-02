@@ -195,21 +195,34 @@
             finalTypeName = fromVDFTypeName;
 
         var result;
-        if (window[finalTypeName] && window[finalTypeName].VDFDeserialize)
-            result = window[finalTypeName].VDFDeserialize(this, prop, options);
-        else if (finalTypeName == "object")
-            result = null;
-        else if (EnumValue.IsEnum(finalTypeName))
-            result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
-        else if (VDF.GetIsTypePrimitive(finalTypeName))
-            result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
-        else {
-            result = VDFNode.CreateNewInstanceOfType(finalTypeName);
-            if (result.VDFDeserialize)
-                result.VDFDeserialize(this, prop, options);
-            else
-                this.IntoObject(result, options, prop);
+        var deserializedByCustomMethod = false;
+        if (window[finalTypeName] && window[finalTypeName].VDFDeserialize) {
+            var deserializeResult = window[finalTypeName].VDFDeserialize(this, prop, options);
+            if (deserializeResult != VDF.NoActionTaken) {
+                result = deserializeResult;
+                deserializedByCustomMethod = true;
+            }
         }
+
+        if (!deserializedByCustomMethod)
+            if (finalTypeName == "object") {
+            } else if (EnumValue.IsEnum(finalTypeName))
+                result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
+            else if (VDF.GetIsTypePrimitive(finalTypeName))
+                result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
+            else {
+                result = VDFNode.CreateNewInstanceOfType(finalTypeName);
+
+                var deserializedByCustomMethod2 = false;
+                if (result.VDFDeserialize) {
+                    var deserializeResult = result.VDFDeserialize(this, prop, options);
+                    if (deserializeResult != VDF.NoActionTaken)
+                        deserializedByCustomMethod2 = true;
+                }
+
+                if (!deserializedByCustomMethod2)
+                    this.IntoObject(result, options, prop);
+            }
 
         return result;
     };
@@ -241,5 +254,7 @@
     };
     return VDFNode;
 })();
+
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
+VDF.NoActionTaken = new VDFNode();
 //# sourceMappingURL=VDFNode.js.map

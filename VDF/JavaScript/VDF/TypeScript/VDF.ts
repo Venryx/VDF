@@ -59,6 +59,9 @@ class VDF
 	// for use with VDFType
 	static PropRegex_Any = ""; //"^.+$";
 
+	// for use with VDFSerialize/VDFDeserialize methods
+	static NoActionTaken; //= new VDFNode(); // workaround: initialization moved to VDFNode class file
+
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
 	static GetGenericArgumentsOfType(typeName: string): string[]
 	{
@@ -208,6 +211,23 @@ class StringBuilder
 	Clear() { this.Remove(0, this.data.length); }
 	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
 }
+
+// attributes
+// ----------
+
+class AttributesWrapper
+{
+	constructor(attributes)
+	{
+		this.attributes = attributes;
+	}
+
+	attributes;
+
+	set type(type) { type.attributes = this.attributes; }
+	set method(method) { method.attributes = this.attributes; }
+}
+function AddAttributes(...attributes) { return new AttributesWrapper(attributes); }
 
 // VDF-usable data wrappers
 // ==================

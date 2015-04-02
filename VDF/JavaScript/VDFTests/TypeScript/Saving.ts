@@ -547,7 +547,20 @@ that needs escaping.>>\"".Fix());
 				return result;
 			}
 		}
+		//AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
 		test("D1_MapWithEmbeddedSerializeMethod_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}"); });
+
+		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				boolProp: new VDFPropInfo("bool", true)
+			});
+			boolProp = true;
+			VDFSerialize() { return VDF.NoActionTaken; }
+		}
+		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
+
 
 		// for JSON compatibility
 		// ==========

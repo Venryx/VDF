@@ -248,31 +248,47 @@ public class VDFNode
 		if (finalType == null || finalType.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 			finalType = fromVDFType;
 		
-		object result;
+		object result = null;
+		bool deserializedByCustomMethod = false;
 		if (VDFTypeInfo.Get(finalType).methods.Values.Any(a=>a.tags.Any(b=>b is VDFDeserialize && (b as VDFDeserialize).fromParent)))
-			result = VDFTypeInfo.Get(finalType).methods.Values.First(a=>a.tags.Any(b=>b is VDFDeserialize && (b as VDFDeserialize).fromParent)).Call(null, this, prop, options);
-		else if (finalType == typeof(object))
-			result = null;
-		else if (finalType.IsEnum) // helper importer for enums
-			result = Enum.Parse(finalType, primitiveValue.ToString()); //primitiveValue);
-		else if (VDF.GetIsTypePrimitive(finalType)) //primitiveValue != null)
-			result = Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
-		else
 		{
-			result = CreateNewInstanceOfType(finalType);
-			if (VDFTypeInfo.Get(finalType).methods.Values.Any(a=>a.tags.Any(b=>b is VDFDeserialize && !(b as VDFDeserialize).fromParent)))
-				VDFTypeInfo.Get(finalType).methods.Values.First(a=>a.tags.Any(b=>b is VDFDeserialize && !(b as VDFDeserialize).fromParent)).Call(result, this, prop, options);
-			else
+			object deserializeResult = VDFTypeInfo.Get(finalType).methods.Values.First(a=>a.tags.Any(b=>b is VDFDeserialize && (b as VDFDeserialize).fromParent)).Call(null, this, prop, options);
+			if (deserializeResult != VDF.NoActionTaken)
 			{
-				IntoObject(result, options, prop);
-				if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
-				{
-					var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
-					((IList)result).CopyTo(newResult, 0);
-					result = newResult;
-				}
+				result = deserializeResult;
+				deserializedByCustomMethod = true;
 			}
 		}
+
+		if (!deserializedByCustomMethod)
+			if (finalType == typeof(object)) {} //result = null;
+			else if (finalType.IsEnum) // helper importer for enums
+				result = Enum.Parse(finalType, primitiveValue.ToString()); //primitiveValue);
+			else if (VDF.GetIsTypePrimitive(finalType)) //primitiveValue != null)
+				result = Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
+			else
+			{
+				result = CreateNewInstanceOfType(finalType);
+
+				bool deserializedByCustomMethod2 = false;
+				if (VDFTypeInfo.Get(finalType).methods.Values.Any(a=>a.tags.Any(b=>b is VDFDeserialize && !(b as VDFDeserialize).fromParent)))
+				{
+					object deserializeResult = VDFTypeInfo.Get(finalType).methods.Values.First(a=>a.tags.Any(b=>b is VDFDeserialize && !(b as VDFDeserialize).fromParent)).Call(result, this, prop, options);
+					if (deserializeResult != VDF.NoActionTaken)
+						deserializedByCustomMethod2 = true;
+				}
+
+				if (!deserializedByCustomMethod2)
+				{
+					IntoObject(result, options, prop);
+					if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
+					{
+						var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
+						((IList)result).CopyTo(newResult, 0);
+						result = newResult;
+					}
+				}
+			}
 
 		return result;
 	}

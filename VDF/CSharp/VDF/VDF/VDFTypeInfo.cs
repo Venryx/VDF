@@ -81,6 +81,13 @@ public class VDFTypeInfo
 			finalAttributes.Add(new VDFDeserialize());
 		AddExtraMethod(method, tags);
 	}
+	public void AddDeserializeMethod_WithReturn<T>(Func<VDFNode, VDFPropInfo, VDFLoadOptions, object> method, params Attribute[] tags)
+	{
+		var finalAttributes = tags.ToList();
+		if (!finalAttributes.Any(a=>a is VDFDeserialize))
+			finalAttributes.Add(new VDFDeserialize());
+		AddExtraMethod(method, tags);
+	}
 	public void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFPropInfo, VDFLoadOptions, T> method, params Attribute[] tags)
 	{
 		var finalAttributes = tags.ToList();

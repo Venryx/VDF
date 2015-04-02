@@ -46,7 +46,6 @@ var VDFSaver = (function () {
 
         var declaredTypeName = declaredTypeName_orOptions;
 
-        var node = new VDFNode();
         var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null;
         var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
         var typeInfo = VDFTypeInfo.Get(typeName);
@@ -54,72 +53,82 @@ var VDFSaver = (function () {
         if (obj && obj.VDFPreSerialize)
             obj.VDFPreSerialize(prop, options);
 
-        if (obj && obj.VDFSerialize)
-            node = obj.VDFSerialize(prop, options);
-        else if (obj == null)
-            node.primitiveValue = null;
-        else if (VDF.GetIsTypePrimitive(typeName))
-            node.primitiveValue = obj;
-        else if (EnumValue.IsEnum(typeName))
-            node.primitiveValue = new EnumValue(typeName, obj).toString();
-        else if (typeName && typeName.startsWith("List(")) {
-            node.isList = true;
-            var objAsList = obj;
-            for (var i = 0; i < objAsList.length; i++)
-                node.AddListChild(VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
-        } else if (typeName && typeName.startsWith("Dictionary(")) {
-            node.isMap = true;
-            var objAsDictionary = obj;
-            for (var key in objAsDictionary.Keys)
-                node.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, prop, true).primitiveValue, VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
-        } else {
-            node.isMap = true;
+        var result;
+        var serializedByCustomMethod = false;
+        if (obj && obj.VDFSerialize) {
+            var serializeResult = obj.VDFSerialize(prop, options);
+            if (serializeResult != VDF.NoActionTaken) {
+                result = serializeResult;
+                serializedByCustomMethod = true;
+            }
+        }
 
-            // special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
-            var oldObj = obj;
-            obj = {};
-            for (var propName in typeInfo.props)
-                obj[propName] = null; // first, clear each declared prop to a null value, to ensure that the code below can process each declared property
-            for (var propName in oldObj)
-                obj[propName] = oldObj[propName];
+        if (!serializedByCustomMethod) {
+            result = new VDFNode();
+            if (obj == null) {
+            } else if (VDF.GetIsTypePrimitive(typeName))
+                result.primitiveValue = obj;
+            else if (EnumValue.IsEnum(typeName))
+                result.primitiveValue = new EnumValue(typeName, obj).toString();
+            else if (typeName && typeName.startsWith("List(")) {
+                result.isList = true;
+                var objAsList = obj;
+                for (var i = 0; i < objAsList.length; i++)
+                    result.AddListChild(VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
+            } else if (typeName && typeName.startsWith("Dictionary(")) {
+                result.isMap = true;
+                var objAsDictionary = obj;
+                for (var key in objAsDictionary.Keys)
+                    result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, prop, true).primitiveValue, VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
+            } else {
+                result.isMap = true;
 
-            for (var propName in obj)
-                try  {
-                    var propInfo = typeInfo.props[propName];
-                    var include = typeInfo.propIncludeRegexL1 != null ? new RegExp(typeInfo.propIncludeRegexL1).test(propName) : false;
-                    include = propInfo && propInfo.includeL2 != null ? propInfo.includeL2 : include;
-                    if (!include)
-                        continue;
+                // special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
+                var oldObj = obj;
+                obj = {};
+                for (var propName in typeInfo.props)
+                    obj[propName] = null; // first, clear each declared prop to a null value, to ensure that the code below can process each declared property
+                for (var propName in oldObj)
+                    obj[propName] = oldObj[propName];
 
-                    var propValue = obj[propName];
-                    if (propInfo && propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
-                        continue;
+                for (var propName in obj)
+                    try  {
+                        var propInfo = typeInfo.props[propName];
+                        var include = typeInfo.propIncludeRegexL1 != null ? new RegExp(typeInfo.propIncludeRegexL1).test(propName) : false;
+                        include = propInfo && propInfo.includeL2 != null ? propInfo.includeL2 : include;
+                        if (!include)
+                            continue;
 
-                    var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options);
-                    propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.popOutL2 != null ? propInfo.popOutL2 : propValueNode.childPopOut);
-                    node.SetMapChild(propName, propValueNode);
-                } catch (ex) {
-                    throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n");
-                }
+                        var propValue = obj[propName];
+                        if (propInfo && propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
+                            continue;
+
+                        var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options);
+                        propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.popOutL2 != null ? propInfo.popOutL2 : propValueNode.childPopOut);
+                        result.SetMapChild(propName, propValueNode);
+                    } catch (ex) {
+                        throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n");
+                    }
+            }
         }
 
         if (declaredTypeName == null)
-            if (node.isList || node.listChildren.Count > 0)
+            if (result.isList || result.listChildren.Count > 0)
                 declaredTypeName = "List(object)";
-            else if (node.isMap || node.mapChildren.Count > 0)
+            else if (result.isMap || result.mapChildren.Count > 0)
                 declaredTypeName = "Dictionary(object object)";
             else
                 declaredTypeName = "object";
         if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == 1 /* Internal */ && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName) || (options.typeMarking == 2 /* External */ && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF)) || options.typeMarking == 3 /* ExternalNoCollapse */))
-            node.metadata = typeName;
+            result.metadata = typeName;
 
         if (options.useChildPopOut && typeInfo != null && typeInfo.childPopOutL1)
-            node.childPopOut = true;
+            result.childPopOut = true;
 
         if (obj && obj.VDFPostSerialize)
             obj.VDFPostSerialize(prop, options);
 
-        return node;
+        return result;
     };
     return VDFSaver;
 })();

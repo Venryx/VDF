@@ -363,6 +363,14 @@ that needs escaping.>>""".Fix());
 		[Fact] void D1_MapWithEmbeddedSerializeMethod_Prop()
 			{ VDF.Serialize<D1_MapWithEmbeddedSerializeMethod_Prop_Class>(new D1_MapWithEmbeddedSerializeMethod_Prop_Class()).Should().Be("{included:true}"); }
 
+		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
+		{
+			[VDFProp] public bool boolProp = true;
+			[VDFSerialize] VDFNode Serialize() { return VDF.NoActionTaken; }
+		}
+		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop()
+			{ VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}"); }
+
 		// for JSON compatibility
 		// ==========
 

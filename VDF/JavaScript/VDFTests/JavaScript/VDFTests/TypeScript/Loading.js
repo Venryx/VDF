@@ -541,6 +541,22 @@ Shoot at Enemy Vehicle\n\
             VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true);
         });
 
+        var D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class = (function () {
+            function D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class() {
+                this.boolProp = false;
+            }
+            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.VDFDeserialize = function (node) {
+                return VDF.NoActionTaken;
+            };
+            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.typeInfo = new VDFTypeInfo({
+                boolProp: new VDFPropInfo("bool")
+            });
+            return D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class;
+        })();
+        test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () {
+            VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true);
+        });
+
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
             }
@@ -560,6 +576,30 @@ Shoot at Enemy Vehicle\n\
         })();
         test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () {
             ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null);
+        });
+
+        var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
+            function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {
+            }
+            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent.typeInfo = new VDFTypeInfo({
+                child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child")
+            });
+            return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent;
+        })();
+        var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = (function () {
+            function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child() {
+                this.boolProp = false;
+            }
+            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.VDFDeserialize = function (node, prop, options) {
+                return VDF.NoActionTaken;
+            };
+            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.typeInfo = new VDFTypeInfo({
+                boolProp: new VDFPropInfo("bool")
+            });
+            return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
+        })();
+        test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () {
+            VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true);
         });
 
         var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent = (function () {

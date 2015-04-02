@@ -581,10 +581,21 @@ Shoot at Enemy Vehicle\n\
 			});
 
 			boolProp = false;
-
 			VDFDeserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethod_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
+
+		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				boolProp: new VDFPropInfo("bool")
+			});
+
+			boolProp = false;
+			VDFDeserialize(node: VDFNode) { return VDF.NoActionTaken; }
+		}
+		test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent
 		{
@@ -600,6 +611,25 @@ Shoot at Enemy Vehicle\n\
 			static VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", ()=>{ ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
+
+		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child")
+			});
+			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
+		}
+		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				boolProp: new VDFPropInfo("bool")
+			});
+			boolProp = false;
+			static VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions) { return VDF.NoActionTaken; }
+		}
+		test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
 
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent
 		{

@@ -32,6 +32,9 @@ public static class VDF
 	// for use with VDFType
 	public const string PropRegex_Any = ""; //"^.+$";
 
+	// for use with VDFSerialize/VDFDeserialize methods
+	public static VDFNode NoActionTaken = new VDFNode();
+
 	static Dictionary<Type, string> builtInTypeAliasesByType;
 	
 	static VDF()

@@ -550,8 +550,26 @@ that needs escaping.>>\"".Fix());
             });
             return D1_MapWithEmbeddedSerializeMethod_Prop_Class;
         })();
+
+        //AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
         test("D1_MapWithEmbeddedSerializeMethod_Prop", function () {
             VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}");
+        });
+
+        var D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class = (function () {
+            function D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class() {
+                this.boolProp = true;
+            }
+            D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype.VDFSerialize = function () {
+                return VDF.NoActionTaken;
+            };
+            D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.typeInfo = new VDFTypeInfo({
+                boolProp: new VDFPropInfo("bool", true)
+            });
+            return D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class;
+        })();
+        test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", function () {
+            VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}");
         });
 
         // for JSON compatibility
