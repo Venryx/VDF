@@ -1,54 +1,99 @@
-﻿class VDFTypeInfo
+﻿class VDFType
 {
-	static Get(typeName: string): VDFTypeInfo
-	{
-		if (VDF.GetIsTypeAnonymous(typeName))
-			return new VDFTypeInfo(null, VDF.PropRegex_Any);
-
-		var result = new VDFTypeInfo(null, null, null);
-		result.props = null;
-		var currentTypeName = typeName;
-		while (window[currentTypeName]) //true)
-		{
-			if (window[currentTypeName].typeInfo)
-				for (var key in window[currentTypeName].typeInfo)
-					if (result[key] == null)
-						result[key] = window[currentTypeName].typeInfo[key];
-
-			if (window[currentTypeName].prototype && window[currentTypeName].prototype.__proto__) // if has base-type
-				currentTypeName = window[currentTypeName].prototype.__proto__.constructor.name; // set current-type-name to base-type's name
-			else
-				break;
-		}
-		result.props = result.props || {};
-		return result;
-	}
-
-	props: any;
 	propIncludeRegexL1: string;
 	childPopOutL1: boolean;
-	constructor(props?: any, propIncludeRegexL1?: string, childPopOutL1?: boolean)
+	constructor(propIncludeRegexL1?: string, childPopOutL1?: boolean)
 	{
-		this.props = props || {};
 		this.propIncludeRegexL1 = propIncludeRegexL1;
 		this.childPopOutL1 = childPopOutL1;
 	}
-	//SetPropInfo(propName: string, propInfo: VDFPropInfo) { this.propInfoByName[propName] = propInfo; }
+
+	AddDataOf(typeTag: VDFType)
+	{
+		if (typeTag.propIncludeRegexL1 != null)
+			this.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
+		if (typeTag.childPopOutL1 != null)
+			this.childPopOutL1 = typeTag.childPopOutL1;
+	}
+}
+class VDFTypeInfo
+{
+	static Get(typeName: string): VDFTypeInfo
+	{
+		var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
+		if (VDF.GetIsTypeAnonymous(typeNameBase))
+		{
+			var result = new VDFTypeInfo();
+			result.typeTag = new VDFType(VDF.PropRegex_Any);
+			return result;
+		}
+
+		if (window[typeNameBase] && window[typeNameBase].typeInfo == null)
+		{
+			var result = new VDFTypeInfo();
+			result.typeTag = new VDFType();
+
+			/*var typeTag = new VDFType();
+			var currentTypeName = typeNameBase;
+			while (window[currentTypeName]) //true)
+			{
+				if (window[currentTypeName].typeInfo.typeTag)
+					for (var key in window[currentTypeName].typeInfo.typeTag)
+						if (typeTag[key] == null)
+							typeTag[key] = window[currentTypeName].typeInfo.typeTag[key];
+
+				if (window[currentTypeName].prototype && window[currentTypeName].prototype.__proto__) // if has base-type
+					currentTypeName = window[currentTypeName].prototype.__proto__.constructor.name; // set current-type-name to base-type's name
+				else
+					break;
+			}
+			result.typeTag = typeTag;*/
+
+			var currentType = typeNameBase;
+			while (currentType != null)
+			{
+				var typeTag2 = (window[currentType].typeInfo || {}).typeTag;
+				for (var key in typeTag2)
+					if (result.typeTag[key] == null)
+						result.typeTag[key] = typeTag2[key];
+				currentType = window[currentType].prototype && window[currentType].prototype.__proto__ && window[currentType].prototype.__proto__.constructor.name;
+			}
+
+			window[typeNameBase].typeInfo = result;
+		}
+
+		return window[typeNameBase] && window[typeNameBase].typeInfo;
+	}
+
+	props = {};
+	tags: any[];
+	typeTag: VDFType;
 }
 
+class VDFProp
+{
+	includeL2: boolean;
+	writeDefaultValue: boolean;
+	popOutL2: boolean;
+	constructor(includeL2 = true, writeDefaultValue = true, popOutL2?: boolean)
+	{
+		this.includeL2 = includeL2;
+		this.writeDefaultValue = writeDefaultValue;
+		this.popOutL2 = popOutL2;
+	}
+}
 class VDFPropInfo
 {
+	propName: string;
 	propTypeName: string;
-	includeL2: boolean;
-	popOutL2: boolean;
-	writeDefaultValue: boolean;
-
-	constructor(propType: string, includeL2?: boolean, popOutL2?: boolean, writeDefaultValue: boolean = true)
+	tags: any[];
+	propTag: VDFProp;
+	constructor(propName: string, propType: string, tags: any[], propTag: VDFProp)
 	{
+		this.propName = propName;
 		this.propTypeName = propType;
-		this.includeL2 = includeL2;
-		this.popOutL2 = popOutL2;
-		this.writeDefaultValue = writeDefaultValue;
+		this.tags = tags;
+		this.propTag = propTag;
 	}
 
 	IsXValueTheDefault(x: any)
@@ -64,4 +109,10 @@ class VDFPropInfo
 			return true;*/
 		return false;
 	}
+}
+
+class VDFMethodInfo
+{
+	tags: any[];
+	constructor(tags: any[]) { this.tags = tags; }
 }

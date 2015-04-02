@@ -48,7 +48,7 @@ var VDFSaver = (function () {
 
         var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null;
         var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-        var typeInfo = VDFTypeInfo.Get(typeName);
+        var typeInfo = typeName && VDFTypeInfo.Get(typeName);
 
         if (obj && obj.VDFPreSerialize)
             obj.VDFPreSerialize(prop, options);
@@ -94,17 +94,17 @@ var VDFSaver = (function () {
                 for (var propName in obj)
                     try  {
                         var propInfo = typeInfo.props[propName];
-                        var include = typeInfo.propIncludeRegexL1 != null ? new RegExp(typeInfo.propIncludeRegexL1).test(propName) : false;
-                        include = propInfo && propInfo.includeL2 != null ? propInfo.includeL2 : include;
+                        var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
+                        include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;
                         if (!include)
                             continue;
 
                         var propValue = obj[propName];
-                        if (propInfo && propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
+                        if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
                             continue;
 
-                        var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options);
-                        propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.popOutL2 != null ? propInfo.popOutL2 : propValueNode.childPopOut);
+                        var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, propInfo);
+                        propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
                         result.SetMapChild(propName, propValueNode);
                     } catch (ex) {
                         throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n");
@@ -122,7 +122,7 @@ var VDFSaver = (function () {
         if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == 1 /* Internal */ && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName) || (options.typeMarking == 2 /* External */ && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF)) || options.typeMarking == 3 /* ExternalNoCollapse */))
             result.metadata = typeName;
 
-        if (options.useChildPopOut && typeInfo != null && typeInfo.childPopOutL1)
+        if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.childPopOutL1)
             result.childPopOut = true;
 
         if (obj && obj.VDFPostSerialize)

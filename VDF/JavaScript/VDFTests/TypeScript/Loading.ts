@@ -482,11 +482,7 @@ Shoot at Enemy Vehicle\n\
 
 		class TypeWithPreDeserializeMethod
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				flag: new VDFPropInfo("bool")
-			});
-			flag = false;
+			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
 			VDFPreDeserialize(): void { this.flag = true; }
 		}
 		test("D1_PreDeserializeMethod", ()=>
@@ -496,11 +492,7 @@ Shoot at Enemy Vehicle\n\
 		});
 		class TypeWithPostDeserializeMethod
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				flag: new VDFPropInfo("bool")
-			});
-			flag = false;
+			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
 			VDFPostDeserialize(): void { this.flag = true; }
 		}
 		test("D1_PostDeserializeMethod", ()=>
@@ -510,11 +502,7 @@ Shoot at Enemy Vehicle\n\
 		});
 		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				flag: new VDFPropInfo("bool")
-			});
-			flag = false;
+			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
 			VDFPostDeserialize(prop: string, options: VDFLoadOptions): void { if (<string>options.message == "RequiredMessage") this.flag = true; }
 		}
 		test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", ()=> { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, "WrongMessage")).flag.Should().Be(false); });
@@ -530,11 +518,7 @@ Shoot at Enemy Vehicle\n\
 		test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
 		class TypeInstantiatedManuallyThenFilled
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				flag: new VDFPropInfo("bool")
-			});
-			flag = false;
+			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
 		}
 		test("D1_InstantiateTypeManuallyThenFill", ()=>
 		{
@@ -544,17 +528,13 @@ Shoot at Enemy Vehicle\n\
 		});
 		class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				messages: new VDFPropInfo("Dictionary(string string)", true, true),
-				otherProperty: new VDFPropInfo("bool")
-			}, null, true);
-			messages = new Dictionary<string, string>("string", "string",
+			_helper = Type(new VDFType(null, true)).set = this;
+			messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp()).set = new Dictionary<string, string>("string", "string",
 			{
 				title1: "message1",
 				title2: "message2"
 			});
-			otherProperty = false;
+			otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
 		}
 		test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
 		{
@@ -575,82 +555,50 @@ Shoot at Enemy Vehicle\n\
 
 		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				boolProp: new VDFPropInfo("bool")
-			});
-
-			boolProp = false;
+			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
 			VDFDeserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethod_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
 
 		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				boolProp: new VDFPropInfo("bool")
-			});
-
-			boolProp = false;
+			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
 			VDFDeserialize(node: VDFNode) { return VDF.NoActionTaken; }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child")
-			});
-			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
+			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new VDFProp()).set = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child
 		{
-			static typeInfo = new VDFTypeInfo(null);
-			static VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
+			static VDFDeserialize(node: VDFNode, prop: VDFPropInfo, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", ()=>{ ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child")
-			});
-			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
+			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new VDFProp()).set = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				boolProp: new VDFPropInfo("bool")
-			});
-			boolProp = false;
-			static VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions) { return VDF.NoActionTaken; }
+			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+			static VDFDeserialize(node: VDFNode, prop: VDFPropInfo, options: VDFLoadOptions) { return VDF.NoActionTaken; }
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
 
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent
 		{
-			static typeInfo = new VDFTypeInfo(
-			{
-				withoutTag: new VDFPropInfo("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"),
-				withTag: new VDFPropInfo("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child")
-			});
-			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child;
-			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child; // doesn't actually have tag; just pretend it does
+			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
+			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null; // doesn't actually have tag; just pretend it does
 		}
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child
 		{
-			static typeInfo = new VDFTypeInfo(
+			methodCalled = Prop(this, "methodCalled", "bool", new VDFProp()).set = false;
+			VDFDeserialize(node: VDFNode, prop: VDFPropInfo, options: VDFLoadOptions): void
 			{
-				methodCalled: new VDFPropInfo("bool")
-			});
-			methodCalled = false;
-			VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions): void
-			{
-				if (prop == "withTag")
+				if (prop.propName == "withTag")
 					this.methodCalled = true;
 			}
 		}

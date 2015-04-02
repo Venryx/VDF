@@ -19,41 +19,49 @@ public class VDFTypeInfo
 	public static VDFTypeInfo Get(Type type)
 	{
 		if (!cachedTypeInfo.ContainsKey(type))
-			Set(type, (VDFType)type.GetCustomAttributes(typeof(VDFType), true).FirstOrDefault());
+		{
+			var result = new VDFTypeInfo();
+			foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+				if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
+					result.props[field.Name] = VDFPropInfo.Get(field);
+			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+				result.props[property.Name] = VDFPropInfo.Get(property);
+			foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Where(member => member is MethodBase)) // include constructors
+				if (!result.methods.ContainsKey(method.Name))
+					result.methods.Add(method.Name, VDFMethodInfo.Get(method));
+
+			result.typeTag = type.GetCustomAttributes(true).OfType<VDFType>().FirstOrDefault() ?? new VDFType();
+			if (VDF.GetIsTypeAnonymous(type))
+				result.typeTag.propIncludeRegexL1 = VDF.PropRegex_Any;
+
+			var currentType = type.BaseType;
+			while (currentType != null && currentType.GetCustomAttributes(typeof(VDFType), true).Length > 0)
+			{
+				var typeTag2 = currentType.GetCustomAttributes(typeof(VDFType), true).OfType<VDFType>().First();
+				if (result.typeTag.propIncludeRegexL1 == null)
+					result.typeTag.propIncludeRegexL1 = typeTag2.propIncludeRegexL1;
+				currentType = currentType.BaseType;
+			}
+
+			cachedTypeInfo[type] = result;
+		}
 		return cachedTypeInfo[type];
 	}
-	public static void Set(Type type, VDFType typeTag = null) { cachedTypeInfo[type] = BuildTypeInfo(type, typeTag); }
-	static VDFTypeInfo BuildTypeInfo(Type type, VDFType typeTag)
-	{
-		var result = new VDFTypeInfo();
-		foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-			if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
-				result.props[field.Name] = VDFPropInfo.Get(field);
-		foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-			result.props[property.Name] = VDFPropInfo.Get(property);
-		foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Where(member=>member is MethodBase)) // include constructors
-			if (!result.methods.ContainsKey(method.Name))
-				result.methods.Add(method.Name, VDFMethodInfo.Get(method));
-		if (VDF.GetIsTypeAnonymous(type))
-			result.propIncludeRegexL1 = VDF.PropRegex_Any;
-		if (typeTag != null)
-		{
-			result.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
-			result.childPopOutL1 = typeTag.childPopOutL1;
-		}
-		return result;
-	}
 
-	public string propIncludeRegexL1; // by default, use an opt-in approach
-	public bool childPopOutL1;
 	public Dictionary<string, VDFPropInfo> props = new Dictionary<string, VDFPropInfo>();
 	public Dictionary<string, VDFMethodInfo> methods = new Dictionary<string, VDFMethodInfo>();
+	public VDFType typeTag;
 
 	public void AddExtraMethod_Base(Delegate method, List<Attribute> tags)
 	{
 		var methodInfo = new VDFMethodInfo();
 		methodInfo.memberInfo = method.Method;
-		methodInfo.tags = tags;
+		methodInfo.preSerializeTag = tags.OfType<VDFPreSerialize>().FirstOrDefault();
+		methodInfo.serializeTag = tags.OfType<VDFSerialize>().FirstOrDefault();
+		methodInfo.postSerializeTag = tags.OfType<VDFPostSerialize>().FirstOrDefault();
+		methodInfo.preDeserializeTag = tags.OfType<VDFPreDeserialize>().FirstOrDefault();
+		methodInfo.deserializeTag = tags.OfType<VDFDeserialize>().FirstOrDefault();
+		methodInfo.postDeserializeTag = tags.OfType<VDFPostDeserialize>().FirstOrDefault();
 		methods.Add(method.Method.Name, methodInfo);
 	}
 	public void AddExtraMethod(Action method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
@@ -99,14 +107,15 @@ public class VDFTypeInfo
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute
 {
-	public bool? includeL2;
-	public bool? popOutL2;
+	public bool includeL2;
 	public bool writeDefaultValue;
-	public VDFProp(bool includeL2 = true, bool popOutL2 = false, bool writeDefaultValue = true)
+	public bool popOutL2;
+	// issue: attribute constructors can't have nullables, so if tag is added, its would-be-optional override-props (popOutL2) are as well
+	public VDFProp(bool includeL2 = true, bool writeDefaultValue = true, bool popOutL2 = false)
 	{
 		this.includeL2 = includeL2;
-		this.popOutL2 = popOutL2;
 		this.writeDefaultValue = writeDefaultValue;
+		this.popOutL2 = popOutL2;
 	}
 }
 public class VDFPropInfo
@@ -115,27 +124,12 @@ public class VDFPropInfo
 	public static VDFPropInfo Get(MemberInfo prop)
 	{
 		if (!cachedPropInfo.ContainsKey(prop))
-			Set(prop, (VDFProp)prop.GetCustomAttributes(typeof(VDFProp), true).FirstOrDefault());
+			cachedPropInfo[prop] = new VDFPropInfo {memberInfo = prop, propTag = prop.GetCustomAttributes(true).OfType<VDFProp>().FirstOrDefault()};
 		return cachedPropInfo[prop];
-	}
-	public static void Set(MemberInfo prop, VDFProp propTag = null) { cachedPropInfo[prop] = BuildPropInfo(prop, propTag); }
-	static VDFPropInfo BuildPropInfo(MemberInfo prop, VDFProp propTag)
-	{
-		var result = new VDFPropInfo();
-		result.memberInfo = prop;
-		if (propTag != null)
-		{
-			result.includeL2 = propTag.includeL2;
-			result.popOutL2 = propTag.popOutL2;
-			result.writeDefaultValue = propTag.writeDefaultValue;
-		}
-		return result;
 	}
 
 	public MemberInfo memberInfo;
-	public bool? includeL2;
-	public bool? popOutL2;
-	public bool writeDefaultValue = true;
+	public VDFProp propTag;
 
 	public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
 	public bool IsXValueTheDefault(object x)
@@ -181,20 +175,27 @@ public class VDFMethodInfo
 	public static VDFMethodInfo Get(MethodBase method)
 	{
 		if (!cachedMethodInfo.ContainsKey(method))
-			Set(method, method.GetCustomAttributes(typeof(Attribute), true).OfType<Attribute>().ToList());
+		{
+			var result = new VDFMethodInfo();
+			result.memberInfo = method;
+			result.preSerializeTag = method.GetCustomAttributes(true).OfType<VDFPreSerialize>().FirstOrDefault();
+			result.serializeTag = method.GetCustomAttributes(true).OfType<VDFSerialize>().FirstOrDefault();
+			result.postSerializeTag = method.GetCustomAttributes(true).OfType<VDFPostSerialize>().FirstOrDefault();
+			result.preDeserializeTag = method.GetCustomAttributes(true).OfType<VDFPreDeserialize>().FirstOrDefault();
+			result.deserializeTag = method.GetCustomAttributes(true).OfType<VDFDeserialize>().FirstOrDefault();
+			result.postDeserializeTag = method.GetCustomAttributes(true).OfType<VDFPostDeserialize>().FirstOrDefault();
+			cachedMethodInfo[method] = result;
+		}
 		return cachedMethodInfo[method];
-	}
-	public static void Set(MethodBase method, List<Attribute> tags) { cachedMethodInfo[method] = BuildMethodInfo(method, tags); }
-	static VDFMethodInfo BuildMethodInfo(MethodBase method, List<Attribute> tags)
-	{
-		var result = new VDFMethodInfo();
-		result.memberInfo = method;
-		result.tags = tags;
-		return result;
 	}
 
 	public MethodBase memberInfo;
-	public List<Attribute> tags; 
+	public VDFPreSerialize preSerializeTag;
+	public VDFSerialize serializeTag;
+	public VDFPostSerialize postSerializeTag;
+	public VDFPreDeserialize preDeserializeTag;
+	public VDFDeserialize deserializeTag;
+	public VDFPostDeserialize postDeserializeTag;
 
 	public object Call(object objParent, params object[] args)
 	{

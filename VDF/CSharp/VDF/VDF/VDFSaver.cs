@@ -73,20 +73,21 @@ public static class VDFSaver
 		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
 
 		if (obj != null)
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.tags.Any(b=>b is VDFPreSerialize)))
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.preSerializeTag != null))
 				method.Call(obj, prop, options);
 
 		VDFNode result = null;
 		bool serializedByCustomMethod = false;
-		if (obj != null && VDFTypeInfo.Get(type).methods.Values.Any(a=>a.tags.Any(b=>b is VDFSerialize)))
-		{
-			object serializeResult = VDFTypeInfo.Get(type).methods.Values.First(a=>a.tags.Any(b=>b is VDFSerialize)).Call(obj, prop, options);
-			if (serializeResult != VDF.NoActionTaken)
+		if (obj != null)
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.serializeTag != null))
 			{
-				result = (VDFNode)serializeResult;
-				serializedByCustomMethod = true;
+				object serializeResult = method.Call(obj, prop, options);
+				if (serializeResult != VDF.NoActionTaken)
+				{
+					result = (VDFNode)serializeResult;
+					serializedByCustomMethod = true;
+				}
 			}
-		}
 
 		if (!serializedByCustomMethod)
 		{
@@ -117,8 +118,8 @@ public static class VDFSaver
 					try
 					{
 						VDFPropInfo propInfo = typeInfo.props[propName];
-						bool include = typeInfo.propIncludeRegexL1 != null ? new Regex(typeInfo.propIncludeRegexL1).IsMatch(propName) : false; //new Regex("^" + typeInfo.propIncludeRegexL1 + "$").IsMatch(propName);
-						include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
+						bool include = typeInfo.typeTag.propIncludeRegexL1 != null ? new Regex(typeInfo.typeTag.propIncludeRegexL1).IsMatch(propName) : false; //new Regex("^" + typeInfo.propIncludeRegexL1 + "$").IsMatch(propName);
+						include = propInfo.propTag != null ? propInfo.propTag.includeL2 : include;
 						include = options.propIncludesL3.Contains(propInfo.memberInfo) || options.propIncludesL3.Contains(VDF.AnyMember) ? true : include;
 						include = options.propExcludesL4.Contains(propInfo.memberInfo) || options.propExcludesL4.Contains(VDF.AnyMember) ? false : include;
 						include = options.propIncludesL5.Contains(propInfo.memberInfo) || options.propIncludesL5.Contains(VDF.AnyMember) ? true : include;
@@ -126,12 +127,12 @@ public static class VDFSaver
 							continue;
 
 						object propValue = propInfo.GetValue(obj);
-						if (propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
+						if (propInfo.IsXValueTheDefault(propValue) && propInfo.propTag != null && !propInfo.propTag.writeDefaultValue)
 							continue;
 
 						// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
 						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, propInfo);
-						propValueNode.childPopOut = options.useChildPopOut && (propInfo.popOutL2.HasValue ? propInfo.popOutL2.Value : propValueNode.childPopOut);
+						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.mapChildren.Add(propName, propValueNode);
 					}
 					catch (Exception ex)
@@ -156,11 +157,11 @@ public static class VDFSaver
 		))
 			result.metadata = VDF.GetNameOfType(type, options);
 
-		if (options.useChildPopOut && typeInfo != null && typeInfo.childPopOutL1)
+		if (options.useChildPopOut && typeInfo != null && typeInfo.typeTag.childPopOutL1)
 			result.childPopOut = true;
 
 		if (obj != null)
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.tags.Any(b=>b is VDFPostSerialize)))
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.postSerializeTag != null))
 				method.Call(obj, prop, options);
 
 		return result;

@@ -244,7 +244,7 @@
                 if (obj instanceof Dictionary)
                     obj.Set(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
                 else
-                    obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString].propTypeName, options, keyString);
+                    obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString].propTypeName, options, typeInfo.props[keyString]);
             } catch (ex) {
                 throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n");
             }

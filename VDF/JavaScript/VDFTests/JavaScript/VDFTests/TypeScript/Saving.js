@@ -149,10 +149,8 @@ that needs escaping.>>\"".Fix());
 
         var TypeWithDefaultStringProp = (function () {
             function TypeWithDefaultStringProp() {
+                this.defaultString = Prop(this, "defaultString", "string", new VDFProp(true, false)).set = null;
             }
-            TypeWithDefaultStringProp.typeInfo = new VDFTypeInfo({
-                defaultString: new VDFPropInfo("string", true, false, false)
-            });
             return TypeWithDefaultStringProp;
         })();
         test("D1_IgnoreEmptyString", function () {
@@ -160,13 +158,10 @@ that needs escaping.>>\"".Fix());
         });
         var TypeWithNullProps = (function () {
             function TypeWithNullProps() {
-                this.strings2 = new List("string");
+                this.obj = Prop(this, "obj", "object", new VDFProp()).set = null;
+                this.strings = Prop(this, "strings", "List(string)", new VDFProp()).set = null;
+                this.strings2 = Prop(this, "strings2", "List(string)", new VDFProp()).set = new List("string");
             }
-            TypeWithNullProps.typeInfo = new VDFTypeInfo({
-                obj: new VDFPropInfo("object", true),
-                strings: new VDFPropInfo("List(string)", true),
-                strings2: new VDFPropInfo("List(string)", true)
-            });
             return TypeWithNullProps;
         })();
         test("D1_NullValues", function () {
@@ -184,11 +179,8 @@ that needs escaping.>>\"".Fix());
         });
         var TypeWithList_PopOutItemData = (function () {
             function TypeWithList_PopOutItemData() {
-                this.list = new List("string", "A", "B");
+                this.list = Prop(this, "list", "List(string)", new VDFProp(true, true, true)).set = new List("string", "A", "B");
             }
-            TypeWithList_PopOutItemData.typeInfo = new VDFTypeInfo({
-                list: new VDFPropInfo("List(string)", true, true)
-            });
             return TypeWithList_PopOutItemData;
         })();
         test("D1_ListItems_PoppedOutChildren", function () {
@@ -232,13 +224,11 @@ that needs escaping.>>\"".Fix());
         });
         var TypeWithPreSerializePrepMethod = (function () {
             function TypeWithPreSerializePrepMethod() {
+                this.preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new VDFProp()).set = false;
             }
             TypeWithPreSerializePrepMethod.prototype.VDFPreSerialize = function () {
                 this.preSerializeWasCalled = true;
             };
-            TypeWithPreSerializePrepMethod.typeInfo = new VDFTypeInfo({
-                preSerializeWasCalled: new VDFPropInfo("bool", true)
-            });
             return TypeWithPreSerializePrepMethod;
         })();
         test("D1_PreSerializePreparation", function () {
@@ -248,14 +238,11 @@ that needs escaping.>>\"".Fix());
         });
         var TypeWithPostSerializeCleanupMethod = (function () {
             function TypeWithPostSerializeCleanupMethod() {
-                this.postSerializeWasCalled = false;
+                this.postSerializeWasCalled = Prop(this, "postSerializeWasCalled", "bool", new VDFProp()).set = false;
             }
             TypeWithPostSerializeCleanupMethod.prototype.VDFPostSerialize = function () {
                 this.postSerializeWasCalled = true;
             };
-            TypeWithPostSerializeCleanupMethod.typeInfo = new VDFTypeInfo({
-                postSerializeWasCalled: new VDFPropInfo("bool", true)
-            });
             return TypeWithPostSerializeCleanupMethod;
         })();
         test("D1_PostSerializeCleanup", function () {
@@ -265,21 +252,13 @@ that needs escaping.>>\"".Fix());
         });
         var TypeWithMixOfProps = (function () {
             function TypeWithMixOfProps() {
-                this.Bool = true;
-                this.Int = 5;
-                this.Double = .5;
-                this.String = "Prop value string.";
-                this.list = new List("string", "2A", "2B");
-                this.nestedList = new List("List(string)", new List("string", "1A"));
+                this.Bool = Prop(this, "Bool", "bool", new VDFProp()).set = true;
+                this.Int = Prop(this, "Int", "int", new VDFProp()).set = 5;
+                this.Double = Prop(this, "Double", "double", new VDFProp()).set = .5;
+                this.String = Prop(this, "String", "string", new VDFProp()).set = "Prop value string.";
+                this.list = Prop(this, "list", "List(string)", new VDFProp()).set = new List("string", "2A", "2B");
+                this.nestedList = Prop(this, "nestedList", "List(List(string))", new VDFProp()).set = new List("List(string)", new List("string", "1A"));
             }
-            TypeWithMixOfProps.typeInfo = new VDFTypeInfo({
-                Bool: new VDFPropInfo("bool", true),
-                Int: new VDFPropInfo("int", true),
-                Double: new VDFPropInfo("double", true),
-                String: new VDFPropInfo("string", true),
-                list: new VDFPropInfo("List(string)", true),
-                nestedList: new VDFPropInfo("List(List(string))", true)
-            });
             return TypeWithMixOfProps;
         })();
         test("D1_TypeProperties_MarkForNone", function () {
@@ -308,13 +287,9 @@ that needs escaping.>>\"".Fix());
 
         var D1_Object_DictionaryPoppedOutThenBool_Class1 = (function () {
             function D1_Object_DictionaryPoppedOutThenBool_Class1() {
-                this.messages = new Dictionary("string", "string", { title1: "message1", title2: "message2" });
-                this.otherProperty = true;
+                this.messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp(true, true, true)).set = new Dictionary("string", "string", { title1: "message1", title2: "message2" });
+                this.otherProperty = Prop(this, "otherProperty", "Dictionary(string string)", new VDFProp()).set = true;
             }
-            D1_Object_DictionaryPoppedOutThenBool_Class1.typeInfo = new VDFTypeInfo({
-                messages: new VDFPropInfo("Dictionary(string string)", true, true),
-                otherProperty: new VDFPropInfo("bool", true)
-            });
             return D1_Object_DictionaryPoppedOutThenBool_Class1;
         })();
         test("D1_DictionaryPoppedOutThenBool", function () {
@@ -325,16 +300,13 @@ that needs escaping.>>\"".Fix());
         });
         var D1_Map_PoppedOutDictionary_PoppedOutPairs_Class = (function () {
             function D1_Map_PoppedOutDictionary_PoppedOutPairs_Class() {
-                this.messages = new Dictionary("string", "string", {
+                this._helper = Type(new VDFType(null, true)).set = this;
+                this.messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp(true, true, true)).set = new Dictionary("string", "string", {
                     title1: "message1",
                     title2: "message2"
                 });
-                this.otherProperty = true;
+                this.otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = true;
             }
-            D1_Map_PoppedOutDictionary_PoppedOutPairs_Class.typeInfo = new VDFTypeInfo({
-                messages: new VDFPropInfo("Dictionary(string string)", true, true),
-                otherProperty: new VDFPropInfo("bool", true)
-            }, null, true);
             return D1_Map_PoppedOutDictionary_PoppedOutPairs_Class;
         })();
         test("D1_Map_PoppedOutDictionary_PoppedOutPairs", function () {
@@ -348,22 +320,15 @@ that needs escaping.>>\"".Fix());
 
         var T1_Depth1 = (function () {
             function T1_Depth1() {
-                this.level2 = new T1_Depth2();
+                this.level2 = Prop(this, "level2", "T1_Depth2", new VDFProp()).set = new T1_Depth2();
             }
-            T1_Depth1.typeInfo = new VDFTypeInfo({
-                level2: new VDFPropInfo("T1_Depth2", true)
-            });
             return T1_Depth1;
         })();
         var T1_Depth2 = (function () {
             function T1_Depth2() {
-                this.messages = new List("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
-                this.otherProperty = true;
+                this.messages = Prop(this, "messages", "List(string)", new VDFProp(true, true, true)).set = new List("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
+                this.otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = true;
             }
-            T1_Depth2.typeInfo = new VDFTypeInfo({
-                messages: new VDFPropInfo("List(string)", true, true),
-                otherProperty: new VDFPropInfo("bool", true)
-            });
             return T1_Depth2;
         })();
         test("D2_Map_ListThenBool_PoppedOutStringsWithOneMultiline", function () {
@@ -376,31 +341,21 @@ that needs escaping.>>\"".Fix());
 
         var Level1 = (function () {
             function Level1() {
-                this.level2 = new Level2();
+                this.level2 = Prop(this, "level2", "Level2", new VDFProp()).set = new Level2();
             }
-            Level1.typeInfo = new VDFTypeInfo({
-                level2: new VDFPropInfo("Level2", true)
-            });
             return Level1;
         })();
         var Level2 = (function () {
             function Level2() {
-                this.level3_first = new Level3();
-                this.level3_second = new Level3();
+                this.level3_first = Prop(this, "level3_first", "Level3", new VDFProp()).set = new Level3();
+                this.level3_second = Prop(this, "level3_second", "Level3", new VDFProp()).set = new Level3();
             }
-            Level2.typeInfo = new VDFTypeInfo({
-                level3_first: new VDFPropInfo("Level3", true),
-                level3_second: new VDFPropInfo("Level3", true)
-            });
             return Level2;
         })();
         var Level3 = (function () {
             function Level3() {
-                this.messages = new List("string", "DeepString1", "DeepString2");
+                this.messages = Prop(this, "messages", "List(string)", new VDFProp(true, true, true)).set = new List("string", "DeepString1", "DeepString2");
             }
-            Level3.typeInfo = new VDFTypeInfo({
-                messages: new VDFPropInfo("List(string)", true, true)
-            });
             return Level3;
         })();
         test("D3_Map_Map_Maps_Lists_PoppedOutStrings", function () {
@@ -422,42 +377,28 @@ that needs escaping.>>\"".Fix());
 
         var T4_Depth1 = (function () {
             function T4_Depth1() {
-                this.level2 = new T4_Depth2();
+                this.level2 = Prop(this, "level2", "T4_Depth2)", new VDFProp()).set = new T4_Depth2();
             }
-            T4_Depth1.typeInfo = new VDFTypeInfo({
-                level2: new VDFPropInfo("T4_Depth2", true)
-            });
             return T4_Depth1;
         })();
         var T4_Depth2 = (function () {
             function T4_Depth2() {
-                this.level3_first = new T4_Depth3();
-                this.level3_second = new T4_Depth3();
+                this.level3_first = Prop(this, "level3_first", "T4_Depth3", new VDFProp()).set = new T4_Depth3();
+                this.level3_second = Prop(this, "level3_second", "T4_Depth3", new VDFProp()).set = new T4_Depth3();
             }
-            T4_Depth2.typeInfo = new VDFTypeInfo({
-                level3_first: new VDFPropInfo("T4_Depth3", true),
-                level3_second: new VDFPropInfo("T4_Depth3", true)
-            });
             return T4_Depth2;
         })();
         var T4_Depth3 = (function () {
             function T4_Depth3() {
-                this.level4s = new List("T4_Depth4", new T4_Depth4(), new T4_Depth4());
+                this.level4s = Prop(this, "level4s", "List(T4_Depth4)", new VDFProp(true, true, true)).set = new List("T4_Depth4", new T4_Depth4(), new T4_Depth4());
             }
-            T4_Depth3.typeInfo = new VDFTypeInfo({
-                level4s: new VDFPropInfo("List(T4_Depth4)", true, true)
-            });
             return T4_Depth3;
         })();
         var T4_Depth4 = (function () {
             function T4_Depth4() {
-                this.messages = new List("string", "text1", "text2");
-                this.otherProperty = false;
+                this.messages = Prop(this, "messages", "List(string)", new VDFProp(true, true, true)).set = new List("string", "text1", "text2");
+                this.otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
             }
-            T4_Depth4.typeInfo = new VDFTypeInfo({
-                messages: new VDFPropInfo("List(string)", true, true),
-                otherProperty: new VDFPropInfo("bool", true)
-            });
             return T4_Depth4;
         })();
         test("D4_Map_Map_Maps_Lists_PoppedOutMaps_ListsThenBools_PoppedOutStrings", function () {
@@ -479,13 +420,10 @@ that needs escaping.>>\"".Fix());
 
         var T5_Depth2 = (function () {
             function T5_Depth2() {
-                this.firstProperty = false;
-                this.otherProperty = false;
+                this._helper = Type(new VDFType(null, true)).set = this;
+                this.firstProperty = Prop(this, "firstProperty", "bool", new VDFProp()).set = false;
+                this.otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
             }
-            T5_Depth2.typeInfo = new VDFTypeInfo({
-                firstProperty: new VDFPropInfo("bool", true),
-                otherProperty: new VDFPropInfo("bool", true)
-            }, null, true);
             return T5_Depth2;
         })();
         test("D4_List_Map_PoppedOutBools", function () {
@@ -499,13 +437,10 @@ that needs escaping.>>\"".Fix());
         // ==========
         var D1_Map_PropWithNameMatchingIncludeRegex_Class = (function () {
             function D1_Map_PropWithNameMatchingIncludeRegex_Class() {
-                this._notMatching = true;
-                this.matching = true;
+                this._helper = Type(new VDFType("^[^_]")).set = this;
+                this._notMatching = Prop(this, "_notMatching", "bool").set = true;
+                this.matching = Prop(this, "matching", "bool").set = true;
             }
-            D1_Map_PropWithNameMatchingIncludeRegex_Class.typeInfo = new VDFTypeInfo({
-                _notMatching: new VDFPropInfo("bool"),
-                matching: new VDFPropInfo("bool")
-            }, "^[^_]");
             return D1_Map_PropWithNameMatchingIncludeRegex_Class;
         })();
         test("D1_Map_PropWithNameMatchingIncludeRegex", function () {
@@ -514,19 +449,16 @@ that needs escaping.>>\"".Fix());
 
         var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base = (function () {
             function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base() {
+                this._helper = Type(new VDFType("^[^_]")).set = this;
             }
-            D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.typeInfo = new VDFTypeInfo(null, "^[^_]");
             return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base;
         })();
         var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived = (function () {
             function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived() {
-                this._notMatching = true;
-                this.matching = true;
+                this._helper = Type(new VDFType()).set = this;
+                this._notMatching = Prop(this, "_notMatching", "bool").set = true;
+                this.matching = Prop(this, "matching", "bool").set = true;
             }
-            D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.typeInfo = new VDFTypeInfo({
-                _notMatching: new VDFPropInfo("bool"),
-                matching: new VDFPropInfo("bool")
-            });
             return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived;
         })();
         D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
@@ -536,18 +468,14 @@ that needs escaping.>>\"".Fix());
 
         var D1_MapWithEmbeddedSerializeMethod_Prop_Class = (function () {
             function D1_MapWithEmbeddedSerializeMethod_Prop_Class() {
-                this.notIncluded = true;
-                this.included = true;
+                this.notIncluded = Prop(this, "notIncluded", "bool").set = true;
+                this.included = Prop(this, "included", "bool").set = true;
             }
             D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype.VDFSerialize = function () {
                 var result = new VDFNode();
                 result.SetMapChild("included", new VDFNode(this.included));
                 return result;
             };
-            D1_MapWithEmbeddedSerializeMethod_Prop_Class.typeInfo = new VDFTypeInfo({
-                notIncluded: new VDFPropInfo("bool"),
-                included: new VDFPropInfo("bool")
-            });
             return D1_MapWithEmbeddedSerializeMethod_Prop_Class;
         })();
 
@@ -558,14 +486,11 @@ that needs escaping.>>\"".Fix());
 
         var D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class = (function () {
             function D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class() {
-                this.boolProp = true;
+                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = true;
             }
             D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype.VDFSerialize = function () {
                 return VDF.NoActionTaken;
             };
-            D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.typeInfo = new VDFTypeInfo({
-                boolProp: new VDFPropInfo("bool", true)
-            });
             return D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class;
         })();
         test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", function () {
@@ -585,11 +510,8 @@ that needs escaping.>>\"".Fix());
         });
         var D0_Map_List_BoolsWithPopOutDisabled_Class = (function () {
             function D0_Map_List_BoolsWithPopOutDisabled_Class() {
-                this.ints = new List("int", 0, 1);
+                this.ints = Prop(this, "ints", "List(int)", new VDFProp()).set = new List("int", 0, 1);
             }
-            D0_Map_List_BoolsWithPopOutDisabled_Class.typeInfo = new VDFTypeInfo({
-                ints: new VDFPropInfo("List(int)", true, true)
-            });
             return D0_Map_List_BoolsWithPopOutDisabled_Class;
         })();
         test("D0_Map_List_BoolsWithPopOutDisabled", function () {
@@ -627,6 +549,8 @@ that needs escaping.>>\"".Fix());
                 window[enumNames[i]] = eval(enumNames[i]);
             } catch (e) {
             }
+
+        (new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base()).toString(); // make sure we create one instance, so that the type-info attachment code can run
     })(Saving || (Saving = {}));
 })(VDFTests || (VDFTests = {}));
 //# sourceMappingURL=Saving.js.map

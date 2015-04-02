@@ -187,8 +187,8 @@
 	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 
 	ToObject(options: VDFLoadOptions): any;
-	ToObject(declaredTypeName?: string, options?: VDFLoadOptions, prop?: string): any;
-	ToObject(declaredTypeName_orOptions?: any, options = new VDFLoadOptions(), prop?: string): any
+	ToObject(declaredTypeName?: string, options?: VDFLoadOptions, prop?: VDFPropInfo): any;
+	ToObject(declaredTypeName_orOptions?: any, options = new VDFLoadOptions(), prop?: VDFPropInfo): any
 	{
 		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
 			return this.ToObject(null, declaredTypeName_orOptions);
@@ -251,7 +251,7 @@
 
 		return result;
 	}
-	IntoObject(obj: any, options: VDFLoadOptions = null, prop?: string): void
+	IntoObject(obj: any, options: VDFLoadOptions = null, prop?: VDFPropInfo): void
 	{
 		options = options || new VDFLoadOptions();
 
@@ -270,7 +270,7 @@
 				if (obj instanceof Dictionary) //is IDictionary)
 					obj.Set(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
 				else
-					obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString].propTypeName, options, keyString);
+					obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString].propTypeName, options, typeInfo.props[keyString]);
 			}
 			catch(ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"); }
 

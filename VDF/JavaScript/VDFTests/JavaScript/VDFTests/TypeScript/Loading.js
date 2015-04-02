@@ -426,14 +426,11 @@ Shoot at Enemy Vehicle\n\
         //test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
         var TypeWithPreDeserializeMethod = (function () {
             function TypeWithPreDeserializeMethod() {
-                this.flag = false;
+                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
             TypeWithPreDeserializeMethod.prototype.VDFPreDeserialize = function () {
                 this.flag = true;
             };
-            TypeWithPreDeserializeMethod.typeInfo = new VDFTypeInfo({
-                flag: new VDFPropInfo("bool")
-            });
             return TypeWithPreDeserializeMethod;
         })();
         test("D1_PreDeserializeMethod", function () {
@@ -442,14 +439,11 @@ Shoot at Enemy Vehicle\n\
         });
         var TypeWithPostDeserializeMethod = (function () {
             function TypeWithPostDeserializeMethod() {
-                this.flag = false;
+                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
             TypeWithPostDeserializeMethod.prototype.VDFPostDeserialize = function () {
                 this.flag = true;
             };
-            TypeWithPostDeserializeMethod.typeInfo = new VDFTypeInfo({
-                flag: new VDFPropInfo("bool")
-            });
             return TypeWithPostDeserializeMethod;
         })();
         test("D1_PostDeserializeMethod", function () {
@@ -458,15 +452,12 @@ Shoot at Enemy Vehicle\n\
         });
         var ObjectWithPostDeserializeMethodRequiringCustomMessage_Class = (function () {
             function ObjectWithPostDeserializeMethodRequiringCustomMessage_Class() {
-                this.flag = false;
+                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
             ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.VDFPostDeserialize = function (prop, options) {
                 if (options.message == "RequiredMessage")
                     this.flag = true;
             };
-            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.typeInfo = new VDFTypeInfo({
-                flag: new VDFPropInfo("bool")
-            });
             return ObjectWithPostDeserializeMethodRequiringCustomMessage_Class;
         })();
         test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () {
@@ -485,11 +476,8 @@ Shoot at Enemy Vehicle\n\
         test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
         var TypeInstantiatedManuallyThenFilled = (function () {
             function TypeInstantiatedManuallyThenFilled() {
-                this.flag = false;
+                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
-            TypeInstantiatedManuallyThenFilled.typeInfo = new VDFTypeInfo({
-                flag: new VDFPropInfo("bool")
-            });
             return TypeInstantiatedManuallyThenFilled;
         })();
         test("D1_InstantiateTypeManuallyThenFill", function () {
@@ -499,16 +487,13 @@ Shoot at Enemy Vehicle\n\
         });
         var D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
             function D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
-                this.messages = new Dictionary("string", "string", {
+                this._helper = Type(new VDFType(null, true)).set = this;
+                this.messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp()).set = new Dictionary("string", "string", {
                     title1: "message1",
                     title2: "message2"
                 });
-                this.otherProperty = false;
+                this.otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
             }
-            D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1.typeInfo = new VDFTypeInfo({
-                messages: new VDFPropInfo("Dictionary(string string)", true, true),
-                otherProperty: new VDFPropInfo("bool")
-            }, null, true);
             return D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1;
         })();
         test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", function () {
@@ -527,14 +512,11 @@ Shoot at Enemy Vehicle\n\
         // ==========
         var D1_MapWithEmbeddedDeserializeMethod_Prop_Class = (function () {
             function D1_MapWithEmbeddedDeserializeMethod_Prop_Class() {
-                this.boolProp = false;
+                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
             }
             D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype.VDFDeserialize = function (node) {
                 this.boolProp = node["boolProp"].primitiveValue;
             };
-            D1_MapWithEmbeddedDeserializeMethod_Prop_Class.typeInfo = new VDFTypeInfo({
-                boolProp: new VDFPropInfo("bool")
-            });
             return D1_MapWithEmbeddedDeserializeMethod_Prop_Class;
         })();
         test("D1_MapWithEmbeddedDeserializeMethod_Prop", function () {
@@ -543,14 +525,11 @@ Shoot at Enemy Vehicle\n\
 
         var D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class = (function () {
             function D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class() {
-                this.boolProp = false;
+                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
             }
             D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.VDFDeserialize = function (node) {
                 return VDF.NoActionTaken;
             };
-            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.typeInfo = new VDFTypeInfo({
-                boolProp: new VDFPropInfo("bool")
-            });
             return D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class;
         })();
         test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () {
@@ -559,10 +538,8 @@ Shoot at Enemy Vehicle\n\
 
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
+                this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new VDFProp()).set = null;
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent.typeInfo = new VDFTypeInfo({
-                child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child")
-            });
             return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent;
         })();
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = (function () {
@@ -571,7 +548,6 @@ Shoot at Enemy Vehicle\n\
             D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.VDFDeserialize = function (node, prop, options) {
                 return null;
             };
-            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.typeInfo = new VDFTypeInfo(null);
             return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
         })();
         test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () {
@@ -580,22 +556,17 @@ Shoot at Enemy Vehicle\n\
 
         var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {
+                this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new VDFProp()).set = null;
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent.typeInfo = new VDFTypeInfo({
-                child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child")
-            });
             return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent;
         })();
         var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child() {
-                this.boolProp = false;
+                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
             }
             D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.VDFDeserialize = function (node, prop, options) {
                 return VDF.NoActionTaken;
             };
-            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.typeInfo = new VDFTypeInfo({
-                boolProp: new VDFPropInfo("bool")
-            });
             return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
         })();
         test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () {
@@ -604,24 +575,19 @@ Shoot at Enemy Vehicle\n\
 
         var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent = (function () {
             function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent() {
+                this.withoutTag = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
+                this.withTag = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
             }
-            D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent.typeInfo = new VDFTypeInfo({
-                withoutTag: new VDFPropInfo("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"),
-                withTag: new VDFPropInfo("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child")
-            });
             return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent;
         })();
         var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = (function () {
             function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child() {
-                this.methodCalled = false;
+                this.methodCalled = Prop(this, "methodCalled", "bool", new VDFProp()).set = false;
             }
             D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype.VDFDeserialize = function (node, prop, options) {
-                if (prop == "withTag")
+                if (prop.propName == "withTag")
                     this.methodCalled = true;
             };
-            D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.typeInfo = new VDFTypeInfo({
-                methodCalled: new VDFPropInfo("bool")
-            });
             return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child;
         })();
         test("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag", function () {

@@ -200,38 +200,78 @@ var StringBuilder = (function () {
     return StringBuilder;
 })();
 
-// attributes
+// tags
 // ----------
-var AttributesWrapper = (function () {
-    function AttributesWrapper(attributes) {
-        this.attributes = attributes;
-    }
-    Object.defineProperty(AttributesWrapper.prototype, "type", {
-        set: function (type) {
-            type.attributes = this.attributes;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(AttributesWrapper.prototype, "method", {
-        set: function (method) {
-            method.attributes = this.attributes;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    return AttributesWrapper;
-})();
-function AddAttributes() {
-    var attributes = [];
-    for (var _i = 0; _i < (arguments.length - 0); _i++) {
-        attributes[_i] = arguments[_i + 0];
-    }
-    return new AttributesWrapper(attributes);
+function PropDeclarationWrapper(type, propName, propType, tags) {
+    var s = this;
+    s.type = type;
+    s.propName = propName;
+    s.propType = propType;
+    s.tags = tags;
 }
+;
+PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
+    var s = this;
+    var typeInfo = VDFTypeInfo.Get(s.type.name);
+
+    var propTag = {};
+    for (var i in s.tags)
+        if (s.tags[i] instanceof VDFProp)
+            propTag = s.tags[i];
+    typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
+};
+function Prop(type, propName, propType) {
+    var tags = [];
+    for (var _i = 0; _i < (arguments.length - 3); _i++) {
+        tags[_i] = arguments[_i + 3];
+    }
+    return new PropDeclarationWrapper(type instanceof Function ? type : type.constructor, propName, propType, tags);
+}
+;
+
+function MethodDeclarationWrapper(tags) {
+    this.tags = tags;
+}
+;
+MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) {
+    method.methodInfo = new VDFMethodInfo(this.tags);
+};
+function Method() {
+    var tags = [];
+    for (var _i = 0; _i < (arguments.length - 0); _i++) {
+        tags[_i] = arguments[_i + 0];
+    }
+    return new MethodDeclarationWrapper(tags);
+}
+;
+
+function TypeDeclarationWrapper(tags) {
+    this.tags = tags;
+}
+;
+TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
+    var s = this;
+    type = type instanceof Function ? type : type.constructor;
+    var typeInfo = VDFTypeInfo.Get(type.name);
+
+    var typeTag = {};
+    for (var i in s.tags)
+        if (s.tags[i] instanceof VDFType)
+            typeTag = s.tags[i];
+    typeInfo.tags = s.tags;
+    typeInfo.typeTag.AddDataOf(typeTag);
+};
+function Type() {
+    var tags = [];
+    for (var _i = 0; _i < (arguments.length - 0); _i++) {
+        tags[_i] = arguments[_i + 0];
+    }
+    return new TypeDeclarationWrapper(tags);
+}
+;
 
 // VDF-usable data wrappers
-// ==================
+// ==========
 //class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
 // for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)
 //var object = Object;

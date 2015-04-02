@@ -212,25 +212,52 @@ class StringBuilder
 	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
 }
 
-// attributes
+// tags
 // ----------
 
-class AttributesWrapper
+function PropDeclarationWrapper(type, propName, propType, tags)
 {
-	constructor(attributes)
-	{
-		this.attributes = attributes;
-	}
+	var s = this;
+	s.type = type;
+	s.propName = propName;
+	s.propType = propType;
+	s.tags = tags;
+};
+PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value)
+{
+	var s = this;
+	var typeInfo = VDFTypeInfo.Get(s.type.name);
 
-	attributes;
+	var propTag: any = {};
+	for (var i in s.tags)
+		if (s.tags[i] instanceof VDFProp)
+			propTag = s.tags[i];
+	typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
+};
+function Prop(type, propName, propType, ...tags) { return new PropDeclarationWrapper(type instanceof Function ? type : type.constructor, propName, propType, tags); };
 
-	set type(type) { type.attributes = this.attributes; }
-	set method(method) { method.attributes = this.attributes; }
-}
-function AddAttributes(...attributes) { return new AttributesWrapper(attributes); }
+function MethodDeclarationWrapper(tags) { this.tags = tags; };
+MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) { method.methodInfo = new VDFMethodInfo(this.tags); };
+function Method(...tags) { return new MethodDeclarationWrapper(tags); };
+
+function TypeDeclarationWrapper(tags) { this.tags = tags; };
+TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type)
+{
+	var s = this;
+	type = type instanceof Function ? type : type.constructor;
+	var typeInfo = VDFTypeInfo.Get(type.name);
+
+	var typeTag: any = {};
+	for (var i in s.tags)
+		if (s.tags[i] instanceof VDFType)
+			typeTag = s.tags[i];
+	typeInfo.tags = s.tags;
+	typeInfo.typeTag.AddDataOf(typeTag);
+};
+function Type(...tags) { return new TypeDeclarationWrapper(tags); };
 
 // VDF-usable data wrappers
-// ==================
+// ==========
 
 //class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
 // for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)

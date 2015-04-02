@@ -47,8 +47,8 @@ class VDFSaveOptions
 class VDFSaver
 {
 	static ToVDFNode(obj: any, options?: VDFSaveOptions): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName?: string, options?: VDFSaveOptions, prop?: string, declaredTypeFromParent?: boolean): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), prop?: string, declaredTypeInParentVDF?: boolean): VDFNode
+	static ToVDFNode(obj: any, declaredTypeName?: string, options?: VDFSaveOptions, prop?: VDFPropInfo, declaredTypeFromParent?: boolean): VDFNode;
+	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), prop?: VDFPropInfo, declaredTypeInParentVDF?: boolean): VDFNode
 	{
 		if (declaredTypeName_orOptions instanceof VDFSaveOptions)
 			return VDFSaver.ToVDFNode(obj, null, declaredTypeName_orOptions);
@@ -57,7 +57,7 @@ class VDFSaver
 
 		var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-		var typeInfo = VDFTypeInfo.Get(typeName);
+		var typeInfo = typeName && VDFTypeInfo.Get(typeName);
 
 		if (obj && obj.VDFPreSerialize)
 			obj.VDFPreSerialize(prop, options);
@@ -112,17 +112,17 @@ class VDFSaver
 					try
 					{
 						var propInfo: VDFPropInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
-						var include = typeInfo.propIncludeRegexL1 != null ? new RegExp(typeInfo.propIncludeRegexL1).test(propName) : false;
-						include = propInfo && propInfo.includeL2 != null ? propInfo.includeL2 : include;
+						var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
+						include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;
 						if (!include)
 							continue;
 
 						var propValue = obj[propName];
-						if (propInfo && propInfo.IsXValueTheDefault(propValue) && !propInfo.writeDefaultValue)
+						if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
 							continue;
 					
-						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options);
-						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.popOutL2 != null ? propInfo.popOutL2 : propValueNode.childPopOut);
+						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, propInfo);
+						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.SetMapChild(propName, propValueNode);
 					}
 					catch (ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"); }
@@ -144,7 +144,7 @@ class VDFSaver
 		))
 			result.metadata = typeName;
 
-		if (options.useChildPopOut && typeInfo != null && typeInfo.childPopOutL1)
+		if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.childPopOutL1)
 			result.childPopOut = true;
 
 		if (obj && obj.VDFPostSerialize)

@@ -250,9 +250,9 @@ public class VDFNode
 		
 		object result = null;
 		bool deserializedByCustomMethod = false;
-		if (VDFTypeInfo.Get(finalType).methods.Values.Any(a=>a.tags.Any(b=>b is VDFDeserialize && (b as VDFDeserialize).fromParent)))
+		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods.Values.Where(a=>a.deserializeTag != null && a.deserializeTag.fromParent))
 		{
-			object deserializeResult = VDFTypeInfo.Get(finalType).methods.Values.First(a=>a.tags.Any(b=>b is VDFDeserialize && (b as VDFDeserialize).fromParent)).Call(null, this, prop, options);
+			object deserializeResult = method.Call(null, this, prop, options);
 			if (deserializeResult != VDF.NoActionTaken)
 			{
 				result = deserializeResult;
@@ -271,9 +271,9 @@ public class VDFNode
 				result = CreateNewInstanceOfType(finalType);
 
 				bool deserializedByCustomMethod2 = false;
-				if (VDFTypeInfo.Get(finalType).methods.Values.Any(a=>a.tags.Any(b=>b is VDFDeserialize && !(b as VDFDeserialize).fromParent)))
+				foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods.Values.Where(a=>a.deserializeTag != null && !a.deserializeTag.fromParent))
 				{
-					object deserializeResult = VDFTypeInfo.Get(finalType).methods.Values.First(a=>a.tags.Any(b=>b is VDFDeserialize && !(b as VDFDeserialize).fromParent)).Call(result, this, prop, options);
+					object deserializeResult = method.Call(result, this, prop, options);
 					if (deserializeResult != VDF.NoActionTaken)
 						deserializedByCustomMethod2 = true;
 				}
@@ -301,9 +301,9 @@ public class VDFNode
 		var typeInfo = VDFTypeInfo.Get(type);
 
 		// call pre-deserialize constructors before pre-deserialize normal methods
-		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.tags.Any(b=>b is VDFPreDeserialize)))
+		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.preDeserializeTag != null))
 			method.Call(obj, prop, options);
-		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.tags.Any(b=>b is VDFPreDeserialize)))
+		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.preDeserializeTag != null))
 			method.Call(obj, prop, options);
 
 		for (var i = 0; i < listChildren.Count; i++)
@@ -322,9 +322,9 @@ public class VDFNode
 			catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }
 
 		// call post-deserialize constructors before post-deserialize normal methods
-		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.tags.Any(b=>b is VDFPostDeserialize)))
+		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.postDeserializeTag != null))
 			method.Call(obj, prop, options);
-		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.tags.Any(b=>b is VDFPostDeserialize)))
+		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.postDeserializeTag != null))
 			method.Call(obj, prop, options);
 	}
 }

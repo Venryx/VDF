@@ -247,7 +247,7 @@ that needs escaping.>>""".Fix());
 		class T1_Depth1 { [VDFProp] T1_Depth2 level2 = new T1_Depth2(); }
 		class T1_Depth2
 		{
-			[VDFProp(true, true)] List<string> messages = new List<string> {"DeepString1_Line1\n\tDeepString1_Line2", "DeepString2"};
+			[VDFProp(popOutL2: true)] List<string> messages = new List<string> {"DeepString1_Line1\n\tDeepString1_Line2", "DeepString2"};
 			[VDFProp] bool otherProperty = true;
 		}
 		[Fact] void D2_Map_ListThenBool_PoppedOutStringsWithOneMultiline()
@@ -261,7 +261,7 @@ that needs escaping.>>""".Fix());
 
 		class Level1 { [VDFProp] public Level2 level2 = new Level2(); }
 		class Level2 { [VDFProp] Level3 level3_first = new Level3(); [VDFProp] public Level3 level3_second = new Level3(); }
-		class Level3 { [VDFProp(true, true)] public List<string> messages = new List<string>{"DeepString1", "DeepString2"}; }
+		class Level3 { [VDFProp(popOutL2: true)] public List<string> messages = new List<string> { "DeepString1", "DeepString2" }; }
 		[Fact] void D3_Map_Map_Maps_Lists_PoppedOutStrings()
 		{
 			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
@@ -283,10 +283,10 @@ that needs escaping.>>""".Fix());
 
 		class T4_Depth1 { [VDFProp] T4_Depth2 level2 = new T4_Depth2(); }
 		class T4_Depth2 { [VDFProp] T4_Depth3 level3_first = new T4_Depth3(); [VDFProp] T4_Depth3 level3_second = new T4_Depth3(); }
-		class T4_Depth3 { [VDFProp(true, true)] List<T4_Depth4> level4s = new List<T4_Depth4>{new T4_Depth4(), new T4_Depth4()}; }
+		class T4_Depth3 { [VDFProp(popOutL2: true)] List<T4_Depth4> level4s = new List<T4_Depth4> { new T4_Depth4(), new T4_Depth4() }; }
 		class T4_Depth4
 		{
-			[VDFProp(true, true)] List<string> messages = new List<string>{"text1", "text2"};
+			[VDFProp(popOutL2: true)] List<string> messages = new List<string>{"text1", "text2"};
 			[VDFProp] bool otherProperty = false;
 		}
 		[Fact] void D4_Map_Map_Maps_Lists_PoppedOutMaps_ListsThenBools_PoppedOutStrings()
@@ -340,7 +340,7 @@ that needs escaping.>>""".Fix());
 			{ VDF.Serialize<D1_Map_PropWithNameMatchingIncludeRegex_Class>(new D1_Map_PropWithNameMatchingIncludeRegex_Class()).Should().Be("{matching:true}"); }
 
 		[VDFType(propIncludeRegexL1: "^[^_]")] class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {}
-		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived : D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base
+		[VDFType] class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived : D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base
 		{
 			public bool _notMatching = true;
 			public bool matching = true;
