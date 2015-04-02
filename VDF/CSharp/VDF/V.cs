@@ -7,7 +7,7 @@ using System.Threading;
 static class V
 {
 	static void Main() {}
-	public static void Nothing() {}
+	public static void DoNothing() {}
 
 	public static void WaitXMillisecondsThenRun(int waitTime, Action action)
 	{

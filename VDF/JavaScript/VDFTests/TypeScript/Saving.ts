@@ -165,9 +165,9 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				obj: new VDFPropInfo("object"),
-				strings: new VDFPropInfo("List(string)"),
-				strings2: new VDFPropInfo("List(string)")
+				obj: new VDFPropInfo("object", true),
+				strings: new VDFPropInfo("List(string)", true),
+				strings2: new VDFPropInfo("List(string)", true)
 			});
 			obj: any;
 			strings: List<string>;
@@ -241,7 +241,7 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				preSerializeWasCalled: new VDFPropInfo("bool")
+				preSerializeWasCalled: new VDFPropInfo("bool", true)
 			});
 			preSerializeWasCalled;
 			VDFPreSerialize(): void { this.preSerializeWasCalled = true; }
@@ -256,7 +256,7 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				postSerializeWasCalled: new VDFPropInfo("bool")
+				postSerializeWasCalled: new VDFPropInfo("bool", true)
 			});
 			postSerializeWasCalled = false;
 			VDFPostSerialize(): void { this.postSerializeWasCalled = true; }
@@ -271,12 +271,12 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				Bool: new VDFPropInfo("bool"),
-				Int: new VDFPropInfo("int"),
-				Double: new VDFPropInfo("double"),
-				String: new VDFPropInfo("string"),
-				list: new VDFPropInfo("List(string)"),
-				nestedList: new VDFPropInfo("List(List(string))")
+				Bool: new VDFPropInfo("bool", true),
+				Int: new VDFPropInfo("int", true),
+				Double: new VDFPropInfo("double", true),
+				String: new VDFPropInfo("string", true),
+				list: new VDFPropInfo("List(string)", true),
+				nestedList: new VDFPropInfo("List(List(string))", true)
 			});
 			Bool = true;
 			Int = 5;
@@ -318,7 +318,7 @@ that needs escaping.>>\"".Fix());
 			static typeInfo = new VDFTypeInfo(
 			{
 				messages: new VDFPropInfo("Dictionary(string string)", true, true),
-				otherProperty: new VDFPropInfo("bool")
+				otherProperty: new VDFPropInfo("bool", true)
 			});
 			messages = new Dictionary<string, string>("string", "string", {title1: "message1", title2:"message2"});
 			otherProperty = true;
@@ -335,8 +335,8 @@ that needs escaping.>>\"".Fix());
 			static typeInfo = new VDFTypeInfo(
 			{
 				messages: new VDFPropInfo("Dictionary(string string)", true, true),
-				otherProperty: new VDFPropInfo("bool")
-			}, false, true);
+				otherProperty: new VDFPropInfo("bool", true)
+			}, null, true);
 			messages = new Dictionary<string, string>("string", "string",
 			{
 				title1: "message1",
@@ -358,7 +358,7 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				level2: new VDFPropInfo("T1_Depth2")
+				level2: new VDFPropInfo("T1_Depth2", true)
 			});
 			level2 = new T1_Depth2();
 		}
@@ -367,7 +367,7 @@ that needs escaping.>>\"".Fix());
 			static typeInfo = new VDFTypeInfo(
 			{
 				messages: new VDFPropInfo("List(string)", true, true),
-				otherProperty: new VDFPropInfo("bool"),
+				otherProperty: new VDFPropInfo("bool", true),
 			});
 			messages = new List<string>("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
 			otherProperty = true;
@@ -385,7 +385,7 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				level2: new VDFPropInfo("Level2")
+				level2: new VDFPropInfo("Level2", true)
 			});
 			level2 = new Level2();
 		}
@@ -393,8 +393,8 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				level3_first: new VDFPropInfo("Level3"),
-				level3_second: new VDFPropInfo("Level3")
+				level3_first: new VDFPropInfo("Level3", true),
+				level3_second: new VDFPropInfo("Level3", true)
 			});
 			level3_first = new Level3();
 			level3_second = new Level3();
@@ -430,7 +430,7 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				level2: new VDFPropInfo("T4_Depth2")
+				level2: new VDFPropInfo("T4_Depth2", true)
 			});
 			level2 = new T4_Depth2();
 		}
@@ -438,8 +438,8 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				level3_first: new VDFPropInfo("T4_Depth3"),
-				level3_second: new VDFPropInfo("T4_Depth3")
+				level3_first: new VDFPropInfo("T4_Depth3", true),
+				level3_second: new VDFPropInfo("T4_Depth3", true)
 			});
 			level3_first = new T4_Depth3();
 			level3_second = new T4_Depth3();
@@ -457,7 +457,7 @@ that needs escaping.>>\"".Fix());
 			static typeInfo = new VDFTypeInfo(
 			{
 				messages: new VDFPropInfo("List(string)", true, true),
-				otherProperty: new VDFPropInfo("bool")
+				otherProperty: new VDFPropInfo("bool", true)
 			});
 			messages = new List<string>("string", "text1", "text2");
 			otherProperty = false;
@@ -484,9 +484,9 @@ that needs escaping.>>\"".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				firstProperty: new VDFPropInfo("bool"),
-				otherProperty: new VDFPropInfo("bool")
-			}, false, true);
+				firstProperty: new VDFPropInfo("bool", true),
+				otherProperty: new VDFPropInfo("bool", true)
+			}, null, true);
 			firstProperty = false;
 			otherProperty = false;
 		}
@@ -497,6 +497,57 @@ that needs escaping.>>\"".Fix());
 	firstProperty:false\n\
 	otherProperty:false".replace(/\r/g, ""));
 		});
+
+		// tag stuff
+		// ==========
+
+		class D1_Map_PropWithNameMatchingIncludeRegex_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				_notMatching: new VDFPropInfo("bool"),
+				matching: new VDFPropInfo("bool")
+			}, "^[^_]");
+			_notMatching = true;
+			matching = true;
+		}
+		test("D1_Map_PropWithNameMatchingIncludeRegex", ()=>{ VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}"); });
+
+		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base
+		{
+			static typeInfo = new VDFTypeInfo(null, "^[^_]");
+		}
+		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				_notMatching: new VDFPropInfo("bool"),
+				matching: new VDFPropInfo("bool")
+			});
+			_notMatching = true;
+			matching = true;
+		}
+		D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
+		test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", ()=>{ VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}"); });
+
+		class D1_MapWithEmbeddedSerializeMethod_Prop_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				notIncluded: new VDFPropInfo("bool"),
+				included: new VDFPropInfo("bool")
+			});
+			notIncluded = true;
+			included = true;
+
+			VDFSerialize(): VDFNode //VDFPropInfo prop, VDFSaveOptions options)
+			{
+				var result = new VDFNode();
+				result.SetMapChild("included", new VDFNode(this.included));
+				return result;
+			}
+		}
+		test("D1_MapWithEmbeddedSerializeMethod_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}"); });
 
 		// for JSON compatibility
 		// ==========

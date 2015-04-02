@@ -115,7 +115,7 @@ var VDFLoader = (function () {
                     if (typeName.StartsWith("Dictionary("))
                         propValueTypeName = typeGenericArgs[1];
                     else
-                        propValueTypeName = typeInfo.propInfoByName[propName] ? typeInfo.propInfoByName[propName].propTypeName : null;
+                        propValueTypeName = typeInfo.props[propName] ? typeInfo.props[propName].propTypeName : null;
 
                     var propValueFirstToken = tokensAtDepth1[i + 1];
                     var propValueEnderToken = tokensAtDepth1.FirstOrDefault(function (a) {

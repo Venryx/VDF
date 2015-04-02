@@ -106,7 +106,7 @@ that needs escaping.>>""".Fix());
 			a["strings2"].listChildren.Count.Should().Be(0);
 			a.ToVDF().Should().Be("TypeWithNullProps>{obj:null strings:null strings2:[]}");
 		}
-		class TypeWithList_PopOutItemData { [VDFProp(popOutChildrenL2: true)] List<string> list = new List<string>{"A", "B"}; }
+		class TypeWithList_PopOutItemData { [VDFProp(popOutL2: true)] List<string> list = new List<string>{"A", "B"}; }
 		[Fact] void D1_ListItems_PoppedOutChildren()
 		{
 			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutItemData>(new TypeWithList_PopOutItemData());
@@ -136,7 +136,7 @@ that needs escaping.>>""".Fix());
 			a["key1"].primitiveValue.Should().Be(null);
 			a.ToVDF().Should().Be("Dictionary(string string)>{key1:null}");
 		}
-		[Fact] void D1_AnonymousTypeProperties_MarkNoTypes()
+		[Fact] void TypeW()
 		{
 			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Double = .5, String = "Prop value string."}, new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
 			a["Bool"].primitiveValue.Should().Be(false);
@@ -211,7 +211,7 @@ that needs escaping.>>""".Fix());
 
 		class D1_Object_DictionaryPoppedOutThenBool_Class1
 		{
-			[VDFProp(popOutChildrenL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			[VDFProp(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
@@ -225,9 +225,9 @@ that needs escaping.>>""".Fix());
 	title1:""message1""
 	title2:""message2""".Replace("\r", ""));
 		}
-		[VDFType(popOutChildrenL1: true)] class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class
+		[VDFType(childPopOutL1: true)] class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class
 		{
-			[VDFProp(popOutChildrenL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			[VDFProp(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
@@ -307,7 +307,7 @@ that needs escaping.>>""".Fix());
 		""text2""".Replace("\r", ""));
 		}
 
-		[VDFType(false, true)] class T5_Depth2
+		[VDFType(childPopOutL1: true)] class T5_Depth2
 		{
 			[VDFProp] bool firstProperty = false;
 			[VDFProp] bool otherProperty = false;
@@ -319,6 +319,49 @@ that needs escaping.>>""".Fix());
 	firstProperty:false
 	otherProperty:false".Replace("\r", ""));
 		}
+
+		// tag stuff
+		// ==========
+
+		/*class D1_Map_PropWithTagInSaveOptionsIncludeTags_Class
+		{
+			public bool withoutTag = true;
+			[Tags("include")] public bool withTag = true;
+		}
+		[Fact] void D1_Map_PropWithTagInSaveOptionsIncludeTags()
+			{ VDF.Serialize<D1_Map_PropWithTagInSaveOptionsIncludeTags_Class>(new D1_Map_PropWithTagInSaveOptionsIncludeTags_Class(), new VDFSaveOptions(includeTags: new[] {"include"})).Should().Be("{withTag:true}"); }*/
+
+		[VDFType(propIncludeRegexL1: "^[^_]")] class D1_Map_PropWithNameMatchingIncludeRegex_Class
+		{
+			public bool _notMatching = true;
+			public bool matching = true;
+		}
+		[Fact] void D1_Map_PropWithNameMatchingIncludeRegex()
+			{ VDF.Serialize<D1_Map_PropWithNameMatchingIncludeRegex_Class>(new D1_Map_PropWithNameMatchingIncludeRegex_Class()).Should().Be("{matching:true}"); }
+
+		[VDFType(propIncludeRegexL1: "^[^_]")] class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {}
+		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived : D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base
+		{
+			public bool _notMatching = true;
+			public bool matching = true;
+		}
+		[Fact] void D1_Map_PropWithNameMatchingBaseClassIncludeRegex()
+			{ VDF.Serialize<D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived>(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived()).Should().Be("{matching:true}"); }
+
+		class D1_MapWithEmbeddedSerializeMethod_Prop_Class
+		{
+			public bool notIncluded = true;
+			public bool included = true;
+
+			[VDFSerialize] VDFNode Serialize() //VDFPropInfo prop, VDFSaveOptions options)
+			{
+				var result = new VDFNode();
+				result.mapChildren["included"] = new VDFNode(included);
+				return result;
+			}
+		}
+		[Fact] void D1_MapWithEmbeddedSerializeMethod_Prop()
+			{ VDF.Serialize<D1_MapWithEmbeddedSerializeMethod_Prop_Class>(new D1_MapWithEmbeddedSerializeMethod_Prop_Class()).Should().Be("{included:true}"); }
 
 		// for JSON compatibility
 		// ==========
@@ -355,13 +398,13 @@ that needs escaping.>>""".Fix());
 		// unique to C# version
 		// ==========
 
-		class SpecialList2<T> : List<T> {}
+		/*class SpecialList2<T> : List<T> {}
 		[Fact] void D1_SpecialListItems()
 		{
 			VDF.RegisterTypeExporter_Inline(typeof(SpecialList2<>), obj=>"You'll never see the items!"); // example of where exporters/importers that can output/input VDFNode's would be helpful
 			var a = new SpecialList2<string>{"A", "B", "C"};
 			VDF.Serialize<SpecialList2<string>>(a).Should().Be("\"You'll never see the items!\"");
-		}
+		}*/
 		class D1_ListOfTypeArray_Strings_Class { [VDFProp] string[] array = {"A", "B"}; }
 		[Fact] void D1_ListOfTypeArray_Strings()
 		{

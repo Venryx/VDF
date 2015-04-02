@@ -52,15 +52,12 @@ Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(it
 
 class VDF
 {
-	static typeExporters_inline = {};
-	static typeImporters_inline = {};
-
 	// for use with VDFSaveOptions
 	static AnyMember: string = "#AnyMember";
 	static AllMembers: Array<string> = ["#AnyMember"];
 
-	static RegisterTypeExporter_Inline(type: string, exporter: Function) { VDF.typeExporters_inline[type] = exporter; }
-	static RegisterTypeImporter_Inline<T>(type: string, importer: Function) { VDF.typeImporters_inline[type] = importer; }
+	// for use with VDFType
+	static PropRegex_Any = ""; //"^.+$";
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
 	static GetGenericArgumentsOfType(typeName: string): string[]

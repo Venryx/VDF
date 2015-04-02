@@ -1,6 +1,6 @@
 ﻿/*class Loading
 {
-	static initialized: boolean;
+	static initialized = false;
 	static Init()
 	{
 		if (this.initialized)
@@ -486,7 +486,7 @@ Shoot at Enemy Vehicle\n\
 			{
 				flag: new VDFPropInfo("bool")
 			});
-			flag: boolean;
+			flag = false;
 			VDFPreDeserialize(): void { this.flag = true; }
 		}
 		test("D1_PreDeserializeMethod", ()=>
@@ -500,7 +500,7 @@ Shoot at Enemy Vehicle\n\
 			{
 				flag: new VDFPropInfo("bool")
 			});
-			flag: boolean;
+			flag = false;
 			VDFPostDeserialize(): void { this.flag = true; }
 		}
 		test("D1_PostDeserializeMethod", ()=>
@@ -515,7 +515,7 @@ Shoot at Enemy Vehicle\n\
 				flag: new VDFPropInfo("bool")
 			});
 			flag = false;
-			VDFPostDeserialize(message: any): void { if (<string>message == "RequiredMessage") this.flag = true; }
+			VDFPostDeserialize(prop: string, options: VDFLoadOptions): void { if (<string>options.message == "RequiredMessage") this.flag = true; }
 		}
 		test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", ()=> { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, "WrongMessage")).flag.Should().Be(false); });
 		/*class ObjectWithPostDeserializeConstructor_Class
@@ -524,7 +524,7 @@ Shoot at Enemy Vehicle\n\
 			{
 				flag: new VDFPropInfo("bool")
 			});
-			flag: boolean;
+			flag = false;
 			ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
 		test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
@@ -534,7 +534,7 @@ Shoot at Enemy Vehicle\n\
 			{
 				flag: new VDFPropInfo("bool")
 			});
-			flag: boolean;
+			flag = false;
 		}
 		test("D1_InstantiateTypeManuallyThenFill", ()=>
 		{
@@ -548,13 +548,13 @@ Shoot at Enemy Vehicle\n\
 			{
 				messages: new VDFPropInfo("Dictionary(string string)", true, true),
 				otherProperty: new VDFPropInfo("bool")
-			}, false, true);
+			}, null, true);
 			messages = new Dictionary<string, string>("string", "string",
 			{
 				title1: "message1",
 				title2: "message2"
 			});
-			otherProperty: boolean;
+			otherProperty = false;
 		}
 		test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
 		{
@@ -568,6 +568,67 @@ Shoot at Enemy Vehicle\n\
 			a.messages["title1"].Should().Be("message1");
 			a.messages["title2"].Should().Be("message2");
 			a.otherProperty.Should().Be(true);
+		});
+
+		// tag stuff
+		// ==========
+
+		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				boolProp: new VDFPropInfo("bool")
+			});
+
+			boolProp = false;
+
+			VDFDeserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
+		}
+		test("D1_MapWithEmbeddedDeserializeMethod_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
+
+		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				child: new VDFPropInfo("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child")
+			});
+			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
+		}
+		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child
+		{
+			static typeInfo = new VDFTypeInfo(null);
+			static VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
+		}
+		test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", ()=>{ ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
+
+		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				withoutTag: new VDFPropInfo("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"),
+				withTag: new VDFPropInfo("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child")
+			});
+			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child;
+			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child; // doesn't actually have tag; just pretend it does
+		}
+		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child
+		{
+			static typeInfo = new VDFTypeInfo(
+			{
+				methodCalled: new VDFPropInfo("bool")
+			});
+			methodCalled = false;
+			VDFDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions): void
+			{
+				if (prop == "withTag")
+					this.methodCalled = true;
+			}
+		}
+		test("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag", ()=>
+		{
+			var a = VDF.Deserialize("{withoutTag:{} withTag:{}}", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent");
+			a.withoutTag.methodCalled.Should().Be(false);
+			a.withTag.methodCalled.Should().Be(true);
 		});
 
 		// for JSON compatibility

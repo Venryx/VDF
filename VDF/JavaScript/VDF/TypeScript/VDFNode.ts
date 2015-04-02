@@ -48,7 +48,7 @@
 
 	isList: boolean; // can also be inferred from use of list-children collection
 	isMap: boolean; // can also be inferred from use of map-children collection
-	popOutChildren: boolean;
+	childPopOut: boolean;
 	ToVDF(options: VDFSaveOptions = null, tabDepth = 0): string { return this.ToVDF_InlinePart(options, tabDepth) + this.ToVDF_PoppedOutPart(options, tabDepth); }
 	ToVDF_InlinePart(options: VDFSaveOptions = null, tabDepth = 0): string
 	{
@@ -88,7 +88,7 @@
 		else
 			builder.Append("\"" + this.primitiveValue + "\"");
 
-		if (options.useChildPopOut && this.popOutChildren)
+		if (options.useChildPopOut && this.childPopOut)
 		{
 			if (this.isMap || this.mapChildren.Count > 0)
 				builder.Append(this.mapChildren.Count > 0 ? "{^}" : "{}");
@@ -122,7 +122,7 @@
 		var builder = new StringBuilder();
 
 		// include popped-out-content of direct children (i.e. a single directly-under group)
-		if (options.useChildPopOut && this.popOutChildren)
+		if (options.useChildPopOut && this.childPopOut)
 		{
 			var childTabStr = "";
 			for (var i = 0; i < tabDepth + 1; i++)
@@ -187,14 +187,13 @@
 	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 
 	ToObject(options: VDFLoadOptions): any;
-	ToObject(declaredTypeName?: string, options?: VDFLoadOptions): any;
-	ToObject(declaredTypeName_orOptions?: any, options_orNothing?: any): any
+	ToObject(declaredTypeName?: string, options?: VDFLoadOptions, prop?: string): any;
+	ToObject(declaredTypeName_orOptions?: any, options = new VDFLoadOptions(), prop?: string): any
 	{
 		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
 			return this.ToObject(null, declaredTypeName_orOptions);
 
 		var declaredTypeName: string = declaredTypeName_orOptions;
-		var options: VDFLoadOptions = options_orNothing || new VDFLoadOptions();
 
 		var fromVDFTypeName = "object";
 		if (this.metadata != null && (window[this.metadata] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
@@ -217,8 +216,8 @@
 			finalTypeName = fromVDFTypeName;
 		
 		var result;
-		if (VDF.typeImporters_inline[finalTypeName])
-			result = VDF.typeImporters_inline[finalTypeName](this.primitiveValue);
+		if (window[finalTypeName] && window[finalTypeName].VDFDeserialize)
+			result = window[finalTypeName].VDFDeserialize(this, prop, options);
 		else if (finalTypeName == "object")
 			result = null;
 		else if (EnumValue.IsEnum(finalTypeName)) // helper importer for enums
@@ -228,41 +227,39 @@
 		else
 		{
 			result = VDFNode.CreateNewInstanceOfType(finalTypeName);
-			this.IntoObject(result, options);
+			if (result.VDFDeserialize)
+				result.VDFDeserialize(this, prop, options);
+			else
+				this.IntoObject(result, options, prop);
 		}
 
 		return result;
 	}
-	IntoObject(obj: any, loadOptions: VDFLoadOptions = null): void
+	IntoObject(obj: any, options: VDFLoadOptions = null, prop?: string): void
 	{
-		loadOptions = loadOptions || new VDFLoadOptions();
+		options = options || new VDFLoadOptions();
 
 		var typeName = VDF.GetTypeNameOfObject(obj);
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
 		var typeInfo = VDFTypeInfo.Get(typeName);
 
 		if (obj && obj.VDFPreDeserialize)
-			obj.VDFPreDeserialize(loadOptions.message);
+			obj.VDFPreDeserialize(prop, options);
 
 		for (var i = 0; i < this.listChildren.Count; i++)
-			obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], loadOptions));
+			obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, prop));
 		for (var keyString in this.mapChildren.Keys)
 			try
 			{
 				if (obj instanceof Dictionary) //is IDictionary)
-				{
-					var key = keyString; // in most cases, the dictionary's in-code key-type will be a string, so we can just use the in-VDF key-string directly
-					if (VDF.typeImporters_inline[<any>typeGenericArgs[0]]) // porting-note: the JS version doesn't let you register importer-func's for generic-type-definitions
-						key = VDF.typeImporters_inline[<any>typeGenericArgs[0]](keyString);
-					obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], loadOptions));
-				}
+					obj.Set(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
 				else
-					obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.propInfoByName[keyString].propTypeName, loadOptions);
+					obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString].propTypeName, options, keyString);
 			}
 			catch(ex) { throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"); }
 
 		if (obj && obj.VDFPostDeserialize)
-			obj.VDFPostDeserialize(loadOptions.message);
+			obj.VDFPostDeserialize(prop, options);
 	}
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

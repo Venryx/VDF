@@ -139,7 +139,7 @@ class VDFLoader
 					if (typeName.StartsWith("Dictionary(")) //typeof(IDictionary).IsAssignableFrom(objType))
 						propValueTypeName = typeGenericArgs[1];
 					else
-						propValueTypeName = typeInfo.propInfoByName[propName] ? typeInfo.propInfoByName[propName].propTypeName : null;
+						propValueTypeName = typeInfo.props[propName] ? typeInfo.props[propName].propTypeName : null;
 
 					var propValueFirstToken = tokensAtDepth1[i + 1];
 					var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.Key);

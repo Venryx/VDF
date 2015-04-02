@@ -25,12 +25,12 @@ public class VDFException : Exception
 }
 public static class VDF
 {
-	public static Dictionary<Type, Func<object, string>> typeExporters_inline = new Dictionary<Type, Func<object, string>>();
-	public static Dictionary<Type, Func<string, List<Type>, object>> typeImporters_inline = new Dictionary<Type, Func<string, List<Type>, object>>(); 
-
 	// for use with VDFSaveOptions
 	public static MemberInfo AnyMember = typeof(VDF).GetMember("AnyMember")[0];
 	public static List<MemberInfo> AllMembers = new List<MemberInfo> {AnyMember};
+
+	// for use with VDFType
+	public const string PropRegex_Any = ""; //"^.+$";
 
 	static Dictionary<Type, string> builtInTypeAliasesByType;
 	
@@ -46,16 +46,11 @@ public static class VDF
 		};
 
 		// initialize exporters/importers for some common types
-		RegisterTypeExporter_Inline<Color>(color=>color.Name);
-		RegisterTypeImporter_Inline<Color>(str=>Color.FromName(str));
-		RegisterTypeExporter_Inline<Guid>(id=>id.ToString());
-		RegisterTypeImporter_Inline<Guid>(str=>new Guid(str));
+		VDFTypeInfo.Get(typeof(Color)).AddSerializeMethod<Color>((self, prop, options)=>new VDFNode(self.Name));
+		VDFTypeInfo.Get(typeof(Color)).AddDeserializeMethod_FromParent<Color>((node, prop, options)=>Color.FromName((string)node.primitiveValue));
+		VDFTypeInfo.Get(typeof(Guid)).AddSerializeMethod<Guid>((self, prop, options)=>new VDFNode(self.ToString()));
+		VDFTypeInfo.Get(typeof(Guid)).AddDeserializeMethod_FromParent<Guid>((node, prop, options)=>new Guid((string)node.primitiveValue));
 	}
-	public static void RegisterTypeExporter_Inline<T>(Func<T, string> exporter) { RegisterTypeExporter_Inline(typeof(T), obj=>exporter((T)obj)); }
-	public static void RegisterTypeImporter_Inline<T>(Func<string, T> importer) { RegisterTypeImporter_Inline(typeof(T), (str, genericArgs)=>importer(str)); }
-	public static void RegisterTypeExporter_Inline(Type type, Func<object, string> exporter) { typeExporters_inline[type] = exporter; }
-	public static void RegisterTypeImporter_Inline(Type type, Func<string, object> importer) { typeImporters_inline[type] = (str, genericArgs)=>importer(str); }
-	public static void RegisterTypeImporter_Inline(Type type, Func<string, List<Type>, object> importer) { typeImporters_inline[type] = importer; } // generic-args lets you write an importer for classes of type Wrapper<T>
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
 	static int GetGenericParamsCountOfTypeName(string typeName)

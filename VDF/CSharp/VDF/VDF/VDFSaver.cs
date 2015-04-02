@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 public enum VDFTypeMarking
 {
@@ -24,15 +25,15 @@ public class VDFSaveOptions
 	public bool useCommaSeparators; // currently only applies to non-popped-out children
 
 	// CS only
-	public List<MemberInfo> includePropsL3;
-	public List<MemberInfo> excludePropsL4;
-	public List<MemberInfo> includePropsL5;
+	public List<MemberInfo> propIncludesL3;
+	public List<MemberInfo> propExcludesL4;
+	public List<MemberInfo> propIncludesL5;
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
 
 	public VDFSaveOptions(object message = null, VDFTypeMarking typeMarking = VDFTypeMarking.Internal,
 		bool useMetadata = true, bool useChildPopOut = true, bool useStringKeys = false, bool useNumberTrimming = true, bool useCommaSeparators = false, 
-		IEnumerable<MemberInfo> includePropsL3 = null, IEnumerable<MemberInfo> excludePropsL4 = null, IEnumerable<MemberInfo> includePropsL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+		IEnumerable<MemberInfo> propIncludesL3 = null, IEnumerable<MemberInfo> propExcludesL4 = null, IEnumerable<MemberInfo> propIncludesL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
 		this.message = message;
 		this.typeMarking = typeMarking;
@@ -41,9 +42,9 @@ public class VDFSaveOptions
 		this.useStringKeys = useStringKeys;
 		this.useNumberTrimming = useNumberTrimming;
 		this.useCommaSeparators = useCommaSeparators;
-		this.includePropsL3 = includePropsL3 != null ? includePropsL3.ToList() : new List<MemberInfo>();
-		this.excludePropsL4 = excludePropsL4 != null ? excludePropsL4.ToList() : new List<MemberInfo>();
-		this.includePropsL5 = includePropsL5 != null ? includePropsL5.ToList() : new List<MemberInfo>();
+		this.propIncludesL3 = propIncludesL3 != null ? propIncludesL3.ToList() : new List<MemberInfo>();
+		this.propExcludesL4 = propExcludesL4 != null ? propExcludesL4.ToList() : new List<MemberInfo>();
+		this.propIncludesL5 = propIncludesL5 != null ? propIncludesL5.ToList() : new List<MemberInfo>();
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
 	}
@@ -61,9 +62,9 @@ public class VDFSaveOptions
 
 public static class VDFSaver
 {
-	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions options = null, bool declaredTypeFromParent = false) { return ToVDFNode(obj, typeof(T), options, declaredTypeFromParent); }
-	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options, bool declaredTypeFromParent = false) { return ToVDFNode(obj, null, options, declaredTypeFromParent); }
-	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, bool declaredTypeFromParent = false)
+	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions options = null) { return ToVDFNode(obj, typeof(T), options); }
+	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options) { return ToVDFNode(obj, null, options); }
+	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, VDFPropInfo prop = null, bool declaredTypeInParentVDF = false)
 	{
 		options = options ?? new VDFSaveOptions();
 		
@@ -73,13 +74,11 @@ public static class VDFSaver
 		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
 
 		if (obj != null)
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.preSerializeMethod))
-				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {options.message} : new object[0]);
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.tags.Any(b=>b is VDFPreSerialize)))
+				method.Call(obj, prop, options);
 
-		if (obj != null && VDF.typeExporters_inline.ContainsKey(type))
-			node.primitiveValue = VDF.typeExporters_inline[type](obj);
-		else if (obj != null && type.IsGenericType && VDF.typeExporters_inline.ContainsKey(type.GetGenericTypeDefinition()))
-			node.primitiveValue = VDF.typeExporters_inline[type.GetGenericTypeDefinition()](obj);
+		if (obj != null && VDFTypeInfo.Get(type).methods.Values.Any(a=>a.tags.Any(b=>b is VDFSerialize)))
+			node = (VDFNode)VDFTypeInfo.Get(type).methods.Values.First(a=>a.tags.Any(b=>b is VDFSerialize)).Call(obj, prop, options);
 		else if (obj == null)
 			node.primitiveValue = null;
 		else if (VDF.GetIsTypePrimitive(type))
@@ -91,27 +90,27 @@ public static class VDFSaver
 			node.isList = true;
 			var objAsList = (IList)obj;
 			for (var i = 0; i < objAsList.Count; i++)
-				node.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, true));
+				node.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
 		}
 		else if (obj is IDictionary)
 		{
 			node.isMap = true;
 			var objAsDictionary = (IDictionary)obj;
 			foreach (object key in objAsDictionary.Keys)
-				node.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, true), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, true));
+				node.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, prop, true), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
 		}
 		else // if an object, with properties
 		{
 			node.isMap = true;
-			foreach (string propName in typeInfo.propInfoByName.Keys)
+			foreach (string propName in typeInfo.props.Keys)
 				try
 				{
-					VDFPropInfo propInfo = typeInfo.propInfoByName[propName];
-					bool include = typeInfo.props_includeL1;
+					VDFPropInfo propInfo = typeInfo.props[propName];
+					bool include = typeInfo.propIncludeRegexL1 != null ? new Regex(typeInfo.propIncludeRegexL1).IsMatch(propName) : false; //new Regex("^" + typeInfo.propIncludeRegexL1 + "$").IsMatch(propName);
 					include = propInfo.includeL2.HasValue ? propInfo.includeL2.Value : include;
-					include = options.includePropsL3.Contains(propInfo.memberInfo) || options.includePropsL3.Contains(VDF.AnyMember) ? true : include;
-					include = options.excludePropsL4.Contains(propInfo.memberInfo) || options.excludePropsL4.Contains(VDF.AnyMember) ? false : include;
-					include = options.includePropsL5.Contains(propInfo.memberInfo) || options.includePropsL5.Contains(VDF.AnyMember) ? true : include;
+					include = options.propIncludesL3.Contains(propInfo.memberInfo) || options.propIncludesL3.Contains(VDF.AnyMember) ? true : include;
+					include = options.propExcludesL4.Contains(propInfo.memberInfo) || options.propExcludesL4.Contains(VDF.AnyMember) ? false : include;
+					include = options.propIncludesL5.Contains(propInfo.memberInfo) || options.propIncludesL5.Contains(VDF.AnyMember) ? true : include;
 					if (!include)
 						continue;
 
@@ -120,8 +119,8 @@ public static class VDFSaver
 						continue;
 
 					// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
-					var propValueNode = ToVDFNode(propValue, !type.Name.StartsWith("<>") ? propInfo.GetPropType() : null, options);
-					propValueNode.popOutChildren = options.useChildPopOut && (propInfo.popOutChildrenL2.HasValue ? propInfo.popOutChildrenL2.Value : propValueNode.popOutChildren);
+					var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, propInfo);
+					propValueNode.childPopOut = options.useChildPopOut && (propInfo.popOutL2.HasValue ? propInfo.popOutL2.Value : propValueNode.childPopOut);
 					node.mapChildren.Add(propName, propValueNode);
 				}
 				catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
@@ -137,17 +136,17 @@ public static class VDFSaver
 		if (options.useMetadata && type != null && !VDF.GetIsTypeAnonymous(type) &&
 		(
 			(options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(type) && type != declaredType) ||
-			(options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(type) && (type != declaredType || !declaredTypeFromParent)) ||
+			(options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(type) && (type != declaredType || !declaredTypeInParentVDF)) ||
 			options.typeMarking == VDFTypeMarking.ExternalNoCollapse
 		))
 			node.metadata = VDF.GetNameOfType(type, options);
 
-		if (options.useChildPopOut && typeInfo != null && typeInfo.popOutChildrenL1)
-			node.popOutChildren = true;
+		if (options.useChildPopOut && typeInfo != null && typeInfo.childPopOutL1)
+			node.childPopOut = true;
 
 		if (obj != null)
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methodInfo.Where(methodInfo=>methodInfo.postSerializeMethod))
-				method.Call(obj, method.memberInfo.GetParameters().Length > 0 ? new[] {options.message} : new object[0]);
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.tags.Any(b=>b is VDFPostSerialize)))
+				method.Call(obj, prop, options);
 
 		return node;
 	}

@@ -163,9 +163,9 @@ that needs escaping.>>\"".Fix());
                 this.strings2 = new List("string");
             }
             TypeWithNullProps.typeInfo = new VDFTypeInfo({
-                obj: new VDFPropInfo("object"),
-                strings: new VDFPropInfo("List(string)"),
-                strings2: new VDFPropInfo("List(string)")
+                obj: new VDFPropInfo("object", true),
+                strings: new VDFPropInfo("List(string)", true),
+                strings2: new VDFPropInfo("List(string)", true)
             });
             return TypeWithNullProps;
         })();
@@ -237,7 +237,7 @@ that needs escaping.>>\"".Fix());
                 this.preSerializeWasCalled = true;
             };
             TypeWithPreSerializePrepMethod.typeInfo = new VDFTypeInfo({
-                preSerializeWasCalled: new VDFPropInfo("bool")
+                preSerializeWasCalled: new VDFPropInfo("bool", true)
             });
             return TypeWithPreSerializePrepMethod;
         })();
@@ -254,7 +254,7 @@ that needs escaping.>>\"".Fix());
                 this.postSerializeWasCalled = true;
             };
             TypeWithPostSerializeCleanupMethod.typeInfo = new VDFTypeInfo({
-                postSerializeWasCalled: new VDFPropInfo("bool")
+                postSerializeWasCalled: new VDFPropInfo("bool", true)
             });
             return TypeWithPostSerializeCleanupMethod;
         })();
@@ -273,12 +273,12 @@ that needs escaping.>>\"".Fix());
                 this.nestedList = new List("List(string)", new List("string", "1A"));
             }
             TypeWithMixOfProps.typeInfo = new VDFTypeInfo({
-                Bool: new VDFPropInfo("bool"),
-                Int: new VDFPropInfo("int"),
-                Double: new VDFPropInfo("double"),
-                String: new VDFPropInfo("string"),
-                list: new VDFPropInfo("List(string)"),
-                nestedList: new VDFPropInfo("List(List(string))")
+                Bool: new VDFPropInfo("bool", true),
+                Int: new VDFPropInfo("int", true),
+                Double: new VDFPropInfo("double", true),
+                String: new VDFPropInfo("string", true),
+                list: new VDFPropInfo("List(string)", true),
+                nestedList: new VDFPropInfo("List(List(string))", true)
             });
             return TypeWithMixOfProps;
         })();
@@ -313,7 +313,7 @@ that needs escaping.>>\"".Fix());
             }
             D1_Object_DictionaryPoppedOutThenBool_Class1.typeInfo = new VDFTypeInfo({
                 messages: new VDFPropInfo("Dictionary(string string)", true, true),
-                otherProperty: new VDFPropInfo("bool")
+                otherProperty: new VDFPropInfo("bool", true)
             });
             return D1_Object_DictionaryPoppedOutThenBool_Class1;
         })();
@@ -333,8 +333,8 @@ that needs escaping.>>\"".Fix());
             }
             D1_Map_PoppedOutDictionary_PoppedOutPairs_Class.typeInfo = new VDFTypeInfo({
                 messages: new VDFPropInfo("Dictionary(string string)", true, true),
-                otherProperty: new VDFPropInfo("bool")
-            }, false, true);
+                otherProperty: new VDFPropInfo("bool", true)
+            }, null, true);
             return D1_Map_PoppedOutDictionary_PoppedOutPairs_Class;
         })();
         test("D1_Map_PoppedOutDictionary_PoppedOutPairs", function () {
@@ -351,7 +351,7 @@ that needs escaping.>>\"".Fix());
                 this.level2 = new T1_Depth2();
             }
             T1_Depth1.typeInfo = new VDFTypeInfo({
-                level2: new VDFPropInfo("T1_Depth2")
+                level2: new VDFPropInfo("T1_Depth2", true)
             });
             return T1_Depth1;
         })();
@@ -362,7 +362,7 @@ that needs escaping.>>\"".Fix());
             }
             T1_Depth2.typeInfo = new VDFTypeInfo({
                 messages: new VDFPropInfo("List(string)", true, true),
-                otherProperty: new VDFPropInfo("bool")
+                otherProperty: new VDFPropInfo("bool", true)
             });
             return T1_Depth2;
         })();
@@ -379,7 +379,7 @@ that needs escaping.>>\"".Fix());
                 this.level2 = new Level2();
             }
             Level1.typeInfo = new VDFTypeInfo({
-                level2: new VDFPropInfo("Level2")
+                level2: new VDFPropInfo("Level2", true)
             });
             return Level1;
         })();
@@ -389,8 +389,8 @@ that needs escaping.>>\"".Fix());
                 this.level3_second = new Level3();
             }
             Level2.typeInfo = new VDFTypeInfo({
-                level3_first: new VDFPropInfo("Level3"),
-                level3_second: new VDFPropInfo("Level3")
+                level3_first: new VDFPropInfo("Level3", true),
+                level3_second: new VDFPropInfo("Level3", true)
             });
             return Level2;
         })();
@@ -425,7 +425,7 @@ that needs escaping.>>\"".Fix());
                 this.level2 = new T4_Depth2();
             }
             T4_Depth1.typeInfo = new VDFTypeInfo({
-                level2: new VDFPropInfo("T4_Depth2")
+                level2: new VDFPropInfo("T4_Depth2", true)
             });
             return T4_Depth1;
         })();
@@ -435,8 +435,8 @@ that needs escaping.>>\"".Fix());
                 this.level3_second = new T4_Depth3();
             }
             T4_Depth2.typeInfo = new VDFTypeInfo({
-                level3_first: new VDFPropInfo("T4_Depth3"),
-                level3_second: new VDFPropInfo("T4_Depth3")
+                level3_first: new VDFPropInfo("T4_Depth3", true),
+                level3_second: new VDFPropInfo("T4_Depth3", true)
             });
             return T4_Depth2;
         })();
@@ -456,7 +456,7 @@ that needs escaping.>>\"".Fix());
             }
             T4_Depth4.typeInfo = new VDFTypeInfo({
                 messages: new VDFPropInfo("List(string)", true, true),
-                otherProperty: new VDFPropInfo("bool")
+                otherProperty: new VDFPropInfo("bool", true)
             });
             return T4_Depth4;
         })();
@@ -483,9 +483,9 @@ that needs escaping.>>\"".Fix());
                 this.otherProperty = false;
             }
             T5_Depth2.typeInfo = new VDFTypeInfo({
-                firstProperty: new VDFPropInfo("bool"),
-                otherProperty: new VDFPropInfo("bool")
-            }, false, true);
+                firstProperty: new VDFPropInfo("bool", true),
+                otherProperty: new VDFPropInfo("bool", true)
+            }, null, true);
             return T5_Depth2;
         })();
         test("D4_List_Map_PoppedOutBools", function () {
@@ -493,6 +493,65 @@ that needs escaping.>>\"".Fix());
             a.ToVDF().Should().Be("List(T5_Depth2)>[{^}]\n\
 	firstProperty:false\n\
 	otherProperty:false".replace(/\r/g, ""));
+        });
+
+        // tag stuff
+        // ==========
+        var D1_Map_PropWithNameMatchingIncludeRegex_Class = (function () {
+            function D1_Map_PropWithNameMatchingIncludeRegex_Class() {
+                this._notMatching = true;
+                this.matching = true;
+            }
+            D1_Map_PropWithNameMatchingIncludeRegex_Class.typeInfo = new VDFTypeInfo({
+                _notMatching: new VDFPropInfo("bool"),
+                matching: new VDFPropInfo("bool")
+            }, "^[^_]");
+            return D1_Map_PropWithNameMatchingIncludeRegex_Class;
+        })();
+        test("D1_Map_PropWithNameMatchingIncludeRegex", function () {
+            VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}");
+        });
+
+        var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base = (function () {
+            function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base() {
+            }
+            D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.typeInfo = new VDFTypeInfo(null, "^[^_]");
+            return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base;
+        })();
+        var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived = (function () {
+            function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived() {
+                this._notMatching = true;
+                this.matching = true;
+            }
+            D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.typeInfo = new VDFTypeInfo({
+                _notMatching: new VDFPropInfo("bool"),
+                matching: new VDFPropInfo("bool")
+            });
+            return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived;
+        })();
+        D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
+        test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", function () {
+            VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}");
+        });
+
+        var D1_MapWithEmbeddedSerializeMethod_Prop_Class = (function () {
+            function D1_MapWithEmbeddedSerializeMethod_Prop_Class() {
+                this.notIncluded = true;
+                this.included = true;
+            }
+            D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype.VDFSerialize = function () {
+                var result = new VDFNode();
+                result.SetMapChild("included", new VDFNode(this.included));
+                return result;
+            };
+            D1_MapWithEmbeddedSerializeMethod_Prop_Class.typeInfo = new VDFTypeInfo({
+                notIncluded: new VDFPropInfo("bool"),
+                included: new VDFPropInfo("bool")
+            });
+            return D1_MapWithEmbeddedSerializeMethod_Prop_Class;
+        })();
+        test("D1_MapWithEmbeddedSerializeMethod_Prop", function () {
+            VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}");
         });
 
         // for JSON compatibility

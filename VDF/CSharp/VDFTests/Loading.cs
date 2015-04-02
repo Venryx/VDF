@@ -471,7 +471,7 @@ Shoot at Enemy Vehicle
 		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
 			public bool flag;
-			[VDFPostDeserialize] void VDFPostDeserialize(object message) { if ((string)message == "RequiredMessage") flag = true; }
+			[VDFPostDeserialize] void VDFPostDeserialize(VDFPropInfo prop, VDFLoadOptions options) { if ((string)options.message == "RequiredMessage") flag = true; }
 		}
 		[Fact] void D0_ObjectWithPostDeserializeMethodRequiringCustomMessage() { VDF.Deserialize<ObjectWithPostDeserializeMethodRequiringCustomMessage_Class>("{}", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); }
 		class ObjectWithPostDeserializeConstructor_Class
@@ -487,9 +487,9 @@ Shoot at Enemy Vehicle
 			VDF.DeserializeInto("{flag:true}", a);
 			a.flag.Should().Be(true);
 		}
-		[VDFType(popOutChildrenL1: true)] class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
+		[VDFType(childPopOutL1: true)] class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
-			[VDFProp(popOutChildrenL2: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
+			[VDFProp(popOutL2: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
@@ -508,6 +508,50 @@ Shoot at Enemy Vehicle
 			a.messages["title1"].Should().Be("message1");
 			a.messages["title2"].Should().Be("message2");
 			a.otherProperty.Should().Be(true);
+		}
+
+		// tag stuff
+		// ==========
+
+		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class
+		{
+			public bool boolProp;
+
+			[VDFDeserialize] void Deserialize(VDFNode node) { boolProp = node["boolProp"]; }
+		}
+		[Fact] void D1_MapWithEmbeddedDeserializeMethod_Prop()
+			{ VDF.Deserialize<D1_MapWithEmbeddedDeserializeMethod_Prop_Class>("{boolProp:true}").boolProp.Should().Be(true); }
+
+		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent
+		{
+			public D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child child;
+		}
+		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child
+		{
+			[VDFDeserialize(fromParent: true)] static D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child Deserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options) { return null; }
+		}
+		[Fact] void D1_MapWithEmbeddedDeserializeFromParentMethod_Prop()
+			{ VDF.Deserialize<D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent>("{child:{}}").child.Should().Be(null); }
+
+		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent
+		{
+			[VDFProp] public D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child withoutTag;
+			[VDFProp, Tags("tag")] public D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child withTag;
+		}
+		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child
+		{
+			public bool methodCalled;
+			[VDFDeserialize] void Deserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options)
+			{
+				if (prop.memberInfo.GetCustomAttributes(typeof(Tags), true).OfType<Tags>().Any(a=>a.tags.Contains("tag")))
+					methodCalled = true;
+			}
+		}
+		[Fact] void D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag()
+		{
+			var a = VDF.Deserialize<D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent>("{withoutTag:{} withTag:{}}");
+			a.withoutTag.methodCalled.Should().Be(false);
+			a.withTag.methodCalled.Should().Be(true);
 		}
 
 		// for JSON compatibility
@@ -541,7 +585,7 @@ Shoot at Enemy Vehicle
 			b.Should().Be(1.5f);
 		}
 		//[Fact] void D1_PropLoadError_DuplicateDictionaryKeys() { ((Action)(()=>VDFLoader.ToVDFNode("{scores:{Dan:0 Dan:1}}"))).ShouldThrow<ArgumentException>().WithMessage("*same key*"); }
-		class SpecialList3<T> : List<T> {}
+		/*class SpecialList3<T> : List<T> {}
 		[Fact] void D1_SpecialListItem()
 		{
 			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), obj=>new SpecialList3<string>{"Obvious first-item data."}); // example of where exporters/importers that can output/input VDFNode's would be helpful
@@ -551,7 +595,7 @@ Shoot at Enemy Vehicle
 		{
 			VDF.RegisterTypeImporter_Inline(typeof(SpecialList3<>), (obj, genericArgs)=>new SpecialList3<string>{"Obvious first-item data; of type: " + genericArgs.First().Name.ToLower()}); // note; example of where exporters/importers that can output/input VDFNode's would be helpful
 			VDF.Deserialize<SpecialList3<string>>("'<<Fake data-string that doesn't matter.>>'").Should().BeEquivalentTo(new SpecialList3<string> {"Obvious first-item data; of type: string"});
-		}
+		}*/
 		[Fact] void D1_ListOfTypeArray()
 		{
 			var a = VDF.Deserialize<int[]>("[0 1]");

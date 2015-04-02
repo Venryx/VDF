@@ -39,13 +39,6 @@ Array.prototype._AddProperty("Contains", function (item) {
 var VDF = (function () {
     function VDF() {
     }
-    VDF.RegisterTypeExporter_Inline = function (type, exporter) {
-        VDF.typeExporters_inline[type] = exporter;
-    };
-    VDF.RegisterTypeImporter_Inline = function (type, importer) {
-        VDF.typeImporters_inline[type] = importer;
-    };
-
     // v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
     VDF.GetGenericArgumentsOfType = function (typeName) {
         var genericArgumentTypes = new Array();
@@ -123,11 +116,10 @@ var VDF = (function () {
     VDF.DeserializeInto = function (vdf, obj, options) {
         VDFLoader.ToVDFNode(vdf, VDF.GetTypeNameOfObject(obj), options).IntoObject(obj, options);
     };
-    VDF.typeExporters_inline = {};
-    VDF.typeImporters_inline = {};
-
     VDF.AnyMember = "#AnyMember";
     VDF.AllMembers = ["#AnyMember"];
+
+    VDF.PropRegex_Any = "";
     return VDF;
 })();
 

@@ -3,18 +3,35 @@
 	static Get(typeName: string): VDFTypeInfo
 	{
 		if (VDF.GetIsTypeAnonymous(typeName))
-			return new VDFTypeInfo(null, true);
-		return (window[typeName] || {}).typeInfo || new VDFTypeInfo();
+			return new VDFTypeInfo(null, VDF.PropRegex_Any);
+
+		var result = new VDFTypeInfo(null, null, null);
+		result.props = null;
+		var currentTypeName = typeName;
+		while (window[currentTypeName]) //true)
+		{
+			if (window[currentTypeName].typeInfo)
+				for (var key in window[currentTypeName].typeInfo)
+					if (result[key] == null)
+						result[key] = window[currentTypeName].typeInfo[key];
+
+			if (window[currentTypeName].prototype && window[currentTypeName].prototype.__proto__) // if has base-type
+				currentTypeName = window[currentTypeName].prototype.__proto__.constructor.name; // set current-type-name to base-type's name
+			else
+				break;
+		}
+		result.props = result.props || {};
+		return result;
 	}
 
-	propInfoByName: any;
-	props_includeL1: boolean;
-	popOutChildrenL1: boolean;
-	constructor(propInfoByName?: any, props_includeL1?: boolean, popOutChildrenL1?: boolean)
+	props: any;
+	propIncludeRegexL1: string;
+	childPopOutL1: boolean;
+	constructor(props?: any, propIncludeRegexL1?: string, childPopOutL1?: boolean)
 	{
-		this.propInfoByName = propInfoByName || {};
-		this.props_includeL1 = props_includeL1;
-		this.popOutChildrenL1 = popOutChildrenL1;
+		this.props = props || {};
+		this.propIncludeRegexL1 = propIncludeRegexL1;
+		this.childPopOutL1 = childPopOutL1;
 	}
 	//SetPropInfo(propName: string, propInfo: VDFPropInfo) { this.propInfoByName[propName] = propInfo; }
 }
@@ -23,13 +40,14 @@ class VDFPropInfo
 {
 	propTypeName: string;
 	includeL2: boolean;
-	popOutChildrenL2: boolean;
+	popOutL2: boolean;
 	writeDefaultValue: boolean;
-	constructor(propType: string, includeL2: boolean = true, popOutChildrenL2: boolean = false, writeDefaultValue: boolean = true)
+
+	constructor(propType: string, includeL2?: boolean, popOutL2?: boolean, writeDefaultValue: boolean = true)
 	{
 		this.propTypeName = propType;
 		this.includeL2 = includeL2;
-		this.popOutChildrenL2 = popOutChildrenL2;
+		this.popOutL2 = popOutL2;
 		this.writeDefaultValue = writeDefaultValue;
 	}
 

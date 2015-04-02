@@ -15,7 +15,7 @@ namespace VDFTests
 		// temp
 		// ==========
 
-		[VDFType(true, true)] public class FrameData
+		[VDFType(VDF.PropRegex_Any, true)] public class FrameData
 		{
 			public FrameSettings settings = new FrameSettings();
 			public Dictionary<string, object> prefs = new Dictionary<string, object>();
@@ -31,7 +31,7 @@ namespace VDFTests
 			Soft
 		}
 
-		[VDFType(true, true)] public class FrameSettings
+		[VDFType(VDF.PropRegex_Any, true)] public class FrameSettings
 		{
 			public bool showTooltips = true;
 			public List<string> autoOpenSubmenus = new List<string> {"Frame2", "CreativeDefense"};
