@@ -182,7 +182,7 @@
 			return new Dictionary(genericParameters[0], genericParameters[1]);
 		if (!(window[typeName] instanceof Function))
 			throw new Error("Could not find type \"" + typeName + "\".");
-		return new window[typeName];
+		return new window[typeName]; // maybe todo: add code that resets props to their nulled-out/zeroed-out values
 	}
 	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 

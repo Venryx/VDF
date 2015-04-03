@@ -122,7 +122,7 @@ var VDFSaver = (function () {
         if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == 1 /* Internal */ && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName) || (options.typeMarking == 2 /* External */ && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF)) || options.typeMarking == 3 /* ExternalNoCollapse */))
             result.metadata = typeName;
 
-        if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.childPopOutL1)
+        if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.popOutL1)
             result.childPopOut = true;
 
         if (obj && obj.VDFPostSerialize)

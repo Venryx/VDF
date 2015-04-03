@@ -41,33 +41,33 @@ public class VDFNode
 	// base-types: ["bool", "char", "byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "string"]
 	static T ChangeType<T>(object primitiveValue) { return (T)Convert.ChangeType(primitiveValue, typeof(T)); } //(T)primitiveValue; }
 	public static implicit operator bool(VDFNode node) { return ChangeType<bool>(node.primitiveValue); ; }
-	public static implicit operator VDFNode(bool val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(bool val) { return new VDFNode(val); }
 	public static implicit operator char(VDFNode node) { return ChangeType<char>(node.primitiveValue); }
-	public static implicit operator VDFNode(char val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(char val) { return new VDFNode(val); }
 	public static implicit operator byte(VDFNode node) { return ChangeType<byte>(node.primitiveValue); }
-	public static implicit operator VDFNode(byte val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(byte val) { return new VDFNode(val); }
 	public static implicit operator sbyte(VDFNode node) { return ChangeType<sbyte>(node.primitiveValue); }
-	public static implicit operator VDFNode(sbyte val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(sbyte val) { return new VDFNode(val); }
 	public static implicit operator short(VDFNode node) { return ChangeType<short>(node.primitiveValue); }
-	public static implicit operator VDFNode(short val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(short val) { return new VDFNode(val); }
 	public static implicit operator ushort(VDFNode node) { return ChangeType<ushort>(node.primitiveValue); }
-	public static implicit operator VDFNode(ushort val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(ushort val) { return new VDFNode(val); }
 	public static implicit operator int(VDFNode node) { return ChangeType<int>(node.primitiveValue); }
-	public static implicit operator VDFNode(int val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(int val) { return new VDFNode(val); }
 	public static implicit operator uint(VDFNode node) { return ChangeType<uint>(node.primitiveValue); }
-	public static implicit operator VDFNode(uint val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(uint val) { return new VDFNode(val); }
 	public static implicit operator long(VDFNode node) { return ChangeType<long>(node.primitiveValue); }
-	public static implicit operator VDFNode(long val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(long val) { return new VDFNode(val); }
 	public static implicit operator ulong(VDFNode node) { return ChangeType<ulong>(node.primitiveValue); }
-	public static implicit operator VDFNode(ulong val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(ulong val) { return new VDFNode(val); }
 	public static implicit operator float(VDFNode node) { return ChangeType<float>(node.primitiveValue); }
-	public static implicit operator VDFNode(float val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(float val) { return new VDFNode(val); }
 	public static implicit operator double(VDFNode node) { return ChangeType<double>(node.primitiveValue); }
-	public static implicit operator VDFNode(double val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(double val) { return new VDFNode(val); }
 	public static implicit operator decimal(VDFNode node) { return ChangeType<decimal>(node.primitiveValue); }
-	public static implicit operator VDFNode(decimal val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(decimal val) { return new VDFNode(val); }
 	public static implicit operator string(VDFNode node) { return ChangeType<string>(node.primitiveValue); }
-	public static implicit operator VDFNode(string val) { return new VDFNode { primitiveValue = val }; }
+	public static implicit operator VDFNode(string val) { return new VDFNode(val); }
 	//public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
 	public override string ToString() { return primitiveValue.ToString(); } // helpful for debugging
 

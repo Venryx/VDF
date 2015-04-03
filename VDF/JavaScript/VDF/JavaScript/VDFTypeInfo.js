@@ -1,13 +1,13 @@
 ﻿var VDFType = (function () {
-    function VDFType(propIncludeRegexL1, childPopOutL1) {
+    function VDFType(propIncludeRegexL1, popOutL1) {
         this.propIncludeRegexL1 = propIncludeRegexL1;
-        this.childPopOutL1 = childPopOutL1;
+        this.popOutL1 = popOutL1;
     }
     VDFType.prototype.AddDataOf = function (typeTag) {
         if (typeTag.propIncludeRegexL1 != null)
             this.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
-        if (typeTag.childPopOutL1 != null)
-            this.childPopOutL1 = typeTag.childPopOutL1;
+        if (typeTag.popOutL1 != null)
+            this.popOutL1 = typeTag.popOutL1;
     };
     return VDFType;
 })();

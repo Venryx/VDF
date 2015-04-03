@@ -225,7 +225,7 @@ that needs escaping.>>""".Fix());
 	title1:""message1""
 	title2:""message2""".Replace("\r", ""));
 		}
-		[VDFType(childPopOutL1: true)] class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class
+		[VDFType(popOutL1: true)] class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class
 		{
 			[VDFProp(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
@@ -307,7 +307,7 @@ that needs escaping.>>""".Fix());
 		""text2""".Replace("\r", ""));
 		}
 
-		[VDFType(childPopOutL1: true)] class T5_Depth2
+		[VDFType(popOutL1: true)] class T5_Depth2
 		{
 			[VDFProp] bool firstProperty = false;
 			[VDFProp] bool otherProperty = false;

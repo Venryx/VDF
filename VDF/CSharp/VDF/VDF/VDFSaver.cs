@@ -157,7 +157,7 @@ public static class VDFSaver
 		))
 			result.metadata = VDF.GetNameOfType(type, options);
 
-		if (options.useChildPopOut && typeInfo != null && typeInfo.typeTag.childPopOutL1)
+		if (options.useChildPopOut && typeInfo != null && typeInfo.typeTag.popOutL1)
 			result.childPopOut = true;
 
 		if (obj != null)

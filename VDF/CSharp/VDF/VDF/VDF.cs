@@ -49,10 +49,10 @@ public static class VDF
 		};
 
 		// initialize exporters/importers for some common types
-		VDFTypeInfo.Get(typeof(Color)).AddSerializeMethod<Color>((self, prop, options)=>new VDFNode(self.Name));
-		VDFTypeInfo.Get(typeof(Color)).AddDeserializeMethod_FromParent<Color>((node, prop, options)=>Color.FromName((string)node.primitiveValue));
-		VDFTypeInfo.Get(typeof(Guid)).AddSerializeMethod<Guid>((self, prop, options)=>new VDFNode(self.ToString()));
-		VDFTypeInfo.Get(typeof(Guid)).AddDeserializeMethod_FromParent<Guid>((node, prop, options)=>new Guid((string)node.primitiveValue));
+		VDFTypeInfo.AddSerializeMethod<Color>((self, prop, options)=>new VDFNode(self.Name));
+		VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, prop, options)=>Color.FromName((string)node.primitiveValue));
+		VDFTypeInfo.AddSerializeMethod<Guid>((self, prop, options)=>new VDFNode(self.ToString()));
+		VDFTypeInfo.AddDeserializeMethod_FromParent<Guid>((node, prop, options)=>new Guid((string)node.primitiveValue));
 	}
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"

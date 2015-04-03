@@ -6,11 +6,11 @@ using System.Reflection;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute
 {
 	public string propIncludeRegexL1;
-	public bool childPopOutL1;
-	public VDFType(string propIncludeRegexL1 = null, bool childPopOutL1 = false)
+	public bool popOutL1;
+	public VDFType(string propIncludeRegexL1 = null, bool popOutL1 = false)
 	{
 		this.propIncludeRegexL1 = propIncludeRegexL1;
-		this.childPopOutL1 = childPopOutL1;
+		this.popOutL1 = popOutL1;
 	}
 }
 public class VDFTypeInfo
@@ -73,35 +73,43 @@ public class VDFTypeInfo
 	public void AddExtraMethod<A, R>(Func<A, R> method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
 	public void AddExtraMethod<A1, A2, R>(Func<A1, A2, R> method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
 	public void AddExtraMethod<A1, A2, A3, R>(Func<A1, A2, A3, R> method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
-	//public void AddExtraMethod<A1, A2, A3, A4, R>(Func<A1, A2, A3, A4, R> method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
+	public void AddExtraMethod<A1, A2, A3, A4, R>(Func<A1, A2, A3, A4, R> method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
 
-	public void AddSerializeMethod<T>(Func<T, VDFPropInfo, VDFSaveOptions, VDFNode> method, params Attribute[] tags)
+	public static void AddSerializeMethod<T>(Func<T, VDFNode> method, params Attribute[] tags) { AddSerializeMethod<T>((obj, prop, options)=>method(obj), tags); }
+	public static void AddSerializeMethod<T>(Func<T, VDFPropInfo, VDFNode> method, params Attribute[] tags) { AddSerializeMethod<T>((obj, prop, options) => method(obj, prop), tags); }
+	public static void AddSerializeMethod<T>(Func<T, VDFPropInfo, VDFSaveOptions, VDFNode> method, params Attribute[] tags)
 	{
 		var finalAttributes = tags.ToList();
 		if (!finalAttributes.Any(a=>a is VDFSerialize))
 			finalAttributes.Add(new VDFSerialize());
-		AddExtraMethod(method, tags);
+		Get(typeof(T)).AddExtraMethod(method, tags);
 	}
-	public void AddDeserializeMethod<T>(Action<T, VDFNode, VDFPropInfo, VDFLoadOptions> method, params Attribute[] tags)
+	public static void AddDeserializeMethod<T>(Action<T, VDFNode> method, params Attribute[] tags) { AddDeserializeMethod<T>((obj, node, prop, options)=>method(obj, node), tags); }
+	public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFPropInfo> method, params Attribute[] tags) { AddDeserializeMethod<T>((obj, node, prop, options)=>method(obj, node, prop), tags); }
+	public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFPropInfo, VDFLoadOptions> method, params Attribute[] tags)
 	{
 		var finalAttributes = tags.ToList();
 		if (!finalAttributes.Any(a=>a is VDFDeserialize))
 			finalAttributes.Add(new VDFDeserialize());
-		AddExtraMethod(method, tags);
+		Get(typeof(T)).AddExtraMethod(method, tags);
 	}
-	public void AddDeserializeMethod_WithReturn<T>(Func<VDFNode, VDFPropInfo, VDFLoadOptions, object> method, params Attribute[] tags)
+	public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, object> method, params Attribute[] tags) { AddDeserializeMethod_WithReturn<T>((obj, node, prop, options)=>method(obj, node), tags); }
+	public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFPropInfo, object> method, params Attribute[] tags) { AddDeserializeMethod_WithReturn<T>((obj, node, prop, options)=>method(obj, node, prop), tags); }
+	public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFPropInfo, VDFLoadOptions, object> method, params Attribute[] tags)
 	{
 		var finalAttributes = tags.ToList();
 		if (!finalAttributes.Any(a=>a is VDFDeserialize))
 			finalAttributes.Add(new VDFDeserialize());
-		AddExtraMethod(method, tags);
+		Get(typeof(T)).AddExtraMethod(method, tags);
 	}
-	public void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFPropInfo, VDFLoadOptions, T> method, params Attribute[] tags)
+	public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, T> method, params Attribute[] tags) { AddDeserializeMethod_FromParent((node, prop, options)=>method(node), tags); }
+	public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFPropInfo, T> method, params Attribute[] tags) { AddDeserializeMethod_FromParent((node, prop, options)=>method(node, prop), tags); }
+	public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFPropInfo, VDFLoadOptions, T> method, params Attribute[] tags)
 	{
 		var finalAttributes = tags.ToList();
 		if (!finalAttributes.Any(a=>a is VDFDeserialize))
 			finalAttributes.Add(new VDFDeserialize(fromParent: true));
-		AddExtraMethod(method, tags);
+		Get(typeof(T)).AddExtraMethod(method, tags);
 	}
 }
 

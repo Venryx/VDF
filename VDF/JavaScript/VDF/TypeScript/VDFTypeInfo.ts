@@ -1,19 +1,19 @@
 ﻿class VDFType
 {
 	propIncludeRegexL1: string;
-	childPopOutL1: boolean;
-	constructor(propIncludeRegexL1?: string, childPopOutL1?: boolean)
+	popOutL1: boolean;
+	constructor(propIncludeRegexL1?: string, popOutL1?: boolean)
 	{
 		this.propIncludeRegexL1 = propIncludeRegexL1;
-		this.childPopOutL1 = childPopOutL1;
+		this.popOutL1 = popOutL1;
 	}
 
 	AddDataOf(typeTag: VDFType)
 	{
 		if (typeTag.propIncludeRegexL1 != null)
 			this.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
-		if (typeTag.childPopOutL1 != null)
-			this.childPopOutL1 = typeTag.childPopOutL1;
+		if (typeTag.popOutL1 != null)
+			this.popOutL1 = typeTag.popOutL1;
 	}
 }
 class VDFTypeInfo

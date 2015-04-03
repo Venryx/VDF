@@ -144,7 +144,7 @@ class VDFSaver
 		))
 			result.metadata = typeName;
 
-		if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.childPopOutL1)
+		if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.popOutL1)
 			result.childPopOut = true;
 
 		if (obj && obj.VDFPostSerialize)
