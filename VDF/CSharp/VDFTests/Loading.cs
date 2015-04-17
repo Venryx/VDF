@@ -480,6 +480,15 @@ Shoot at Enemy Vehicle
 			[VDFPostDeserialize] ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
 		[Fact] void D1_ObjectWithPostDeserializeConstructor() { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); }
+
+		/*class D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Base
+		{
+			public bool called;
+			[VDFPostDeserialize] public void PostDeserialize() { called = true; } // important: PostDeserialize methods in a base class must be made public // maybe todo: add code to auto-add private base-class members as well
+		}
+		class D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Derived : D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Base {}
+		[Fact] void D1_MapWithPostDeserializeMethodInBaseClass_Prop() { VDF.Deserialize<D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Derived>("{}").called.Should().Be(true); }*/
+
 		class TypeInstantiatedManuallyThenFilled { [VDFProp] public bool flag; }
 		[Fact] void D1_InstantiateTypeManuallyThenFill()
 		{
@@ -565,6 +574,17 @@ Shoot at Enemy Vehicle
 			var a = VDF.Deserialize<D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent>("{withoutTag:{} withTag:{}}");
 			a.withoutTag.methodCalled.Should().Be(false);
 			a.withTag.methodCalled.Should().Be(true);
+		}
+
+		class D1_MapWithExtensionDeserializeFromParentMethod_Prop_Class_Parent
+			{ public D1_MapWithExtensionDeserializeFromParentMethod_Prop_Class_Child child; }
+		class D1_MapWithExtensionDeserializeFromParentMethod_Prop_Class_Child
+			{ public bool called; }
+		[Fact] void D1_MapWithExtensionDeserializeFromParentMethod_Prop()
+		{
+			VDFTypeInfo.AddDeserializeMethod_FromParent(node=>new D1_MapWithExtensionDeserializeFromParentMethod_Prop_Class_Child {called = true});
+
+			VDF.Deserialize<D1_MapWithExtensionDeserializeFromParentMethod_Prop_Class_Parent>("{child:{}}").child.called.Should().Be(true);
 		}
 
 		// for JSON compatibility

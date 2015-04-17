@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute
 {
@@ -55,6 +56,7 @@ public class VDFTypeInfo
 	public void AddExtraMethod_Base(Delegate method, List<Attribute> tags)
 	{
 		var methodInfo = new VDFMethodInfo();
+		methodInfo.method = method;
 		methodInfo.memberInfo = method.Method;
 		methodInfo.preSerializeTag = tags.OfType<VDFPreSerialize>().FirstOrDefault();
 		methodInfo.serializeTag = tags.OfType<VDFSerialize>().FirstOrDefault();
@@ -79,37 +81,37 @@ public class VDFTypeInfo
 	public static void AddSerializeMethod<T>(Func<T, VDFPropInfo, VDFNode> method, params Attribute[] tags) { AddSerializeMethod<T>((obj, prop, options) => method(obj, prop), tags); }
 	public static void AddSerializeMethod<T>(Func<T, VDFPropInfo, VDFSaveOptions, VDFNode> method, params Attribute[] tags)
 	{
-		var finalAttributes = tags.ToList();
-		if (!finalAttributes.Any(a=>a is VDFSerialize))
-			finalAttributes.Add(new VDFSerialize());
-		Get(typeof(T)).AddExtraMethod(method, tags);
+		var finalTags = tags.ToList();
+		if (!finalTags.Any(a=>a is VDFSerialize))
+			finalTags.Add(new VDFSerialize());
+		Get(typeof(T)).AddExtraMethod(method, finalTags.ToArray());
 	}
 	public static void AddDeserializeMethod<T>(Action<T, VDFNode> method, params Attribute[] tags) { AddDeserializeMethod<T>((obj, node, prop, options)=>method(obj, node), tags); }
 	public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFPropInfo> method, params Attribute[] tags) { AddDeserializeMethod<T>((obj, node, prop, options)=>method(obj, node, prop), tags); }
 	public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFPropInfo, VDFLoadOptions> method, params Attribute[] tags)
 	{
-		var finalAttributes = tags.ToList();
-		if (!finalAttributes.Any(a=>a is VDFDeserialize))
-			finalAttributes.Add(new VDFDeserialize());
-		Get(typeof(T)).AddExtraMethod(method, tags);
+		var finalTags = tags.ToList();
+		if (!finalTags.Any(a=>a is VDFDeserialize))
+			finalTags.Add(new VDFDeserialize());
+		Get(typeof(T)).AddExtraMethod(method, finalTags.ToArray());
 	}
 	public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, object> method, params Attribute[] tags) { AddDeserializeMethod_WithReturn<T>((obj, node, prop, options)=>method(obj, node), tags); }
 	public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFPropInfo, object> method, params Attribute[] tags) { AddDeserializeMethod_WithReturn<T>((obj, node, prop, options)=>method(obj, node, prop), tags); }
 	public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFPropInfo, VDFLoadOptions, object> method, params Attribute[] tags)
 	{
-		var finalAttributes = tags.ToList();
-		if (!finalAttributes.Any(a=>a is VDFDeserialize))
-			finalAttributes.Add(new VDFDeserialize());
-		Get(typeof(T)).AddExtraMethod(method, tags);
+		var finalTags = tags.ToList();
+		if (!finalTags.Any(a=>a is VDFDeserialize))
+			finalTags.Add(new VDFDeserialize());
+		Get(typeof(T)).AddExtraMethod(method, finalTags.ToArray());
 	}
 	public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, T> method, params Attribute[] tags) { AddDeserializeMethod_FromParent((node, prop, options)=>method(node), tags); }
 	public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFPropInfo, T> method, params Attribute[] tags) { AddDeserializeMethod_FromParent((node, prop, options)=>method(node, prop), tags); }
 	public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFPropInfo, VDFLoadOptions, T> method, params Attribute[] tags)
 	{
-		var finalAttributes = tags.ToList();
-		if (!finalAttributes.Any(a=>a is VDFDeserialize))
-			finalAttributes.Add(new VDFDeserialize(fromParent: true));
-		Get(typeof(T)).AddExtraMethod(method, tags);
+		var finalTags = tags.ToList();
+		if (!finalTags.Any(a=>a is VDFDeserialize))
+			finalTags.Add(new VDFDeserialize(fromParent: true));
+		Get(typeof(T)).AddExtraMethod(method, finalTags.ToArray());
 	}
 }
 
@@ -205,12 +207,24 @@ public class VDFMethodInfo
 	public VDFDeserialize deserializeTag;
 	public VDFPostDeserialize postDeserializeTag;
 
+	public Delegate method; // if a method delegate/lambda was supplied (i.e. if an extension method)
+
 	public object Call(object objParent, params object[] args)
 	{
 		if (args.Length > memberInfo.GetParameters().Length)
 			args = args.Take(memberInfo.GetParameters().Length).ToArray();
-		if (memberInfo.Name.Contains("<")) // if anonymous/lambda method
-			return memberInfo.Invoke(null, new[] {objParent}.Concat(args).ToArray());
+
+		/*if (memberInfo.Name.Contains("<"))  // if anonymous/lambda method
+			if (memberInfo.GetParameters().FirstOrDefault().ParameterType != typeof(VDFNode)) // if accepts a "self" argument (e.g. an added-as-extra-method standard Deserialize method)
+				return memberInfo.Invoke(null, new[] {objParent}.Concat(args).ToArray());
+			else
+				return memberInfo.Invoke(FormatterServices.GetUninitializedObject(memberInfo.DeclaringType), args.ToArray());*/
+		if (method != null) // if anonymous/lambda method
+			if (memberInfo.GetParameters().FirstOrDefault().ParameterType != typeof(VDFNode)) // if accepts a "self" argument (e.g. an added-as-extra-method standard Deserialize method)
+				return method.DynamicInvoke(new[] {objParent}.Concat(args).ToArray());
+			else
+				return method.DynamicInvoke(args.ToArray());
+
 		return memberInfo.Invoke(objParent, args);
 	}
 }
