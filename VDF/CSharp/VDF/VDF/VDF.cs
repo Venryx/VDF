@@ -36,6 +36,7 @@ public static class VDF
 	public static VDFNode NoActionTaken = new VDFNode();
 
 	static Dictionary<Type, string> builtInTypeAliasesByType;
+	static Dictionary<string, Type> builtInTypeAliasesByTypeName;
 	
 	static VDF()
 	{
@@ -47,6 +48,7 @@ public static class VDF
 			{typeof(bool), "bool"}, {typeof(char), "char"}, {typeof(string), "string"}, {typeof(object), "object"},
 			{typeof(List<>), "List"}, {typeof(Dictionary<,>), "Dictionary"}
 		};
+		builtInTypeAliasesByTypeName = builtInTypeAliasesByType.ToDictionary(a=>a.Value, a=>a.Key);
 
 		// initialize exporters/importers for some common types
 		VDFTypeInfo.AddSerializeMethod<Color>((self, prop, options)=>new VDFNode(self.Name));
@@ -73,8 +75,10 @@ public static class VDF
 	{
 		if (options.typeAliasesByType.Values.Contains(nameRoot))
 			return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
-		if (builtInTypeAliasesByType.Values.Contains(nameRoot))
-			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
+		//if (builtInTypeAliasesByType.Values.Contains(nameRoot))
+		//	return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
+		if (builtInTypeAliasesByTypeName.ContainsKey(nameRoot))
+			return builtInTypeAliasesByTypeName[nameRoot];
 
 		var result = Type.GetType(nameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 		if (result != null)
@@ -97,8 +101,10 @@ public static class VDF
 		options = options ?? new VDFLoadOptions();
 		if (options.typeAliasesByType.Values.Contains(typeName))
 			return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
-		if (builtInTypeAliasesByType.Values.Contains(typeName))
-			return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
+		//if (builtInTypeAliasesByType.Values.Contains(typeName))
+		//	return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
+		if (builtInTypeAliasesByTypeName.ContainsKey(typeName))
+			return builtInTypeAliasesByTypeName[typeName];
 
 		var rootName = typeName.Contains("(") ? typeName.Substring(0, typeName.IndexOf("(")) : typeName;
 		if (options.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name

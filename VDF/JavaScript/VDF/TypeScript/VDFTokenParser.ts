@@ -193,7 +193,7 @@ class VDFTokenParser
 		}
 
 		if (postProcessTokens)
-			VDFTokenParser.PostProcessTokens(result, options);
+			result = VDFTokenParser.PostProcessTokens(result, options);
 
 		return result;
 	}
@@ -214,7 +214,7 @@ class VDFTokenParser
 		return result;
 	}
 
-	static PostProcessTokens(tokens: List<VDFToken>, options: VDFLoadOptions)
+	static PostProcessTokens(tokens: List<VDFToken>, options: VDFLoadOptions): List<VDFToken>
 	{
 		// pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (for JSON compatibility)
 		// ----------
@@ -248,18 +248,22 @@ class VDFTokenParser
 						enderTokenIndex++;
 					var wrapGroupTabDepth = tokens[enderTokenIndex].type == VDFTokenType.PoppedOutChildGroupMarker ? line_tabsReached - 1 : line_tabsReached;
 					tabDepth_popOutBlockEndWrapTokens.Set(wrapGroupTabDepth, tokens.GetRange(i + 1, enderTokenIndex - (i + 1)));
+					tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth)[0].index = i + 1; // update index
 					i = enderTokenIndex - 1; // have next token processed be the ender-token (^^[...] or line-break)
 				}
 				else if (lastToken.type == VDFTokenType.Tab)
 				{
 					var wrapGroupTabDepth = lastToken.type == VDFTokenType.Tab ? line_tabsReached - 1 : line_tabsReached;
-					for (var i2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Indexes())
+					tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth));
+					//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][0]), tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count);
+					tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth)[0].index, tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count); // index was updated when set put together
+					/*for (var i2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Indexes())
 					{
 						var token2 = tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][i2];
 						tokens.Remove(token2);
 						tokens.Insert(i - 1, token2);
-					}
-					i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
+					}*/
+					i -= tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
 					tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
 				}
 			}
@@ -276,12 +280,15 @@ class VDFTokenParser
 					for (var tabDepth = maxTabDepth; tabDepth >= line_tabsReached; tabDepth--)
 						if (tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth))
 						{
-							for (var i2 in tabDepth_popOutBlockEndWrapTokens[tabDepth].Indexes())
+							tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens.Get(tabDepth));
+							//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[tabDepth][0]), tabDepth_popOutBlockEndWrapTokens[tabDepth].Count);
+							tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens.Get(tabDepth)[0].index, tabDepth_popOutBlockEndWrapTokens.Get(tabDepth).Count); // index was updated when set put together
+							/*for (var i2 in tabDepth_popOutBlockEndWrapTokens[tabDepth].Indexes())
 							{
 								var token2 = tabDepth_popOutBlockEndWrapTokens[tabDepth][i2];
 								tokens.Remove(token2);
 								tokens.Insert(i - 1, token2);
-							}
+							}*/
 							tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
 						}
 				}
@@ -293,16 +300,26 @@ class VDFTokenParser
 		// pass 3: remove all now-useless tokens
 		// ----------
 
-		for (var i = tokens.Count - 1; i >= 0; i--)
+		/*for (var i = tokens.Count - 1; i >= 0; i--)
 			if (tokens[i].type == VDFTokenType.Tab || tokens[i].type == VDFTokenType.LineBreak || tokens[i].type == VDFTokenType.MetadataEndMarker || tokens[i].type == VDFTokenType.KeyValueSeparator || tokens[i].type == VDFTokenType.PoppedOutChildGroupMarker)
-				tokens.RemoveAt(i);
+				tokens.RemoveAt(i);*/
+
+		var result = new List<VDFToken>(); //"VDFToken");
+		for (var i in tokens.Indexes())
+		{
+			var token = tokens[i];
+			if (!(token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.KeyValueSeparator || token.type == VDFTokenType.PoppedOutChildGroupMarker))
+				result.Add(token);
+		}
 
 		// pass 4: fix token position-and-index properties
 		// ----------
 
-		VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
+		VDFTokenParser.RefreshTokenPositionAndIndexProperties(result); //tokens);
 
 		//Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
+
+		return result;
 	}
 	static RefreshTokenPositionAndIndexProperties(tokens: List<VDFToken>)
 	{

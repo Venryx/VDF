@@ -317,8 +317,10 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 			this.push(items[i]);
 	};
 	self.Insert = function(index, item) { return this.splice(index, 0, item); };
+	self.InsertRange = function(index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
 	self.Remove = function(item) { this.RemoveAt(this.indexOf(item)); };
 	self.RemoveAt = function(index) { this.splice(index, 1); };
+	self.RemoveRange = function(index, count) { return this.splice(index, count); };
 	self.Any = function(matchFunc)
 	{
 		for (var i in this.Indexes())
@@ -396,8 +398,10 @@ interface List<T> extends Array<T> // class/instance declaration stuff
 	Add(...items): number;
 	AddRange(items: Array<T>): void;
 	Insert(index, item): void;
+	InsertRange(index: number, items: Array<T>): void;
 	Remove(item: T): void;
 	RemoveAt(index: number): void;
+	RemoveRange(index: number, count: number): void;
 	Any(matchFunc): boolean;
 	All(matchFunc): boolean;
 	First(matchFunc?): T;

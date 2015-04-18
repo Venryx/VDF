@@ -350,11 +350,17 @@ window["List"] = function List(itemType) {
     self.Insert = function (index, item) {
         return this.splice(index, 0, item);
     };
+    self.InsertRange = function (index, items) {
+        return this.splice.apply(this, [index, 0].concat(items));
+    };
     self.Remove = function (item) {
         this.RemoveAt(this.indexOf(item));
     };
     self.RemoveAt = function (index) {
         this.splice(index, 1);
+    };
+    self.RemoveRange = function (index, count) {
+        return this.splice(index, count);
     };
     self.Any = function (matchFunc) {
         for (var i in this.Indexes())

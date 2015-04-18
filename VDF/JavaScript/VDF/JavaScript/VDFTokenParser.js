@@ -162,7 +162,7 @@ var VDFTokenParser = (function () {
         }
 
         if (postProcessTokens)
-            VDFTokenParser.PostProcessTokens(result, options);
+            result = VDFTokenParser.PostProcessTokens(result, options);
 
         return result;
     };
@@ -209,15 +209,22 @@ var VDFTokenParser = (function () {
                         enderTokenIndex++;
                     var wrapGroupTabDepth = tokens[enderTokenIndex].type == 13 /* PoppedOutChildGroupMarker */ ? line_tabsReached - 1 : line_tabsReached;
                     tabDepth_popOutBlockEndWrapTokens.Set(wrapGroupTabDepth, tokens.GetRange(i + 1, enderTokenIndex - (i + 1)));
+                    tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth)[0].index = i + 1; // update index
                     i = enderTokenIndex - 1; // have next token processed be the ender-token (^^[...] or line-break)
                 } else if (lastToken.type == 7 /* Tab */) {
                     var wrapGroupTabDepth = lastToken.type == 7 /* Tab */ ? line_tabsReached - 1 : line_tabsReached;
-                    for (var i2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Indexes()) {
-                        var token2 = tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][i2];
-                        tokens.Remove(token2);
-                        tokens.Insert(i - 1, token2);
-                    }
-                    i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
+                    tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth));
+
+                    //tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][0]), tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count);
+                    tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth)[0].index, tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count); // index was updated when set put together
+
+                    /*for (var i2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Indexes())
+                    {
+                    var token2 = tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][i2];
+                    tokens.Remove(token2);
+                    tokens.Insert(i - 1, token2);
+                    }*/
+                    i -= tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
                     tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
                 }
             } else if (lastToken != null && (lastToken.type == 8 /* LineBreak */ || lastToken.type == 7 /* Tab */ || token.type == 6 /* None */)) {
@@ -230,11 +237,17 @@ var VDFTokenParser = (function () {
                             maxTabDepth = parseInt(key);
                     for (var tabDepth = maxTabDepth; tabDepth >= line_tabsReached; tabDepth--)
                         if (tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth)) {
-                            for (var i2 in tabDepth_popOutBlockEndWrapTokens[tabDepth].Indexes()) {
-                                var token2 = tabDepth_popOutBlockEndWrapTokens[tabDepth][i2];
-                                tokens.Remove(token2);
-                                tokens.Insert(i - 1, token2);
-                            }
+                            tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens.Get(tabDepth));
+
+                            //tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[tabDepth][0]), tabDepth_popOutBlockEndWrapTokens[tabDepth].Count);
+                            tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens.Get(tabDepth)[0].index, tabDepth_popOutBlockEndWrapTokens.Get(tabDepth).Count); // index was updated when set put together
+
+                            /*for (var i2 in tabDepth_popOutBlockEndWrapTokens[tabDepth].Indexes())
+                            {
+                            var token2 = tabDepth_popOutBlockEndWrapTokens[tabDepth][i2];
+                            tokens.Remove(token2);
+                            tokens.Insert(i - 1, token2);
+                            }*/
                             tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
                         }
                 }
@@ -243,14 +256,24 @@ var VDFTokenParser = (function () {
 
         tokens.RemoveAt(tokens.Count - 1); // maybe temp: remove depth-0-ender helper token
 
-        for (var i = tokens.Count - 1; i >= 0; i--)
-            if (tokens[i].type == 7 /* Tab */ || tokens[i].type == 8 /* LineBreak */ || tokens[i].type == 10 /* MetadataEndMarker */ || tokens[i].type == 12 /* KeyValueSeparator */ || tokens[i].type == 13 /* PoppedOutChildGroupMarker */)
-                tokens.RemoveAt(i);
+        // pass 3: remove all now-useless tokens
+        // ----------
+        /*for (var i = tokens.Count - 1; i >= 0; i--)
+        if (tokens[i].type == VDFTokenType.Tab || tokens[i].type == VDFTokenType.LineBreak || tokens[i].type == VDFTokenType.MetadataEndMarker || tokens[i].type == VDFTokenType.KeyValueSeparator || tokens[i].type == VDFTokenType.PoppedOutChildGroupMarker)
+        tokens.RemoveAt(i);*/
+        var result = new List();
+        for (var i in tokens.Indexes()) {
+            var token = tokens[i];
+            if (!(token.type == 7 /* Tab */ || token.type == 8 /* LineBreak */ || token.type == 10 /* MetadataEndMarker */ || token.type == 12 /* KeyValueSeparator */ || token.type == 13 /* PoppedOutChildGroupMarker */))
+                result.Add(token);
+        }
 
         // pass 4: fix token position-and-index properties
         // ----------
-        VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
+        VDFTokenParser.RefreshTokenPositionAndIndexProperties(result); //tokens);
+
         //Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
+        return result;
     };
     VDFTokenParser.RefreshTokenPositionAndIndexProperties = function (tokens) {
         var textProcessedLength = 0;
