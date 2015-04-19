@@ -38,9 +38,10 @@ public static class VDFLoader
 	public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions options = null) { return ToVDFNode(text, typeof(T), options); }
 	public static VDFNode ToVDFNode(string text, VDFLoadOptions options) { return ToVDFNode(text, null, options); }
 	public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions options = null) { return ToVDFNode(VDFTokenParser.ParseTokens(text, options), declaredType, options); }
-	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null)
+	public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null, int firstTokenIndex = 0, int enderTokenIndex = -1)
 	{
 		options = options ?? new VDFLoadOptions();
+		enderTokenIndex = enderTokenIndex != -1 ? enderTokenIndex : tokens.Count;
 
 		// figure out obj-type
 		// ==========
@@ -48,8 +49,10 @@ public static class VDFLoader
 		var depth = 0;
 		var tokensAtDepth0 = new List<VDFToken>();
 		var tokensAtDepth1 = new List<VDFToken>();
-		foreach (VDFToken token in tokens)
+		//foreach (VDFToken token in tokens)
+		for (var i = firstTokenIndex; i < enderTokenIndex; i++)
 		{
+			var token = tokens[i];
 			if (token.type == VDFTokenType.ListEndMarker || token.type == VDFTokenType.MapEndMarker)
 				depth--;
 			if (depth == 0)
@@ -115,7 +118,8 @@ public static class VDFLoader
 				{
 					var itemFirstToken = tokens[token.index];
 					var itemEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker);
-					node.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
+					//node.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
+					node.listChildren.Add(ToVDFNode(tokens, typeGenericArgs[0], options, itemFirstToken.index, itemEnderToken != null ? itemEnderToken.index : enderTokenIndex));
 					if (itemFirstToken.type == VDFTokenType.Metadata) // if item had metadata, skip an extra token (since it had two non-end tokens)
 						i++;
 				}
@@ -140,20 +144,21 @@ public static class VDFLoader
 
 					var propValueFirstToken = tokensAtDepth1[i + 1];
 					var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.Key);
-					node.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
+					//node.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
+					node.mapChildren.Add(propName, ToVDFNode(tokens, propValueType, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex));
 				}
 			}
 		}
 
 		return node;
 	}
-	static List<VDFToken> GetTokenRange_Tokens(List<VDFToken> tokens, VDFToken firstToken, VDFToken enderToken)
+	/*static List<VDFToken> GetTokenRange_Tokens(List<VDFToken> tokens, VDFToken firstToken, VDFToken enderToken)
 	{
 		//return tokens.GetRange(firstToken.index, (enderToken != null ? enderToken.index : tokens.Count) - firstToken.index).Select(a=>new VDFToken(a.type, a.position - firstToken.position, a.index - firstToken.index, a.text)).ToList();
 
-		var result = new List<VDFToken>();
+		var result = new List<VDFToken>(); //(enderToken != null ? enderToken.index : tokens.Count) - firstToken.index);
 		for (var i = firstToken.index; i < (enderToken != null ? enderToken.index : tokens.Count); i++)
 			result.Add(new VDFToken(tokens[i].type, tokens[i].position - firstToken.position, tokens[i].index - firstToken.index, tokens[i].text));
 		return result;
-	}
+	}*/
 }

@@ -23,15 +23,18 @@
 var VDFLoader = (function () {
     function VDFLoader() {
     }
-    VDFLoader.ToVDFNode = function (tokens_orText, declaredTypeName_orOptions, options_orNothing) {
+    VDFLoader.ToVDFNode = function (tokens_orText, declaredTypeName_orOptions, options, firstTokenIndex, enderTokenIndex) {
+        if (typeof firstTokenIndex === "undefined") { firstTokenIndex = 0; }
+        if (typeof enderTokenIndex === "undefined") { enderTokenIndex = -1; }
         if (declaredTypeName_orOptions instanceof VDFLoadOptions)
             return VDFLoader.ToVDFNode(tokens_orText, null, declaredTypeName_orOptions);
         if (typeof tokens_orText == "string")
-            return VDFLoader.ToVDFNode(VDFTokenParser.ParseTokens(tokens_orText, options_orNothing), declaredTypeName_orOptions, options_orNothing);
+            return VDFLoader.ToVDFNode(VDFTokenParser.ParseTokens(tokens_orText, options), declaredTypeName_orOptions, options);
 
         var tokens = tokens_orText;
         var declaredTypeName = declaredTypeName_orOptions;
-        var options = options_orNothing || new VDFLoadOptions();
+        options = options || new VDFLoadOptions();
+        enderTokenIndex = enderTokenIndex != -1 ? enderTokenIndex : tokens.Count;
 
         // figure out obj-type
         // ==========
@@ -39,7 +42,8 @@ var VDFLoader = (function () {
         var tokensAtDepth0 = new List("VDFToken");
         var tokensAtDepth1 = new List("VDFToken");
         var i;
-        for (var i in tokens.Indexes()) {
+
+        for (var i = firstTokenIndex; i < enderTokenIndex; i++) {
             var token = tokens[i];
             if (token.type == 19 /* ListEndMarker */ || token.type == 21 /* MapEndMarker */)
                 depth--;
@@ -100,7 +104,9 @@ var VDFLoader = (function () {
                     var itemEnderToken = tokensAtDepth1.FirstOrDefault(function (a) {
                         return a.index > itemFirstToken.index + (itemFirstToken.type == 9 /* Metadata */ ? 1 : 0) && token.type != 19 /* ListEndMarker */ && token.type != 21 /* MapEndMarker */;
                     });
-                    node.AddListChild(VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
+
+                    //node.AddListChild(VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
+                    node.AddListChild(VDFLoader.ToVDFNode(tokens, typeGenericArgs[0], options, itemFirstToken.index, itemEnderToken != null ? itemEnderToken.index : enderTokenIndex));
                     if (itemFirstToken.type == 9 /* Metadata */)
                         i++;
                 }
@@ -121,19 +127,14 @@ var VDFLoader = (function () {
                     var propValueEnderToken = tokensAtDepth1.FirstOrDefault(function (a) {
                         return a.index > propValueFirstToken.index && a.type == 11 /* Key */;
                     });
-                    node.SetMapChild(propName, VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueTypeName, options));
+
+                    //node.SetMapChild(propName, VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueTypeName, options));
+                    node.SetMapChild(propName, VDFLoader.ToVDFNode(tokens, propValueTypeName, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex));
                 }
             }
         }
 
         return node;
-    };
-    VDFLoader.GetTokenRange_Tokens = function (tokens, firstToken, enderToken) {
-        //return tokens.GetRange(firstToken.index, (enderToken != null ? enderToken.index : tokens.Count) - firstToken.index).Select(a=>new VDFToken(a.type, a.position - firstToken.position, a.index - firstToken.index, a.text)).ToList();
-        var result = new List("VDFToken");
-        for (var i = firstToken.index; i < (enderToken != null ? enderToken.index : tokens.Count); i++)
-            result.Add(new VDFToken(tokens[i].type, tokens[i].position - firstToken.position, tokens[i].index - firstToken.index, tokens[i].text));
-        return result;
     };
     return VDFLoader;
 })();
