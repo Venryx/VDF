@@ -636,6 +636,16 @@ Shoot at Enemy Vehicle\n\
             a.double.Should().Be(3.5);
         });
 
+        var AsObjectOfType_Class = (function () {
+            function AsObjectOfType_Class() {
+            }
+            return AsObjectOfType_Class;
+        })();
+        test("AsObjectOfType", function () {
+            var a = VDF.Deserialize("AsObjectOfType_Class>{}", "AsObjectOfType_Class");
+            ok(a instanceof AsObjectOfType_Class);
+        });
+
         // export all classes/enums to global scope
         var arguments;
         var names = V.GetMatches(arguments.callee.toString(), /        var (\w+) = \(function \(\) {/g, 1);

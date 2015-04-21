@@ -316,7 +316,7 @@ public class VDFNode
 			{
 				if (obj is IDictionary)
 					((IDictionary)obj).Add(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
-				else
+				else if (typeInfo.props.ContainsKey(keyString)) // maybe temp; just ignore props that are missing
 					typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, typeInfo.props[keyString]));
 			}
 			catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }

@@ -101,12 +101,11 @@ class VDFSaver
 				result.isMap = true;
 
 				// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
-				var oldObj = obj;
-				obj = {};
 				for (var propName in typeInfo.props)
-					obj[propName] = null; // first, clear each declared prop to a null value, to ensure that the code below can process each declared property
-				for (var propName in oldObj) // now add in the actual data, for any that are attached to the actual instance
-					obj[propName] = oldObj[propName];
+				{
+					if (!(propName in obj))
+						obj[propName] = null;
+				}
 
 				for (var propName in obj)
 					try
