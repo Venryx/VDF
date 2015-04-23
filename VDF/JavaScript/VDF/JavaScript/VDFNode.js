@@ -215,16 +215,7 @@
                 result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
             else {
                 result = VDFNode.CreateNewInstanceOfType(finalTypeName);
-
-                var deserializedByCustomMethod2 = false;
-                if (result.VDFDeserialize) {
-                    var deserializeResult = result.VDFDeserialize(this, prop, options);
-                    if (deserializeResult != VDF.NoActionTaken)
-                        deserializedByCustomMethod2 = true;
-                }
-
-                if (!deserializedByCustomMethod2)
-                    this.IntoObject(result, options, prop);
+                this.IntoObject(result, options, prop);
             }
 
         return result;
@@ -240,18 +231,27 @@
         if (obj && obj.VDFPreDeserialize)
             obj.VDFPreDeserialize(prop, options);
 
-        for (var i = 0; i < this.listChildren.Count; i++)
-            obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, prop));
-        for (var keyString in this.mapChildren.Keys)
-            try  {
-                if (obj instanceof Dictionary)
-                    obj.Set(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
-                else
-                    obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, typeInfo.props[keyString]);
-            } catch (ex) {
-                ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n";
-                throw ex;
-            }
+        var deserializedByCustomMethod2 = false;
+        if (obj.VDFDeserialize) {
+            var deserializeResult = obj.VDFDeserialize(this, prop, options);
+            if (deserializeResult != VDF.NoActionTaken)
+                deserializedByCustomMethod2 = true;
+        }
+
+        if (!deserializedByCustomMethod2) {
+            for (var i = 0; i < this.listChildren.Count; i++)
+                obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, prop));
+            for (var keyString in this.mapChildren.Keys)
+                try  {
+                    if (obj instanceof Dictionary)
+                        obj.Set(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
+                    else
+                        obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, typeInfo.props[keyString]);
+                } catch (ex) {
+                    ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n";
+                    throw ex;
+                }
+        }
 
         if (obj && obj.VDFPostDeserialize)
             obj.VDFPostDeserialize(prop, options);
