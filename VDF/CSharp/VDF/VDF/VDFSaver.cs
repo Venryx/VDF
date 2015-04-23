@@ -14,7 +14,7 @@ public enum VDFTypeMarking
 }
 public class VDFSaveOptions
 {
-	public object message;
+	public List<object> messages;
 	public VDFTypeMarking typeMarking;
 
 	// for JSON compatibility
@@ -31,11 +31,11 @@ public class VDFSaveOptions
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
 
-	public VDFSaveOptions(object message = null, VDFTypeMarking typeMarking = VDFTypeMarking.Internal,
+	public VDFSaveOptions(List<object> messages = null, VDFTypeMarking typeMarking = VDFTypeMarking.Internal,
 		bool useMetadata = true, bool useChildPopOut = true, bool useStringKeys = false, bool useNumberTrimming = true, bool useCommaSeparators = false, 
 		IEnumerable<MemberInfo> propIncludesL3 = null, IEnumerable<MemberInfo> propExcludesL4 = null, IEnumerable<MemberInfo> propIncludesL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
-		this.message = message;
+		this.messages = messages ?? new List<object>();
 		this.typeMarking = typeMarking;
 		this.useMetadata = useMetadata;
 		this.useChildPopOut = useChildPopOut;

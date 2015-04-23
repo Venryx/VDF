@@ -211,7 +211,7 @@ public class VDFNode
 	// loading
 	// ==========
 
-	static object CreateNewInstanceOfType(Type type)
+	public static object CreateNewInstanceOfType(Type type)
 	{
 		if (typeof(Array).IsAssignableFrom(type)) // if array, we start out with a list, and then turn it into an array at the end
 			return Activator.CreateInstance(typeof(List<>).MakeGenericType(type.GetElementType()), true);

@@ -5,7 +5,7 @@ using System.Linq;
 
 public class VDFLoadOptions
 {
-	public object message;
+	public List<object> messages;
 
 	// for JSON compatibility
 	public bool allowStringKeys;
@@ -16,9 +16,9 @@ public class VDFLoadOptions
 	public Dictionary<Type, string> typeAliasesByType;
 	//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
-	public VDFLoadOptions(object message = null, bool allowStringKeys = false, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	public VDFLoadOptions(List<object> message = null, bool allowStringKeys = false, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
-		this.message = message;
+		this.messages = message ?? new List<object>();
 		this.allowStringKeys = allowStringKeys;
 		this.allowCommaSeparators = allowCommaSeparators;
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();

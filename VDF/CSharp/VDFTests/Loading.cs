@@ -471,9 +471,9 @@ Shoot at Enemy Vehicle
 		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
 			public bool flag;
-			[VDFPostDeserialize] void VDFPostDeserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options) { if ((string)options.message == "RequiredMessage") flag = true; }
+			[VDFPostDeserialize] void VDFPostDeserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options) { if ((string)options.messages[0] == "RequiredMessage") flag = true; }
 		}
-		[Fact] void D0_ObjectWithPostDeserializeMethodRequiringCustomMessage() { VDF.Deserialize<ObjectWithPostDeserializeMethodRequiringCustomMessage_Class>("{}", new VDFLoadOptions("WrongMessage")).flag.Should().Be(false); }
+		[Fact] void D0_ObjectWithPostDeserializeMethodRequiringCustomMessage() { VDF.Deserialize<ObjectWithPostDeserializeMethodRequiringCustomMessage_Class>("{}", new VDFLoadOptions(new List<object>{"WrongMessage"})).flag.Should().Be(false); }
 		class ObjectWithPostDeserializeConstructor_Class
 		{
 			public bool flag;

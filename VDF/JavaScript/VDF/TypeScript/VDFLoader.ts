@@ -1,6 +1,6 @@
 ﻿class VDFLoadOptions
 {
-	message: any;
+	messages: any[];
 
 	// for JSON compatibility
 	allowStringKeys: boolean;
@@ -9,9 +9,9 @@
 	// JS only
 	loadUnknownTypesAsBasicTypes: boolean;
 
-	constructor(initializerObj?: any, message?: any, allowStringKeys = false, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
+	constructor(initializerObj?: any, messages?: any[], allowStringKeys = false, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
 	{
-		this.message = message;
+		this.messages = messages || [];
 		this.allowStringKeys = allowStringKeys;
 		this.allowCommaSeparators = allowCommaSeparators;
 		this.loadUnknownTypesAsBasicTypes = loadUnknownTypesAsBasicTypes;

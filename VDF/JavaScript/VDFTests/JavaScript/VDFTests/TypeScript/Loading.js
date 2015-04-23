@@ -455,13 +455,13 @@ Shoot at Enemy Vehicle\n\
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
             ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.VDFPostDeserialize = function (node, prop, options) {
-                if (options.message == "RequiredMessage")
+                if (options.messages[0] == "RequiredMessage")
                     this.flag = true;
             };
             return ObjectWithPostDeserializeMethodRequiringCustomMessage_Class;
         })();
         test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () {
-            VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, "WrongMessage")).flag.Should().Be(false);
+            VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false);
         });
 
         /*class ObjectWithPostDeserializeConstructor_Class

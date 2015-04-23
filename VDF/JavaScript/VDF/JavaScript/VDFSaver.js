@@ -6,14 +6,14 @@
     VDFTypeMarking[VDFTypeMarking["ExternalNoCollapse"] = 3] = "ExternalNoCollapse";
 })(VDFTypeMarking || (VDFTypeMarking = {}));
 var VDFSaveOptions = (function () {
-    function VDFSaveOptions(initializerObj, message, typeMarking, useMetadata, useChildPopOut, useStringKeys, useNumberTrimming, useCommaSeparators) {
+    function VDFSaveOptions(initializerObj, messages, typeMarking, useMetadata, useChildPopOut, useStringKeys, useNumberTrimming, useCommaSeparators) {
         if (typeof typeMarking === "undefined") { typeMarking = 1 /* Internal */; }
         if (typeof useMetadata === "undefined") { useMetadata = true; }
         if (typeof useChildPopOut === "undefined") { useChildPopOut = true; }
         if (typeof useStringKeys === "undefined") { useStringKeys = false; }
         if (typeof useNumberTrimming === "undefined") { useNumberTrimming = true; }
         if (typeof useCommaSeparators === "undefined") { useCommaSeparators = false; }
-        this.message = message;
+        this.messages = messages || [];
         this.typeMarking = typeMarking;
         this.useMetadata = useMetadata;
         this.useChildPopOut = useChildPopOut;

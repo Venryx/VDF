@@ -173,7 +173,7 @@
 	// loading
 	// ==================
 
-	static CreateNewInstanceOfType(typeName: string)
+	public static CreateNewInstanceOfType(typeName: string)
 	{
 		var typeNameRoot = VDF.GetTypeNameRoot(typeName);
 		var genericParameters = VDF.GetGenericArgumentsOfType(typeName);

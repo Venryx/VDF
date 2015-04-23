@@ -7,7 +7,7 @@
 }
 class VDFSaveOptions
 {
-	message: any;
+	messages: any[];
 	typeMarking: VDFTypeMarking;
 
 	// for JSON compatibility
@@ -17,10 +17,10 @@ class VDFSaveOptions
 	useNumberTrimming: boolean; // e.g. trims 0.123 to .123
 	useCommaSeparators: boolean; // currently only applies to non-popped-out children
 
-	constructor(initializerObj?: any, message?: any, typeMarking = VDFTypeMarking.Internal,
+	constructor(initializerObj?: any, messages?: any[], typeMarking = VDFTypeMarking.Internal,
 		useMetadata = true, useChildPopOut = true, useStringKeys = false, useNumberTrimming = true, useCommaSeparators = false)
 	{
-		this.message = message;
+		this.messages = messages || [];
 		this.typeMarking = typeMarking;
 		this.useMetadata = useMetadata;
 		this.useChildPopOut = useChildPopOut;
