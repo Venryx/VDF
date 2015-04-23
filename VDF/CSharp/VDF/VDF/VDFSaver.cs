@@ -176,7 +176,7 @@ public static class VDFSaver
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.postSerializeTag != null))
-				method.Call(obj, parent, prop, options);
+				method.Call(obj, result, parent, prop, options);
 
 		return result;
 	}

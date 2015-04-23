@@ -136,7 +136,7 @@ var VDFSaver = (function () {
             result.childPopOut = true;
 
         if (obj && obj.VDFPostSerialize)
-            obj.VDFPostSerialize(parent, prop, options);
+            obj.VDFPostSerialize(result, parent, prop, options);
 
         return result;
     };
