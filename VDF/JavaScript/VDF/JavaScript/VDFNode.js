@@ -247,7 +247,8 @@
                 else
                     obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, typeInfo.props[keyString]);
             } catch (ex) {
-                throw new Error(ex.message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n");
+                ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n";
+                throw ex;
             }
 
         if (obj && obj.VDFPostDeserialize)
