@@ -454,7 +454,7 @@ Shoot at Enemy Vehicle\n\
             function ObjectWithPostDeserializeMethodRequiringCustomMessage_Class() {
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
-            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.VDFPostDeserialize = function (prop, options) {
+            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.VDFPostDeserialize = function (node, prop, options) {
                 if (options.message == "RequiredMessage")
                     this.flag = true;
             };

@@ -503,7 +503,7 @@ Shoot at Enemy Vehicle\n\
 		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
 			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
-			VDFPostDeserialize(prop: string, options: VDFLoadOptions): void { if (<string>options.message == "RequiredMessage") this.flag = true; }
+			VDFPostDeserialize(node: VDFNode, prop: string, options: VDFLoadOptions): void { if (<string>options.message == "RequiredMessage") this.flag = true; }
 		}
 		test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", ()=> { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, "WrongMessage")).flag.Should().Be(false); });
 		/*class ObjectWithPostDeserializeConstructor_Class

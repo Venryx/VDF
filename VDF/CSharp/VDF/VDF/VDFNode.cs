@@ -290,9 +290,9 @@ public class VDFNode
 
 		// call pre-deserialize constructors before pre-deserialize normal methods
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.preDeserializeTag != null))
-			method.Call(obj, prop, options);
+			method.Call(obj, this, prop, options);
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.preDeserializeTag != null))
-			method.Call(obj, prop, options);
+			method.Call(obj, this, prop, options);
 
 		bool deserializedByCustomMethod2 = false;
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.deserializeTag != null && !a.deserializeTag.fromParent))
@@ -322,8 +322,8 @@ public class VDFNode
 
 		// call post-deserialize constructors before post-deserialize normal methods
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.postDeserializeTag != null))
-			method.Call(obj, prop, options);
+			method.Call(obj, this, prop, options);
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.postDeserializeTag != null))
-			method.Call(obj, prop, options);
+			method.Call(obj, this, prop, options);
 	}
 }

@@ -253,7 +253,7 @@
 		var typeInfo = VDFTypeInfo.Get(typeName);
 
 		if (obj && obj.VDFPreDeserialize)
-			obj.VDFPreDeserialize(prop, options);
+			obj.VDFPreDeserialize(this, prop, options);
 
 		var deserializedByCustomMethod2 = false;
 		if (obj.VDFDeserialize)
@@ -279,7 +279,7 @@
 		}
 
 		if (obj && obj.VDFPostDeserialize)
-			obj.VDFPostDeserialize(prop, options);
+			obj.VDFPostDeserialize(this, prop, options);
 	}
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
