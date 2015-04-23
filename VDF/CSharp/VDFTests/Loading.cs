@@ -471,7 +471,7 @@ Shoot at Enemy Vehicle
 		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
 			public bool flag;
-			[VDFPostDeserialize] void VDFPostDeserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options) { if ((string)options.messages[0] == "RequiredMessage") flag = true; }
+			[VDFPostDeserialize] void VDFPostDeserialize(VDFNode node, object parent, VDFPropInfo prop, VDFLoadOptions options) { if ((string)options.messages[0] == "RequiredMessage") flag = true; }
 		}
 		[Fact] void D0_ObjectWithPostDeserializeMethodRequiringCustomMessage() { VDF.Deserialize<ObjectWithPostDeserializeMethodRequiringCustomMessage_Class>("{}", new VDFLoadOptions(new List<object>{"WrongMessage"})).flag.Should().Be(false); }
 		class ObjectWithPostDeserializeConstructor_Class
@@ -541,7 +541,7 @@ Shoot at Enemy Vehicle
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent
 			{ public D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child child; }
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child
-			{ [VDFDeserialize(fromParent: true)] static D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child Deserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options) { return null; } }
+			{ [VDFDeserialize(fromParent: true)] static D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child Deserialize(VDFNode node, object parent, VDFPropInfo prop, VDFLoadOptions options) { return null; } }
 		[Fact] void D1_MapWithEmbeddedDeserializeFromParentMethod_Prop()
 			{ VDF.Deserialize<D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent>("{child:{}}").child.Should().Be(null); }
 
@@ -550,7 +550,7 @@ Shoot at Enemy Vehicle
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child
 		{
 			public bool boolProp;
-			[VDFDeserialize(fromParent: true)] static object Deserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options) { return VDF.NoActionTaken; }
+			[VDFDeserialize(fromParent: true)] static object Deserialize(VDFNode node, object parent, VDFPropInfo prop, VDFLoadOptions options) { return VDF.NoActionTaken; }
 		}
 		[Fact] void D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop()
 			{ VDF.Deserialize<D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent>("{child:{boolProp:true}}").child.boolProp.Should().Be(true); }
@@ -563,8 +563,9 @@ Shoot at Enemy Vehicle
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child
 		{
 			public bool methodCalled;
-			[VDFDeserialize] void Deserialize(VDFNode node, VDFPropInfo prop, VDFLoadOptions options)
+			[VDFDeserialize] void Deserialize(VDFNode node, object parent, VDFPropInfo prop, VDFLoadOptions options)
 			{
+				parent.Should().BeOfType<D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent>();
 				if (prop.memberInfo.GetCustomAttributes(typeof(Tags), true).OfType<Tags>().Any(a=>a.tags.Contains("tag")))
 					methodCalled = true;
 			}

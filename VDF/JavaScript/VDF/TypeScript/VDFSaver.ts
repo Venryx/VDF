@@ -47,8 +47,8 @@ class VDFSaveOptions
 class VDFSaver
 {
 	static ToVDFNode(obj: any, options?: VDFSaveOptions): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName?: string, options?: VDFSaveOptions, prop?: VDFPropInfo, declaredTypeFromParent?: boolean): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), prop?: VDFPropInfo, declaredTypeInParentVDF?: boolean): VDFNode
+	static ToVDFNode(obj: any, declaredTypeName?: string, options?: VDFSaveOptions, parent?: any, prop?: VDFPropInfo, declaredTypeFromParent?: boolean): VDFNode;
+	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), parent?: any, prop?: VDFPropInfo, declaredTypeInParentVDF?: boolean): VDFNode
 	{
 		if (declaredTypeName_orOptions instanceof VDFSaveOptions)
 			return VDFSaver.ToVDFNode(obj, null, declaredTypeName_orOptions);
@@ -60,13 +60,13 @@ class VDFSaver
 		var typeInfo = typeName && VDFTypeInfo.Get(typeName);
 
 		if (obj && obj.VDFPreSerialize)
-			obj.VDFPreSerialize(prop, options);
+			obj.VDFPreSerialize(parent, prop, options);
 
 		var result;
 		var serializedByCustomMethod = false;
 		if (obj && obj.VDFSerialize)
 		{
-			var serializeResult = obj.VDFSerialize(prop, options);
+			var serializeResult = obj.VDFSerialize(parent, prop, options);
 			if (serializeResult == VDF.CancelSerialize)
 				return serializeResult;
 			if (serializeResult != VDF.NoActionTaken)
@@ -90,7 +90,7 @@ class VDFSaver
 				var objAsList = <List<any>>obj;
 				for (var i = 0; i < objAsList.length; i++)
 				{
-					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true);
+					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, parent, prop, true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
 					result.AddListChild(itemNode);
@@ -102,10 +102,10 @@ class VDFSaver
 				var objAsDictionary = <Dictionary<any, any>>obj;
 				for (var key in objAsDictionary.Keys)
 				{
-					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true);
+					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, parent, prop, true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
-					result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, prop, true).primitiveValue, valueNode);
+					result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, parent, prop, true).primitiveValue, valueNode);
 				}
 			}
 			else // if an object, with properties
@@ -132,7 +132,7 @@ class VDFSaver
 						if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
 							continue;
 					
-						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, propInfo);
+						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, obj, propInfo);
 						if (propValueNode == VDF.CancelSerialize)
 							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
@@ -161,7 +161,7 @@ class VDFSaver
 			result.childPopOut = true;
 
 		if (obj && obj.VDFPostSerialize)
-			obj.VDFPostSerialize(prop, options);
+			obj.VDFPostSerialize(parent, prop, options);
 
 		return result;
 	}

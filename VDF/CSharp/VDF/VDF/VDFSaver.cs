@@ -64,7 +64,7 @@ public static class VDFSaver
 {
 	public static VDFNode ToVDFNode<T>(object obj, VDFSaveOptions options = null) { return ToVDFNode(obj, typeof(T), options); }
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options) { return ToVDFNode(obj, null, options); }
-	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, VDFPropInfo prop = null, bool declaredTypeInParentVDF = false)
+	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, object parent = null, VDFPropInfo prop = null, bool declaredTypeInParentVDF = false)
 	{
 		options = options ?? new VDFSaveOptions();
 		
@@ -74,14 +74,14 @@ public static class VDFSaver
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.preSerializeTag != null))
-				method.Call(obj, prop, options);
+				method.Call(obj, parent, prop, options);
 
 		VDFNode result = null;
 		bool serializedByCustomMethod = false;
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.serializeTag != null))
 			{
-				object serializeResult = method.Call(obj, prop, options);
+				object serializeResult = method.Call(obj, parent, prop, options);
 				if (serializeResult == VDF.CancelSerialize)
 					return (VDFNode)serializeResult;
 				if (serializeResult != VDF.NoActionTaken)
@@ -105,7 +105,7 @@ public static class VDFSaver
 				var objAsList = (IList)obj;
 				for (var i = 0; i < objAsList.Count; i++)
 				{
-					var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true);
+					var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, parent, prop, true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
 					result.listChildren.Add(itemNode);
@@ -117,10 +117,10 @@ public static class VDFSaver
 				var objAsDictionary = (IDictionary)obj;
 				foreach (object key in objAsDictionary.Keys)
 				{
-					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true);
+					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, parent, prop, true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
-					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, prop, true), valueNode);
+					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, parent, prop, true), valueNode);
 				}
 			}
 			else // if an object, with properties
@@ -143,7 +143,7 @@ public static class VDFSaver
 							continue;
 
 						// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
-						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, propInfo);
+						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, obj, propInfo);
 						if (propValueNode == VDF.CancelSerialize)
 							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
@@ -176,7 +176,7 @@ public static class VDFSaver
 
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.postSerializeTag != null))
-				method.Call(obj, prop, options);
+				method.Call(obj, parent, prop, options);
 
 		return result;
 	}

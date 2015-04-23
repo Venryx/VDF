@@ -454,7 +454,7 @@ Shoot at Enemy Vehicle\n\
             function ObjectWithPostDeserializeMethodRequiringCustomMessage_Class() {
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
             }
-            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.VDFPostDeserialize = function (node, prop, options) {
+            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.VDFPostDeserialize = function (node, parent, prop, options) {
                 if (options.messages[0] == "RequiredMessage")
                     this.flag = true;
             };
@@ -545,7 +545,7 @@ Shoot at Enemy Vehicle\n\
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child() {
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.VDFDeserialize = function (node, prop, options) {
+            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.VDFDeserialize = function (node, parent, prop, options) {
                 return null;
             };
             return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
@@ -564,7 +564,7 @@ Shoot at Enemy Vehicle\n\
             function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child() {
                 this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.VDFDeserialize = function (node, prop, options) {
+            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.VDFDeserialize = function (node, parent, prop, options) {
                 return VDF.NoActionTaken;
             };
             return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
@@ -584,7 +584,8 @@ Shoot at Enemy Vehicle\n\
             function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child() {
                 this.methodCalled = Prop(this, "methodCalled", "bool", new VDFProp()).set = false;
             }
-            D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype.VDFDeserialize = function (node, prop, options) {
+            D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype.VDFDeserialize = function (node, parent, prop, options) {
+                ok(parent instanceof D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent);
                 if (prop.propName == "withTag")
                     this.methodCalled = true;
             };

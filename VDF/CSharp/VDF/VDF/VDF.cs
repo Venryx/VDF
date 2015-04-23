@@ -52,10 +52,10 @@ public static class VDF
 		builtInTypeAliasesByTypeName = builtInTypeAliasesByType.ToDictionary(a=>a.Value, a=>a.Key);
 
 		// initialize exporters/importers for some common types
-		VDFTypeInfo.AddSerializeMethod<Color>((self, prop, options)=>new VDFNode(self.Name));
-		VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, prop, options)=>Color.FromName((string)node.primitiveValue));
-		VDFTypeInfo.AddSerializeMethod<Guid>((self, prop, options)=>new VDFNode(self.ToString()));
-		VDFTypeInfo.AddDeserializeMethod_FromParent<Guid>((node, prop, options)=>new Guid((string)node.primitiveValue));
+		VDFTypeInfo.AddSerializeMethod<Color>((self, parent, prop, options)=>new VDFNode(self.Name));
+		VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, parent, prop, options)=>Color.FromName((string)node.primitiveValue));
+		VDFTypeInfo.AddSerializeMethod<Guid>((self, parent, prop, options)=>new VDFNode(self.ToString()));
+		VDFTypeInfo.AddDeserializeMethod_FromParent<Guid>((node, parent, prop, options)=>new Guid((string)node.primitiveValue));
 	}
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"

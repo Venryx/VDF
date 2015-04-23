@@ -222,7 +222,7 @@ public class VDFNode
 
 	public T ToObject<T>(VDFLoadOptions options = null) { return (T)ToObject(typeof(T), options); }
 	public object ToObject(VDFLoadOptions options) { return ToObject(null, options); }
-	public object ToObject(Type declaredType = null, VDFLoadOptions options = null, VDFPropInfo prop = null)
+	public object ToObject(Type declaredType = null, VDFLoadOptions options = null, object parent = null, VDFPropInfo prop = null)
 	{
 		options = options ?? new VDFLoadOptions();
 
@@ -252,7 +252,7 @@ public class VDFNode
 		bool deserializedByCustomMethod = false;
 		foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods.Values.Where(a=>a.deserializeTag != null && a.deserializeTag.fromParent))
 		{
-			object deserializeResult = method.Call(null, this, prop, options);
+			object deserializeResult = method.Call(null, this, parent, prop, options);
 			if (deserializeResult != VDF.NoActionTaken)
 			{
 				result = deserializeResult;
@@ -269,7 +269,7 @@ public class VDFNode
 			else
 			{
 				result = CreateNewInstanceOfType(finalType);
-				IntoObject(result, options, prop);
+				IntoObject(result, options, parent, prop);
 				if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
 				{
 					var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
@@ -280,7 +280,7 @@ public class VDFNode
 
 		return result;
 	}
-	public void IntoObject(object obj, VDFLoadOptions options = null, VDFPropInfo prop = null)
+	public void IntoObject(object obj, VDFLoadOptions options = null, object parent = null, VDFPropInfo prop = null)
 	{
 		options = options ?? new VDFLoadOptions();
 
@@ -290,14 +290,14 @@ public class VDFNode
 
 		// call pre-deserialize constructors before pre-deserialize normal methods
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.preDeserializeTag != null))
-			method.Call(obj, this, prop, options);
+			method.Call(obj, this, parent, prop, options);
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.preDeserializeTag != null))
-			method.Call(obj, this, prop, options);
+			method.Call(obj, this, parent, prop, options);
 
 		bool deserializedByCustomMethod2 = false;
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.deserializeTag != null && !a.deserializeTag.fromParent))
 		{
-			object deserializeResult = method.Call(obj, this, prop, options);
+			object deserializeResult = method.Call(obj, this, parent, prop, options);
 			if (deserializeResult != VDF.NoActionTaken)
 				deserializedByCustomMethod2 = true;
 		}
@@ -306,24 +306,24 @@ public class VDFNode
 		{
 			for (var i = 0; i < listChildren.Count; i++)
 				if (obj is Array)
-					((Array)obj).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, prop), i);
+					((Array)obj).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, parent, prop), i);
 				else if (obj is IList)
-					((IList)obj).Add(listChildren[i].ToObject(typeGenericArgs[0], options, prop));
+					((IList)obj).Add(listChildren[i].ToObject(typeGenericArgs[0], options, parent, prop));
 			foreach (string keyString in mapChildren.Keys)
 				try
 				{
 					if (obj is IDictionary)
-						((IDictionary)obj).Add(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), mapChildren[keyString].ToObject(typeGenericArgs[1], options, prop));
+						((IDictionary)obj).Add(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), mapChildren[keyString].ToObject(typeGenericArgs[1], options, parent, prop));
 					else if (typeInfo.props.ContainsKey(keyString)) // maybe temp; just ignore props that are missing
-						typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, typeInfo.props[keyString]));
+						typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, obj, typeInfo.props[keyString]));
 				}
 				catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }
 		}
 
 		// call post-deserialize constructors before post-deserialize normal methods
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.postDeserializeTag != null))
-			method.Call(obj, this, prop, options);
+			method.Call(obj, this, parent, prop, options);
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.postDeserializeTag != null))
-			method.Call(obj, this, prop, options);
+			method.Call(obj, this, parent, prop, options);
 	}
 }
