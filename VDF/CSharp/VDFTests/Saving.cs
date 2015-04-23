@@ -371,15 +371,15 @@ that needs escaping.>>""".Fix());
 		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop()
 			{ VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}"); }
 
-		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
-		{
-			[VDFProp] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child();
-		}
-		class D1_Map_MapThatCancelsItsSerialize_Class_Child
-		{
-			[VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; }
-		}
+		class D1_Map_MapThatCancelsItsSerialize_Class_Parent { [VDFProp] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
+		class D1_Map_MapThatCancelsItsSerialize_Class_Child { [VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; } }
 		[Fact] void D1_Map_MapThatCancelsItsSerialize() { VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}"); }
+
+		class D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent
+			{ [VDFProp] public List<D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child> children = new List<D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child> {new D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child()}; }
+		class D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child
+			{ [VDFSerialize] VDFNode Serialize() { return VDF.CancelSerializeForProp; } }
+		[Fact] void D1_Map_ListThatHasItsSerializeCanceledByItem_Map() { VDF.Serialize<D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent>(new D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent()).Should().Be("{}"); }
 
 		// for JSON compatibility
 		// ==========

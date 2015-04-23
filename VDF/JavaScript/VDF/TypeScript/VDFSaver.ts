@@ -93,6 +93,8 @@ class VDFSaver
 					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, parent, prop, true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
+					if (itemNode == VDF.CancelSerializeForProp) // probably todo: replace with dedicated prop-inclusion-method system
+						return VDF.CancelSerialize;
 					result.AddListChild(itemNode);
 				}
 			}
@@ -105,6 +107,8 @@ class VDFSaver
 					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, parent, prop, true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
+					if (valueNode == VDF.CancelSerializeForProp)
+						return VDF.CancelSerialize;
 					result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, parent, prop, true).primitiveValue, valueNode);
 				}
 			}

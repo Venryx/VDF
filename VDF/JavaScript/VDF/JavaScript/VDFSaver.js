@@ -79,6 +79,8 @@ var VDFSaver = (function () {
                     var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, parent, prop, true);
                     if (itemNode == VDF.CancelSerialize)
                         continue;
+                    if (itemNode == VDF.CancelSerializeForProp)
+                        return VDF.CancelSerialize;
                     result.AddListChild(itemNode);
                 }
             } else if (typeName && typeName.startsWith("Dictionary(")) {
@@ -88,6 +90,8 @@ var VDFSaver = (function () {
                     var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, parent, prop, true);
                     if (valueNode == VDF.CancelSerialize)
                         continue;
+                    if (valueNode == VDF.CancelSerializeForProp)
+                        return VDF.CancelSerialize;
                     result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, parent, prop, true).primitiveValue, valueNode);
                 }
             } else {
