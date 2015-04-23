@@ -117,6 +117,7 @@ class VDF
 		//return "object"; // consider objects with raw-types of undefined, function, etc. to just be anonymous-objects
 		return "object"; // consider everything else to be an anonymous-object
 	}
+	static GetTypeNameRoot(typeName) { return typeName != null && typeName.contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName; }
 
 	static Serialize(obj: any, options: VDFSaveOptions): string;
 	static Serialize(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions): string;

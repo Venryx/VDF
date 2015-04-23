@@ -175,14 +175,15 @@
 
 	static CreateNewInstanceOfType(typeName: string)
 	{
+		var typeNameRoot = VDF.GetTypeNameRoot(typeName);
 		var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
-		if (typeName.StartsWith("List("))
+		if (typeNameRoot == "List")
 			return new List(genericParameters[0]);
-		if (typeName.StartsWith("Dictionary("))
+		if (typeNameRoot == "Dictionary")
 			return new Dictionary(genericParameters[0], genericParameters[1]);
-		if (!(window[typeName] instanceof Function))
+		if (!(window[typeNameRoot] instanceof Function))
 			throw new Error("Could not find type \"" + typeName + "\".");
-		return new window[typeName]; // maybe todo: add code that resets props to their nulled-out/zeroed-out values
+		return new window[typeNameRoot]; // maybe todo: add code that resets props to their nulled-out/zeroed-out values (or just don't use any constructors, and just remember to set the __proto__ property afterward)
 	}
 	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 
@@ -196,7 +197,7 @@
 		var declaredTypeName: string = declaredTypeName_orOptions;
 
 		var fromVDFTypeName = "object";
-		if (this.metadata != null && (window[this.metadata] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
+		if (this.metadata != null && (window[VDF.GetTypeNameRoot(this.metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
 			fromVDFTypeName = this.metadata;
 		else if (typeof this.primitiveValue == "boolean")
 			fromVDFTypeName = "bool";

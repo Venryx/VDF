@@ -633,6 +633,9 @@ Shoot at Enemy Vehicle\n\
 		// unique to JavaScript version
 		// ==========
 
+		class PretendGenericType {}
+		test("Depth0_ObjectWithMetadataHavingGenericType", ()=>ok(VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType));
+
 		test("Depth1_UnknownTypeWithFixOn_String", ()=>
 		{
 			var a = VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions({loadUnknownTypesAsBasicTypes: true}));

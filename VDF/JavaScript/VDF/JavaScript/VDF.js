@@ -94,6 +94,9 @@ var VDF = (function () {
         //return "object"; // consider objects with raw-types of undefined, function, etc. to just be anonymous-objects
         return "object";
     };
+    VDF.GetTypeNameRoot = function (typeName) {
+        return typeName != null && typeName.contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
+    };
 
     VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {
         if (declaredTypeName_orOptions instanceof VDFSaveOptions)

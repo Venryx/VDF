@@ -615,6 +615,15 @@ Shoot at Enemy Vehicle\n\
 
         // unique to JavaScript version
         // ==========
+        var PretendGenericType = (function () {
+            function PretendGenericType() {
+            }
+            return PretendGenericType;
+        })();
+        test("Depth0_ObjectWithMetadataHavingGenericType", function () {
+            return ok(VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType);
+        });
+
         test("Depth1_UnknownTypeWithFixOn_String", function () {
             var a = VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
             a["string"].Should().Be("Prop value string.");

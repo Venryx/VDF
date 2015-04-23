@@ -153,14 +153,15 @@
     // loading
     // ==================
     VDFNode.CreateNewInstanceOfType = function (typeName) {
+        var typeNameRoot = VDF.GetTypeNameRoot(typeName);
         var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
-        if (typeName.StartsWith("List("))
+        if (typeNameRoot == "List")
             return new List(genericParameters[0]);
-        if (typeName.StartsWith("Dictionary("))
+        if (typeNameRoot == "Dictionary")
             return new Dictionary(genericParameters[0], genericParameters[1]);
-        if (!(window[typeName] instanceof Function))
+        if (!(window[typeNameRoot] instanceof Function))
             throw new Error("Could not find type \"" + typeName + "\".");
-        return new window[typeName];
+        return new window[typeNameRoot];
     };
     VDFNode.GetCompatibleTypeNameForNode = function (node) {
         return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string");
@@ -174,7 +175,7 @@
         var declaredTypeName = declaredTypeName_orOptions;
 
         var fromVDFTypeName = "object";
-        if (this.metadata != null && (window[this.metadata] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
+        if (this.metadata != null && (window[VDF.GetTypeNameRoot(this.metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
             fromVDFTypeName = this.metadata;
         else if (typeof this.primitiveValue == "boolean")
             fromVDFTypeName = "bool";
