@@ -61,6 +61,7 @@ class VDF
 
 	// for use with VDFSerialize/VDFDeserialize methods
 	static NoActionTaken; //= new VDFNode(); // workaround: initialization moved to VDFNode class file
+	static CancelSerialize; //= new VDFNode(); // workaround: initialization moved to VDFNode class file
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
 	static GetGenericArgumentsOfType(typeName: string): string[]

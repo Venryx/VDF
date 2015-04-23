@@ -497,6 +497,24 @@ that needs escaping.>>\"".Fix());
             VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}");
         });
 
+        var D1_Map_MapThatCancelsItsSerialize_Class_Parent = (function () {
+            function D1_Map_MapThatCancelsItsSerialize_Class_Parent() {
+                this.child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new VDFProp()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child();
+            }
+            return D1_Map_MapThatCancelsItsSerialize_Class_Parent;
+        })();
+        var D1_Map_MapThatCancelsItsSerialize_Class_Child = (function () {
+            function D1_Map_MapThatCancelsItsSerialize_Class_Child() {
+            }
+            D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype.VDFSerialize = function () {
+                return VDF.CancelSerialize;
+            };
+            return D1_Map_MapThatCancelsItsSerialize_Class_Child;
+        })();
+        test("D1_Map_MapThatCancelsItsSerialize", function () {
+            VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}");
+        });
+
         // for JSON compatibility
         // ==========
         var D0_MapWithMetadataDisabled_Class = (function () {

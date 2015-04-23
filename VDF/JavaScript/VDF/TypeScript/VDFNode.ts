@@ -281,3 +281,4 @@
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 
 VDF.NoActionTaken = new VDFNode();
+VDF.CancelSerialize = new VDFNode();

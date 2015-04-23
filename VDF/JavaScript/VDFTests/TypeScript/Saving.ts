@@ -464,6 +464,15 @@ that needs escaping.>>\"".Fix());
 		}
 		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
 
+		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
+		{
+			child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new VDFProp()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child();
+		}
+		class D1_Map_MapThatCancelsItsSerialize_Class_Child
+		{
+			VDFSerialize() { return VDF.CancelSerialize; }
+		}
+		test("D1_Map_MapThatCancelsItsSerialize", ()=> { VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}"); });
 
 		// for JSON compatibility
 		// ==========

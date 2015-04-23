@@ -82,6 +82,8 @@ public static class VDFSaver
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.serializeTag != null))
 			{
 				object serializeResult = method.Call(obj, prop, options);
+				if (serializeResult == VDF.CancelSerialize)
+					return (VDFNode)serializeResult;
 				if (serializeResult != VDF.NoActionTaken)
 				{
 					result = (VDFNode)serializeResult;
@@ -102,14 +104,24 @@ public static class VDFSaver
 				result.isList = true;
 				var objAsList = (IList)obj;
 				for (var i = 0; i < objAsList.Count; i++)
-					result.listChildren.Add(ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
+				{
+					var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true);
+					if (itemNode == VDF.CancelSerialize)
+						continue;
+					result.listChildren.Add(itemNode);
+				}
 			}
 			else if (obj is IDictionary)
 			{
 				result.isMap = true;
 				var objAsDictionary = (IDictionary)obj;
 				foreach (object key in objAsDictionary.Keys)
-					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, prop, true), ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
+				{
+					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true);
+					if (valueNode == VDF.CancelSerialize)
+						continue;
+					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, prop, true), valueNode);
+				}
 			}
 			else // if an object, with properties
 			{
@@ -132,6 +144,8 @@ public static class VDFSaver
 
 						// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
 						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, propInfo);
+						if (propValueNode == VDF.CancelSerialize)
+							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.mapChildren.Add(propName, propValueNode);
 					}

@@ -371,6 +371,17 @@ that needs escaping.>>""".Fix());
 		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop()
 			{ VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}"); }
 
+		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
+		{
+			[VDFProp] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child();
+		}
+		class D1_Map_MapThatCancelsItsSerialize_Class_Child
+		{
+			[VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; }
+		}
+		[Fact] void D1_Map_MapThatCancelsItsSerialize()
+			{ VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}"); }
+
 		// for JSON compatibility
 		// ==========
 

@@ -57,6 +57,8 @@ var VDFSaver = (function () {
         var serializedByCustomMethod = false;
         if (obj && obj.VDFSerialize) {
             var serializeResult = obj.VDFSerialize(prop, options);
+            if (serializeResult == VDF.CancelSerialize)
+                return serializeResult;
             if (serializeResult != VDF.NoActionTaken) {
                 result = serializeResult;
                 serializedByCustomMethod = true;
@@ -73,13 +75,21 @@ var VDFSaver = (function () {
             else if (typeName && typeName.startsWith("List(")) {
                 result.isList = true;
                 var objAsList = obj;
-                for (var i = 0; i < objAsList.length; i++)
-                    result.AddListChild(VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true));
+                for (var i = 0; i < objAsList.length; i++) {
+                    var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, prop, true);
+                    if (itemNode == VDF.CancelSerialize)
+                        continue;
+                    result.AddListChild(itemNode);
+                }
             } else if (typeName && typeName.startsWith("Dictionary(")) {
                 result.isMap = true;
                 var objAsDictionary = obj;
-                for (var key in objAsDictionary.Keys)
-                    result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, prop, true).primitiveValue, VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true));
+                for (var key in objAsDictionary.Keys) {
+                    var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, prop, true);
+                    if (valueNode == VDF.CancelSerialize)
+                        continue;
+                    result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, prop, true).primitiveValue, valueNode);
+                }
             } else {
                 result.isMap = true;
 
@@ -101,6 +111,8 @@ var VDFSaver = (function () {
                             continue;
 
                         var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, propInfo);
+                        if (propValueNode == VDF.CancelSerialize)
+                            continue;
                         propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
                         result.SetMapChild(propName, propValueNode);
                     } catch (ex) {
