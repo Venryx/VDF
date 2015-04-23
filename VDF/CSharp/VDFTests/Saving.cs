@@ -379,8 +379,7 @@ that needs escaping.>>""".Fix());
 		{
 			[VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; }
 		}
-		[Fact] void D1_Map_MapThatCancelsItsSerialize()
-			{ VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}"); }
+		[Fact] void D1_Map_MapThatCancelsItsSerialize() { VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}"); }
 
 		// for JSON compatibility
 		// ==========

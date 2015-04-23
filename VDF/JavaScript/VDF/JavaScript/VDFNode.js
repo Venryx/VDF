@@ -189,7 +189,9 @@
             else if (this.isMap || this.mapChildren.Count > 0)
                 fromVDFTypeName = "Dictionary(object object)"; //"object-anonymous"; //"object";
 
-        var finalTypeName = declaredTypeName;
+        var finalTypeName;
+        if (window[VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
+            finalTypeName = declaredTypeName;
 
         // porting-note: this is only a limited implementation of CS functionality of making sure from-vdf-type is more specific than declared-type
         if (finalTypeName == null || ["object", "IList", "IDictionary"].Contains(finalTypeName))
