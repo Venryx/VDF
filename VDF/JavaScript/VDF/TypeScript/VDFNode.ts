@@ -237,10 +237,11 @@
 			else if (VDF.GetIsTypePrimitive(finalTypeName)) //primitiveValue != null)
 				result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
 			else
-			{
-				result = VDFNode.CreateNewInstanceOfType(finalTypeName);
-				this.IntoObject(result, options, parent, prop);
-			}
+				if (this.primitiveValue != null || this.isList || this.isMap)
+				{
+					result = VDFNode.CreateNewInstanceOfType(finalTypeName);
+					this.IntoObject(result, options, parent, prop);
+				}
 		
 		return result;
 	}

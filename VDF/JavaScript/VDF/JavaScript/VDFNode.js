@@ -213,7 +213,7 @@
                 result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
             else if (VDF.GetIsTypePrimitive(finalTypeName))
                 result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
-            else {
+            else if (this.primitiveValue != null || this.isList || this.isMap) {
                 result = VDFNode.CreateNewInstanceOfType(finalTypeName);
                 this.IntoObject(result, options, parent, prop);
             }

@@ -267,16 +267,17 @@ public class VDFNode
 			else if (VDF.GetIsTypePrimitive(finalType)) //primitiveValue != null)
 				result = Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
 			else
-			{
-				result = CreateNewInstanceOfType(finalType);
-				IntoObject(result, options, parent, prop);
-				if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
+				if (primitiveValue != null || isList || isMap)
 				{
-					var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
-					((IList)result).CopyTo(newResult, 0);
-					result = newResult;
+					result = CreateNewInstanceOfType(finalType);
+					IntoObject(result, options, parent, prop);
+					if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
+					{
+						var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
+						((IList)result).CopyTo(newResult, 0);
+						result = newResult;
+					}
 				}
-			}
 
 		return result;
 	}
