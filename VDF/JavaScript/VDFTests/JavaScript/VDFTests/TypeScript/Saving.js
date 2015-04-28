@@ -433,7 +433,7 @@ that needs escaping.>>\"".Fix());
 	otherProperty:false".replace(/\r/g, ""));
         });
 
-        // serialize-related methods
+        // prop-inclusion by regex
         // ==========
         var D1_Map_PropWithNameMatchingIncludeRegex_Class = (function () {
             function D1_Map_PropWithNameMatchingIncludeRegex_Class() {
@@ -466,6 +466,8 @@ that needs escaping.>>\"".Fix());
             VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}");
         });
 
+        // serialize-related methods
+        // ==========
         var D1_MapWithEmbeddedSerializeMethod_Prop_Class = (function () {
             function D1_MapWithEmbeddedSerializeMethod_Prop_Class() {
                 this.notIncluded = Prop(this, "notIncluded", "bool").set = true;

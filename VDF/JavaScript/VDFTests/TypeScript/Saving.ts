@@ -416,7 +416,7 @@ that needs escaping.>>\"".Fix());
 	otherProperty:false".replace(/\r/g, ""));
 		});
 
-		// serialize-related methods
+		// prop-inclusion by regex
 		// ==========
 
 		class D1_Map_PropWithNameMatchingIncludeRegex_Class
@@ -441,6 +441,9 @@ that needs escaping.>>\"".Fix());
 		}
 		D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
 		test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", ()=>{ VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}"); });
+
+		// serialize-related methods
+		// ==========
 
 		class D1_MapWithEmbeddedSerializeMethod_Prop_Class
 		{

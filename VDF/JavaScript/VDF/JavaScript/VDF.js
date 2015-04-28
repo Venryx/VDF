@@ -205,9 +205,13 @@ var StringBuilder = (function () {
 
 // tags
 // ----------
-function PropDeclarationWrapper(type, propName, propType, tags) {
+function PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags) {
+    if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
+        return Prop.apply(this, [typeOrObj, propName, null, propType_orFirstTag].concat(tags));
+    var propType = propType_orFirstTag;
+
     var s = this;
-    s.type = type;
+    s.type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
     s.propName = propName;
     s.propType = propType;
     s.tags = tags;
@@ -223,12 +227,12 @@ PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
             propTag = s.tags[i];
     typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
 };
-function Prop(type, propName, propType) {
+function Prop(typeOrObj, propName, propType_orFirstTag) {
     var tags = [];
     for (var _i = 0; _i < (arguments.length - 3); _i++) {
         tags[_i] = arguments[_i + 3];
     }
-    return new PropDeclarationWrapper(type instanceof Function ? type : type.constructor, propName, propType, tags);
+    return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags);
 }
 ;
 
