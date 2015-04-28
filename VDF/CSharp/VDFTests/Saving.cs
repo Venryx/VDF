@@ -320,7 +320,7 @@ that needs escaping.>>""".Fix());
 	otherProperty:false".Replace("\r", ""));
 		}
 
-		// tag stuff
+		// serialize-related methods
 		// ==========
 
 		/*class D1_Map_PropWithTagInSaveOptionsIncludeTags_Class
@@ -370,6 +370,14 @@ that needs escaping.>>""".Fix());
 		}
 		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop()
 			{ VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}"); }
+
+		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class
+		{
+			[VDFPreSerializeProp] VDFNode PreSerializeProp(VDFPropInfo prop, bool propValue, VDFSaveOptions options) { return VDF.CancelSerialize; }
+			
+			[VDFProp] public bool boolProp = true;
+		}
+		[Fact] void D1_Map_BoolWhoseSerializeIsCanceledFromParent() { VDF.Serialize<D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class>(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class()).Should().Be("{}"); }
 
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent { [VDFProp] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
 		class D1_Map_MapThatCancelsItsSerialize_Class_Child { [VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; } }

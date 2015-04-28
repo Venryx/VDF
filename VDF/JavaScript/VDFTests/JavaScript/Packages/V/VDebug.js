@@ -85,7 +85,7 @@
 					lengthOfPassedLines += funcLines[i].length;
 
 				var callerLine = funcLines[i];
-				if (!callerLine.contains("LogMe()"))
+				if (!callerLine.Contains("LogMe()"))
 					callerLine = "[invalid]"; // probably caused by successive calls to same function, from outside log-me-marked code
 
 				var message = messagePrepend + "CALLER) " + callerLine;

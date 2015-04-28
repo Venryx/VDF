@@ -59,16 +59,18 @@ class VDFSaver
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
 		var typeInfo = typeName && VDFTypeInfo.Get(typeName);
 
+		if (parent && parent.VDFPreSerializeProp)
+			if (parent.VDFPreSerializeProp(prop, obj, options) == VDF.CancelSerialize)
+				return VDF.CancelSerialize;
 		if (obj && obj.VDFPreSerialize)
-			obj.VDFPreSerialize(parent, prop, options);
+			if (obj.VDFPreSerialize(parent, prop, options) == VDF.CancelSerialize)
+				return VDF.CancelSerialize;
 
 		var result;
 		var serializedByCustomMethod = false;
 		if (obj && obj.VDFSerialize)
 		{
 			var serializeResult = obj.VDFSerialize(parent, prop, options);
-			if (serializeResult == VDF.CancelSerialize)
-				return serializeResult;
 			if (serializeResult != VDF.NoActionTaken)
 			{
 				result = serializeResult;

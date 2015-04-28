@@ -433,7 +433,7 @@ that needs escaping.>>\"".Fix());
 	otherProperty:false".replace(/\r/g, ""));
         });
 
-        // tag stuff
+        // serialize-related methods
         // ==========
         var D1_Map_PropWithNameMatchingIncludeRegex_Class = (function () {
             function D1_Map_PropWithNameMatchingIncludeRegex_Class() {
@@ -495,6 +495,19 @@ that needs escaping.>>\"".Fix());
         })();
         test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", function () {
             VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}");
+        });
+
+        var D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class = (function () {
+            function D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class() {
+                this.boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new VDFProp()).set = true;
+            }
+            D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.VDFPreSerializeProp = function (prop, propValue, options) {
+                return VDF.CancelSerialize;
+            };
+            return D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class;
+        })();
+        test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", function () {
+            VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}");
         });
 
         var D1_Map_MapThatCancelsItsSerialize_Class_Parent = (function () {

@@ -5,7 +5,7 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 
-public class VDFException : Exception
+/*public class VDFException : Exception
 {
 	string message;
 	Exception innerException;
@@ -22,7 +22,7 @@ public class VDFException : Exception
 	}
 	public override string Message { get { return ToString(); } }
 	public override string StackTrace { get { return innerException != null ? innerException.StackTrace : base.StackTrace; } }
-}
+}*/
 public static class VDF
 {
 	// for use with VDFSaveOptions
@@ -113,7 +113,7 @@ public static class VDF
 			rootName = options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[] {'`'})[0];
 		var rootType = GetTypeByNameRoot(rootName, GetGenericParamsCountOfTypeName(typeName), options);
 		if (rootType == null)
-			throw new VDFException("Could not find type \"" + rootName + "\".");
+			throw new Exception("Could not find type \"" + rootName + "\"."); //throw new VDFException("Could not find type \"" + rootName + "\".");
 		if (rootType.IsGenericType)
 		{
 			var genericArgumentTypes = new List<Type>();

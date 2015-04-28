@@ -317,7 +317,8 @@ public class VDFNode
 					else if (typeInfo.props.ContainsKey(keyString)) // maybe temp; just ignore props that are missing
 						typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, obj, typeInfo.props[keyString]));
 				}
-				catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }
+				//catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }
+				catch (Exception ex) { ex.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(ex, ex.Message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"); throw; }
 		}
 
 		// call post-deserialize constructors before post-deserialize normal methods

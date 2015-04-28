@@ -95,7 +95,7 @@ var VDF = (function () {
         return "object";
     };
     VDF.GetTypeNameRoot = function (typeName) {
-        return typeName != null && typeName.contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
+        return typeName != null && typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
     };
 
     VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {

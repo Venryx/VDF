@@ -519,7 +519,7 @@ Shoot at Enemy Vehicle
 			a.otherProperty.Should().Be(true);
 		}
 
-		// tag stuff
+		// deserialize-related methods
 		// ==========
 
 		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class

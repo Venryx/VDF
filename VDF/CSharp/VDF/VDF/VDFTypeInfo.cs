@@ -178,6 +178,13 @@ public class VDFPropInfo
 	}
 }
 
+[AttributeUsage(AttributeTargets.Method)] public class VDFPreSerializeProp : Attribute {}
+/*[AttributeUsage(AttributeTargets.Method)] public class VDFSerializeProp : Attribute {} // maybe todo: add these, for consistency's/completeness' sake
+[AttributeUsage(AttributeTargets.Method)] public class VDFPostSerializeProp : Attribute {}
+[AttributeUsage(AttributeTargets.Method)] public class VDFPreDeserializeProp : Attribute {}
+[AttributeUsage(AttributeTargets.Method)] public class VDFDeserializeProp : Attribute {}
+[AttributeUsage(AttributeTargets.Method)] public class VDFPostDeserializeProp : Attribute {}*/
+
 [AttributeUsage(AttributeTargets.Method)] public class VDFPreSerialize : Attribute {}
 [AttributeUsage(AttributeTargets.Method)] public class VDFSerialize : Attribute {}
 [AttributeUsage(AttributeTargets.Method)] public class VDFPostSerialize : Attribute {}
@@ -197,6 +204,7 @@ public class VDFMethodInfo
 		{
 			var result = new VDFMethodInfo();
 			result.memberInfo = method;
+			result.preSerializePropTag = method.GetCustomAttributes(true).OfType<VDFPreSerializeProp>().FirstOrDefault();
 			result.preSerializeTag = method.GetCustomAttributes(true).OfType<VDFPreSerialize>().FirstOrDefault();
 			result.serializeTag = method.GetCustomAttributes(true).OfType<VDFSerialize>().FirstOrDefault();
 			result.postSerializeTag = method.GetCustomAttributes(true).OfType<VDFPostSerialize>().FirstOrDefault();
@@ -209,6 +217,7 @@ public class VDFMethodInfo
 	}
 
 	public MethodBase memberInfo;
+	public VDFPreSerializeProp preSerializePropTag;
 	public VDFPreSerialize preSerializeTag;
 	public VDFSerialize serializeTag;
 	public VDFPostSerialize postSerializeTag;

@@ -72,9 +72,14 @@ public static class VDFSaver
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
 		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
 
+		if (parent != null)
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(parent.GetType()).methods.Values.Where(a=>a.preSerializePropTag != null))
+				if (method.Call(parent, prop, obj, options) == VDF.CancelSerialize)
+					return VDF.CancelSerialize;
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.preSerializeTag != null))
-				method.Call(obj, parent, prop, options);
+				if (method.Call(obj, parent, prop, options) == VDF.CancelSerialize)
+					return VDF.CancelSerialize;
 
 		VDFNode result = null;
 		bool serializedByCustomMethod = false;
@@ -82,8 +87,6 @@ public static class VDFSaver
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.serializeTag != null))
 			{
 				object serializeResult = method.Call(obj, parent, prop, options);
-				if (serializeResult == VDF.CancelSerialize)
-					return (VDFNode)serializeResult;
 				if (serializeResult != VDF.NoActionTaken)
 				{
 					result = (VDFNode)serializeResult;
@@ -153,10 +156,8 @@ public static class VDFSaver
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.mapChildren.Add(propName, propValueNode);
 					}
-					catch (Exception ex)
-					{
-						throw new VDFException("Error saving property '" + propName + "'.", ex);
-					}
+					//catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
+					catch (Exception ex) { ex.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(ex, ex.Message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"); throw; }
 			}
 		}
 
