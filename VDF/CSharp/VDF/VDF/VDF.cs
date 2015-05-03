@@ -23,6 +23,24 @@ using System.Reflection;
 	public override string Message { get { return ToString(); } }
 	public override string StackTrace { get { return innerException != null ? innerException.StackTrace : base.StackTrace; } }
 }*/
+
+public static class VDFClassExtensions
+{
+	public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags)
+	{
+		var result = new HashSet<MemberInfo>(); //List<MemberInfo>();
+		var currentType = self;
+		while (currentType != null)
+		{
+			foreach (MemberInfo member in currentType.GetMembers(flags))
+				//if (!result.Contains(member))
+				result.Add(member);
+			currentType = currentType.BaseType;
+		}
+		return result.ToList(); //Distinct().ToList();
+	}
+}
+
 public static class VDF
 {
 	// for use with VDFSaveOptions

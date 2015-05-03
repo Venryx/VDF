@@ -96,7 +96,7 @@ class VDF
 		{
 			if (obj.realTypeName)
 				return obj.realTypeName;
-			var nativeTypeName = obj.constructor.name;
+			var nativeTypeName = obj.constructor.name != "" ? obj.constructor.name : null;
 			/*if (nativeTypeName == "Boolean")
 				return "bool";
 			if (nativeTypeName == "Number")

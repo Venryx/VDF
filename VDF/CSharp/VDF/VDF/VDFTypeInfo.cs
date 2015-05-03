@@ -27,7 +27,7 @@ public class VDFTypeInfo
 					result.props[field.Name] = VDFPropInfo.Get(field);
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 				result.props[property.Name] = VDFPropInfo.Get(property);
-			foreach (MethodBase method in type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).Where(member => member is MethodBase)) // include constructors
+			foreach (MethodBase method in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).OfType<MethodBase>()) // include constructors
 				if (!result.methods.ContainsKey(method.Name))
 					result.methods.Add(method.Name, VDFMethodInfo.Get(method));
 

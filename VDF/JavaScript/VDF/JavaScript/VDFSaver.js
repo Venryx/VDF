@@ -48,7 +48,7 @@ var VDFSaver = (function () {
 
         var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null;
         var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-        var typeInfo = typeName && VDFTypeInfo.Get(typeName);
+        var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
 
         if (parent && parent.VDFPreSerializeProp)
             if (parent.VDFPreSerializeProp(prop, obj, options) == VDF.CancelSerialize)

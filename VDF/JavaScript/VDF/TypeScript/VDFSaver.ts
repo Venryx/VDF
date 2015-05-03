@@ -57,7 +57,7 @@ class VDFSaver
 
 		var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-		var typeInfo = typeName && VDFTypeInfo.Get(typeName);
+		var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
 
 		if (parent && parent.VDFPreSerializeProp)
 			if (parent.VDFPreSerializeProp(prop, obj, options) == VDF.CancelSerialize)
