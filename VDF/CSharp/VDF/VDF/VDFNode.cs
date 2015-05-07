@@ -280,6 +280,7 @@ public class VDFNode
 						result = newResult;
 					}
 				}
+		path.currentNode.obj = result; // in case post-deserialize method was attached as extra-method to the object, that makes use of the (basically useless) path.currentNode.obj property
 
 		return result;
 	}
@@ -310,19 +311,19 @@ public class VDFNode
 		{
 			for (var i = 0; i < listChildren.Count; i++)
 				if (obj is Array)
-					(obj as Array).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i)), i);
+					(obj as Array).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, listChildren[i])), i);
 				else if (obj is IList)
-					(obj as IList).Add(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count)));
+					(obj as IList).Add(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count, listChildren[i])));
 			foreach (string keyString in mapChildren.Keys)
 				try
 				{
 					if (obj is IDictionary)
 					{
 						var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
-						((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key)));
+						((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method
 					}
 					else if (typeInfo.props.ContainsKey(keyString)) // maybe temp; just ignore props that are missing
-						typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, path.ExtendAsChild(obj, typeInfo.props[keyString])));
+						typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, path.ExtendAsChild(typeInfo.props[keyString], null)));
 				}
 				//catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }
 				catch (Exception ex)

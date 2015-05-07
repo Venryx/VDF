@@ -86,19 +86,19 @@ class VDFNodePath
 	get parentNode() { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; }
 	get currentNode() { return this.nodes.Last(); }
 
-	ExtendAsListChild(index: number)
+	ExtendAsListChild(index: number, obj)
 	{
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
-		newNodes.Last().list_index = index;
+		newNodes.Add(new VDFNodePathNode(obj, null, index));
 		return new VDFNodePath(newNodes);
 	}
-	ExtendAsMapChild(key)
+	ExtendAsMapChild(key, obj)
 	{
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
-		newNodes.Last().map_key = key;
+		newNodes.Add(new VDFNodePathNode(obj, null, -1, key));
 		return new VDFNodePath(newNodes);
 	}
-	ExtendAsChild(obj, prop: VDFPropInfo)
+	ExtendAsChild(prop: VDFPropInfo, obj)
 	{
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, prop));

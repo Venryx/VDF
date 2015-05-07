@@ -70,19 +70,19 @@ public class VDFNodePath
 	public VDFNodePathNode parentNode { get { return nodes.Take(nodes.Count - 1).LastOrDefault(); } }
 	public VDFNodePathNode currentNode { get { return nodes.Last(); } }
 
-	public VDFNodePath ExtendAsListChild(int index)
+	public VDFNodePath ExtendAsListChild(int index, object obj)
 	{
 		var newNodes = nodes.Select(a=>a.Clone()).ToList();
-		newNodes.Last().list_index = index;
+		newNodes.Add(new VDFNodePathNode(obj, null, index));
 		return new VDFNodePath(newNodes);
 	}
-	public VDFNodePath ExtendAsMapChild(object key)
+	public VDFNodePath ExtendAsMapChild(object key, object obj)
 	{
-		var newNodes = nodes.Select(a => a.Clone()).ToList();
-		newNodes.Last().map_key = key;
+		var newNodes = nodes.Select(a=>a.Clone()).ToList();
+		newNodes.Add(new VDFNodePathNode(obj, null, -1, key));
 		return new VDFNodePath(newNodes);
 	}
-	public VDFNodePath ExtendAsChild(object obj, VDFPropInfo prop)
+	public VDFNodePath ExtendAsChild(VDFPropInfo prop, object obj)
 	{
 		var newNodes = nodes.Select(a=>a.Clone()).ToList();
 		newNodes.Add(new VDFNodePathNode(obj, prop));

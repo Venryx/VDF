@@ -94,7 +94,7 @@ class VDFSaver
 				var objAsList = <List<any>>obj;
 				for (var i = 0; i < objAsList.length; i++)
 				{
-					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i), true);
+					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
 					if (itemNode == VDF.CancelSerializeForProp) // probably todo: replace with dedicated prop-inclusion-method system
@@ -108,7 +108,7 @@ class VDFSaver
 				var objAsDictionary = <Dictionary<any, any>>obj;
 				for (var key in objAsDictionary.Keys)
 				{
-					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key), true);
+					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
 					if (valueNode == VDF.CancelSerializeForProp)
@@ -140,7 +140,7 @@ class VDFSaver
 						if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
 							continue;
 					
-						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, path.ExtendAsChild(obj, propInfo));
+						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, path.ExtendAsChild(propInfo, propValue));
 						if (propValueNode == VDF.CancelSerialize)
 							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);

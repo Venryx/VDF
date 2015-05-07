@@ -82,21 +82,21 @@ var VDFNodePath = (function () {
         configurable: true
     });
 
-    VDFNodePath.prototype.ExtendAsListChild = function (index) {
+    VDFNodePath.prototype.ExtendAsListChild = function (index, obj) {
         var newNodes = this.nodes.Select(function (a) {
             return a.Clone();
         }, "VDFNodePathNode");
-        newNodes.Last().list_index = index;
+        newNodes.Add(new VDFNodePathNode(obj, null, index));
         return new VDFNodePath(newNodes);
     };
-    VDFNodePath.prototype.ExtendAsMapChild = function (key) {
+    VDFNodePath.prototype.ExtendAsMapChild = function (key, obj) {
         var newNodes = this.nodes.Select(function (a) {
             return a.Clone();
         }, "VDFNodePathNode");
-        newNodes.Last().map_key = key;
+        newNodes.Add(new VDFNodePathNode(obj, null, -1, key));
         return new VDFNodePath(newNodes);
     };
-    VDFNodePath.prototype.ExtendAsChild = function (obj, prop) {
+    VDFNodePath.prototype.ExtendAsChild = function (prop, obj) {
         var newNodes = this.nodes.Select(function (a) {
             return a.Clone();
         }, "VDFNodePathNode");

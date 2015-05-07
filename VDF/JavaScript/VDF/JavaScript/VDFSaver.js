@@ -80,7 +80,7 @@ var VDFSaver = (function () {
                 result.isList = true;
                 var objAsList = obj;
                 for (var i = 0; i < objAsList.length; i++) {
-                    var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i), true);
+                    var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
                     if (itemNode == VDF.CancelSerialize)
                         continue;
                     if (itemNode == VDF.CancelSerializeForProp)
@@ -91,7 +91,7 @@ var VDFSaver = (function () {
                 result.isMap = true;
                 var objAsDictionary = obj;
                 for (var key in objAsDictionary.Keys) {
-                    var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key), true);
+                    var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
                     if (valueNode == VDF.CancelSerialize)
                         continue;
                     if (valueNode == VDF.CancelSerializeForProp)
@@ -118,7 +118,7 @@ var VDFSaver = (function () {
                         if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
                             continue;
 
-                        var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, path.ExtendAsChild(obj, propInfo));
+                        var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.propTypeName : null, options, path.ExtendAsChild(propInfo, propValue));
                         if (propValueNode == VDF.CancelSerialize)
                             continue;
                         propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);

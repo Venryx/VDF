@@ -245,6 +245,7 @@
 					path.currentNode.obj = result;
 					this.IntoObject(result, options, path);
 				}
+		path.currentNode.obj = result; // in case post-deserialize method was attached as extra-method to the object, that makes use of the (basically useless) path.currentNode.obj property
 		
 		return result;
 	}
@@ -271,17 +272,17 @@
 		if (!deserializedByCustomMethod2)
 		{
 			for (var i = 0; i < this.listChildren.Count; i++)
-				obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i)));
+				obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, this.listChildren[i])));
 			for (var keyString in this.mapChildren.Keys)
 				try
 				{
 					if (obj instanceof Dictionary) //is IDictionary)
 					{
 						var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
-						obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key)));
+						obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method
 					}
 					else
-						obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, path.ExtendAsChild(obj, typeInfo.props[keyString]));
+						obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, path.ExtendAsChild(typeInfo.props[keyString] || {propName: keyString}, null));
 				}
 			catch(ex) { ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"; throw ex; }
 		}

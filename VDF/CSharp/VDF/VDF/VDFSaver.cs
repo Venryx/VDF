@@ -109,7 +109,7 @@ public static class VDFSaver
 				var objAsList = (IList)obj;
 				for (var i = 0; i < objAsList.Count; i++)
 				{
-					var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i), true);
+					var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
 					if (itemNode == VDF.CancelSerializeForProp) // probably todo: replace with dedicated prop-inclusion-method system
@@ -123,7 +123,7 @@ public static class VDFSaver
 				var objAsDictionary = (IDictionary)obj;
 				foreach (object key in objAsDictionary.Keys)
 				{
-					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key), true);
+					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
 					if (valueNode == VDF.CancelSerializeForProp)
@@ -151,7 +151,7 @@ public static class VDFSaver
 							continue;
 
 						// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
-						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, path.ExtendAsChild(obj, propInfo));
+						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, path.ExtendAsChild(propInfo, propValue));
 						if (propValueNode == VDF.CancelSerialize)
 							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
