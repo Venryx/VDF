@@ -376,7 +376,7 @@ that needs escaping.>>""".Fix());
 
 		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class
 		{
-			[VDFPreSerializeProp] VDFNode PreSerializeProp(VDFPropInfo prop, bool propValue, VDFSaveOptions options) { return VDF.CancelSerialize; }
+			[VDFPreSerializeProp] VDFNode PreSerializeProp(VDFNodePath propPath, VDFSaveOptions options) { return VDF.CancelSerialize; }
 			
 			[VDFProp] public bool boolProp = true;
 		}

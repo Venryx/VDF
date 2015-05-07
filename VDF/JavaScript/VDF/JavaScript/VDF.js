@@ -36,6 +36,76 @@ Array.prototype._AddProperty("Contains", function (item) {
 
 // classes
 // ==========
+var VDFNodePathNode = (function () {
+    function VDFNodePathNode(obj, prop, list_index, map_key) {
+        if (typeof obj === "undefined") { obj = null; }
+        if (typeof prop === "undefined") { prop = null; }
+        if (typeof list_index === "undefined") { list_index = -1; }
+        if (typeof map_key === "undefined") { map_key = null; }
+        this.list_index = -1;
+        this.obj = obj;
+        this.prop = prop;
+        this.list_index = list_index;
+        this.map_key = map_key;
+    }
+    VDFNodePathNode.prototype.Clone = function () {
+        return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_key);
+    };
+    return VDFNodePathNode;
+})();
+var VDFNodePath = (function () {
+    function VDFNodePath(nodes_orRootNode) {
+        if (nodes_orRootNode instanceof Array)
+            this.nodes = nodes_orRootNode;
+        else
+            this.nodes = new List("VDFNodePathNode", nodes_orRootNode);
+    }
+    Object.defineProperty(VDFNodePath.prototype, "rootNode", {
+        get: function () {
+            return this.nodes.First();
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(VDFNodePath.prototype, "parentNode", {
+        get: function () {
+            return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(VDFNodePath.prototype, "currentNode", {
+        get: function () {
+            return this.nodes.Last();
+        },
+        enumerable: true,
+        configurable: true
+    });
+
+    VDFNodePath.prototype.ExtendAsListChild = function (index) {
+        var newNodes = this.nodes.Select(function (a) {
+            return a.Clone();
+        }, "VDFNodePathNode");
+        newNodes.Last().list_index = index;
+        return new VDFNodePath(newNodes);
+    };
+    VDFNodePath.prototype.ExtendAsMapChild = function (key) {
+        var newNodes = this.nodes.Select(function (a) {
+            return a.Clone();
+        }, "VDFNodePathNode");
+        newNodes.Last().map_key = key;
+        return new VDFNodePath(newNodes);
+    };
+    VDFNodePath.prototype.ExtendAsChild = function (obj, prop) {
+        var newNodes = this.nodes.Select(function (a) {
+            return a.Clone();
+        }, "VDFNodePathNode");
+        newNodes.Add(new VDFNodePathNode(obj, prop));
+        return new VDFNodePath(newNodes);
+    };
+    return VDFNodePath;
+})();
+
 var VDF = (function () {
     function VDF() {
     }
@@ -380,6 +450,12 @@ window["List"] = function List(itemType) {
             if (!matchFunc.call(this[i], this[i]))
                 return false;
         return true;
+    };
+    self.Select = function (selectFunc, itemType) {
+        var result = new List(itemType || "object");
+        for (var i in this.Indexes())
+            result.Add(selectFunc.call(this[i], this[i]));
+        return result;
     };
     self.First = function (matchFunc) {
         var result = this.FirstOrDefault(matchFunc);

@@ -50,6 +50,62 @@ Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(it
 // classes
 // ==========
 
+class VDFNodePathNode
+{
+	obj: any;
+
+	// if not root (i.e. a child/descendant)
+	prop: VDFPropInfo; //string propName;
+	list_index = -1;
+	map_key: any;
+
+	constructor(obj = null, prop: VDFPropInfo = null, list_index = -1, map_key = null)
+	{
+		this.obj = obj;
+		this.prop = prop;
+		this.list_index = list_index;
+		this.map_key = map_key;
+	}
+
+	Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_key); }
+}
+class VDFNodePath
+{
+	nodes: List<VDFNodePathNode>;
+	constructor(nodes: List<VDFNodePathNode>);
+	constructor(rootNode: VDFNodePathNode);
+	constructor(nodes_orRootNode)
+	{
+		if (nodes_orRootNode instanceof Array)
+			this.nodes = nodes_orRootNode;
+		else
+			this.nodes = new List<VDFNodePathNode>("VDFNodePathNode", nodes_orRootNode);
+	}
+
+	get rootNode() { return this.nodes.First(); }
+	get parentNode() { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; }
+	get currentNode() { return this.nodes.Last(); }
+
+	ExtendAsListChild(index: number)
+	{
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+		newNodes.Last().list_index = index;
+		return new VDFNodePath(newNodes);
+	}
+	ExtendAsMapChild(key)
+	{
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+		newNodes.Last().map_key = key;
+		return new VDFNodePath(newNodes);
+	}
+	ExtendAsChild(obj, prop: VDFPropInfo)
+	{
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+		newNodes.Add(new VDFNodePathNode(obj, prop));
+		return new VDFNodePath(newNodes);
+	}
+}
+
 class VDF
 {
 	// for use with VDFSaveOptions
@@ -342,6 +398,13 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 				return false;
 		return true;
 	};
+	self.Select = function(selectFunc, itemType)
+	{
+		var result = new List(itemType || "object");
+		for (var i in this.Indexes())
+			result.Add(selectFunc.call(this[i], this[i]));
+		return result;
+	};
 	self.First = function(matchFunc)
 	{
 		var result = this.FirstOrDefault(matchFunc);
@@ -376,7 +439,8 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 				if (matchFunc.call(this[i], this[i]))
 					return this[i];
 			return null;
-		} else
+		}
+		else
 			return this[this.length - 1];
 	};
 	self.GetRange = function(index, count)
@@ -411,6 +475,7 @@ interface List<T> extends Array<T> // class/instance declaration stuff
 	RemoveRange(index: number, count: number): void;
 	Any(matchFunc): boolean;
 	All(matchFunc): boolean;
+	Select<T>(selectFunc: Function, itemType?: string): List<T>;
 	First(matchFunc?): T;
 	FirstOrDefault(matchFunc?): T;
 	Last(matchFunc?): T;

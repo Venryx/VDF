@@ -41,6 +41,55 @@ public static class VDFClassExtensions
 	}
 }
 
+public class VDFNodePathNode
+{
+	public object obj;
+
+	// if not root (i.e. a child/descendant)
+	public VDFPropInfo prop; //string propName;
+	public int list_index = -1;
+	public object map_key;
+
+	public VDFNodePathNode(object obj = null, VDFPropInfo prop = null, int list_index = -1, object map_key = null)
+	{
+		this.obj = obj;
+		this.prop = prop;
+		this.list_index = list_index;
+		this.map_key = map_key;
+	}
+
+	public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_key); }
+}
+public class VDFNodePath
+{
+	public List<VDFNodePathNode> nodes;
+	public VDFNodePath(List<VDFNodePathNode> nodes) { this.nodes = nodes; }
+	public VDFNodePath(VDFNodePathNode rootNode) { nodes = new List<VDFNodePathNode> {rootNode}; }
+
+	public VDFNodePathNode rootNode { get { return nodes.First(); } }
+	public VDFNodePathNode parentNode { get { return nodes.Take(nodes.Count - 1).LastOrDefault(); } }
+	public VDFNodePathNode currentNode { get { return nodes.Last(); } }
+
+	public VDFNodePath ExtendAsListChild(int index)
+	{
+		var newNodes = nodes.Select(a=>a.Clone()).ToList();
+		newNodes.Last().list_index = index;
+		return new VDFNodePath(newNodes);
+	}
+	public VDFNodePath ExtendAsMapChild(object key)
+	{
+		var newNodes = nodes.Select(a => a.Clone()).ToList();
+		newNodes.Last().map_key = key;
+		return new VDFNodePath(newNodes);
+	}
+	public VDFNodePath ExtendAsChild(object obj, VDFPropInfo prop)
+	{
+		var newNodes = nodes.Select(a=>a.Clone()).ToList();
+		newNodes.Add(new VDFNodePathNode(obj, prop));
+		return new VDFNodePath(newNodes);
+	}
+}
+
 public static class VDF
 {
 	// for use with VDFSaveOptions
@@ -71,10 +120,10 @@ public static class VDF
 		builtInTypeAliasesByTypeName = builtInTypeAliasesByType.ToDictionary(a=>a.Value, a=>a.Key);
 
 		// initialize exporters/importers for some common types
-		VDFTypeInfo.AddSerializeMethod<Color>((self, parent, prop, options)=>new VDFNode(self.Name));
-		VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, parent, prop, options)=>Color.FromName((string)node.primitiveValue));
-		VDFTypeInfo.AddSerializeMethod<Guid>((self, parent, prop, options)=>new VDFNode(self.ToString()));
-		VDFTypeInfo.AddDeserializeMethod_FromParent<Guid>((node, parent, prop, options)=>new Guid((string)node.primitiveValue));
+		VDFTypeInfo.AddSerializeMethod<Color>((self, path, options)=>new VDFNode(self.Name));
+		VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, path, options)=>Color.FromName((string)node.primitiveValue));
+		VDFTypeInfo.AddSerializeMethod<Guid>((self, path, options)=>new VDFNode(self.ToString()));
+		VDFTypeInfo.AddDeserializeMethod_FromParent<Guid>((node, path, options)=>new Guid((string)node.primitiveValue));
 	}
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"

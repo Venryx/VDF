@@ -503,7 +503,7 @@ that needs escaping.>>\"".Fix());
             function D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class() {
                 this.boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new VDFProp()).set = true;
             }
-            D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.VDFPreSerializeProp = function (prop, propValue, options) {
+            D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.VDFPreSerializeProp = function (propPath, options) {
                 return VDF.CancelSerialize;
             };
             return D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class;

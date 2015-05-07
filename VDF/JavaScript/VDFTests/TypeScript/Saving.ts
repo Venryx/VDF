@@ -469,7 +469,7 @@ that needs escaping.>>\"".Fix());
 
 		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class
 		{
-			VDFPreSerializeProp(prop, propValue, options) { return VDF.CancelSerialize; }
+			VDFPreSerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
 			
 			boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new VDFProp()).set = true;
 		}

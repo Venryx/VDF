@@ -188,13 +188,15 @@
 	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 
 	ToObject(options: VDFLoadOptions): any;
-	ToObject(declaredTypeName?: string, options?: VDFLoadOptions, parent?: any, prop?: VDFPropInfo): any;
-	ToObject(declaredTypeName_orOptions?: any, options = new VDFLoadOptions(), parent?: any, prop?: VDFPropInfo): any
+	ToObject(declaredTypeName?: string, options?: VDFLoadOptions, path?: VDFNodePath): any;
+	ToObject(declaredTypeName_orOptions?: any, options = new VDFLoadOptions(), path?: VDFNodePath): any
 	{
 		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
 			return this.ToObject(null, declaredTypeName_orOptions);
 
 		var declaredTypeName: string = declaredTypeName_orOptions;
+
+		path = path || new VDFNodePath(new VDFNodePathNode());
 
 		var fromVDFTypeName = "object";
 		if (this.metadata != null && (window[VDF.GetTypeNameRoot(this.metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
@@ -222,7 +224,7 @@
 		var deserializedByCustomMethod = false;
 		if (window[finalTypeName] && window[finalTypeName].VDFDeserialize)
 		{
-			var deserializeResult = window[finalTypeName].VDFDeserialize(this, parent, prop, options);
+			var deserializeResult = window[finalTypeName].VDFDeserialize(this, path, options);
 			if (deserializeResult != VDF.NoActionTaken)
 			{
 				result = deserializeResult;
@@ -240,26 +242,28 @@
 				if (this.primitiveValue != null || this.isList || this.isMap)
 				{
 					result = VDFNode.CreateNewInstanceOfType(finalTypeName);
-					this.IntoObject(result, options, parent, prop);
+					path.currentNode.obj = result;
+					this.IntoObject(result, options, path);
 				}
 		
 		return result;
 	}
-	IntoObject(obj: any, options: VDFLoadOptions = null, parent?: any, prop?: VDFPropInfo): void
+	IntoObject(obj: any, options: VDFLoadOptions = null, path?: VDFNodePath): void
 	{
 		options = options || new VDFLoadOptions();
+		path = path || new VDFNodePath(new VDFNodePathNode(obj));
 
 		var typeName = VDF.GetTypeNameOfObject(obj);
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
 		var typeInfo = VDFTypeInfo.Get(typeName);
 
 		if (obj && obj.VDFPreDeserialize)
-			obj.VDFPreDeserialize(this, parent, prop, options);
+			obj.VDFPreDeserialize(this, path, options);
 
 		var deserializedByCustomMethod2 = false;
 		if (obj.VDFDeserialize)
 		{
-			var deserializeResult = obj.VDFDeserialize(this, parent, prop, options);
+			var deserializeResult = obj.VDFDeserialize(this, path, options);
 			if (deserializeResult != VDF.NoActionTaken)
 				deserializedByCustomMethod2 = true;
 		}
@@ -267,20 +271,23 @@
 		if (!deserializedByCustomMethod2)
 		{
 			for (var i = 0; i < this.listChildren.Count; i++)
-				obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, parent, prop));
+				obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i)));
 			for (var keyString in this.mapChildren.Keys)
 				try
 				{
 					if (obj instanceof Dictionary) //is IDictionary)
-						obj.Set(VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options), this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, parent, prop));
+					{
+						var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
+						obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key)));
+					}
 					else
-						obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, obj, typeInfo.props[keyString]);
+						obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, path.ExtendAsChild(obj, typeInfo.props[keyString]));
 				}
 			catch(ex) { ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"; throw ex; }
 		}
 
 		if (obj && obj.VDFPostDeserialize)
-			obj.VDFPostDeserialize(this, parent, prop, options);
+			obj.VDFPostDeserialize(this, path, options);
 	}
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
