@@ -28,16 +28,16 @@ public static class VDFClassExtensions
 {
 	public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags)
 	{
-		var result = new HashSet<MemberInfo>(); //List<MemberInfo>();
+		var result = new List<MemberInfo>(); //HashSet<MemberInfo>();
 		var currentType = self;
 		while (currentType != null)
 		{
-			foreach (MemberInfo member in currentType.GetMembers(flags))
+			foreach (MemberInfo member in currentType.GetMembers(flags | BindingFlags.DeclaredOnly)) // only get members declared in this class (not in base, since we're getting those ourselves soon anyway)
 				//if (!result.Contains(member))
 				result.Add(member);
 			currentType = currentType.BaseType;
 		}
-		return result.ToList(); //Distinct().ToList();
+		return result; //.ToList(); //Distinct().ToList();
 	}
 }
 

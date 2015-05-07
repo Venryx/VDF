@@ -28,8 +28,13 @@ public class VDFTypeInfo
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
 				result.props[property.Name] = VDFPropInfo.Get(property);
 			foreach (MethodBase method in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).OfType<MethodBase>()) // include constructors
-				if (!result.methods.ContainsKey(method.Name))
-					result.methods.Add(method.Name, VDFMethodInfo.Get(method));
+			{
+				var methodName = method.Name;
+				if (result.methods.ContainsKey(methodName))
+					methodName += "(from base type: " + type.Name + ")";
+				if (!result.methods.ContainsKey(methodName))
+					result.methods.Add(methodName, VDFMethodInfo.Get(method));
+			}
 
 			result.typeTag = type.GetCustomAttributes(true).OfType<VDFType>().FirstOrDefault() ?? new VDFType();
 			if (VDF.GetIsTypeAnonymous(type))
