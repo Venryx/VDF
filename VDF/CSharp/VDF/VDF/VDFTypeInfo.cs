@@ -31,7 +31,7 @@ public class VDFTypeInfo
 			{
 				var methodName = method.Name;
 				if (result.methods.ContainsKey(methodName))
-					methodName += "(from base type: " + type.Name + ")";
+					methodName += "(from base type: " + method.DeclaringType.Name + ")";
 				if (!result.methods.ContainsKey(methodName))
 					result.methods.Add(methodName, VDFMethodInfo.Get(method));
 			}

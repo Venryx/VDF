@@ -313,14 +313,20 @@ public class VDFNode
 				if (obj is Array)
 					(obj as Array).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, listChildren[i])), i);
 				else if (obj is IList)
-					(obj as IList).Add(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count, listChildren[i])));
+				//(obj as IList).Add(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count, listChildren[i])));
+				{
+					var item = listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count, listChildren[i]));
+					if ((obj as IList).Count == i) // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
+						(obj as IList).Add(item);
+				}
 			foreach (string keyString in mapChildren.Keys)
 				try
 				{
 					if (obj is IDictionary)
 					{
 						var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
-						((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method
+						//((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method
+						((IDictionary)obj)[key] = mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null)); // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
 					}
 					else if (typeInfo.props.ContainsKey(keyString)) // maybe temp; just ignore props that are missing
 						typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, path.ExtendAsChild(typeInfo.props[keyString], null)));
