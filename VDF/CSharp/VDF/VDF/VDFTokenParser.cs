@@ -396,6 +396,10 @@ public static class VDFTokenParser
 						tokens.Remove(token2);
 						tokens.Insert(i - 1, token2);
 					}*/
+
+					// maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
+					RefreshTokenPositionAndIndexProperties(tokens);
+
 					i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
 					tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
 				}
@@ -416,6 +420,10 @@ public static class VDFTokenParser
 								tokens.Remove(token2);
 								tokens.Insert(i - 1, token2);
 							}*/
+
+							// maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
+							RefreshTokenPositionAndIndexProperties(tokens);
+
 							tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
 						}
 			}
@@ -440,7 +448,10 @@ public static class VDFTokenParser
 
 		RefreshTokenPositionAndIndexProperties(result); //tokens);
 
-		//Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
+		// temp; for testing
+		/*Console.WriteLine(String.Join(" ", tokens.Select(a=>a.text).ToArray()));
+		Console.WriteLine("==========");
+		Console.WriteLine(String.Join(" ", result.Select(a=>a.text).ToArray()));*/
 
 		return result;
 	}

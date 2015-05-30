@@ -263,6 +263,10 @@ class VDFTokenParser
 						tokens.Remove(token2);
 						tokens.Insert(i - 1, token2);
 					}*/
+
+					// maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
+					VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
+
 					i -= tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
 					tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
 				}
@@ -289,6 +293,10 @@ class VDFTokenParser
 								tokens.Remove(token2);
 								tokens.Insert(i - 1, token2);
 							}*/
+
+							// maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
+							VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
+
 							tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
 						}
 				}
