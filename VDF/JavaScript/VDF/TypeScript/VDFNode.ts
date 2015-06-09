@@ -301,4 +301,3 @@
 
 VDF.NoActionTaken = new VDFNode();
 VDF.CancelSerialize = new VDFNode();
-VDF.CancelSerializeForProp = new VDFNode();

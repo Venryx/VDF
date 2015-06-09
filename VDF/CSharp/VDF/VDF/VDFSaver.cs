@@ -73,10 +73,6 @@ public static class VDFSaver
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
 		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
 
-		if (path != null && path.parentNode != null)
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(path.parentNode.obj.GetType()).methods.Values.Where(a=>a.preSerializePropTag != null))
-				if (method.Call(path.parentNode.obj, path, options) == VDF.CancelSerialize)
-					return VDF.CancelSerialize;
 		if (obj != null)
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods.Values.Where(a=>a.preSerializeTag != null))
 				if (method.Call(obj, path, options) == VDF.CancelSerialize)
@@ -112,8 +108,6 @@ public static class VDFSaver
 					var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
-					if (itemNode == VDF.CancelSerializeForProp) // probably todo: replace with dedicated prop-inclusion-method system
-						return VDF.CancelSerialize;
 					result.listChildren.Add(itemNode);
 				}
 			}
@@ -126,8 +120,6 @@ public static class VDFSaver
 					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
-					if (valueNode == VDF.CancelSerializeForProp)
-						return VDF.CancelSerialize;
 					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, path, true), valueNode);
 				}
 			}
@@ -150,8 +142,16 @@ public static class VDFSaver
 						if (propInfo.IsXValueTheDefault(propValue) && propInfo.propTag != null && !propInfo.propTag.writeDefaultValue)
 							continue;
 
+						VDFNodePath childPath = path.ExtendAsChild(propInfo, propValue);
+						var canceled = false;
+						foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.preSerializePropTag != null))
+							if (method.Call(obj, childPath, options) == VDF.CancelSerialize)
+								canceled = true;
+						if (canceled)
+							continue;
+
 						// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
-						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, path.ExtendAsChild(propInfo, propValue));
+						var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, childPath);
 						if (propValueNode == VDF.CancelSerialize)
 							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);

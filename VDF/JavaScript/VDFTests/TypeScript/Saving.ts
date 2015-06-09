@@ -481,12 +481,6 @@ that needs escaping.>>\"".Fix());
 			{ VDFSerialize() { return VDF.CancelSerialize; } }
 		test("D1_Map_MapThatCancelsItsSerialize", ()=> { VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}"); });
 
-		class D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent
-			{ children = Prop(this, "children", "List(D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child)", new VDFProp()).set = new List<D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child>("D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child", new D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child()); }
-		class D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child
-			{ VDFSerialize() { return VDF.CancelSerializeForProp; } }
-		test("D1_Map_ListThatHasItsSerializeCanceledByItem_Map", ()=>{ VDF.Serialize(new D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent(), "D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent").Should().Be("{}"); });
-
 		// for JSON compatibility
 		// ==========
 

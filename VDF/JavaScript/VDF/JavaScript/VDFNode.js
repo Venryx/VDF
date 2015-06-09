@@ -273,5 +273,4 @@
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 VDF.NoActionTaken = new VDFNode();
 VDF.CancelSerialize = new VDFNode();
-VDF.CancelSerializeForProp = new VDFNode();
 //# sourceMappingURL=VDFNode.js.map

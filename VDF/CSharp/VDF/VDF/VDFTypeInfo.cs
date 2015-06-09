@@ -156,7 +156,7 @@ public class VDFPropInfo
 	{
 		if (x == null) // if null
 			return true;
-		if (GetPropType().IsValueType && x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
+		if (GetPropType().IsValueType && x.Equals(Activator.CreateInstance(GetPropType()))) //x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
 			return true;
 		/*if (x is IList && ((IList)x).Count == 0) // if list, and empty
 			return true;

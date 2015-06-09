@@ -102,7 +102,6 @@ public static class VDF
 	// for use with VDFSerialize/VDFDeserialize methods
 	public static VDFNode NoActionTaken = new VDFNode();
 	public static VDFNode CancelSerialize = new VDFNode();
-	public static VDFNode CancelSerializeForProp = new VDFNode();
 
 	static Dictionary<Type, string> builtInTypeAliasesByType;
 	static Dictionary<string, Type> builtInTypeAliasesByTypeName;

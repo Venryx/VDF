@@ -530,24 +530,6 @@ that needs escaping.>>\"".Fix());
             VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}");
         });
 
-        var D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent = (function () {
-            function D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent() {
-                this.children = Prop(this, "children", "List(D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child)", new VDFProp()).set = new List("D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child", new D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child());
-            }
-            return D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent;
-        })();
-        var D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child = (function () {
-            function D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child() {
-            }
-            D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child.prototype.VDFSerialize = function () {
-                return VDF.CancelSerializeForProp;
-            };
-            return D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Child;
-        })();
-        test("D1_Map_ListThatHasItsSerializeCanceledByItem_Map", function () {
-            VDF.Serialize(new D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent(), "D1_Map_ListThatHasItsSerializeCanceledByItem_Map_Class_Parent").Should().Be("{}");
-        });
-
         // for JSON compatibility
         // ==========
         var D0_MapWithMetadataDisabled_Class = (function () {
