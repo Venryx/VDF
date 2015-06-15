@@ -18,8 +18,11 @@
 }
 class VDFTypeInfo
 {
-	static Get(typeName: string): VDFTypeInfo
+	static Get(type_orTypeName: any): VDFTypeInfo
 	{
+		//var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
+		var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
+
 		var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
 		if (VDF.GetIsTypeAnonymous(typeNameBase))
 		{
@@ -28,7 +31,8 @@ class VDFTypeInfo
 			return result;
 		}
 
-		if (window[typeNameBase] && window[typeNameBase].typeInfo == null)
+		var typeBase = window[typeNameBase];
+		if (typeBase && typeBase.typeInfo == null)
 		{
 			var result = new VDFTypeInfo();
 			result.typeTag = new VDFType();
@@ -59,15 +63,22 @@ class VDFTypeInfo
 				currentType = window[currentType].prototype && window[currentType].prototype.__proto__ && window[currentType].prototype.__proto__.constructor.name;
 			}
 
-			window[typeNameBase].typeInfo = result;
+			typeBase.typeInfo = result;
 		}
 
-		return window[typeNameBase] && window[typeNameBase].typeInfo;
+		return typeBase && typeBase.typeInfo;
 	}
 
 	props = {};
 	tags: any[];
 	typeTag: VDFType;
+
+	GetProp(propName: string): VDFPropInfo
+	{
+		if (!(propName in this.props))
+			this.props[propName] = new VDFPropInfo(propName, null, [], null);
+		return this.props[propName];
+	}
 }
 
 class VDFProp
@@ -84,14 +95,14 @@ class VDFProp
 }
 class VDFPropInfo
 {
-	propName: string;
-	propTypeName: string;
+	name: string;
+	typeName: string;
 	tags: any[];
 	propTag: VDFProp;
-	constructor(propName: string, propType: string, tags: any[], propTag: VDFProp)
+	constructor(propName: string, propTypeName: string, tags: any[], propTag: VDFProp)
 	{
-		this.propName = propName;
-		this.propTypeName = propType;
+		this.name = propName;
+		this.typeName = propTypeName;
 		this.tags = tags;
 		this.propTag = propTag;
 	}
@@ -111,8 +122,20 @@ class VDFPropInfo
 	}
 }
 
-class VDFMethodInfo
+class VDFPreSerializeProp {}
+
+class VDFPreSerialize {}
+class VDFSerialize {}
+class VDFPostSerialize {}
+class VDFPreDeserialize {}
+class VDFDeserialize
+{
+	fromParent: boolean;
+	constructor(fromParent = false) { this.fromParent = fromParent; }
+}
+class VDFPostDeserialize {}
+/*class VDFMethodInfo
 {
 	tags: any[];
 	constructor(tags: any[]) { this.tags = tags; }
-}
+}*/

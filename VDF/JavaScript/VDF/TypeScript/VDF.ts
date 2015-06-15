@@ -46,6 +46,18 @@ interface Array<T>
 	Contains(str: T): boolean;
 }
 Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(item) != -1; });
+interface Function
+{
+	AddTags(...tags: any[]): string;
+}
+Function.prototype._AddProperty("AddTags", function(...tags)
+{
+	if (this.tags == null)
+		this.tags = new List("object");
+	for (var i = 0; i < tags.length; i++)
+		this.tags.push(tags[i]);
+	return this;
+});
 
 // classes
 // ==========
@@ -77,7 +89,7 @@ class VDFNodePath
 	constructor(nodes_orRootNode)
 	{
 		if (nodes_orRootNode instanceof Array)
-			this.nodes = nodes_orRootNode;
+			this.nodes = List.apply(null, ["VDFNodePathNode"].concat(nodes_orRootNode));
 		else
 			this.nodes = new List<VDFNodePathNode>("VDFNodePathNode", nodes_orRootNode);
 	}
@@ -174,6 +186,18 @@ class VDF
 		return "object"; // consider everything else to be an anonymous-object
 	}
 	static GetTypeNameRoot(typeName) { return typeName != null && typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName; }
+
+	static GetObjectProps(obj): any
+	{
+		var result = {};
+		if (obj == null)
+			return result;
+		for (var propName in obj.__proto__) // add base-class props first
+			result[propName] = null;
+		for (var propName in obj)
+			result[propName] = null;
+		return result;
+	}
 
 	static Serialize(obj: any, options: VDFSaveOptions): string;
 	static Serialize(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions): string;
@@ -273,14 +297,14 @@ class StringBuilder
 // tags
 // ----------
 
-function PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags): void
+function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags): void
 {
 	if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
-		return Prop.apply(this, [typeOrObj, propName, null, propType_orFirstTag].concat(tags));
+		return Prop.apply(this, [type_orObj, propName, null, propType_orFirstTag].concat(tags));
 	var propType = propType_orFirstTag;
 
 	var s = this;
-	s.type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
+	s.type = type_orObj instanceof Function ? type_orObj : type_orObj.constructor;
 	s.propName = propName;
 	s.propType = propType;
 	s.tags = tags;
@@ -298,9 +322,9 @@ PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value)
 };
 function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) { return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags); };
 
-function MethodDeclarationWrapper(tags) { this.tags = tags; };
+/*function MethodDeclarationWrapper(tags) { this.tags = tags; };
 MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) { method.methodInfo = new VDFMethodInfo(this.tags); };
-function Method(...tags) { return new MethodDeclarationWrapper(tags); };
+function Method(...tags) { return new MethodDeclarationWrapper(tags); };*/
 
 function TypeDeclarationWrapper(tags) { this.tags = tags; };
 TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type)

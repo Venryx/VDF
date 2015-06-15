@@ -201,13 +201,16 @@
 
         var result;
         var deserializedByCustomMethod = false;
-        if (window[finalTypeName] && window[finalTypeName].VDFDeserialize) {
-            var deserializeResult = window[finalTypeName].VDFDeserialize(this, path, options);
-            if (deserializeResult != VDF.NoActionTaken) {
-                result = deserializeResult;
-                deserializedByCustomMethod = true;
+        for (var propName in window[finalTypeName])
+            if (window[finalTypeName][propName] instanceof Function && window[finalTypeName][propName].tags && window[finalTypeName][propName].tags.Any(function (a) {
+                return a instanceof VDFDeserialize;
+            })) {
+                var deserializeResult = window[finalTypeName][propName](this, path, options);
+                if (deserializeResult != VDF.NoActionTaken) {
+                    result = deserializeResult;
+                    deserializedByCustomMethod = true;
+                }
             }
-        }
 
         if (!deserializedByCustomMethod)
             if (finalTypeName == "object") {
@@ -233,15 +236,21 @@
         var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
         var typeInfo = VDFTypeInfo.Get(typeName);
 
-        if (obj && obj.VDFPreDeserialize)
-            obj.VDFPreDeserialize(this, path, options);
+        for (var propName in VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) {
+                return a instanceof VDFPreDeserialize;
+            }))
+                obj[propName](this, path, options);
 
         var deserializedByCustomMethod2 = false;
-        if (obj.VDFDeserialize) {
-            var deserializeResult = obj.VDFDeserialize(this, path, options);
-            if (deserializeResult != VDF.NoActionTaken)
-                deserializedByCustomMethod2 = true;
-        }
+        for (var propName in VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) {
+                return a instanceof VDFDeserialize;
+            })) {
+                var deserializeResult = obj[propName](this, path, options);
+                if (deserializeResult != VDF.NoActionTaken)
+                    deserializedByCustomMethod2 = true;
+            }
 
         if (!deserializedByCustomMethod2) {
             for (var i = 0; i < this.listChildren.Count; i++) {
@@ -257,15 +266,18 @@
                         //obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null)));
                         obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
                     } else
-                        obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].propTypeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { propName: keyString }, null));
+                        obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { name: keyString }, null));
                 } catch (ex) {
                     ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n";
                     throw ex;
                 }
         }
 
-        if (obj && obj.VDFPostDeserialize)
-            obj.VDFPostDeserialize(this, path, options);
+        for (var propName in VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) {
+                return a instanceof VDFPostDeserialize;
+            }))
+                obj[propName](this, path, options);
     };
     return VDFNode;
 })();

@@ -226,7 +226,8 @@ that needs escaping.>>\"".Fix());
 		class TypeWithPreSerializePrepMethod
 		{
 			preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new VDFProp()).set = false;
-			VDFPreSerialize(): void { this.preSerializeWasCalled = true; }
+			PreSerialize(): void { this.preSerializeWasCalled = true; }
+			constructor() { this.PreSerialize.AddTags(new VDFPreSerialize()); }
 		}
 		test("D1_PreSerializePreparation", ()=>
 		{
@@ -237,7 +238,8 @@ that needs escaping.>>\"".Fix());
 		class TypeWithPostSerializeCleanupMethod
 		{
 			postSerializeWasCalled = Prop(this, "postSerializeWasCalled", "bool", new VDFProp()).set = false;
-			VDFPostSerialize(): void { this.postSerializeWasCalled = true; }
+			PostSerialize(): void { this.postSerializeWasCalled = true; }
+			constructor() { this.PostSerialize.AddTags(new VDFPostSerialize()); }
 		}
 		test("D1_PostSerializeCleanup", ()=>
 		{
@@ -450,12 +452,13 @@ that needs escaping.>>\"".Fix());
 			notIncluded = Prop(this, "notIncluded", "bool").set = true;
 			included = Prop(this, "included", "bool").set = true;
 
-			VDFSerialize(): VDFNode //VDFPropInfo prop, VDFSaveOptions options)
+			Serialize(): VDFNode //VDFPropInfo prop, VDFSaveOptions options)
 			{
 				var result = new VDFNode();
 				result.SetMapChild("included", new VDFNode(this.included));
 				return result;
 			}
+			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
 		//AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
 		test("D1_MapWithEmbeddedSerializeMethod_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}"); });
@@ -463,13 +466,15 @@ that needs escaping.>>\"".Fix());
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
 		{
 			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = true;
-			VDFSerialize() { return VDF.NoActionTaken; }
+			Serialize() { return VDF.NoActionTaken; }
+			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
 		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
 
 		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class
 		{
-			VDFPreSerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
+			PreSerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
+			constructor() { this.PreSerializeProp.AddTags(new VDFPreSerializeProp()); }
 			
 			boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new VDFProp()).set = true;
 		}
@@ -478,7 +483,10 @@ that needs escaping.>>\"".Fix());
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
 			{ child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new VDFProp()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
 		class D1_Map_MapThatCancelsItsSerialize_Class_Child
-			{ VDFSerialize() { return VDF.CancelSerialize; } }
+		{
+			Serialize() { return VDF.CancelSerialize; }
+			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
+		}
 		test("D1_Map_MapThatCancelsItsSerialize", ()=> { VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}"); });
 
 		// for JSON compatibility

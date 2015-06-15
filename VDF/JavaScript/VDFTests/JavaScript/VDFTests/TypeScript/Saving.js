@@ -225,8 +225,9 @@ that needs escaping.>>\"".Fix());
         var TypeWithPreSerializePrepMethod = (function () {
             function TypeWithPreSerializePrepMethod() {
                 this.preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new VDFProp()).set = false;
+                this.PreSerialize.AddTags(new VDFPreSerialize());
             }
-            TypeWithPreSerializePrepMethod.prototype.VDFPreSerialize = function () {
+            TypeWithPreSerializePrepMethod.prototype.PreSerialize = function () {
                 this.preSerializeWasCalled = true;
             };
             return TypeWithPreSerializePrepMethod;
@@ -239,8 +240,9 @@ that needs escaping.>>\"".Fix());
         var TypeWithPostSerializeCleanupMethod = (function () {
             function TypeWithPostSerializeCleanupMethod() {
                 this.postSerializeWasCalled = Prop(this, "postSerializeWasCalled", "bool", new VDFProp()).set = false;
+                this.PostSerialize.AddTags(new VDFPostSerialize());
             }
-            TypeWithPostSerializeCleanupMethod.prototype.VDFPostSerialize = function () {
+            TypeWithPostSerializeCleanupMethod.prototype.PostSerialize = function () {
                 this.postSerializeWasCalled = true;
             };
             return TypeWithPostSerializeCleanupMethod;
@@ -472,8 +474,9 @@ that needs escaping.>>\"".Fix());
             function D1_MapWithEmbeddedSerializeMethod_Prop_Class() {
                 this.notIncluded = Prop(this, "notIncluded", "bool").set = true;
                 this.included = Prop(this, "included", "bool").set = true;
+                this.Serialize.AddTags(new VDFSerialize());
             }
-            D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype.VDFSerialize = function () {
+            D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype.Serialize = function () {
                 var result = new VDFNode();
                 result.SetMapChild("included", new VDFNode(this.included));
                 return result;
@@ -489,8 +492,9 @@ that needs escaping.>>\"".Fix());
         var D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class = (function () {
             function D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class() {
                 this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = true;
+                this.Serialize.AddTags(new VDFSerialize());
             }
-            D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype.VDFSerialize = function () {
+            D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype.Serialize = function () {
                 return VDF.NoActionTaken;
             };
             return D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class;
@@ -502,8 +506,9 @@ that needs escaping.>>\"".Fix());
         var D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class = (function () {
             function D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class() {
                 this.boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new VDFProp()).set = true;
+                this.PreSerializeProp.AddTags(new VDFPreSerializeProp());
             }
-            D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.VDFPreSerializeProp = function (propPath, options) {
+            D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.PreSerializeProp = function (propPath, options) {
                 return VDF.CancelSerialize;
             };
             return D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class;
@@ -520,8 +525,9 @@ that needs escaping.>>\"".Fix());
         })();
         var D1_Map_MapThatCancelsItsSerialize_Class_Child = (function () {
             function D1_Map_MapThatCancelsItsSerialize_Class_Child() {
+                this.Serialize.AddTags(new VDFSerialize());
             }
-            D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype.VDFSerialize = function () {
+            D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype.Serialize = function () {
                 return VDF.CancelSerialize;
             };
             return D1_Map_MapThatCancelsItsSerialize_Class_Child;

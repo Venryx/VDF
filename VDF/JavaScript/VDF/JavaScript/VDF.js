@@ -34,6 +34,18 @@ Array.prototype._AddProperty("Contains", function (item) {
     return this.indexOf(item) != -1;
 });
 
+Function.prototype._AddProperty("AddTags", function () {
+    var tags = [];
+    for (var _i = 0; _i < (arguments.length - 0); _i++) {
+        tags[_i] = arguments[_i + 0];
+    }
+    if (this.tags == null)
+        this.tags = new List("object");
+    for (var i = 0; i < tags.length; i++)
+        this.tags.push(tags[i]);
+    return this;
+});
+
 // classes
 // ==========
 var VDFNodePathNode = (function () {
@@ -56,7 +68,7 @@ var VDFNodePathNode = (function () {
 var VDFNodePath = (function () {
     function VDFNodePath(nodes_orRootNode) {
         if (nodes_orRootNode instanceof Array)
-            this.nodes = nodes_orRootNode;
+            this.nodes = List.apply(null, ["VDFNodePathNode"].concat(nodes_orRootNode));
         else
             this.nodes = new List("VDFNodePathNode", nodes_orRootNode);
     }
@@ -168,6 +180,17 @@ var VDF = (function () {
         return typeName != null && typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
     };
 
+    VDF.GetObjectProps = function (obj) {
+        var result = {};
+        if (obj == null)
+            return result;
+        for (var propName in obj.__proto__)
+            result[propName] = null;
+        for (var propName in obj)
+            result[propName] = null;
+        return result;
+    };
+
     VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {
         if (declaredTypeName_orOptions instanceof VDFSaveOptions)
             return VDF.Serialize(obj, null, declaredTypeName_orOptions);
@@ -275,13 +298,13 @@ var StringBuilder = (function () {
 
 // tags
 // ----------
-function PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags) {
+function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags) {
     if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
-        return Prop.apply(this, [typeOrObj, propName, null, propType_orFirstTag].concat(tags));
+        return Prop.apply(this, [type_orObj, propName, null, propType_orFirstTag].concat(tags));
     var propType = propType_orFirstTag;
 
     var s = this;
-    s.type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
+    s.type = type_orObj instanceof Function ? type_orObj : type_orObj.constructor;
     s.propName = propName;
     s.propType = propType;
     s.tags = tags;
@@ -306,22 +329,9 @@ function Prop(typeOrObj, propName, propType_orFirstTag) {
 }
 ;
 
-function MethodDeclarationWrapper(tags) {
-    this.tags = tags;
-}
-;
-MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) {
-    method.methodInfo = new VDFMethodInfo(this.tags);
-};
-function Method() {
-    var tags = [];
-    for (var _i = 0; _i < (arguments.length - 0); _i++) {
-        tags[_i] = arguments[_i + 0];
-    }
-    return new MethodDeclarationWrapper(tags);
-}
-;
-
+/*function MethodDeclarationWrapper(tags) { this.tags = tags; };
+MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) { method.methodInfo = new VDFMethodInfo(this.tags); };
+function Method(...tags) { return new MethodDeclarationWrapper(tags); };*/
 function TypeDeclarationWrapper(tags) {
     this.tags = tags;
 }

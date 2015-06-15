@@ -3,18 +3,24 @@
 	<s:Boolean x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=62F0852F36F24723B8CAC4FF10A24296/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=62F0852F36F24723B8CAC4FF10A24296/Name/@EntryValue">FromVDFNode_Level1_BaseValues</s:String>
 	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=62F0852F36F24723B8CAC4FF10A24296/XmlSerializedElements/@EntryValue">&lt;Session&gt;&lt;Elements /&gt;&lt;/Session&gt;</s:String>
-	
-	
-	
-	
-	
-	
-	<s:Boolean x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=7CAAB15F4AAC4F1590D94A042C78A86C/@KeyIndexDefined">True</s:Boolean>
-	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=7CAAB15F4AAC4F1590D94A042C78A86C/Name/@EntryValue">All Tests in VDF_JS</s:String>
-	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=7CAAB15F4AAC4F1590D94A042C78A86C/XmlSerializedElements/@EntryValue">&lt;Session&gt;&lt;Elements&gt;&lt;UnitTestElement Provider="Jasmine" Id="Jasmine (identifier)" type="JasmineSpecificationElement" FileName="C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\JavaScript\Packages\JQueryUI\Content\external\jshint.js" SpecName="(identifier)" RangeStart="56091" RangeEnd="56112" Project="8F5A62CB-A601-4083-8D35-CF5FBA344192" /&gt;&lt;UnitTestElement Provider="Jasmine" Id="Jasmine (number)" type="JasmineSpecificationElement" FileName="C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\JavaScript\Packages\JQueryUI\Content\external\jshint.js" SpecName="(number)" RangeStart="57567" RangeEnd="57584" Project="8F5A62CB-A601-4083-8D35-CF5FBA344192" /&gt;&lt;UnitTestElement Provider="Jasmine" Id="Jasmine (punctuator)" type="JasmineSpecificationElement" FileName="C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\JavaScript\Packages\JQueryUI\Content\external\jshint.js" SpecName="(punctuator)" RangeStart="75727" RangeEnd="75748" Project="8F5A62CB-A601-4083-8D35-CF5FBA344192" /&gt;&lt;UnitTestElement Provider="Jasmine" Id="Jasmine (range)" type="JasmineSpecificationElement" FileName="C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\JavaScript\Packages\JQueryUI\Content\external\jshint.js" SpecName="(range)" RangeStart="47656" RangeEnd="47676" Project="8F5A62CB-A601-4083-8D35-CF5FBA344192" /&gt;&lt;UnitTestElement Provider="Jasmine" Id="Jasmine (regexp)" type="JasmineSpecificationElement" FileName="C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\JavaScript\Packages\JQueryUI\Content\external\jshint.js" SpecName="(regexp)" RangeStart="75435" RangeEnd="75452" Project="8F5A62CB-A601-4083-8D35-CF5FBA344192" /&gt;&lt;UnitTestElement Provider="Jasmine" Id="Jasmine (string)" type="JasmineSpecificationElement" FileName="C:\Projects\Visual C#\VDF\VDF\JavaScript\VDFTests\JavaScript\Packages\JQueryUI\Content\external\jshint.js" SpecName="(string)" RangeStart="51001" RangeEnd="51021" Project="8F5A62CB-A601-4083-8D35-CF5FBA344192" /&gt;&lt;/Elements&gt;&lt;/Session&gt;</s:String>
 	<s:Boolean x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=A718288F36D64B2489FE1E627192B419/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=A718288F36D64B2489FE1E627192B419/Name/@EntryValue">assert-true2</s:String>
 	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestSessionPersistentData/=A718288F36D64B2489FE1E627192B419/XmlSerializedElements/@EntryValue">&lt;Session&gt;&lt;Elements /&gt;&lt;/Session&gt;</s:String>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

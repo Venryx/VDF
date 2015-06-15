@@ -15,7 +15,10 @@ var VDFTypeInfo = (function () {
     function VDFTypeInfo() {
         this.props = {};
     }
-    VDFTypeInfo.Get = function (typeName) {
+    VDFTypeInfo.Get = function (type_orTypeName) {
+        //var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
+        var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
+
         var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
         if (VDF.GetIsTypeAnonymous(typeNameBase)) {
             var result = new VDFTypeInfo();
@@ -23,7 +26,8 @@ var VDFTypeInfo = (function () {
             return result;
         }
 
-        if (window[typeNameBase] && window[typeNameBase].typeInfo == null) {
+        var typeBase = window[typeNameBase];
+        if (typeBase && typeBase.typeInfo == null) {
             var result = new VDFTypeInfo();
             result.typeTag = new VDFType();
 
@@ -51,10 +55,16 @@ var VDFTypeInfo = (function () {
                 currentType = window[currentType].prototype && window[currentType].prototype.__proto__ && window[currentType].prototype.__proto__.constructor.name;
             }
 
-            window[typeNameBase].typeInfo = result;
+            typeBase.typeInfo = result;
         }
 
-        return window[typeNameBase] && window[typeNameBase].typeInfo;
+        return typeBase && typeBase.typeInfo;
+    };
+
+    VDFTypeInfo.prototype.GetProp = function (propName) {
+        if (!(propName in this.props))
+            this.props[propName] = new VDFPropInfo(propName, null, [], null);
+        return this.props[propName];
     };
     return VDFTypeInfo;
 })();
@@ -70,9 +80,9 @@ var VDFProp = (function () {
     return VDFProp;
 })();
 var VDFPropInfo = (function () {
-    function VDFPropInfo(propName, propType, tags, propTag) {
-        this.propName = propName;
-        this.propTypeName = propType;
+    function VDFPropInfo(propName, propTypeName, tags, propTag) {
+        this.name = propName;
+        this.typeName = propTypeName;
         this.tags = tags;
         this.propTag = propTag;
     }
@@ -92,10 +102,47 @@ var VDFPropInfo = (function () {
     return VDFPropInfo;
 })();
 
-var VDFMethodInfo = (function () {
-    function VDFMethodInfo(tags) {
-        this.tags = tags;
+var VDFPreSerializeProp = (function () {
+    function VDFPreSerializeProp() {
     }
-    return VDFMethodInfo;
+    return VDFPreSerializeProp;
 })();
+
+var VDFPreSerialize = (function () {
+    function VDFPreSerialize() {
+    }
+    return VDFPreSerialize;
+})();
+var VDFSerialize = (function () {
+    function VDFSerialize() {
+    }
+    return VDFSerialize;
+})();
+var VDFPostSerialize = (function () {
+    function VDFPostSerialize() {
+    }
+    return VDFPostSerialize;
+})();
+var VDFPreDeserialize = (function () {
+    function VDFPreDeserialize() {
+    }
+    return VDFPreDeserialize;
+})();
+var VDFDeserialize = (function () {
+    function VDFDeserialize(fromParent) {
+        if (typeof fromParent === "undefined") { fromParent = false; }
+        this.fromParent = fromParent;
+    }
+    return VDFDeserialize;
+})();
+var VDFPostDeserialize = (function () {
+    function VDFPostDeserialize() {
+    }
+    return VDFPostDeserialize;
+})();
+/*class VDFMethodInfo
+{
+tags: any[];
+constructor(tags: any[]) { this.tags = tags; }
+}*/
 //# sourceMappingURL=VDFTypeInfo.js.map
