@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using SystemMaker;
 using FluentAssertions;
@@ -89,6 +90,14 @@ namespace VDFTests
 	pierceAttack:0");
 			V.DoNothing();
 		}
+
+		/*class Base { bool baseProp; }
+		class Derived : Base { bool derivedProp; }
+		[Fact] void Test()
+		{
+			var members = typeof(Derived).GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+			members.IndexOf(typeof(Base).GetField("baseProp")).Should().BeLessThan(members.IndexOf(typeof(Derived).GetField("derivedProp")));
+		}*/
 
 		/*[Fact] void Save()
 		{

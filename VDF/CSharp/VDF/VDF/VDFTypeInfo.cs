@@ -22,11 +22,18 @@ public class VDFTypeInfo
 		if (!cachedTypeInfo.ContainsKey(type))
 		{
 			var result = new VDFTypeInfo();
-			foreach (FieldInfo field in type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-				if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
-					result.props[field.Name] = VDFPropInfo.Get(field);
-			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-				result.props[property.Name] = VDFPropInfo.Get(property);
+			foreach (MemberInfo member in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+				if (member is FieldInfo)
+				{
+					var field = member as FieldInfo;
+					if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
+						result.props[field.Name] = VDFPropInfo.Get(field);
+				}
+				else if (member is PropertyInfo)
+				{
+					var property = member as PropertyInfo;
+					result.props[property.Name] = VDFPropInfo.Get(property);
+				}
 			foreach (MethodBase method in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).OfType<MethodBase>()) // include constructors
 			{
 				var methodName = method.Name;
