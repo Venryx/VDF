@@ -187,6 +187,28 @@ class VDF
 	}
 	static GetTypeNameRoot(typeName) { return typeName != null && typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName; }
 
+	static GetClassProps(type): any
+	{
+		var result = {};
+		if (type == null)
+			return result;
+
+		var currentType = type;
+		var resultSets = [];
+		while (currentType != null)
+		{
+			var resultSet = [];
+			for (var propName in currentType)
+				resultSet[propName] = currentType[propName];
+			resultSets.push(resultSet);
+			currentType = currentType.prototype.__proto__ && currentType.prototype.__proto__.constructor;
+		}
+
+		for (var i = resultSets.length - 1; i >= 0; i--) // add base-class props first
+			for (var propName in resultSets[i])
+				result[propName] = resultSets[i][propName];
+		return result;
+	}
 	static GetObjectProps(obj): any
 	{
 		var result = {};

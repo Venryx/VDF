@@ -201,11 +201,12 @@
 
         var result;
         var deserializedByCustomMethod = false;
-        for (var propName in window[finalTypeName])
-            if (window[finalTypeName][propName] instanceof Function && window[finalTypeName][propName].tags && window[finalTypeName][propName].tags.Any(function (a) {
+        var classProps = VDF.GetClassProps(window[finalTypeName]);
+        for (var propName in classProps)
+            if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) {
                 return a instanceof VDFDeserialize;
             })) {
-                var deserializeResult = window[finalTypeName][propName](this, path, options);
+                var deserializeResult = classProps[propName](this, path, options);
                 if (deserializeResult != VDF.NoActionTaken) {
                     result = deserializeResult;
                     deserializedByCustomMethod = true;

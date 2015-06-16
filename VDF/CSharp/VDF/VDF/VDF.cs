@@ -68,7 +68,7 @@ public class VDFNodePath
 	public VDFNodePath(VDFNodePathNode rootNode) { nodes = new List<VDFNodePathNode> {rootNode}; }
 
 	public VDFNodePathNode rootNode { get { return nodes.First(); } }
-	public VDFNodePathNode parentNode { get { return nodes.Take(nodes.Count - 1).LastOrDefault(); } }
+	public VDFNodePathNode parentNode { get { return nodes.Count >= 2 ? nodes[nodes.Count - 2] : null; } }
 	public VDFNodePathNode currentNode { get { return nodes.Last(); } }
 
 	public VDFNodePath ExtendAsListChild(int index, object obj)
