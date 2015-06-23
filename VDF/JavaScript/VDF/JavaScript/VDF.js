@@ -24,9 +24,12 @@ String.prototype._AddProperty("EndsWith", function (str) {
 });
 String.prototype._AddProperty("TrimStart", function (chars) {
     var result = "";
+    var doneTrimming = false;
     for (var i = 0; i < this.length; i++)
-        if (!chars.Contains(this[i]))
+        if (!chars.Contains(this[i]) || doneTrimming) {
             result += this[i];
+            doneTrimming = true;
+        }
     return result;
 });
 
@@ -152,6 +155,8 @@ var VDF = (function () {
         if (rawType == "object") {
             if (obj.realTypeName)
                 return obj.realTypeName;
+            if (obj.itemType)
+                return "List(" + obj.itemType + ")";
             var nativeTypeName = obj.constructor.name != "" ? obj.constructor.name : null;
 
             /*if (nativeTypeName == "Boolean")
@@ -241,47 +246,46 @@ var VDF = (function () {
 
 // helper classes
 // ==================
-/*class VDFUtils
-{
-static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
-{
-if (addSetters && !obj._hiddenFieldStore)
-Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
-for (var i in fieldNames)
-(()=>{
-var propName = fieldNames[i];
-var origValue = obj[propName];
-if (addSetters)
-Object.defineProperty(obj, propName,
-{
-enumerable: false,
-get: ()=>obj["_hiddenFieldStore"][propName],
-set: value=>obj["_hiddenFieldStore"][propName] = value
-});
-else
-Object.defineProperty(obj, propName,
-{
-enumerable: false,
-value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
-});
-obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
+var VDFUtils = (function () {
+    function VDFUtils() {
+    }
+    /*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
+    {
+    if (addSetters && !obj._hiddenFieldStore)
+    Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
+    for (var i in fieldNames)
+    (()=>{
+    var propName = fieldNames[i];
+    var origValue = obj[propName];
+    if (addSetters)
+    Object.defineProperty(obj, propName,
+    {
+    enumerable: false,
+    get: ()=>obj["_hiddenFieldStore"][propName],
+    set: value=>obj["_hiddenFieldStore"][propName] = value
+    });
+    else
+    Object.defineProperty(obj, propName,
+    {
+    enumerable: false,
+    value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
+    });
+    obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
+    })();
+    }*/
+    VDFUtils.MakePropertiesHidden = function (obj, alsoMakeFunctionsHidden, addSetters) {
+        for (var propName in obj) {
+            var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
+            if (propDescriptor) {
+                propDescriptor.enumerable = false;
+                Object.defineProperty(obj, propName, propDescriptor);
+            }
+            //else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
+            //	VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
+        }
+    };
+    return VDFUtils;
 })();
-}
-static MakePropertiesHidden(obj, alsoMakeFunctionsHidden?: boolean, addSetters?: boolean)
-{
-for (var propName in obj)
-{
-var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
-if (propDescriptor)
-{
-propDescriptor.enumerable = false;
-Object.defineProperty(obj, propName, propDescriptor);
-}
-else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
-VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
-}
-}
-}*/
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.data = [];
@@ -422,9 +426,13 @@ window["List"] = function List(itemType) {
     var self = Object.create(Array.prototype);
     self = (Array.apply(self, items) || self);
     self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
-    self.constructor = List; // makes "(new List()).constructor == List" be true
-    self.realTypeName = "List(" + itemType + ")";
-    self.itemType = itemType;
+
+    //self.constructor = List; // makes "(new List()).constructor == List" be true
+    //Object.defineProperty(self, "constructor", {enumerable: false, value: List});
+    //self.realTypeName = "List(" + itemType + ")";
+    //Object.defineProperty(self, "realTypeName", {enumerable: false, value: "List(" + itemType + ")"});
+    //self.itemType = itemType;
+    Object.defineProperty(self, "itemType", { enumerable: false, value: itemType });
     return self;
 };
 (function () {
@@ -526,6 +534,7 @@ window["List"] = function List(itemType) {
     self.Contains = function (item) {
         return this.indexOf(item) != -1;
     };
+    VDFUtils.MakePropertiesHidden(self, true);
 })();
 
 var Dictionary = (function () {

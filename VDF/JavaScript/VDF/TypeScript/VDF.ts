@@ -36,9 +36,13 @@ String.prototype._AddProperty("EndsWith", function(str)
 String.prototype._AddProperty("TrimStart", function(chars: Array<string>)
 {
 	var result = "";
+	var doneTrimming = false;
 	for (var i = 0; i < this.length; i++)
-		if (!chars.Contains(this[i]))
+		if (!chars.Contains(this[i]) || doneTrimming)
+		{
 			result += this[i];
+			doneTrimming = true;
+		}
 	return result;
 });
 interface Array<T>
@@ -163,6 +167,8 @@ class VDF
 		{
 			if (obj.realTypeName)
 				return obj.realTypeName;
+			if (obj.itemType)
+				return "List(" + obj.itemType + ")";
 			var nativeTypeName = obj.constructor.name != "" ? obj.constructor.name : null;
 			/*if (nativeTypeName == "Boolean")
 				return "bool";
@@ -250,9 +256,9 @@ class VDF
 // helper classes
 // ==================
 
-/*class VDFUtils
+class VDFUtils
 {
-	static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
+	/*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
 	{
 		if (addSetters && !obj._hiddenFieldStore)
 			Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
@@ -275,7 +281,7 @@ class VDF
 					});
 				obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
 			})();
-	}
+	}*/
 	static MakePropertiesHidden(obj, alsoMakeFunctionsHidden?: boolean, addSetters?: boolean)
 	{
 		for (var propName in obj)
@@ -286,11 +292,11 @@ class VDF
 				propDescriptor.enumerable = false;
 				Object.defineProperty(obj, propName, propDescriptor);
 			}
-			else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
-				VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
+			//else if (alsoMakeFunctionsHidden && obj[propName] instanceof Function)
+			//	VDFUtils.SetUpHiddenFields(obj, addSetters, propName);
 		}
 	}
-}*/
+}
 class StringBuilder
 {
 	public data: Array<string> = [];
@@ -397,9 +403,12 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	var self = Object.create(Array.prototype);
 	self = (Array.apply(self, items) || self);
 	self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
-	self.constructor = List; // makes "(new List()).constructor == List" be true
-	self.realTypeName = "List(" + itemType + ")";
-	self.itemType = itemType;
+	//self.constructor = List; // makes "(new List()).constructor == List" be true
+	//Object.defineProperty(self, "constructor", {enumerable: false, value: List});
+	//self.realTypeName = "List(" + itemType + ")";
+	//Object.defineProperty(self, "realTypeName", {enumerable: false, value: "List(" + itemType + ")"});
+	//self.itemType = itemType;
+	Object.defineProperty(self, "itemType", {enumerable: false, value: itemType});
 	return self;
 };
 (()=> // actual properties and methods
@@ -408,7 +417,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	self["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
 
 	// new properties
-	Object.defineProperty(self, "Count", { enumerable: false, get: function() { return this.length; } });
+	Object.defineProperty(self, "Count", {enumerable: false, get: function() { return this.length; }});
 
 	// new methods
 	self.Indexes = function()
@@ -496,6 +505,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 		return result;
 	};
 	self.Contains = function(item) { return this.indexOf(item) != -1; };
+	VDFUtils.MakePropertiesHidden(self, true);
 })();
 declare var List: // static/constructor declaration stuff
 {
@@ -505,7 +515,7 @@ declare var List: // static/constructor declaration stuff
 interface List<T> extends Array<T> // class/instance declaration stuff
 {
 	// new properties
-	realTypeName: string;
+	//realTypeName: string;
 	itemType: string;
 	Count: number;
 
