@@ -40,6 +40,8 @@ public static class VDFClassExtensions
 		}
 		return result; //.ToList(); //Distinct().ToList();
 	}
+	public static T As<T>(this VDFNode s) { return s != null ? s.As_Base<T>() : default(T); }
+	public static T As<T>(this VDFNode s, T defaultValue) { return s != null ? s.As_Base<T>() : defaultValue; } // implemented as extension method so that it can be called on null
 }
 
 public class VDFNodePathNode
