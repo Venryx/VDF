@@ -16,7 +16,7 @@ public class VDFLoadOptions
 	public Dictionary<Type, string> typeAliasesByType;
 	//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
-	public VDFLoadOptions(List<object> message = null, bool allowStringKeys = false, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
 	{
 		this.messages = message ?? new List<object>();
 		this.allowStringKeys = allowStringKeys;

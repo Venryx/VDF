@@ -1,6 +1,6 @@
 ﻿var VDFLoadOptions = (function () {
     function VDFLoadOptions(initializerObj, messages, allowStringKeys, allowCommaSeparators, loadUnknownTypesAsBasicTypes) {
-        if (typeof allowStringKeys === "undefined") { allowStringKeys = false; }
+        if (typeof allowStringKeys === "undefined") { allowStringKeys = true; }
         if (typeof allowCommaSeparators === "undefined") { allowCommaSeparators = false; }
         if (typeof loadUnknownTypesAsBasicTypes === "undefined") { loadUnknownTypesAsBasicTypes = false; }
         this.messages = messages || [];

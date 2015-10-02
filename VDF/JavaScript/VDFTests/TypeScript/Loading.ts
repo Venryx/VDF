@@ -261,9 +261,11 @@ of three lines in total.".Fix());
 		});
 		test("D1_Dictionary", ()=>
 		{
-			var a: VDFNode = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2'}");
+			var a: VDFNode = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
 			a["key1"].primitiveValue.Should().Be("value1");
 			a["key2"].primitiveValue.Should().Be("value2");
+			a["key3"].primitiveValue.Should().Be("value3");
+			a["key4"].primitiveValue.Should().Be("value4");
 		});
 		test("D1_Dictionary_Complex", ()=>
 		{

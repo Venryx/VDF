@@ -227,9 +227,11 @@ of three lines in total.".Fix());
             ok(a[1][1].primitiveValue == null); //a[1][1].primitiveValue.Should().Be(null);
         });
         test("D1_Dictionary", function () {
-            var a = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2'}");
+            var a = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
             a["key1"].primitiveValue.Should().Be("value1");
             a["key2"].primitiveValue.Should().Be("value2");
+            a["key3"].primitiveValue.Should().Be("value3");
+            a["key4"].primitiveValue.Should().Be("value4");
         });
         test("D1_Dictionary_Complex", function () {
             var a = VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");

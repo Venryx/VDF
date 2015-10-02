@@ -182,7 +182,7 @@ var VDFTokenParser = (function () {
     };
 
     VDFTokenParser.PostProcessTokens = function (tokens, options) {
-        // pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (for JSON compatibility)
+        // pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (one reason being, for JSON compatibility)
         // ----------
         if (options.allowStringKeys)
             for (var i = 0; i < tokens.Count; i++)

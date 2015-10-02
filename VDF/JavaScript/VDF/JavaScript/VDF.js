@@ -423,85 +423,85 @@ window["List"] = function List(itemType) {
     for (var _i = 0; _i < (arguments.length - 1); _i++) {
         items[_i] = arguments[_i + 1];
     }
-    var self = Object.create(Array.prototype);
-    self = (Array.apply(self, items) || self);
-    self["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
+    var s = Object.create(Array.prototype);
+    s = (Array.apply(s, items) || s);
+    s["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
 
     //self.constructor = List; // makes "(new List()).constructor == List" be true
     //Object.defineProperty(self, "constructor", {enumerable: false, value: List});
     //self.realTypeName = "List(" + itemType + ")";
     //Object.defineProperty(self, "realTypeName", {enumerable: false, value: "List(" + itemType + ")"});
     //self.itemType = itemType;
-    Object.defineProperty(self, "itemType", { enumerable: false, value: itemType });
-    return self;
+    Object.defineProperty(s, "itemType", { enumerable: false, value: itemType });
+    return s;
 };
 (function () {
-    var self = List.prototype;
-    self["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
+    var s = List.prototype;
+    s["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
 
     // new properties
-    Object.defineProperty(self, "Count", { enumerable: false, get: function () {
+    Object.defineProperty(s, "Count", { enumerable: false, get: function () {
             return this.length;
         } });
 
     // new methods
-    self.Indexes = function () {
+    s.Indexes = function () {
         var result = {};
         for (var i = 0; i < this.length; i++)
             result[i] = this[i];
         return result;
     };
-    self.Add = function () {
+    s.Add = function () {
         var items = [];
         for (var _i = 0; _i < (arguments.length - 0); _i++) {
             items[_i] = arguments[_i + 0];
         }
         return this.push.apply(this, items);
     };
-    self.AddRange = function (items) {
+    s.AddRange = function (items) {
         for (var i = 0; i < items.length; i++)
             this.push(items[i]);
     };
-    self.Insert = function (index, item) {
+    s.Insert = function (index, item) {
         return this.splice(index, 0, item);
     };
-    self.InsertRange = function (index, items) {
+    s.InsertRange = function (index, items) {
         return this.splice.apply(this, [index, 0].concat(items));
     };
-    self.Remove = function (item) {
+    s.Remove = function (item) {
         this.RemoveAt(this.indexOf(item));
     };
-    self.RemoveAt = function (index) {
+    s.RemoveAt = function (index) {
         this.splice(index, 1);
     };
-    self.RemoveRange = function (index, count) {
+    s.RemoveRange = function (index, count) {
         return this.splice(index, count);
     };
-    self.Any = function (matchFunc) {
+    s.Any = function (matchFunc) {
         for (var i in this.Indexes())
             if (matchFunc.call(this[i], this[i]))
                 return true;
         return false;
     };
-    self.All = function (matchFunc) {
+    s.All = function (matchFunc) {
         for (var i in this.Indexes())
             if (!matchFunc.call(this[i], this[i]))
                 return false;
         return true;
     };
-    self.Select = function (selectFunc, itemType) {
+    s.Select = function (selectFunc, itemType) {
         var result = new List(itemType || "object");
         for (var i in this.Indexes())
             result.Add(selectFunc.call(this[i], this[i]));
         return result;
     };
-    self.First = function (matchFunc) {
+    s.First = function (matchFunc) {
         var result = this.FirstOrDefault(matchFunc);
         if (result == null)
             throw new Error("Matching item not found.");
         return result;
     };
-    self.FirstOrDefault = function (matchFunc) {
+    s.FirstOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var i in this.Indexes())
                 if (matchFunc.call(this[i], this[i]))
@@ -510,13 +510,13 @@ window["List"] = function List(itemType) {
         } else
             return this[0];
     };
-    self.Last = function (matchFunc) {
+    s.Last = function (matchFunc) {
         var result = this.LastOrDefault(matchFunc);
         if (result == null)
             throw new Error("Matching item not found.");
         return result;
     };
-    self.LastOrDefault = function (matchFunc) {
+    s.LastOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var i = this.length - 1; i >= 0; i--)
                 if (matchFunc.call(this[i], this[i]))
@@ -525,16 +525,16 @@ window["List"] = function List(itemType) {
         } else
             return this[this.length - 1];
     };
-    self.GetRange = function (index, count) {
+    s.GetRange = function (index, count) {
         var result = new List(this.itemType);
         for (var i = index; i < index + count; i++)
             result.Add(this[i]);
         return result;
     };
-    self.Contains = function (item) {
+    s.Contains = function (item) {
         return this.indexOf(item) != -1;
     };
-    VDFUtils.MakePropertiesHidden(self, true);
+    VDFUtils.MakePropertiesHidden(s, true);
 })();
 
 var Dictionary = (function () {

@@ -9,7 +9,7 @@
 	// JS only
 	loadUnknownTypesAsBasicTypes: boolean;
 
-	constructor(initializerObj?: any, messages?: any[], allowStringKeys = false, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
+	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
 	{
 		this.messages = messages || [];
 		this.allowStringKeys = allowStringKeys;
