@@ -164,7 +164,7 @@ public static class VDFTokenParser
 
 				else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (!nextChar.HasValue || !charsAToZ.Contains(nextChar.Value))) // if text-so-far is 'null', and there's no more letters
 					currentTokenType = VDFTokenType.Null;
-				else if (((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (!nextChar.HasValue || !charsAToZ.Contains(nextChar.Value)))
+				else if (activeStringStartChar == null && ((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (!nextChar.HasValue || !charsAToZ.Contains(nextChar.Value)))
 					currentTokenType = VDFTokenType.Boolean;
 				else if (chars0To9DotAndNegative.Contains(currentTokenTextBuilder[0]) && currentTokenTextBuilder[0].ToString().ToLower() != "e"
 					&& (!nextChar.HasValue || !chars0To9DotAndNegative.Contains(nextChar.Value)) && nextChar != '\'' && nextChar != '"'

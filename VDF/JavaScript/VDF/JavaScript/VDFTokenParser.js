@@ -127,7 +127,7 @@ var VDFTokenParser = (function () {
                     currentTokenType = 13 /* PoppedOutChildGroupMarker */;
                 else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
                     currentTokenType = 14 /* Null */;
-                else if (((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
+                else if (activeStringStartChar == null && ((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
                     currentTokenType = 15 /* Boolean */;
                 else if (VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.data[0]) && currentTokenTextBuilder.data[0].toLowerCase() != "e" && (nextChar == null || !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar)) && nextChar != '\'' && nextChar != '"' && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == 9 /* Metadata */ || result.Last().type == 12 /* KeyValueSeparator */))
                     currentTokenType = 16 /* Number */;

@@ -146,9 +146,10 @@ of three lines in total.".Fix());
 
 		[Fact] void D1_Map_Children()
 		{
-			VDFNode a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:{name:'Dan' age:50}}");
+			VDFNode a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
 			a["key1"].primitiveValue.Should().Be("Simple string.");
-			a["key2"]["age"].primitiveValue.Should().Be(50);
+			a["key2"].primitiveValue.Should().Be("false");
+			a["key3"]["age"].primitiveValue.Should().Be(50);
 		}
 		[Fact] void D1_Map_ChildrenThatAreRetrievedByKey()
 		{
@@ -346,6 +347,7 @@ of three lines in total.>>'}
 multiline string
 of three lines in total.".Fix());
 		}
+
 		[Fact] void D2_List_Lists_PoppedOutObjects()
 		{
 			var a = VDFLoader.ToVDFNode(

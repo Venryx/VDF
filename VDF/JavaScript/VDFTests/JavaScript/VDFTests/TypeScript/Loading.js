@@ -155,9 +155,10 @@ of three lines in total.".Fix());
         });
 
         test("D1_Map_Children", function () {
-            var a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:{name:'Dan' age:50}}");
+            var a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
             a["key1"].primitiveValue.Should().Be("Simple string.");
-            a["key2"]["age"].primitiveValue.Should().Be(50);
+            a["key2"].primitiveValue.Should().Be("false");
+            a["key3"]["age"].primitiveValue.Should().Be(50);
         });
         test("D1_Map_ChildrenThatAreRetrievedByKey", function () {
             var a = VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
@@ -322,6 +323,7 @@ of three lines in total.>>'}\n\
 multiline string\n\
 of three lines in total.".Fix());
         });
+
         test("D2_List_Lists_PoppedOutObjects", function () {
             var a = VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
 	{name:'Road'}\n\
