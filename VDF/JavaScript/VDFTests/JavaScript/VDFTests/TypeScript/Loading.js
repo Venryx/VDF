@@ -1,27 +1,28 @@
-﻿/*class Loading
+/*class Loading
 {
-static initialized = false;
-static Init()
-{
-if (this.initialized)
-return;
-this.initialized = true;
-Object.prototype._AddFunction_Inline = function Should()
-{
-return 0 || // fix for auto-semicolon-insertion
-{
-Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
-};
-};
-}
-static RunTests()
-{
-/*test("testName()
-{
-ok(null == null);
-});*#/
-}
+    static initialized = false;
+    static Init()
+    {
+        if (this.initialized)
+            return;
+        this.initialized = true;
+        Object.prototype._AddFunction_Inline = function Should()
+        {
+            return 0 || // fix for auto-semicolon-insertion
+            {
+                Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
+                BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
+            };
+        };
+    }
+
+    static RunTests()
+    {
+        /*test("testName()
+        {
+            ok(null == null);
+        });*#/
+    }
 }*/
 // init
 // ==========
@@ -30,14 +31,11 @@ function Loading_RunTests() {
     for (var name in loading)
         test_old(name, loading[name]);
 }
-
-window["test"] = function (name, func) {
-    loading[name] = func;
-};
-
+window["test"] = function (name, func) { loading[name] = func; };
 // tests
 // ==========
-var VDFTests;
+var VDFTests // added to match C# indentation
+;
 (function (VDFTests) {
     var Loading;
     (function (Loading) {
@@ -87,12 +85,11 @@ var VDFTests;
             a[0].primitiveValue.Should().Be("Root string 1.");
             a[1].primitiveValue.Should().Be("Root string 2.");
         });
-
         /*test("D0_List_ExplicitStartAndEndMarkers", ()=>
         {
-        var a: VDFNode = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
-        a[0].primitiveValue.Should().Be("Root string 1.");
-        a[1].primitiveValue.Should().Be("Root string 2.");
+            var a: VDFNode = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
+            a[0].primitiveValue.Should().Be("Root string 1.");
+            a[1].primitiveValue.Should().Be("Root string 2.");
         });*/
         test("D0_List_Objects", function () {
             var a = VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
@@ -113,17 +110,14 @@ which is on two lines".Fix());
 which is on\n\
 three lines".Fix());
         });
-
         /*test("D0_EmptyList", ()=> // for now at least, it's against the rules to have items without a char of their own
         {
-        var a: VDFNode = VDFLoader.ToVDFNode("|", "List(object)");
-        //a.mapChildren.Count.Should().Be(0);
-        a[0].primitiveValue.Should().Be(null);
-        a[1].primitiveValue.Should().Be(null);
+            var a: VDFNode = VDFLoader.ToVDFNode("|", "List(object)");
+            //a.mapChildren.Count.Should().Be(0);
+            a[0].primitiveValue.Should().Be(null);
+            a[1].primitiveValue.Should().Be(null);
         });*/
-        test("D0_EmptyList", function () {
-            VDF.Deserialize("[]").Count.Should().Be(0);
-        });
+        test("D0_EmptyList", function () { VDF.Deserialize("[]").Count.Should().Be(0); });
         test("D0_ListMetadata", function () {
             var a = VDFLoader.ToVDFNode("List(int)>[1 2]");
             a.metadata.Should().Be("List(int)");
@@ -136,9 +130,7 @@ three lines".Fix());
             a[0].metadata.Should().Be("string");
             a[1].metadata.Should().Be("string");
         });
-        test("D0_EmptyMap", function () {
-            VDF.Deserialize("{}").Count.Should().Be(0);
-        });
+        test("D0_EmptyMap", function () { VDF.Deserialize("{}").Count.Should().Be(0); });
         test("D0_Map_ChildMetadata", function () {
             var a = VDFLoader.ToVDFNode("Dictionary(object object)>[a:string>\"1\" b:string>\"2\"]");
             a.metadata.Should().Be("Dictionary(object object)");
@@ -153,7 +145,6 @@ of three lines in total.>>'");
 multiline string\n\
 of three lines in total.".Fix());
         });
-
         test("D1_Map_Children", function () {
             var a = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
             a["key1"].primitiveValue.Should().Be("Simple string.");
@@ -245,7 +236,6 @@ of three lines in total.".Fix());
             a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
             a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
         });
-
         test("D1_ArrayPoppedOut_NoItems", function () {
             var a = VDFLoader.ToVDFNode("{names:[^]}");
             a["names"].listChildren.Count.Should().Be(0);
@@ -283,16 +273,16 @@ of three lines in total.".Fix());
             Written as:
             
             {messages:{^} otherProperty:false}
-            title1:"message1"
-            title2:"message2"
+                title1:"message1"
+                title2:"message2"
             
             Parsed as:
             
             {messages:{
-            title1:"message1"
-            title2:"message2"
+                title1:"message1"
+                title2:"message2"
             } otherProperty:false}
-            */
+             */
             var a = VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
 	title1:'message1'\n\
 	title2:'message2'");
@@ -301,7 +291,6 @@ of three lines in total.".Fix());
             a["messages"]["title2"].primitiveValue.Should().Be("message2");
             a["otherProperty"].primitiveValue.Should().Be(false);
         });
-
         test("D1_Object_MultilineStringThenProperty", function () {
             var a = VDFLoader.ToVDFNode("{text:'<<This is a\n\
 multiline string\n\
@@ -323,12 +312,11 @@ of three lines in total.>>'}\n\
 multiline string\n\
 of three lines in total.".Fix());
         });
-
         test("D2_List_Lists_PoppedOutObjects", function () {
             var a = VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
 	{name:'Road'}\n\
 	^{name:'RoadAndPath'}\n\
-	^{name:'SimpleHill'}");
+	^{name:'SimpleHill'}"); //, new VDFLoadOptions({inferStringTypeForUnknownTypes: true}));
             a.listChildren.Count.Should().Be(3);
         });
         test("D2_List_PoppedOutObjects_MultilineString", function () {
@@ -340,7 +328,6 @@ of three lines in total.".Fix());
 	line2>>'}");
             a.listChildren.Count.Should().Be(2);
         });
-
         test("D2_Object_PoppedOutObject_PoppedOutObject", function () {
             var a = VDFLoader.ToVDFNode("{name:'L0' children:[^]}\n\
 	{name:'L1' children:[^]}\n\
@@ -348,7 +335,6 @@ of three lines in total.".Fix());
             a["children"].listChildren.Count.Should().Be(1);
             a["children"].listChildren[0]["children"].listChildren.Count.Should().Be(1);
         });
-
         test("D5_TokenTextPreservation", function () {
             var vdf1 = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^] tasksScriptText:'<<Shoot at Enemy Vehicle\n\
 	Gun1 aim at EnemyVehicle_NonBroken\n\
@@ -407,35 +393,24 @@ Shoot at Enemy Vehicle\n\
             VDFLoader.ToVDFNode(vdf);
             ok(true);
         });
-
         // to object
         // ==========
         test("D0_Null", function () {
             ok(VDF.Deserialize("null") == null);
             //VDF.Deserialize("null").Should().Be(null);
         });
-
         //test("D0_Nothing() { VDF.Deserialize("").Should().Be(null); });
         //test("D0_Nothing_TypeSpecified() { VDF.Deserialize("string>").Should().Be(null); });
-        test("D0_EmptyString", function () {
-            VDF.Deserialize("''").Should().Be("");
-        });
-        test("D0_Bool", function () {
-            VDF.Deserialize("true", "bool").Should().Be(true);
-        });
-        test("D0_Double", function () {
-            VDF.Deserialize("1.5").Should().Be(1.5);
-        });
-
+        test("D0_EmptyString", function () { VDF.Deserialize("''").Should().Be(""); });
+        test("D0_Bool", function () { VDF.Deserialize("true", "bool").Should().Be(true); });
+        test("D0_Double", function () { VDF.Deserialize("1.5").Should().Be(1.5); });
         //test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
         var TypeWithPreDeserializeMethod = (function () {
             function TypeWithPreDeserializeMethod() {
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
                 this.PreDeserialize.AddTags(new VDFPreDeserialize());
             }
-            TypeWithPreDeserializeMethod.prototype.PreDeserialize = function () {
-                this.flag = true;
-            };
+            TypeWithPreDeserializeMethod.prototype.PreDeserialize = function () { this.flag = true; };
             return TypeWithPreDeserializeMethod;
         })();
         test("D1_PreDeserializeMethod", function () {
@@ -447,9 +422,7 @@ Shoot at Enemy Vehicle\n\
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
                 this.PostDeserialize.AddTags(new VDFPostDeserialize());
             }
-            TypeWithPostDeserializeMethod.prototype.PostDeserialize = function () {
-                this.flag = true;
-            };
+            TypeWithPostDeserializeMethod.prototype.PostDeserialize = function () { this.flag = true; };
             return TypeWithPostDeserializeMethod;
         })();
         test("D1_PostDeserializeMethod", function () {
@@ -461,24 +434,19 @@ Shoot at Enemy Vehicle\n\
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
                 this.PostDeserialize.AddTags(new VDFPostDeserialize());
             }
-            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.PostDeserialize = function (node, path, options) {
-                if (options.messages[0] == "RequiredMessage")
-                    this.flag = true;
-            };
+            ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.PostDeserialize = function (node, path, options) { if (options.messages[0] == "RequiredMessage")
+                this.flag = true; };
             return ObjectWithPostDeserializeMethodRequiringCustomMessage_Class;
         })();
-        test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () {
-            VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false);
-        });
-
+        test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false); });
         /*class ObjectWithPostDeserializeConstructor_Class
         {
-        static typeInfo = new VDFTypeInfo(
-        {
-        flag: new VDFPropInfo("bool")
-        });
-        flag = false;
-        ObjectWithPostDeserializeConstructor_Class() { flag = true; }
+            static typeInfo = new VDFTypeInfo(
+            {
+                flag: new VDFPropInfo("bool")
+            });
+            flag = false;
+            ObjectWithPostDeserializeConstructor_Class() { flag = true; }
         }
         test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
         var TypeInstantiatedManuallyThenFilled = (function () {
@@ -514,7 +482,6 @@ Shoot at Enemy Vehicle\n\
             a.messages["title2"].Should().Be("message2");
             a.otherProperty.Should().Be(true);
         });
-
         // deserialize-related methods
         // ==========
         var D1_MapWithEmbeddedDeserializeMethod_Prop_Class = (function () {
@@ -522,29 +489,19 @@ Shoot at Enemy Vehicle\n\
                 this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
                 this.Deserialize.AddTags(new VDFDeserialize());
             }
-            D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype.Deserialize = function (node) {
-                this.boolProp = node["boolProp"].primitiveValue;
-            };
+            D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype.Deserialize = function (node) { this.boolProp = node["boolProp"].primitiveValue; };
             return D1_MapWithEmbeddedDeserializeMethod_Prop_Class;
         })();
-        test("D1_MapWithEmbeddedDeserializeMethod_Prop", function () {
-            VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true);
-        });
-
+        test("D1_MapWithEmbeddedDeserializeMethod_Prop", function () { VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
         var D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class = (function () {
             function D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class() {
                 this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
                 this.Deserialize.AddTags(new VDFDeserialize());
             }
-            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) {
-                return VDF.NoActionTaken;
-            };
+            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) { return VDF.NoActionTaken; };
             return D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class;
         })();
-        test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () {
-            VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true);
-        });
-
+        test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () { VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
                 this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new VDFProp()).set = null;
@@ -554,16 +511,11 @@ Shoot at Enemy Vehicle\n\
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child() {
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize = function (node, path, options) {
-                return null;
-            };
+            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize = function (node, path, options) { return null; };
             return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
         })();
         D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
-        test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () {
-            ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null);
-        });
-
+        test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () { ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
         var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {
                 this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new VDFProp()).set = null;
@@ -575,19 +527,14 @@ Shoot at Enemy Vehicle\n\
                 this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
                 D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) {
-                return VDF.NoActionTaken;
-            };
+            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) { return VDF.NoActionTaken; };
             return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
         })();
-        test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () {
-            VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true);
-        });
-
+        test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () { VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
         var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent = (function () {
             function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent() {
                 this.withoutTag = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
-                this.withTag = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
+                this.withTag = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null; // doesn't actually have tag; just pretend it does
             }
             return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent;
         })();
@@ -608,7 +555,6 @@ Shoot at Enemy Vehicle\n\
             a.withoutTag.methodCalled.Should().Be(false);
             a.withTag.methodCalled.Should().Be(true);
         });
-
         // for JSON compatibility
         // ==========
         test("D1_Map_IntsWithStringKeys", function () {
@@ -625,7 +571,6 @@ Shoot at Enemy Vehicle\n\
             var a = VDFLoader.ToVDFNode("[-7.45058e-09,0.1,-1.49012e-08]", new VDFLoadOptions().ForJSON());
             a[0].primitiveValue.Should().Be(-7.45058e-09);
         });
-
         // unique to JavaScript version
         // ==========
         var PretendGenericType = (function () {
@@ -633,18 +578,16 @@ Shoot at Enemy Vehicle\n\
             }
             return PretendGenericType;
         })();
-        test("Depth0_ObjectWithMetadataHavingGenericType", function () {
-            return ok(VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType);
-        });
-
+        test("Depth0_ObjectWithMetadataHavingGenericType", function () { return ok(VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType); });
         test("Depth1_UnknownTypeWithFixOn_String", function () {
             var a = VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
             a["string"].Should().Be("Prop value string.");
         });
         test("Depth1_UnknownTypeWithFixOff_String", function () {
-            try  {
+            try {
                 VDF.Deserialize("UnknownType>{string:'Prop value string.'}");
-            } catch (ex) {
+            }
+            catch (ex) {
                 ok(ex.message == "Could not find type \"UnknownType\".");
             }
         });
@@ -657,7 +600,6 @@ Shoot at Enemy Vehicle\n\
             a.bool.Should().Be(false);
             a.double.Should().Be(3.5);
         });
-
         var AsObjectOfType_Class = (function () {
             function AsObjectOfType_Class() {
             }
@@ -667,21 +609,22 @@ Shoot at Enemy Vehicle\n\
             var a = VDF.Deserialize("AsObjectOfType_Class>{}", "AsObjectOfType_Class");
             ok(a instanceof AsObjectOfType_Class);
         });
-
         // export all classes/enums to global scope
         var arguments;
         var names = V.GetMatches(arguments.callee.toString(), /        var (\w+) = \(function \(\) {/g, 1);
         for (var i = 0; i < names.length; i++)
-            try  {
+            try {
                 window[names[i]] = eval(names[i]);
-            } catch (e) {
             }
+            catch (e) { }
         var enumNames = V.GetMatches(arguments.callee.toString(), /        }\)\((\w+) \|\| \(\w+ = {}\)\);/g, 1);
         for (var i = 0; i < enumNames.length; i++)
-            try  {
+            try {
                 window[enumNames[i]] = eval(enumNames[i]);
-            } catch (e) {
             }
+            catch (e) { }
     })(Loading || (Loading = {}));
-})(VDFTests || (VDFTests = {}));
+})(VDFTests // added to match C# indentation
+ || (VDFTests // added to match C# indentation
+ = {}));
 //# sourceMappingURL=Loading.js.map

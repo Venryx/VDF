@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Drawing;
+//using System.Drawing;
 using System.Linq;
 using System.Reflection;
 
-/*public class VDFException : Exception
+public class VDFException : Exception
 {
 	string message;
 	Exception innerException;
@@ -20,9 +20,10 @@ using System.Reflection;
 			return innerException + (innerException.ToString().EndsWith("\n==================") ? "" : "\n==================") + "\nRethrownAs) " + message + "\n" + base.StackTrace + "\n==================";
 		return message + "\n" + base.StackTrace + "\n==================";
 	}
-	public override string Message { get { return ToString(); } }
-	public override string StackTrace { get { return innerException != null ? innerException.StackTrace : base.StackTrace; } }
-}*/
+	public override string Message { get { return ""; } }
+	// return full-text as StackTrace, since prop's expected to be multi-line, and Unity can then modify it to match with 'real'/direct stack-trace text
+	public override string StackTrace { get { return ToString(); } }
+}
 
 public static class VDFClassExtensions
 {
@@ -122,8 +123,8 @@ public static class VDF
 		builtInTypeAliasesByTypeName = builtInTypeAliasesByType.ToDictionary(a=>a.Value, a=>a.Key);
 
 		// initialize exporters/importers for some common types
-		VDFTypeInfo.AddSerializeMethod<Color>((self, path, options)=>new VDFNode(self.Name));
-		VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, path, options)=>Color.FromName((string)node.primitiveValue));
+		//VDFTypeInfo.AddSerializeMethod<Color>((self, path, options)=>new VDFNode(self.Name));
+		//VDFTypeInfo.AddDeserializeMethod_FromParent<Color>((node, path, options)=>Color.FromName((string)node.primitiveValue));
 		VDFTypeInfo.AddSerializeMethod<Guid>((self, path, options)=>new VDFNode(self.ToString()));
 		VDFTypeInfo.AddDeserializeMethod_FromParent<Guid>((node, path, options)=>new Guid((string)node.primitiveValue));
 	}

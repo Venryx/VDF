@@ -125,7 +125,7 @@
 		if (options.useChildPopOut && this.childPopOut)
 		{
 			var childTabStr = "";
-			for (var i = 0; i < tabDepth + 1; i++)
+			for (var i = <any>0; i < tabDepth + 1; i++)
 				childTabStr += "\t";
 			if (this.isMap || this.mapChildren.Count > 0)
 				for (var key in this.mapChildren.Keys)
@@ -157,7 +157,7 @@
 				for (var i in this.listChildren.Indexes())
 					if ((poppedOutChildText = this.listChildren[i].ToVDF_PoppedOutPart(options, tabDepth)).length)
 						poppedOutChildTexts.Add(poppedOutChildText);
-			for (var i = 0; i < poppedOutChildTexts.Count; i++)
+			for (var i = <any>0; i < poppedOutChildTexts.Count; i++)
 			{
 				poppedOutChildText = poppedOutChildTexts[i];
 				var insertPoint = 0;
@@ -183,7 +183,7 @@
 			return new Dictionary(genericParameters[0], genericParameters[1]);
 		if (!(window[typeNameRoot] instanceof Function))
 			throw new Error("Could not find type \"" + typeName + "\".");
-		return new window[typeNameRoot]; // maybe todo: add code that resets props to their nulled-out/zeroed-out values (or just don't use any constructors, and just remember to set the __proto__ property afterward)
+		return new (<{new(...args: any[]): any}><any>window[typeNameRoot]); // maybe todo: add code that resets props to their nulled-out/zeroed-out values (or just don't use any constructors, and just remember to set the __proto__ property afterward)
 	}
 	static GetCompatibleTypeNameForNode(node: VDFNode) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); }
 

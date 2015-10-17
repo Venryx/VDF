@@ -220,7 +220,7 @@ class VDFTokenParser
 		// ----------
 		
 		if (options.allowStringKeys)
-			for (var i = 0; i < tokens.Count; i++)
+			for (var i = <any>0; i < tokens.Count; i++)
 				if (tokens[i].type == VDFTokenType.String && i + 1 < tokens.Count && tokens[i + 1].type == VDFTokenType.KeyValueSeparator)
 					tokens[i].type = VDFTokenType.Key;
 
@@ -231,7 +231,7 @@ class VDFTokenParser
 
 		var line_tabsReached = 0;
 		var tabDepth_popOutBlockEndWrapTokens = new Dictionary<number, List<VDFToken>>("int", "List(VDFToken)");
-		for (var i = 0; i < tokens.Count; i++)
+		for (var i = <any>0; i < tokens.Count; i++)
 		{
 			var lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
 			var token = tokens[i];

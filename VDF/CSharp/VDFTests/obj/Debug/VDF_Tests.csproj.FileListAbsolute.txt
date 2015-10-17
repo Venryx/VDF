@@ -22,3 +22,4 @@ C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\SystemMaker.pdb
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDF_Tests.csprojResolveAssemblyReference.cache
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.dll
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.pdb
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll

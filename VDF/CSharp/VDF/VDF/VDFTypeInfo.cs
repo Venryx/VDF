@@ -237,6 +237,9 @@ public class VDFMethodInfo
 
 	public object Call(object objParent, params object[] args)
 	{
+		var hasSelfFirstArg = method != null && memberInfo.GetParameters().First().ParameterType != typeof(VDFNode); // if accepts a "self" argument (e.g. an added-as-extra-method standard Deserialize method);
+		if (hasSelfFirstArg)
+			args = new[] {objParent}.Concat(args).ToArray();
 		if (args.Length > memberInfo.GetParameters().Length)
 			args = args.Take(memberInfo.GetParameters().Length).ToArray();
 
@@ -246,11 +249,7 @@ public class VDFMethodInfo
 			else
 				return memberInfo.Invoke(FormatterServices.GetUninitializedObject(memberInfo.DeclaringType), args.ToArray());*/
 		if (method != null) // if anonymous/lambda method
-			if (memberInfo.GetParameters().FirstOrDefault().ParameterType != typeof(VDFNode)) // if accepts a "self" argument (e.g. an added-as-extra-method standard Deserialize method)
-				return method.DynamicInvoke(new[] {objParent}.Concat(args).ToArray());
-			else
-				return method.DynamicInvoke(args.ToArray());
-
+			return method.DynamicInvoke(args.ToArray());
 		return memberInfo.Invoke(objParent, args);
 	}
 }

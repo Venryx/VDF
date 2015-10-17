@@ -117,10 +117,13 @@ public static class VDFSaver
 				var objAsDictionary = (IDictionary)obj;
 				foreach (object key in objAsDictionary.Keys)
 				{
-					var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
+				    var keyNode = ToVDFNode(key, typeGenericArgs[0], options, path, true);
+                    if (!(keyNode.primitiveValue is string))
+                        throw new VDFException("A map key object must either be a string or have an exporter that converts it into a string.");
+                    var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
-					result.mapChildren.Add(ToVDFNode(key, typeGenericArgs[0], options, path, true), valueNode);
+					result.mapChildren.Add(keyNode, valueNode);
 				}
 			}
 			else // if an object, with properties
@@ -157,13 +160,13 @@ public static class VDFSaver
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.mapChildren.Add(propName, propValueNode);
 					}
-					//catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
-					catch (Exception ex)
+					catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
+					/*catch (Exception ex)
 					{
 						var field = ex.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance) ?? ex.GetType().GetField("_message", BindingFlags.NonPublic | BindingFlags.Instance);
 						field.SetValue(ex, ex.Message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n");
 						throw;
-					}
+					}*/
 			}
 		}
 

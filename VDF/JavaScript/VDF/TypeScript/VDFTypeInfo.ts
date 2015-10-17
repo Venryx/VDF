@@ -31,7 +31,7 @@ class VDFTypeInfo
 			return result;
 		}
 
-		var typeBase = window[typeNameBase];
+		var typeBase = <any>window[typeNameBase];
 		if (typeBase && typeBase.typeInfo == null)
 		{
 			var result = new VDFTypeInfo();
@@ -56,11 +56,12 @@ class VDFTypeInfo
 			var currentType = typeNameBase;
 			while (currentType != null)
 			{
-				var typeTag2 = (window[currentType].typeInfo || {}).typeTag;
+			    var currentTypeConstructor = <any>window[currentType];
+                var typeTag2 = (currentTypeConstructor.typeInfo || {}).typeTag;
 				for (var key in typeTag2)
 					if (result.typeTag[key] == null)
 						result.typeTag[key] = typeTag2[key];
-				currentType = window[currentType].prototype && window[currentType].prototype.__proto__ && window[currentType].prototype.__proto__.constructor.name;
+                currentType = currentTypeConstructor.prototype && currentTypeConstructor.prototype.__proto__ && currentTypeConstructor.prototype.__proto__.constructor.name;
 			}
 
 			typeBase.typeInfo = result;

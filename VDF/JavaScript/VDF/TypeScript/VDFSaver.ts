@@ -106,11 +106,14 @@ class VDFSaver
 				result.isMap = true;
 				var objAsDictionary = <Dictionary<any, any>>obj;
 				for (var key in objAsDictionary.Keys)
-				{
+                {
+                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true);
+                    if (typeof keyNode.primitiveValue != "string")
+                        throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
 					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
-					result.SetMapChild(VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true).primitiveValue, valueNode);
+					result.SetMapChild(keyNode.primitiveValue, valueNode);
 				}
 			}
 			else // if an object, with properties

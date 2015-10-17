@@ -578,7 +578,7 @@ class Dictionary<K, V>
 		if (this.keys.indexOf(key) == -1)
 			this.keys.push(key);
 		this.values[this.keys.indexOf(key)] = value;
-		(<any>this)[key] = value; // make value accessible directly on Dictionary object
+        (<any>this)[<any>key] = value; // make value accessible directly on Dictionary object
 	}
 	Add(key: K, value: V)
 	{
@@ -591,7 +591,7 @@ class Dictionary<K, V>
 		var itemIndex = this.keys.indexOf(key);
 		this.keys.splice(itemIndex, 1);
 		this.values.splice(itemIndex, 1);
-		delete (<any>this)[key];
+		delete (<any>this)[<any>key];
 	}
 }
 //VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
