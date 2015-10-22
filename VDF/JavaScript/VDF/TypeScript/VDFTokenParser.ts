@@ -76,11 +76,12 @@ class VDFTokenParser
 			var ch = text[i];
 			var nextChar = i + 1 < text.length ? text[i + 1] : null;
 
-			var nextNonSpaceCharPos = VDFTokenParser.FindNextNonXCharPosition(text, i + 1, ' ');
-			var nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : null;
+			//var nextNonSpaceCharPos = VDFTokenParser.FindNextNonXCharPosition(text, i + 1, ' ');
+			//var nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : null;
 
 			currentTokenTextBuilder.Append(ch);
 
+			var lastCharInLiteral = false;
 			if (activeLiteralStartChars == null)
 			{
 				if (ch == '<' && nextChar == '<') // if first char of literal-start-marker
@@ -92,33 +93,41 @@ class VDFTokenParser
 					currentTokenType = VDFTokenType.LiteralStartMarker;
 					i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after comment (i.e. the line-break char)
 				}
-			}
-			else if (i + activeLiteralStartChars.length <= text.length && text.substr(i, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">"))
-			{
-				currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars.replace(/</g, ">"));
-				currentTokenType = VDFTokenType.LiteralEndMarker;
-				i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after literal-end-marker
-				activeLiteralStartChars = null;
-			}
-			if (activeStringStartChar == null)
-			{
-				if (ch == '\'' || ch == '"') // if char of string-start-marker
+				else
 				{
-					activeStringStartChar = ch.toString();
-					currentTokenType = VDFTokenType.StringStartMarker;
+					if (activeStringStartChar == null)
+					{
+						if (ch == '\'' || ch == '"') // if char of string-start-marker
+						{
+							activeStringStartChar = ch;
+							currentTokenType = VDFTokenType.StringStartMarker;
+						}
+					}
+					else if (activeStringStartChar == ch)
+					{
+						currentTokenType = VDFTokenType.StringEndMarker;
+						activeStringStartChar = null;
+					}
 				}
 			}
-			else if (((activeStringStartChar == "'" && ch == '\'') || (activeStringStartChar == "\"" && ch == '"')) && activeLiteralStartChars == null)
+			else if (nextChar == '>') // if possibly: the last char in literal, or first char of literal-end-marker
 			{
-				currentTokenType = VDFTokenType.StringEndMarker;
-				activeStringStartChar = null;
+				lastCharInLiteral = i + 1 + activeLiteralStartChars.length <= text.length && text.substr(i + 1, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">");
+				if (lastCharInLiteral)
+					nextChar = i + 1 + activeLiteralStartChars.length < text.length ? text[i + 1 + activeLiteralStartChars.length] : null; // shift next-char to one right after literal-end-marker (i.e. pretend marker isn't there)
+				else if (i + activeLiteralStartChars.length <= text.length && text.substr(i, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">"))
+				{
+					currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars.replace(/</g, ">"));
+					currentTokenType = VDFTokenType.LiteralEndMarker;
+					i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after literal-end-marker
+					activeLiteralStartChars = null;
+				}
 			}
-
-			var lastCharInLiteral = activeLiteralStartChars != null && i + 1 + activeLiteralStartChars.length <= text.length && text.substr(i + 1, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">");
-			if (lastCharInLiteral)
-				nextChar = i + 1 + activeLiteralStartChars.length < text.length ? text[i + 1 + activeLiteralStartChars.length] : null; // shift next-char to one right after literal-end-marker (i.e. pretend it isn't there)
-			var lastCharInString = (activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"');
-			if (currentTokenType == VDFTokenType.None && (activeLiteralStartChars == null || lastCharInLiteral) && (activeStringStartChar == null || lastCharInString)) // if not in pass-through-span
+			
+			var inPassThroughSpan = currentTokenType != VDFTokenType.None ||
+			                        (activeLiteralStartChars != null && !lastCharInLiteral) || // if in literal, and not last char
+			                        (activeStringStartChar != null && activeStringStartChar != nextChar); // if in string, and not last char
+            if (!inPassThroughSpan)
 			{
 				var firstTokenChar = currentTokenTextBuilder.Length == 1;
 				if (ch == '#' && nextChar == '#' && firstTokenChar) // if first char of in-line-comment
@@ -135,11 +144,13 @@ class VDFTokenParser
 				else if (ch == '\n' && firstTokenChar)
 					currentTokenType = VDFTokenType.LineBreak;
 
-				else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
+				//else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
+				else if (nextChar == '>' && activeLiteralStartChars == null)
 					currentTokenType = VDFTokenType.Metadata;
 				else if (ch == '>' && firstTokenChar)
 					currentTokenType = VDFTokenType.MetadataEndMarker;
-				else if (nextNonSpaceChar == ':' && ch != ' ')
+				//else if (nextNonSpaceChar == ':' && ch != ' ')
+				else if (nextChar == ':' && ch != ' ')
 					currentTokenType = VDFTokenType.Key;
 				else if (ch == ':' && firstTokenChar)
 					currentTokenType = VDFTokenType.KeyValueSeparator;
@@ -154,7 +165,7 @@ class VDFTokenParser
 					&& (nextChar == null || !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar)) && nextChar != '\'' && nextChar != '"'
 					&& (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
 					currentTokenType = VDFTokenType.Number;
-				else if ((activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"'))
+				else if (activeStringStartChar == nextChar && activeStringStartChar != null)
 				{
 					if (activeLiteralStartChars != null)
 					{
@@ -197,13 +208,13 @@ class VDFTokenParser
 
 		return result;
 	}
-	static FindNextNonXCharPosition(text: string, startPos: number, x: string)
+	/*static FindNextNonXCharPosition(text: string, startPos: number, x: string)
 	{
 		for (var i = startPos; i < text.length; i++)
 			if (text[i] != x)
 				return i;
 		return -1;
-	}
+	}*/
 	static UnpadString(paddedString: string)
 	{
 		var result = paddedString;

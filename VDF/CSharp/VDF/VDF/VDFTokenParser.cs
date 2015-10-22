@@ -85,18 +85,19 @@ public static class VDFTokenParser
 		var currentTokenTextBuilder = new StringBuilder();
 		var currentTokenType = VDFTokenType.None;
 		string activeLiteralStartChars = null;
-		string activeStringStartChar = null;
+		char? activeStringStartChar = null;
 		string lastScopeIncreaseChar = null;
 		for (var i = 0; i < text.Length; i++)
 		{
 			char ch = text[i];
 			char? nextChar = i + 1 < text.Length ? text[i + 1] : (char?)null;
 
-			int nextNonSpaceCharPos = FindNextNonXCharPosition(text, i + 1, ' ');
-			char? nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : (char?)null;
+			//int nextNonSpaceCharPos = FindNextNonXCharPosition(text, i + 1, ' ');
+			//char? nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : (char?)null;
 
 			currentTokenTextBuilder.Append(ch);
 
+			bool lastCharInLiteral = false;
 			if (activeLiteralStartChars == null)
 			{
 				if (ch == '<' && nextChar == '<') // if first char of literal-start-marker
@@ -108,33 +109,41 @@ public static class VDFTokenParser
 					currentTokenType = VDFTokenType.LiteralStartMarker;
 					i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after comment (i.e. the line-break char)
 				}
-			}
-			else if (i + activeLiteralStartChars.Length <= text.Length && text.Substring(i, activeLiteralStartChars.Length) == activeLiteralStartChars.Replace("<", ">"))
-			{
-				currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars.Replace("<", ">"));
-				currentTokenType = VDFTokenType.LiteralEndMarker;
-				i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after literal-end-marker
-				activeLiteralStartChars = null;
-			}
-			if (activeStringStartChar == null)
-			{
-				if (ch == '\'' || ch == '"') // if char of string-start-marker
+				else
 				{
-					activeStringStartChar = ch.ToString();
-					currentTokenType = VDFTokenType.StringStartMarker;
+					if (activeStringStartChar == null)
+					{
+						if (ch == '\'' || ch == '"') // if char of string-start-marker
+						{
+							activeStringStartChar = ch;
+							currentTokenType = VDFTokenType.StringStartMarker;
+						}
+					}
+					else if (activeStringStartChar == ch)
+					{
+						currentTokenType = VDFTokenType.StringEndMarker;
+						activeStringStartChar = null;
+					}
 				}
 			}
-			else if (((activeStringStartChar == "'" && ch == '\'') || (activeStringStartChar == "\"" && ch == '"')) && activeLiteralStartChars == null)
+			else if (nextChar == '>') // if possibly: the last char in literal, or first char of literal-end-marker
 			{
-				currentTokenType = VDFTokenType.StringEndMarker;
-				activeStringStartChar = null;
+				lastCharInLiteral = i + 1 + activeLiteralStartChars.Length <= text.Length && text.Substring(i + 1, activeLiteralStartChars.Length) == activeLiteralStartChars.Replace("<", ">");
+				if (lastCharInLiteral)
+					nextChar = i + 1 + activeLiteralStartChars.Length < text.Length ? text[i + 1 + activeLiteralStartChars.Length] : (char?)null; // shift next-char to one right after literal-end-marker (i.e. pretend marker isn't there)
+				else if (i + activeLiteralStartChars.Length <= text.Length && text.Substring(i, activeLiteralStartChars.Length) == activeLiteralStartChars.Replace("<", ">"))
+				{
+					currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars.Replace("<", ">"));
+					currentTokenType = VDFTokenType.LiteralEndMarker;
+					i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after literal-end-marker
+					activeLiteralStartChars = null;
+				}
 			}
-
-			bool lastCharInLiteral = activeLiteralStartChars != null && i + 1 + activeLiteralStartChars.Length <= text.Length && text.Substring(i + 1, activeLiteralStartChars.Length) == activeLiteralStartChars.Replace("<", ">");
-			if (lastCharInLiteral)
-				nextChar = i + 1 + activeLiteralStartChars.Length < text.Length ? text[i + 1 + activeLiteralStartChars.Length] : (char?)null; // shift next-char to one right after literal-end-marker (i.e. pretend it isn't there)
-			bool lastCharInString = (activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"');
-			if (currentTokenType == VDFTokenType.None && (activeLiteralStartChars == null || lastCharInLiteral) && (activeStringStartChar == null || lastCharInString)) // if not in pass-through-span
+			
+			var inPassThroughSpan = currentTokenType != VDFTokenType.None ||
+			                        (activeLiteralStartChars != null && !lastCharInLiteral) || // if in literal, and not last char
+			                        (activeStringStartChar != null && activeStringStartChar != nextChar); // if in string, and not last char
+            if (!inPassThroughSpan)
 			{
 				var firstTokenChar = currentTokenTextBuilder.Length == 1;
 				if (ch == '#' && nextChar == '#' && firstTokenChar) // if first char of in-line-comment
@@ -151,11 +160,13 @@ public static class VDFTokenParser
 				else if (ch == '\n' && firstTokenChar)
 					currentTokenType = VDFTokenType.LineBreak;
 
-				else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
+				//else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
+				else if (nextChar == '>' && activeLiteralStartChars == null)
 					currentTokenType = VDFTokenType.Metadata;
 				else if (ch == '>' && firstTokenChar)
 					currentTokenType = VDFTokenType.MetadataEndMarker;
-				else if (nextNonSpaceChar == ':' && ch != ' ')
+				//else if (nextNonSpaceChar == ':' && ch != ' ')
+				else if (nextChar == ':' && ch != ' ')
 					currentTokenType = VDFTokenType.Key;
 				else if (ch == ':' && firstTokenChar)
 					currentTokenType = VDFTokenType.KeyValueSeparator;
@@ -170,7 +181,7 @@ public static class VDFTokenParser
 					&& (!nextChar.HasValue || !chars0To9DotAndNegative.Contains(nextChar.Value)) && nextChar != '\'' && nextChar != '"'
 					&& (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
 					currentTokenType = VDFTokenType.Number;
-				else if ((activeStringStartChar == "'" && nextChar == '\'') || (activeStringStartChar == "\"" && nextChar == '"'))
+				else if (activeStringStartChar == nextChar && activeStringStartChar != null)
 				{
 					if (activeLiteralStartChars != null)
 					{
@@ -214,13 +225,13 @@ public static class VDFTokenParser
 
 		return result;
 	}
-	static int FindNextNonXCharPosition(string text, int startPos, char x)
+	/*static int FindNextNonXCharPosition(string text, int startPos, char x)
 	{
 		for (int i = startPos; i < text.Length; i++)
 			if (text[i] != x)
 				return i;
 		return -1;
-	}
+	}*/
 	static string UnpadString(string paddedString)
 	{
 		var result = paddedString;
