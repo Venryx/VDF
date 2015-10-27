@@ -240,24 +240,186 @@ var VDFUtils = (function () {
 })();
 var StringBuilder = (function () {
     function StringBuilder(startData) {
-        this.data = [];
         this.Length = 0;
-        if (startData) {
-            this.data.push(startData);
-            this.Length += startData.length;
-        }
+        if (startData)
+            this.Append(startData);
     }
-    StringBuilder.prototype.Append = function (str) { this.data.push(str); this.Length += str.length; return this; }; // adds string str to the StringBuilder
-    StringBuilder.prototype.Insert = function (index, str) { this.data.splice(index, 0, str); this.Length += str.length; return this; }; // inserts string 'str' at 'index'
+    StringBuilder.prototype.Append = function (str) { this.push(str); this.Length += str.length; return this; }; // adds string str to the StringBuilder
+    StringBuilder.prototype.Insert = function (index, str) { this.splice(index, 0, str); this.Length += str.length; return this; }; // inserts string 'str' at 'index'
     StringBuilder.prototype.Remove = function (index, count) {
-        var removedItems = this.data.splice(index, count || 1);
+        var removedItems = this.splice(index, count || 1);
         for (var i = 0; i < removedItems.length; i++)
             this.Length -= removedItems[i].length;
         return this;
     };
-    StringBuilder.prototype.Clear = function () { this.Remove(0, this.data.length); };
-    StringBuilder.prototype.ToString = function (joinerString) { return this.data.join(joinerString || ""); }; // builds the string
+    StringBuilder.prototype.Clear = function () { this.Remove(0, this.length); };
+    StringBuilder.prototype.ToString = function (joinerString) { return this.join(joinerString || ""); }; // builds the string
+    StringBuilder.prototype.toString = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.toLocaleString = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.push = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.pop = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.concat = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.join = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.reverse = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.shift = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.slice = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.sort = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.splice = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.unshift = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.indexOf = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.lastIndexOf = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.every = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.some = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.forEach = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.map = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.filter = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.reduce = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.reduceRight = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    // fakes for extended members
+    StringBuilder.prototype.Contains = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
     return StringBuilder;
+})();
+(function () {
+    StringBuilder.prototype["__proto__"] = Array.prototype; // makes "(new StringBuilder()) instanceof Array" be true
+    var reachedFakes = false;
+    for (var name in StringBuilder.prototype) {
+        if (name == "toString")
+            reachedFakes = true;
+        if (reachedFakes)
+            StringBuilder.prototype[name] = Array.prototype[name];
+    }
 })();
 // tags
 // ----------

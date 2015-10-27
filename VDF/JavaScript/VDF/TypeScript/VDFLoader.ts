@@ -75,7 +75,7 @@ class VDFLoader
 		else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
 			fromVDFTypeName = "bool";
 		else if (firstNonMetadataToken.type == VDFTokenType.Number)
-			fromVDFTypeName = firstNonMetadataToken.text.Contains(".") ? "double" : "int";
+			fromVDFTypeName = firstNonMetadataToken.text == "Infinity" || firstNonMetadataToken.text == "-Infinity" || firstNonMetadataToken.text.Contains(".") || firstNonMetadataToken.text.Contains("e") ? "double" : "int";
 		else if (firstNonMetadataToken.type == VDFTokenType.String)
 			fromVDFTypeName = "string";
 		else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)

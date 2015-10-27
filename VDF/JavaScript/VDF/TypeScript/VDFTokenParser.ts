@@ -71,130 +71,166 @@ class VDFTokenParser
 		var activeLiteralStartChars: string = null;
 		var activeStringStartChar: string = null;
 		var lastScopeIncreaseChar: string = null;
+		var addNextCharToTokenText = true;
 		for (var i = 0; i < text.length; i++)
 		{
 			var ch = text[i];
 			var nextChar = i + 1 < text.length ? text[i + 1] : null;
+			
+			if (addNextCharToTokenText)
+				currentTokenTextBuilder.Append(ch);
+			addNextCharToTokenText = true;
 
-			//var nextNonSpaceCharPos = VDFTokenParser.FindNextNonXCharPosition(text, i + 1, ' ');
-			//var nextNonSpaceChar = nextNonSpaceCharPos != -1 ? text[nextNonSpaceCharPos] : null;
+			if (activeLiteralStartChars != null) // if in literal
+			{
+				// if first char of literal-end-marker
+				if (ch == '>' && i + activeLiteralStartChars.length <= text.length && text.substr(i, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">"))
+				{
+					if (parseAllTokens)
+						result.Add(new VDFToken(VDFTokenType.LiteralEndMarker, i, result.Count, activeLiteralStartChars.replace(/</g, ">"))); // (if this end-marker token is within a string, it'll come before the string token)
+					currentTokenTextBuilder.Remove(currentTokenTextBuilder.Length - 1, 1); // remove current char from the main-token text
+					currentTokenFirstCharPos += activeLiteralStartChars.length; // don't count this inserted token text as part of main-token text
+					i += activeLiteralStartChars.length - 2; // have next char processed be the last char of literal-end-marker
+					addNextCharToTokenText = false; // but don't have it be added to the main-token text
 
-			currentTokenTextBuilder.Append(ch);
+					if (text[i + 1 - activeLiteralStartChars.length] == '#') // if there was a hash just before literal-end-marker (e.g. "some text>#>>"), remove it from main-token text
+						currentTokenTextBuilder.Remove(currentTokenTextBuilder.Length - 1, 1); // remove current char from the main-token text
 
-			var lastCharInLiteral = false;
-			if (activeLiteralStartChars == null)
+					activeLiteralStartChars = null;
+
+					continue;
+				}
+			}
+			else
 			{
 				if (ch == '<' && nextChar == '<') // if first char of literal-start-marker
 				{
 					activeLiteralStartChars = "";
 					while (i + activeLiteralStartChars.length < text.length && text[i + activeLiteralStartChars.length] == '<')
 						activeLiteralStartChars += "<";
-					currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars);
-					currentTokenType = VDFTokenType.LiteralStartMarker;
-					i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after comment (i.e. the line-break char)
+					
+					if (parseAllTokens)
+						result.Add(new VDFToken(VDFTokenType.LiteralStartMarker, i, result.Count, activeLiteralStartChars));
+					currentTokenTextBuilder.Remove(currentTokenTextBuilder.Length - 1, 1); // remove current char from the main-token text
+					currentTokenFirstCharPos += activeLiteralStartChars.length; // don't count this inserted token text as part of main-token text
+					i += activeLiteralStartChars.length - 1; // have next char processed be the one right after literal-start-marker
+
+					if (text[i + 1] == '#') // if there is a hash just after literal-start-marker (e.g. "<<#<some text"), skip it
+					{
+						currentTokenFirstCharPos++;
+						i++;
+					}
+
+					continue;
 				}
-				else
+				// else
 				{
 					if (activeStringStartChar == null)
 					{
 						if (ch == '\'' || ch == '"') // if char of string-start-marker
 						{
 							activeStringStartChar = ch;
-							currentTokenType = VDFTokenType.StringStartMarker;
+							
+							if (parseAllTokens)
+								result.Add(new VDFToken(VDFTokenType.StringStartMarker, i, result.Count, activeStringStartChar));
+							currentTokenTextBuilder.Remove(currentTokenTextBuilder.Length - 1, 1); // remove current char from the main-token text
+							currentTokenFirstCharPos++; // don't count this inserted token text as part of main-token text
+
+							// special case; if string-start-marker for an empty string
+							if (ch == nextChar)
+								result.Add(new VDFToken(VDFTokenType.String, currentTokenFirstCharPos, result.Count, ""));
+
+							continue;
 						}
 					}
 					else if (activeStringStartChar == ch)
 					{
-						currentTokenType = VDFTokenType.StringEndMarker;
+						if (parseAllTokens)
+							result.Add(new VDFToken(VDFTokenType.StringEndMarker, i, result.Count, ch));
+						currentTokenTextBuilder.Remove(currentTokenTextBuilder.Length - 1, 1); // remove current char from the main-token text
+						currentTokenFirstCharPos++; // don't count this inserted token text as part of main-token text
+
 						activeStringStartChar = null;
+
+						continue;
 					}
 				}
 			}
-			else if (nextChar == '>') // if possibly: the last char in literal, or first char of literal-end-marker
-			{
-				lastCharInLiteral = i + 1 + activeLiteralStartChars.length <= text.length && text.substr(i + 1, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">");
-				if (lastCharInLiteral)
-					nextChar = i + 1 + activeLiteralStartChars.length < text.length ? text[i + 1 + activeLiteralStartChars.length] : null; // shift next-char to one right after literal-end-marker (i.e. pretend marker isn't there)
-				else if (i + activeLiteralStartChars.length <= text.length && text.substr(i, activeLiteralStartChars.length) == activeLiteralStartChars.replace(/</g, ">"))
+
+			// if not in literal
+			if (activeLiteralStartChars == null)
+				// if in a string
+				if (activeStringStartChar != null)
 				{
-					currentTokenTextBuilder = new StringBuilder(activeLiteralStartChars.replace(/</g, ">"));
-					currentTokenType = VDFTokenType.LiteralEndMarker;
-					i += currentTokenTextBuilder.Length - 1; // have next char processed be the one right after literal-end-marker
-					activeLiteralStartChars = null;
+					// if last-char of string
+					if (activeStringStartChar == nextChar)
+						currentTokenType = VDFTokenType.String;
 				}
-			}
-			
-			var inPassThroughSpan = currentTokenType != VDFTokenType.None ||
-			                        (activeLiteralStartChars != null && !lastCharInLiteral) || // if in literal, and not last char
-			                        (activeStringStartChar != null && activeStringStartChar != nextChar); // if in string, and not last char
-            if (!inPassThroughSpan)
-			{
-				var firstTokenChar = currentTokenTextBuilder.Length == 1;
-				if (ch == '#' && nextChar == '#' && firstTokenChar) // if first char of in-line-comment
+				else
 				{
-					currentTokenTextBuilder = new StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
-					currentTokenType = VDFTokenType.InLineComment;
-					i += currentTokenTextBuilder.Length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
-				}
-				else if (currentTokenTextBuilder.ToString().TrimStart(options.allowCommaSeparators ? [' ', ','] : [' ']).length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ','))) // if last char of space-or-comma-span
-					currentTokenType = VDFTokenType.SpaceOrCommaSpan;
-
-				else if (ch == '\t' && firstTokenChar)
-					currentTokenType = VDFTokenType.Tab;
-				else if (ch == '\n' && firstTokenChar)
-					currentTokenType = VDFTokenType.LineBreak;
-
-				//else if (nextNonSpaceChar == '>' && activeLiteralStartChars == null)
-				else if (nextChar == '>' && activeLiteralStartChars == null)
-					currentTokenType = VDFTokenType.Metadata;
-				else if (ch == '>' && firstTokenChar)
-					currentTokenType = VDFTokenType.MetadataEndMarker;
-				//else if (nextNonSpaceChar == ':' && ch != ' ')
-				else if (nextChar == ':' && ch != ' ')
-					currentTokenType = VDFTokenType.Key;
-				else if (ch == ':' && firstTokenChar)
-					currentTokenType = VDFTokenType.KeyValueSeparator;
-				else if (ch == '^' && firstTokenChar)
-					currentTokenType = VDFTokenType.PoppedOutChildGroupMarker;
-
-				else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar))) // if text-so-far is 'null', and there's no more letters
-					currentTokenType = VDFTokenType.Null;
-				else if (activeStringStartChar == null && ((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true")) && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar)))
-					currentTokenType = VDFTokenType.Boolean;
-				else if (VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.data[0]) && currentTokenTextBuilder.data[0].toLowerCase() != "e"
-					&& (nextChar == null || !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar)) && nextChar != '\'' && nextChar != '"'
-					&& (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
-					currentTokenType = VDFTokenType.Number;
-				else if (activeStringStartChar == nextChar && activeStringStartChar != null)
-				{
-					if (activeLiteralStartChars != null)
+					var firstTokenChar = currentTokenTextBuilder.Length == 1;
+					if (ch == '#' && nextChar == '#' && firstTokenChar) // if first char of in-line-comment
 					{
-						currentTokenFirstCharPos++;
-						currentTokenTextBuilder = new StringBuilder(VDFTokenParser.UnpadString(currentTokenTextBuilder.ToString()));
+						currentTokenTextBuilder = new StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
+						currentTokenType = VDFTokenType.InLineComment;
+						i += currentTokenTextBuilder.Length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
 					}
-					currentTokenType = VDFTokenType.String;
+					else if (currentTokenTextBuilder.ToString().TrimStart(options.allowCommaSeparators ? [' ', ','] : [' ']).length == 0 && (ch == ' ' || (options.allowCommaSeparators && ch == ',')) && (nextChar != ' ' && (!options.allowCommaSeparators || nextChar != ','))) // if last char of space-or-comma-span
+						currentTokenType = VDFTokenType.SpaceOrCommaSpan;
+
+					else if (ch == '\t' && firstTokenChar)
+						currentTokenType = VDFTokenType.Tab;
+					else if (ch == '\n' && firstTokenChar)
+						currentTokenType = VDFTokenType.LineBreak;
+
+					else if (nextChar == '>')
+						currentTokenType = VDFTokenType.Metadata;
+					else if (ch == '>' && firstTokenChar)
+						currentTokenType = VDFTokenType.MetadataEndMarker;
+					//else if (nextNonSpaceChar == ':' && ch != ' ')
+					else if (nextChar == ':' && ch != ' ')
+						currentTokenType = VDFTokenType.Key;
+					else if (ch == ':' && firstTokenChar)
+						currentTokenType = VDFTokenType.KeyValueSeparator;
+					else if (ch == '^' && firstTokenChar)
+						currentTokenType = VDFTokenType.PoppedOutChildGroupMarker;
+
+					else if (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "null" && (nextChar == null || !VDFTokenParser.charsAToZ.Contains(nextChar))) // if text-so-far is 'null', and there's no more letters
+						currentTokenType = VDFTokenType.Null;
+					else if ((currentTokenTextBuilder.Length == 5 && currentTokenTextBuilder.ToString() == "false") || (currentTokenTextBuilder.Length == 4 && currentTokenTextBuilder.ToString() == "true"))
+						currentTokenType = VDFTokenType.Boolean;
+					else if
+					(
+						// if normal ("-12345" or "-123.45" or "-123e-45") number
+						(
+							VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder[0]) && currentTokenTextBuilder[0].toLowerCase() != "e" // if first-char is valid as start of number
+							&& VDFTokenParser.chars0To9DotAndNegative.Contains(ch) // and current-char is valid as part of number
+							&& (nextChar == null || !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar)) && nextChar != 'I' // and next-char is not valid as part of number
+							&& (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator)
+						)
+						// or infinity number
+						|| ((currentTokenTextBuilder.Length == 8 && currentTokenTextBuilder.ToString() == "Infinity") || (currentTokenTextBuilder.Length == 9 && currentTokenTextBuilder.ToString() == "-Infinity"))
+					)
+						currentTokenType = VDFTokenType.Number;
+					else if (ch == '[' && firstTokenChar)
+					{
+						currentTokenType = VDFTokenType.ListStartMarker;
+						lastScopeIncreaseChar = ch;
+					}
+					else if (ch == ']' && firstTokenChar)
+						currentTokenType = VDFTokenType.ListEndMarker;
+					else if (ch == '{' && firstTokenChar)
+					{
+						currentTokenType = VDFTokenType.MapStartMarker;
+						lastScopeIncreaseChar = ch;
+					}
+					else if (ch == '}' && firstTokenChar)
+						currentTokenType = VDFTokenType.MapEndMarker;
 				}
-				else if (ch == '[' && firstTokenChar)
-				{
-					currentTokenType = VDFTokenType.ListStartMarker;
-					lastScopeIncreaseChar = ch;
-				}
-				else if (ch == ']' && firstTokenChar)
-					currentTokenType = VDFTokenType.ListEndMarker;
-				else if (ch == '{' && firstTokenChar)
-				{
-					currentTokenType = VDFTokenType.MapStartMarker;
-					lastScopeIncreaseChar = ch;
-				}
-				else if (ch == '}' && firstTokenChar)
-					currentTokenType = VDFTokenType.MapEndMarker;
-			}
 
 			if (currentTokenType != VDFTokenType.None)
 			{
-				if (currentTokenType == VDFTokenType.StringStartMarker && ch == nextChar) // special case; empty string
-					result.Add(new VDFToken(VDFTokenType.String, currentTokenFirstCharPos, result.Count, ""));
-				if (parseAllTokens || (currentTokenType != VDFTokenType.LiteralStartMarker && currentTokenType != VDFTokenType.LiteralEndMarker && currentTokenType != VDFTokenType.StringStartMarker && currentTokenType != VDFTokenType.StringEndMarker && currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker))
+				if (parseAllTokens || (currentTokenType != VDFTokenType.InLineComment && currentTokenType != VDFTokenType.SpaceOrCommaSpan && currentTokenType != VDFTokenType.MetadataEndMarker))
 					result.Add(new VDFToken(currentTokenType, currentTokenFirstCharPos, result.Count, currentTokenTextBuilder.ToString()));
 
 				currentTokenFirstCharPos = i + 1;
@@ -215,7 +251,7 @@ class VDFTokenParser
 				return i;
 		return -1;
 	}*/
-	static UnpadString(paddedString: string)
+	/*static UnpadString(paddedString: string)
 	{
 		var result = paddedString;
 		if (result.StartsWith("#"))
@@ -223,7 +259,7 @@ class VDFTokenParser
 		if (result.EndsWith("#"))
 			result = result.substr(0, result.length - 1);
 		return result;
-	}
+	}*/
 
 	static PostProcessTokens(tokens: List<VDFToken>, options: VDFLoadOptions): List<VDFToken>
 	{

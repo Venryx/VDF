@@ -69,6 +69,18 @@ module VDFTests // added to match C# indentation
 			var a = VDFLoader.ToVDFNode("-1");
 			a.primitiveValue.Should().Be(-1);
 		});
+		test("D0_PowerNotation", ()=>
+		{
+			VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000); //1 * Math.Pow(10, 3));
+			VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
+			VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000); //-(1 * Math.Pow(10, 3)));
+			VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
+		});
+		test("D0_Infinity", ()=>
+		{
+			VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(Infinity);
+			VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(-Infinity);
+		});
 		test("D0_String", ()=>
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("'Root string.'");
@@ -414,6 +426,17 @@ of three lines in total.".Fix());
 	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}\n\
 	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}".replace(/\r\n/g, "\n");
 			var tokens = VDFTokenParser.ParseTokens(vdf1, null, true, false);
+
+			// shift each within-string literal-end-marker token to after its containing-string's token
+			for (var i = 0; i < tokens.Count; i++)
+				if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String)
+				{
+					var oldFirst = tokens[i];
+					tokens[i] = tokens[i + 1];
+					tokens[i + 1] = oldFirst;
+					i++;
+				}
+
 			var vdf2 = "";
 			for (var i in tokens.Indexes())
 				vdf2 += tokens[i].text;

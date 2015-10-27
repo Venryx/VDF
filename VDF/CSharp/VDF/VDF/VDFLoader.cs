@@ -100,7 +100,11 @@ public static class VDFLoader
 		else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
 			node.primitiveValue = bool.Parse(firstNonMetadataToken.text);
 		else if (firstNonMetadataToken.type == VDFTokenType.Number)
-			if (firstNonMetadataToken.text.Contains("."))
+			if (firstNonMetadataToken.text == "Infinity")
+				node.primitiveValue = double.PositiveInfinity;
+			else if (firstNonMetadataToken.text == "-Infinity")
+				node.primitiveValue = double.NegativeInfinity;
+			else if (firstNonMetadataToken.text.Contains(".") || firstNonMetadataToken.text.Contains("e"))
 				node.primitiveValue = double.Parse(firstNonMetadataToken.text);
 			else
 				node.primitiveValue = int.Parse(firstNonMetadataToken.text);

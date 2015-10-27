@@ -297,30 +297,66 @@ class VDFUtils
 		}
 	}
 }
-class StringBuilder
+class StringBuilder implements Array<string>
 {
-	public data: Array<string> = [];
 	public Length: number = 0;
 	constructor(startData?: string)
 	{
 		if (startData)
-		{
-			this.data.push(startData);
-			this.Length += startData.length;
-		}
+			this.Append(startData);
 	}
-	Append(str) { this.data.push(str); this.Length += str.length; return this; } // adds string str to the StringBuilder
-	Insert(index, str) { this.data.splice(index, 0, str); this.Length += str.length; return this; } // inserts string 'str' at 'index'
+	Append(str) { this.push(str); this.Length += str.length; return this; } // adds string str to the StringBuilder
+	Insert(index, str) { this.splice(index, 0, str); this.Length += str.length; return this; } // inserts string 'str' at 'index'
 	Remove(index, count) // starting at 'index', removes specified number of elements (if not specified, count defaults to 1)
 	{
-		var removedItems = this.data.splice(index, count || 1);
+		var removedItems = this.splice(index, count || 1);
 		for (var i = 0; i < removedItems.length; i++)
 			this.Length -= removedItems[i].length;
 		return this;
 	}
-	Clear() { this.Remove(0, this.data.length); }
-	ToString(joinerString?) { return this.data.join(joinerString || ""); } // builds the string
+	Clear() { this.Remove(0, this.length); }
+	ToString(joinerString?) { return this.join(joinerString || ""); } // builds the string
+
+	// fakes
+	length: number;
+    toString(...args: any[]) { return null; }
+    toLocaleString(...args: any[]) { return null; }
+    push(...args: any[]) { return null; }
+    pop(...args: any[]) { return null; }
+    concat(...args: any[]) { return null; }
+    join(...args: any[]) { return null; }
+    reverse(...args: any[]) { return null; }
+    shift(...args: any[]) { return null; }
+    slice(...args: any[]) { return null; }
+    sort(...args: any[]) { return null; }
+    splice(...args: any[]) { return null; }
+    unshift(...args: any[]) { return null; }
+    indexOf(...args: any[]) { return null; }
+    lastIndexOf(...args: any[]) { return null; }
+    every(...args: any[]) { return null; }
+    some(...args: any[]) { return null; }
+    forEach(...args: any[]) { return null; }
+    map<U>(...args: any[]) { return null; }
+    filter(...args: any[]) { return null; }
+    reduce(...args: any[]) { return null; }
+    reduceRight(...args: any[]) { return null; }
+	[n: number]: string;
+    
+	// fakes for extended members
+	Contains(...args: any[]) { return null; }
 }
+(()=>
+{
+	StringBuilder.prototype["__proto__"] = Array.prototype; // makes "(new StringBuilder()) instanceof Array" be true
+	var reachedFakes = false;
+	for (var name in StringBuilder.prototype)
+	{
+		if (name == "toString")
+			reachedFakes = true;
+		if (reachedFakes)
+			StringBuilder.prototype[name] = Array.prototype[name];
+	}
+})();
 
 // tags
 // ----------

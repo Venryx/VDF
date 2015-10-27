@@ -39,6 +39,18 @@ namespace VDFTests
 			VDFNode a = VDFLoader.ToVDFNode("-1");
 			a.primitiveValue.Should().Be(-1);
 		}
+		[Fact] void D0_PowerNotation()
+		{
+			VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000d); //1 * Math.Pow(10, 3));
+			VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
+			VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000d); //-(1 * Math.Pow(10, 3)));
+			VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
+		}
+		[Fact] void D0_Infinity()
+		{
+			VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(double.PositiveInfinity);
+			VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(double.NegativeInfinity);
+		}
 		[Fact] void D0_String()
 		{
 			VDFNode a = VDFLoader.ToVDFNode("'Root string.'");
@@ -387,6 +399,17 @@ of three lines in total.".Fix());
 	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}
 	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}".Replace("\r\n", "\n");
 			var tokens = VDFTokenParser.ParseTokens(vdf1, null, true, false);
+
+			// shift each within-string literal-end-marker token to after its containing-string's token
+			for (var i = 0; i < tokens.Count; i++)
+				if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String)
+				{
+					var oldFirst = tokens[i];
+					tokens[i] = tokens[i + 1];
+					tokens[i + 1] = oldFirst;
+					i++;
+				}
+
 			var vdf2 = "";
 			foreach (VDFToken token in tokens)
 				vdf2 += token.text;

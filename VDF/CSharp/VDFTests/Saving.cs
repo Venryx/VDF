@@ -17,6 +17,11 @@ namespace VDFTests
 			a.primitiveValue = "Root string.";
 			a.ToVDF().Should().Be("\"Root string.\"");
 		}
+		[Fact] void D0_Infinity()
+		{
+			new VDFNode(double.PositiveInfinity).ToVDF().Should().Be("Infinity");
+			new VDFNode(double.NegativeInfinity).ToVDF().Should().Be("-Infinity");
+		}
 		[Fact] void D0_MetadataType()
 		{
 			var a = new VDFNode();

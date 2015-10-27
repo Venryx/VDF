@@ -59,6 +59,10 @@ var VDFTests // added to match C# indentation
             a.primitiveValue = "Root string.";
             a.ToVDF().Should().Be("\"Root string.\"");
         });
+        test("D0_Infinity", function () {
+            new VDFNode(Infinity).ToVDF().Should().Be("Infinity");
+            new VDFNode(-Infinity).ToVDF().Should().Be("-Infinity");
+        });
         test("D0_MetadataType", function () {
             var a = new VDFNode();
             a.metadata = "string";
