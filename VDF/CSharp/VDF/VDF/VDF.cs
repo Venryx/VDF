@@ -27,6 +27,15 @@ public class VDFException : Exception
 
 public static class VDFClassExtensions
 {
+	public static Type GetVDFType(this object s) { return s.GetType().ToVDFType(); } // get an object's type, as the VDF system sees it
+	public static Type ToVDFType(this Type s) // get the type that the VDF system sees type 's' as
+	{
+		var result = s;
+		if (result != null && result.IsArray) // if SomeType[], convert into List(SomeType)
+			result = typeof(List<>).MakeGenericType(result.GetElementType());
+		return result;
+	}
+
 	public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags)
 	{
 		var result = new List<MemberInfo>(); //HashSet<MemberInfo>();
@@ -237,6 +246,10 @@ public static class VDF
 		else
 		{
 			string result = type.FullName;
+			//if (result.EndsWith("[]"))
+			if (type.IsArray)
+				result = "List(" + GetNameOfType(type.GetElementType(), options) + ")";
+
 			result = result.Contains("+") ? result.Substring(result.IndexOf("+") + 1) : result; // remove assembly name, if specified in string (may want to ensure this doesn't break anything)
 			foreach (KeyValuePair<string, string> pair in options.namespaceAliasesByName) // loop through aliased-namespaces, and if our result starts with one's name, replace that namespace's name with its alias
 				if (result.StartsWith(pair.Key + ".") && !result.Substring(pair.Key.Length + 1).Split(new[] {'('})[0].Contains("."))

@@ -126,14 +126,16 @@ var VDF = (function () {
             if (obj.itemType)
                 return "List(" + obj.itemType + ")";
             var nativeTypeName = obj.constructor.name != "" ? obj.constructor.name : null;
-            /*if (nativeTypeName == "Boolean")
+            if (nativeTypeName == "Boolean")
                 return "bool";
             if (nativeTypeName == "Number")
                 return obj.toString().Contains(".") ? "double" : "int";
             if (nativeTypeName == "String")
-                return "string";*/
+                return "string";
             if (nativeTypeName == "Object")
                 return "object";
+            if (nativeTypeName == "Array")
+                return "List(object)";
             return nativeTypeName;
         }
         if (rawType == "boolean")

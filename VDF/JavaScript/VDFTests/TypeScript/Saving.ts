@@ -126,6 +126,7 @@ that needs escaping.>>\"".Fix());
 			a = VDFSaver.ToVDFNode("String <<that needs escaping>>.", "string");
 			a.ToVDF().Should().Be("\"<<<String <<that needs escaping>>.>>>\"");
 		});
+		test("D0_EmptyArray", ()=>{ VDF.Serialize([]).Should().Be("[]"); });
 
 		test("D1_ListInferredFromHavingItem_String", ()=>
 		{

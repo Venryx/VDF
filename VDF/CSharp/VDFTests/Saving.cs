@@ -88,6 +88,7 @@ that needs escaping.>>""".Fix());
 			a[2] = new VDFNode("This one doesn't need escaping.");
 			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<<Here's <<another>>.>>>\" \"This one doesn't need escaping.\"]");
 		}
+		[Fact] void D0_EmptyArray() { VDF.Serialize(new object[0]).Should().Be("[]"); }
 
 		// from object
 		// ==========

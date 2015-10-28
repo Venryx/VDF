@@ -66,10 +66,11 @@ public static class VDFSaver
 	public static VDFNode ToVDFNode(object obj, VDFSaveOptions options) { return ToVDFNode(obj, null, options); }
 	public static VDFNode ToVDFNode(object obj, Type declaredType = null, VDFSaveOptions options = null, VDFNodePath path = null, bool declaredTypeInParentVDF = false)
 	{
+		declaredType = declaredType != null ? declaredType.ToVDFType() : null;
 		options = options ?? new VDFSaveOptions();
 		path = path ?? new VDFNodePath(new VDFNodePathNode(obj));
 		
-		Type type = obj != null ? obj.GetType() : null;
+		Type type = obj != null ? obj.GetVDFType() : null;
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
 		var typeInfo = type != null ? VDFTypeInfo.Get(type) : null; //VDFTypeInfo.Get(type) : null; // so anonymous object can be recognized
 
