@@ -429,6 +429,13 @@ of three lines in total.".Fix());
             ObjectWithPostDeserializeConstructor_Class() { flag = true; }
         }
         test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
+        test("D1_ObjectWithPostDeserializeOptionsFunc", function () {
+            var options = new VDFLoadOptions();
+            var flag = false;
+            options.AddPostDeserializeFunc(function () { flag = true; });
+            VDF.Deserialize("{}", "object", options);
+            flag.Should().Be(true);
+        });
         var TypeInstantiatedManuallyThenFilled = (function () {
             function TypeInstantiatedManuallyThenFilled() {
                 this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;

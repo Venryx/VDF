@@ -300,6 +300,9 @@
 		for (var propName in VDF.GetObjectProps(obj))
 			if(obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=>a instanceof VDFPostDeserialize))
 				obj[propName](this, path, options);
+
+		for (var i in options.postDeserializeFuncs)
+			options.postDeserializeFuncs[i]();
 	}
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

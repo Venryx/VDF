@@ -5,7 +5,18 @@ using System.Linq;
 
 public class VDFLoadOptions
 {
+	public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
+	{
+		this.messages = message ?? new List<object>();
+		this.allowStringKeys = allowStringKeys;
+		this.allowCommaSeparators = allowCommaSeparators;
+		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
+		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
+	}
+
 	public List<object> messages;
+	public List<Action> postDeserializeFuncs = new List<Action>();
+	public void AddPostDeserializeFunc(Action func) { postDeserializeFuncs.Add(func); }
 
 	// for JSON compatibility
 	public bool allowStringKeys;
@@ -15,15 +26,6 @@ public class VDFLoadOptions
 	public Dictionary<string, string> namespaceAliasesByName;
 	public Dictionary<Type, string> typeAliasesByType;
 	//public List<string> extraSearchAssemblyNames; // maybe add this option later
-
-	public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
-	{
-		this.messages = message ?? new List<object>();
-		this.allowStringKeys = allowStringKeys;
-		this.allowCommaSeparators = allowCommaSeparators;
-		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
-		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
-	}
 
 	public VDFLoadOptions ForJSON() // helper function for JSON compatibility
 	{

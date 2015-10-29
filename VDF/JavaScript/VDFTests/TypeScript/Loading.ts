@@ -507,6 +507,15 @@ of three lines in total.".Fix());
 			ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
 		test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
+		test("D1_ObjectWithPostDeserializeOptionsFunc", ()=>
+		{
+			var options = new VDFLoadOptions();
+			var flag = false;
+			options.AddPostDeserializeFunc(()=>{ flag = true; });
+			VDF.Deserialize("{}", "object", options);
+			flag.Should().Be(true);
+		});
+
 		class TypeInstantiatedManuallyThenFilled
 		{
 			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;

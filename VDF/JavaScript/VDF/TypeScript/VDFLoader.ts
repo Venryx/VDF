@@ -1,14 +1,5 @@
 ﻿class VDFLoadOptions
 {
-	messages: any[];
-
-	// for JSON compatibility
-	allowStringKeys: boolean;
-	allowCommaSeparators: boolean;
-
-	// JS only
-	loadUnknownTypesAsBasicTypes: boolean;
-
 	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
 	{
 		this.messages = messages || [];
@@ -20,6 +11,17 @@
 			for (var key in initializerObj)
 				this[key] = initializerObj[key];
 	}
+
+	messages: any[];
+	postDeserializeFuncs = new List<Function>("Function");
+	AddPostDeserializeFunc(func: Function) { this.postDeserializeFuncs.Add(func); }
+
+	// for JSON compatibility
+	allowStringKeys: boolean;
+	allowCommaSeparators: boolean;
+
+	// JS only
+	loadUnknownTypesAsBasicTypes: boolean;
 
 	ForJSON() // helper function for JSON compatibility
 	{

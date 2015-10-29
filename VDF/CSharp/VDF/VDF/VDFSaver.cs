@@ -14,23 +14,6 @@ public enum VDFTypeMarking
 }
 public class VDFSaveOptions
 {
-	public List<object> messages;
-	public VDFTypeMarking typeMarking;
-
-	// for JSON compatibility
-	public bool useMetadata;
-	public bool useChildPopOut;
-	public bool useStringKeys;
-	public bool useNumberTrimming; // e.g. trims 0.123 to .123
-	public bool useCommaSeparators; // currently only applies to non-popped-out children
-
-	// CS only
-	public List<MemberInfo> propIncludesL3;
-	public List<MemberInfo> propExcludesL4;
-	public List<MemberInfo> propIncludesL5;
-	public Dictionary<string, string> namespaceAliasesByName;
-	public Dictionary<Type, string> typeAliasesByType;
-
 	public VDFSaveOptions(List<object> messages = null, VDFTypeMarking typeMarking = VDFTypeMarking.Internal,
 		bool useMetadata = true, bool useChildPopOut = true, bool useStringKeys = false, bool useNumberTrimming = true, bool useCommaSeparators = false, 
 		IEnumerable<MemberInfo> propIncludesL3 = null, IEnumerable<MemberInfo> propExcludesL4 = null, IEnumerable<MemberInfo> propIncludesL5 = null, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
@@ -48,6 +31,23 @@ public class VDFSaveOptions
 		this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 		this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
 	}
+
+	public List<object> messages;
+	public VDFTypeMarking typeMarking;
+
+	// for JSON compatibility
+	public bool useMetadata;
+	public bool useChildPopOut;
+	public bool useStringKeys;
+	public bool useNumberTrimming; // e.g. trims 0.123 to .123
+	public bool useCommaSeparators; // currently only applies to non-popped-out children
+
+	// CS only
+	public List<MemberInfo> propIncludesL3;
+	public List<MemberInfo> propExcludesL4;
+	public List<MemberInfo> propIncludesL5;
+	public Dictionary<string, string> namespaceAliasesByName;
+	public Dictionary<Type, string> typeAliasesByType;
 
 	public VDFSaveOptions ForJSON() // helper function for JSON compatibility
 	{

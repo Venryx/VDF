@@ -7,16 +7,6 @@
 }
 class VDFSaveOptions
 {
-	messages: any[];
-	typeMarking: VDFTypeMarking;
-
-	// for JSON compatibility
-	useMetadata: boolean;
-	useChildPopOut: boolean;
-	useStringKeys: boolean;
-	useNumberTrimming: boolean; // e.g. trims 0.123 to .123
-	useCommaSeparators: boolean; // currently only applies to non-popped-out children
-
 	constructor(initializerObj?: any, messages?: any[], typeMarking = VDFTypeMarking.Internal,
 		useMetadata = true, useChildPopOut = true, useStringKeys = false, useNumberTrimming = true, useCommaSeparators = false)
 	{
@@ -32,6 +22,16 @@ class VDFSaveOptions
 			for (var key in initializerObj)
 				this[key] = initializerObj[key];
 	}
+
+	messages: any[];
+	typeMarking: VDFTypeMarking;
+
+	// for JSON compatibility
+	useMetadata: boolean;
+	useChildPopOut: boolean;
+	useStringKeys: boolean;
+	useNumberTrimming: boolean; // e.g. trims 0.123 to .123
+	useCommaSeparators: boolean; // currently only applies to non-popped-out children
 
 	ForJSON(): VDFSaveOptions // helper function for JSON compatibility
 	{

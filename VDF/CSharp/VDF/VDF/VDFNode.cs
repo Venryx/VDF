@@ -345,5 +345,8 @@ public class VDFNode
 			method.Call(obj, this, path, options);
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.postDeserializeTag != null))
 			method.Call(obj, this, path, options);
+
+        foreach (Action func in options.postDeserializeFuncs)
+			func();
 	}
 }

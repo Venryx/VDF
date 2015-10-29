@@ -469,6 +469,14 @@ of three lines in total.".Fix());
 			[VDFPostDeserialize] ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
 		[Fact] void D1_ObjectWithPostDeserializeConstructor() { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); }
+		[Fact] void D1_ObjectWithPostDeserializeOptionsFunc()
+		{
+			VDFLoadOptions options = new VDFLoadOptions();
+			var flag = false;
+			options.AddPostDeserializeFunc(()=>flag = true);
+			VDF.Deserialize<object>("{}", options);
+			flag.Should().Be(true);
+		}
 
 		/*class D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Base
 		{
