@@ -15,12 +15,22 @@ public class VDFLoadOptions
 	}
 
 	public List<object> messages;
+	public Dictionary<object, List<Action>> objPostDeserializeFuncs_early = new Dictionary<object, List<Action>>();
 	public Dictionary<object, List<Action>> objPostDeserializeFuncs = new Dictionary<object, List<Action>>();
-	public void AddObjPostDeserializeFunc(object obj, Action func)
+	public void AddObjPostDeserializeFunc(object obj, Action func, bool early = false)
 	{
-		if (!objPostDeserializeFuncs.ContainsKey(obj))
-			objPostDeserializeFuncs.Add(obj, new List<Action>());
-		objPostDeserializeFuncs[obj].Add(func);
+		if (early)
+		{
+			if (!objPostDeserializeFuncs_early.ContainsKey(obj))
+				objPostDeserializeFuncs_early.Add(obj, new List<Action>());
+			objPostDeserializeFuncs_early[obj].Add(func);
+		}
+		else
+		{
+			if (!objPostDeserializeFuncs.ContainsKey(obj))
+				objPostDeserializeFuncs.Add(obj, new List<Action>());
+			objPostDeserializeFuncs[obj].Add(func);
+		}
 	}
 
 	// for JSON compatibility

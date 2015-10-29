@@ -243,12 +243,15 @@ var VDFNode = (function () {
                     throw ex;
                 }
         }
+        if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
+            for (var i in options.objPostDeserializeFuncs_early.Get(obj))
+                options.objPostDeserializeFuncs_early.Get(obj)[i]();
         for (var propName in VDF.GetObjectProps(obj))
             if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
                 obj[propName](this, path, options);
         if (options.objPostDeserializeFuncs.ContainsKey(obj))
-            for (var i in options.objPostDeserializeFuncs[obj])
-                options.objPostDeserializeFuncs[obj][i]();
+            for (var i in options.objPostDeserializeFuncs.Get(obj))
+                options.objPostDeserializeFuncs.Get(obj)[i]();
     };
     return VDFNode;
 })();

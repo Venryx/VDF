@@ -340,6 +340,10 @@ public class VDFNode
 				}*/
 		}
 
+		if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
+			foreach (Action func in options.objPostDeserializeFuncs_early[obj])
+				func();
+
 		// call post-deserialize constructors before post-deserialize normal methods
 		foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.postDeserializeTag != null))
 			method.Call(obj, this, path, options);

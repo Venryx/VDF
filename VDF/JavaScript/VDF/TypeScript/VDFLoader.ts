@@ -13,12 +13,22 @@
 	}
 
 	messages: any[];
+	objPostDeserializeFuncs_early = new Dictionary<object, List<Function>>("object", "List(Function)");
 	objPostDeserializeFuncs = new Dictionary<object, List<Function>>("object", "List(Function)");
-	AddObjPostDeserializeFunc(obj, func: Function)
+	AddObjPostDeserializeFunc(obj, func: Function, early = false)
 	{
-		if (!this.objPostDeserializeFuncs.ContainsKey(obj))
-			this.objPostDeserializeFuncs.Add(obj, new List<Function>("Function"));
-		this.objPostDeserializeFuncs[obj].Add(func);
+		if (early)
+		{
+			if (!this.objPostDeserializeFuncs_early.ContainsKey(obj))
+				this.objPostDeserializeFuncs_early.Add(obj, new List<Function>("Function"));
+			this.objPostDeserializeFuncs_early[obj].Add(func);
+		}
+		else
+		{
+			if (!this.objPostDeserializeFuncs.ContainsKey(obj))
+				this.objPostDeserializeFuncs.Add(obj, new List<Function>("Function"));
+			this.objPostDeserializeFuncs[obj].Add(func);
+		}
 	}
 
 	// for JSON compatibility
