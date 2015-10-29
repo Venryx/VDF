@@ -15,8 +15,13 @@ public class VDFLoadOptions
 	}
 
 	public List<object> messages;
-	public List<Action> postDeserializeFuncs = new List<Action>();
-	public void AddPostDeserializeFunc(Action func) { postDeserializeFuncs.Add(func); }
+	public Dictionary<object, List<Action>> objPostDeserializeFuncs = new Dictionary<object, List<Action>>();
+	public void AddObjPostDeserializeFunc(object obj, Action func)
+	{
+		if (!objPostDeserializeFuncs.ContainsKey(obj))
+			objPostDeserializeFuncs.Add(obj, new List<Action>());
+		objPostDeserializeFuncs[obj].Add(func);
+	}
 
 	// for JSON compatibility
 	public bool allowStringKeys;

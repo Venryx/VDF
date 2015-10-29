@@ -469,13 +469,21 @@ of three lines in total.".Fix());
 			[VDFPostDeserialize] ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
 		[Fact] void D1_ObjectWithPostDeserializeConstructor() { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); }
+		class ObjectWithPostDeserializeOptionsFunc_Class_Parent { public ObjectWithPostDeserializeOptionsFunc_Class_Child child; }
+        class ObjectWithPostDeserializeOptionsFunc_Class_Child
+		{
+			public static bool flag;
+			[VDFDeserialize(fromParent: true)] static object Deserialize(VDFNode node, VDFNodePath path, VDFLoadOptions options)
+			{
+				options.AddObjPostDeserializeFunc(path.rootNode.obj, ()=>flag = true);
+				return null;
+			}
+		}
 		[Fact] void D1_ObjectWithPostDeserializeOptionsFunc()
 		{
 			VDFLoadOptions options = new VDFLoadOptions();
-			var flag = false;
-			options.AddPostDeserializeFunc(()=>flag = true);
-			VDF.Deserialize<object>("{}", options);
-			flag.Should().Be(true);
+			VDF.Deserialize<ObjectWithPostDeserializeOptionsFunc_Class_Parent>("{child:{}}", options).child.Should().Be(null);
+			ObjectWithPostDeserializeOptionsFunc_Class_Child.flag.Should().Be(true);
 		}
 
 		/*class D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Base

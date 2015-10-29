@@ -275,7 +275,7 @@
 
 		if (!deserializedByCustomMethod2)
 		{
-			for (var i = 0; i < this.listChildren.Count; i++)
+			for (var i = <any>0; i < this.listChildren.Count; i++)
 			//obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, this.listChildren[i])));
             {
             	var item = this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, this.listChildren[i]));
@@ -301,8 +301,9 @@
 			if(obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=>a instanceof VDFPostDeserialize))
 				obj[propName](this, path, options);
 
-		for (var i in options.postDeserializeFuncs)
-			options.postDeserializeFuncs[i]();
+		if (options.objPostDeserializeFuncs.ContainsKey(obj))
+			for (var i in options.objPostDeserializeFuncs[obj])
+				options.objPostDeserializeFuncs[obj][i]();
 	}
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

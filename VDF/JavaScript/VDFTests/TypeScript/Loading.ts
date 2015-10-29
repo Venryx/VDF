@@ -428,7 +428,7 @@ of three lines in total.".Fix());
 			var tokens = VDFTokenParser.ParseTokens(vdf1, null, true, false);
 
 			// shift each within-string literal-end-marker token to after its containing-string's token
-			for (var i = 0; i < tokens.Count; i++)
+			for (var i = <any>0; i < tokens.Count; i++)
 				if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String)
 				{
 					var oldFirst = tokens[i];
@@ -507,13 +507,22 @@ of three lines in total.".Fix());
 			ObjectWithPostDeserializeConstructor_Class() { flag = true; }
 		}
 		test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
+		class ObjectWithPostDeserializeOptionsFunc_Class_Parent { child: ObjectWithPostDeserializeOptionsFunc_Class_Child = Prop(this, "child", "ObjectWithPostDeserializeOptionsFunc_Class_Child").set = null; }
+        class ObjectWithPostDeserializeOptionsFunc_Class_Child
+		{
+			static flag = false;
+			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions)
+			{
+				options.AddObjPostDeserializeFunc(path.rootNode.obj, () =>ObjectWithPostDeserializeOptionsFunc_Class_Child.flag = true);
+				return null;
+			}
+		}
+		ObjectWithPostDeserializeOptionsFunc_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
 		test("D1_ObjectWithPostDeserializeOptionsFunc", ()=>
 		{
 			var options = new VDFLoadOptions();
-			var flag = false;
-			options.AddPostDeserializeFunc(()=>{ flag = true; });
-			VDF.Deserialize("{}", "object", options);
-			flag.Should().Be(true);
+			ok(VDF.Deserialize("{child:{}}", "ObjectWithPostDeserializeOptionsFunc_Class_Parent", options).child == null);
+			ObjectWithPostDeserializeOptionsFunc_Class_Child.flag.Should().Be(true);
 		});
 
 		class TypeInstantiatedManuallyThenFilled

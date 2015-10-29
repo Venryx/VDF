@@ -429,12 +429,27 @@ of three lines in total.".Fix());
             ObjectWithPostDeserializeConstructor_Class() { flag = true; }
         }
         test("D1_ObjectWithPostDeserializeConstructor", ()=> { VDF.Deserialize<ObjectWithPostDeserializeConstructor_Class>("{}").flag.Should().Be(true); });*/
+        var ObjectWithPostDeserializeOptionsFunc_Class_Parent = (function () {
+            function ObjectWithPostDeserializeOptionsFunc_Class_Parent() {
+                this.child = Prop(this, "child", "ObjectWithPostDeserializeOptionsFunc_Class_Child").set = null;
+            }
+            return ObjectWithPostDeserializeOptionsFunc_Class_Parent;
+        })();
+        var ObjectWithPostDeserializeOptionsFunc_Class_Child = (function () {
+            function ObjectWithPostDeserializeOptionsFunc_Class_Child() {
+            }
+            ObjectWithPostDeserializeOptionsFunc_Class_Child.Deserialize = function (node, path, options) {
+                options.AddObjPostDeserializeFunc(path.rootNode.obj, function () { return ObjectWithPostDeserializeOptionsFunc_Class_Child.flag = true; });
+                return null;
+            };
+            ObjectWithPostDeserializeOptionsFunc_Class_Child.flag = false;
+            return ObjectWithPostDeserializeOptionsFunc_Class_Child;
+        })();
+        ObjectWithPostDeserializeOptionsFunc_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
         test("D1_ObjectWithPostDeserializeOptionsFunc", function () {
             var options = new VDFLoadOptions();
-            var flag = false;
-            options.AddPostDeserializeFunc(function () { flag = true; });
-            VDF.Deserialize("{}", "object", options);
-            flag.Should().Be(true);
+            ok(VDF.Deserialize("{child:{}}", "ObjectWithPostDeserializeOptionsFunc_Class_Parent", options).child == null);
+            ObjectWithPostDeserializeOptionsFunc_Class_Child.flag.Should().Be(true);
         });
         var TypeInstantiatedManuallyThenFilled = (function () {
             function TypeInstantiatedManuallyThenFilled() {

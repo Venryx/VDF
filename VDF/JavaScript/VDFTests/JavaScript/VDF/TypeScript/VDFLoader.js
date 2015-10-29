@@ -3,7 +3,7 @@ var VDFLoadOptions = (function () {
         if (allowStringKeys === void 0) { allowStringKeys = true; }
         if (allowCommaSeparators === void 0) { allowCommaSeparators = false; }
         if (loadUnknownTypesAsBasicTypes === void 0) { loadUnknownTypesAsBasicTypes = false; }
-        this.postDeserializeFuncs = new List("Function");
+        this.objPostDeserializeFuncs = new Dictionary("object", "List(Function)");
         this.messages = messages || [];
         this.allowStringKeys = allowStringKeys;
         this.allowCommaSeparators = allowCommaSeparators;
@@ -12,7 +12,11 @@ var VDFLoadOptions = (function () {
             for (var key in initializerObj)
                 this[key] = initializerObj[key];
     }
-    VDFLoadOptions.prototype.AddPostDeserializeFunc = function (func) { this.postDeserializeFuncs.Add(func); };
+    VDFLoadOptions.prototype.AddObjPostDeserializeFunc = function (obj, func) {
+        if (!this.objPostDeserializeFuncs.ContainsKey(obj))
+            this.objPostDeserializeFuncs.Add(obj, new List("Function"));
+        this.objPostDeserializeFuncs[obj].Add(func);
+    };
     VDFLoadOptions.prototype.ForJSON = function () {
         this.allowStringKeys = true;
         this.allowCommaSeparators = true;

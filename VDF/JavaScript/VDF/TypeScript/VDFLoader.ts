@@ -13,8 +13,13 @@
 	}
 
 	messages: any[];
-	postDeserializeFuncs = new List<Function>("Function");
-	AddPostDeserializeFunc(func: Function) { this.postDeserializeFuncs.Add(func); }
+	objPostDeserializeFuncs = new Dictionary<object, List<Function>>("object", "List(Function)");
+	AddObjPostDeserializeFunc(obj, func: Function)
+	{
+		if (!this.objPostDeserializeFuncs.ContainsKey(obj))
+			this.objPostDeserializeFuncs.Add(obj, new List<Function>("Function"));
+		this.objPostDeserializeFuncs[obj].Add(func);
+	}
 
 	// for JSON compatibility
 	allowStringKeys: boolean;
