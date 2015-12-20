@@ -7,11 +7,11 @@ C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.M
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
 C:\Programming\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csprojResolveAssemblyReference.cache
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.pdb
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.exe.config
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.exe
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\SystemMaker.pdb
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.Properties.Resources.resources
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
-C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\SystemMaker.exe
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csprojResolveAssemblyReference.cache
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\VDF.dll.config
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\VDF.dll
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\bin\Debug\VDF.pdb
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.dll
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.pdb
+C:\Projects\Visual C#\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDFN.Properties.Resources.resources

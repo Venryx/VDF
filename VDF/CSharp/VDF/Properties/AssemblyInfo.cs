@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿/*using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -35,4 +35,62 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("VDFTests")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("VDFTests")]*/
+
+/*using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Permissions;
+[assembly: AssemblyVersion("2.0.5.0")]
+[assembly: CLSCompliant(true)]
+[assembly: Debuggable]
+[assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Public Domain")]
+[assembly: AssemblyDelaySign(true)]
+[assembly: AssemblyDescription("ADO.NET 2.0 Data Provider for SQLite")]
+[assembly: AssemblyFileVersion("1.0.61.0")]
+[assembly: AssemblyKeyFile("../mono.pub")]
+[assembly: AssemblyProduct("System.Data.SQLite")]
+[assembly: AssemblyTitle("System.Data.SQLite")]
+[assembly: AssemblyTrademark("")]
+[assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
+[assembly: ReliabilityContract]
+[assembly: ComVisible(false)]
+[assembly: AllowPartiallyTrustedCallers]
+[assembly: SecurityRules]
+[assembly: SecurityPermission(8, SkipVerification = true)]
+[module: UnverifiableCode]*/
+
+using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Security.Permissions;
+
+[assembly: AllowPartiallyTrustedCallers]
+[assembly: AssemblyCompany("http://sqlite.phxsoftware.com")]
+[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyCopyright("Public Domain")]
+[assembly: AssemblyDelaySign(true)]
+[assembly: AssemblyDescription("ADO.NET 2.0 Data Provider for SQLite")]
+[assembly: AssemblyFileVersion("1.0.61.0")]
+//[assembly: AssemblyKeyFile("../mono.pub")]
+[assembly: AssemblyProduct("System.Data.SQLite")]
+[assembly: AssemblyTitle("System.Data.SQLite")]
+[assembly: AssemblyTrademark("")]
+[assembly: AssemblyVersion("2.0.5.0")]
+[assembly: CLSCompliant(true)]
+[assembly: ComVisible(false)]
+[assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
+[assembly: ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
+[assembly: RuntimeCompatibility(WrapNonExceptionThrows = true)]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+//[assembly: SecurityRules(SecurityRuleSet.Level1)]

@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using FluentAssertions;
+using VDFN;
 using Xunit;
 
 namespace VDFTests
@@ -133,6 +134,19 @@ that needs escaping.>>""".Fix());
 			a.ToVDF().Should().Be("[\"hi\"]");
 		}
 		[Fact] void D1_StringAndArraysInArray() { VDF.Serialize(new List<object> {"text", new List<string> {"a", "b"}}).Should().Be("[\"text\" List(string)>[\"a\" \"b\"]]"); }
+		// probably todo: add support for this sort of thing (non-string map keys, that are serialized as strings, but declare their type inline) later
+		/*class D1_MapWithNonStringKeys_Null_Class
+		{
+			[VDFSerialize] VDFNode Serialize() { return "ClassSerializedToString"; }
+		}
+        [Fact] void D1_MapWithNonStringKeys_Null()
+		{
+			var dictionary = new Dictionary<object, string>();
+			dictionary.Add(new D1_MapWithNonStringKeys_Null_Class(), null);
+			var a = VDFSaver.ToVDFNode(dictionary);
+			a.mapChildren.ContainsKey()
+			a.ToVDF().Should().Be("Dictionary(object string)>{D1_MapWithNonStringKeys_Null_Class>\"ClassSerializedToString\":null}");
+		}*/
 		[Fact] void D1_DictionaryValues_Null()
 		{
 			var dictionary = new Dictionary<string, string>();
