@@ -53,6 +53,7 @@ Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(it
 interface Function
 {
 	AddTags(...tags: any[]): string;
+	//IsDerivedFrom(baseType: Function): boolean;
 }
 Function.prototype._AddProperty("AddTags", function(...tags)
 {
@@ -62,6 +63,19 @@ Function.prototype._AddProperty("AddTags", function(...tags)
 		this.tags.push(tags[i]);
 	return this;
 });
+/*Function.prototype._AddProperty("IsDerivedFrom", function(baseType)
+{
+	if (baseType == null)
+		return false;
+	var currentDerived = this.prototype;
+	while (currentDerived.__proto__)
+	{
+		if (currentDerived == baseType.prototype)
+			return true;
+		currentDerived = currentDerived.__proto__;
+	}
+	return false;
+});*/
 
 // classes
 // ==========
@@ -155,6 +169,19 @@ class VDF
 					depth++;
 			}
 		return genericArgumentTypes;
+	}
+	static IsTypeXDerivedFromY(xTypeName: string, yTypeName: string)
+	{
+		if (xTypeName == null || yTypeName == null || window[xTypeName] == null || window[yTypeName] == null)
+			return false;
+		var currentDerived = window[xTypeName].prototype;
+		while (currentDerived.__proto__)
+		{
+			if (currentDerived == window[yTypeName].prototype)
+				return true;
+			currentDerived = currentDerived.__proto__;
+		}
+		return false;
 	}
 
 	static GetIsTypePrimitive(typeName: string): boolean // (technically strings are not primitives in C#, but we consider them such)

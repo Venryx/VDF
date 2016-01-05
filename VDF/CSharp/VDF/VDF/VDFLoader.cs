@@ -101,7 +101,7 @@ namespace VDFN
 			if (fromVDFTypeName != null && fromVDFTypeName.Length > 0)
 			{
 				var fromVDFType = VDF.GetTypeByName(fromVDFTypeName, options);
-				if (type == null || type.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
+				if (type == null || fromVDFType.IsDerivedFrom(type)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 					type = fromVDFType;
 			}
 			var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
@@ -139,7 +139,7 @@ namespace VDFN
 				node.primitiveValue = firstNonMetadataToken.text;
 
 			// if list, parse items
-			else if (typeof(IList).IsAssignableFrom(type))
+			else if (type.IsDerivedFrom(typeof(IList)))
 			{
 				node.isList = true;
 				for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -158,7 +158,7 @@ namespace VDFN
 			}
 
 			// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
-			else //if (!typeof(IList).IsAssignableFrom(objType))
+			else //if (!objType.IsDerivedFrom(typeof(IList)))
 			{
 				node.isMap = true;
 				for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -168,7 +168,7 @@ namespace VDFN
 					{
 						var propName = token.text;
 						Type propValueType;
-						if (typeof(IDictionary).IsAssignableFrom(type))
+						if (type.IsDerivedFrom(typeof(IDictionary)))
 							propValueType = typeGenericArgs[1];
 						else
 							propValueType = typeInfo.props.ContainsKey(propName) ? typeInfo.props[propName].GetPropType() : null;

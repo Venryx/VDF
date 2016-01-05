@@ -215,9 +215,9 @@ namespace VDFN
 
 		public static object CreateNewInstanceOfType(Type type)
 		{
-			if (typeof(Array).IsAssignableFrom(type)) // if array, we start out with a list, and then turn it into an array at the end
+			if (type.IsDerivedFrom(typeof(Array))) // if array, we start out with a list, and then turn it into an array at the end
 				return Activator.CreateInstance(typeof(List<>).MakeGenericType(type.GetElementType()), true);
-			if (typeof(IList).IsAssignableFrom(type) || typeof(IDictionary).IsAssignableFrom(type)) // special cases, which require that we call the constructor
+			if (type.IsDerivedFrom(typeof(IList)) || type.IsDerivedFrom(typeof(IDictionary))) // special cases, which require that we call the constructor
 				return Activator.CreateInstance(type, true);
 			return FormatterServices.GetUninitializedObject(type); // preferred (for simplicity/consistency's sake): create an instance of the type, completely uninitialized 
 		}
@@ -248,7 +248,7 @@ namespace VDFN
 
 			Type finalType = declaredType;
 			var fromVDFType = VDF.GetTypeByName(fromVDFTypeName, options);
-			if (finalType == null || finalType.IsAssignableFrom(fromVDFType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
+			if (finalType == null || fromVDFType.IsDerivedFrom(finalType)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 				finalType = fromVDFType;
 		
 			object result = null;
@@ -275,7 +275,7 @@ namespace VDFN
 						result = CreateNewInstanceOfType(finalType);
 						path.currentNode.obj = result;
 						IntoObject(result, options, path);
-						if (typeof(Array).IsAssignableFrom(finalType)) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
+						if (finalType.IsDerivedFrom(typeof(Array))) // if type is array, we created a temp-list for item population; so, now, replace the temp-list with an array
 						{
 							var newResult = Array.CreateInstance(finalType.GetElementType(), ((IList)result).Count);
 							((IList)result).CopyTo(newResult, 0);

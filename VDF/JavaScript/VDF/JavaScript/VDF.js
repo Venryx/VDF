@@ -38,6 +38,19 @@ Function.prototype._AddProperty("AddTags", function () {
         this.tags.push(tags[i]);
     return this;
 });
+/*Function.prototype._AddProperty("IsDerivedFrom", function(baseType)
+{
+    if (baseType == null)
+        return false;
+    var currentDerived = this.prototype;
+    while (currentDerived.__proto__)
+    {
+        if (currentDerived == baseType.prototype)
+            return true;
+        currentDerived = currentDerived.__proto__;
+    }
+    return false;
+});*/
 // classes
 // ==========
 var VDFNodePathNode = (function () {
@@ -115,6 +128,17 @@ var VDF = (function () {
                     depth++;
             }
         return genericArgumentTypes;
+    };
+    VDF.IsTypeXDerivedFromY = function (xTypeName, yTypeName) {
+        if (xTypeName == null || yTypeName == null || window[xTypeName] == null || window[yTypeName] == null)
+            return false;
+        var currentDerived = window[xTypeName].prototype;
+        while (currentDerived.__proto__) {
+            if (currentDerived == window[yTypeName].prototype)
+                return true;
+            currentDerived = currentDerived.__proto__;
+        }
+        return false;
     };
     VDF.GetIsTypePrimitive = function (typeName) { return ["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "bool", "char", "string"].Contains(typeName); };
     VDF.GetIsTypeAnonymous = function (typeName) { return typeName != null && typeName == "object"; };

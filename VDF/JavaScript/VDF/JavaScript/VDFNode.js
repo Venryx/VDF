@@ -175,8 +175,10 @@ var VDFNode = (function () {
         var finalTypeName;
         if (window[VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
             finalTypeName = declaredTypeName;
-        // porting-note: this is only a limited implementation of CS functionality of making sure from-vdf-type is more specific than declared-type
-        if (finalTypeName == null || ["object", "IList", "IDictionary"].Contains(finalTypeName))
+        // if there is no declared type, or the from-metadata type is more specific than the declared type
+        // (for last condition/way: also assume from-vdf-type is derived, if declared-type name is one of these extra (not actually implemented in JS) types)
+        //if (finalTypeName == null || (<Function><object>window[VDF.GetTypeNameRoot(fromVDFTypeName)] || (()=>{})).IsDerivedFrom(<Function><object>window[VDF.GetTypeNameRoot(finalTypeName)] || (()=>{})) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
+        if (finalTypeName == null || VDF.IsTypeXDerivedFromY(fromVDFTypeName, finalTypeName) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
             finalTypeName = fromVDFTypeName;
         var result;
         var deserializedByCustomMethod = false;

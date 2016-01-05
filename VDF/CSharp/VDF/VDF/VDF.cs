@@ -31,6 +31,7 @@ namespace VDFN
 
 	public static class VDFClassExtensions
 	{
+		// Type
 		public static Type GetVDFType(this object s) { return s.GetType().ToVDFType(); } // get an object's type, as the VDF system sees it
 		public static Type ToVDFType(this Type s) // get the type that the VDF system sees type 's' as
 		{
@@ -39,7 +40,9 @@ namespace VDFN
 				result = typeof(List<>).MakeGenericType(result.GetElementType());
 			return result;
 		}
+		public static bool IsDerivedFrom(this Type s, Type baseType) { return baseType.IsAssignableFrom(s); } // just a more-sensible alias
 
+		// List<MemberInfo>
 		public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags)
 		{
 			var result = new List<MemberInfo>(); //HashSet<MemberInfo>();
@@ -54,6 +57,8 @@ namespace VDFN
 			}
 			return result; //.ToList(); //Distinct().ToList();
 		}
+
+		// VDFNode
 		public static T As<T>(this VDFNode s) { return s != null ? s.As_Base<T>() : default(T); }
 		public static T As<T>(this VDFNode s, T defaultValue) { return s != null ? s.As_Base<T>() : defaultValue; } // implemented as extension method so that it can be called on null
 	}
@@ -236,9 +241,9 @@ namespace VDFN
 
 				var rootTypeName = rootType.FullName.Substring(0, rootType.FullName.IndexOf("`"));
 				rootTypeName = rootTypeName.Contains("+") ? rootTypeName.Substring(rootTypeName.IndexOf("+") + 1) : rootTypeName; // remove assembly name, if specified in string (may want to ensure this doesn't break anything)
-				if (typeof(IList).IsAssignableFrom(rootType)) // if type 'List' or a derivative, collapse its v-type-name to 'List', since that is how we handle it
+				if (rootType.IsDerivedFrom(typeof(IList))) // if type 'List' or a derivative, collapse its v-type-name to 'List', since that is how we handle it
 					rootTypeName = "List";
-				else if (typeof(Dictionary<,>).IsAssignableFrom(rootType)) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
+				else if (rootType.IsDerivedFrom(typeof(Dictionary<,>))) // if type 'Dictionary' or a derivative, collapse its v-type-name to 'Dictionary', since that is how we handle it
 					rootTypeName = "Dictionary";
 
 				string result = rootTypeName + "(" + String.Join(" ", type.GetGenericArguments().Select(type2=>GetNameOfType(type2, options)).ToArray()) + ")";
@@ -263,7 +268,7 @@ namespace VDFN
 		}
 		public static List<Type> GetGenericArgumentsOfType(Type type) // if array, actually returns the element-type (which is equivalent)
 		{
-			if (typeof(IList).IsAssignableFrom(type))
+			if (type.IsDerivedFrom(typeof(IList)))
 				return new List<Type> {type.HasElementType ? type.GetElementType() : type.GetGenericArguments().FirstOrDefault()};
 			return type != null ? type.GetGenericArguments().ToList() : null;
 		}
