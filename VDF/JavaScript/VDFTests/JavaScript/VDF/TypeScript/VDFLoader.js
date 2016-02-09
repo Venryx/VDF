@@ -3,6 +3,7 @@ var VDFLoadOptions = (function () {
         if (allowStringKeys === void 0) { allowStringKeys = true; }
         if (allowCommaSeparators === void 0) { allowCommaSeparators = false; }
         if (loadUnknownTypesAsBasicTypes === void 0) { loadUnknownTypesAsBasicTypes = false; }
+        this.objPostDeserializeFuncs_early = new Dictionary("object", "List(Function)");
         this.objPostDeserializeFuncs = new Dictionary("object", "List(Function)");
         this.messages = messages || [];
         this.allowStringKeys = allowStringKeys;
@@ -12,10 +13,18 @@ var VDFLoadOptions = (function () {
             for (var key in initializerObj)
                 this[key] = initializerObj[key];
     }
-    VDFLoadOptions.prototype.AddObjPostDeserializeFunc = function (obj, func) {
-        if (!this.objPostDeserializeFuncs.ContainsKey(obj))
-            this.objPostDeserializeFuncs.Add(obj, new List("Function"));
-        this.objPostDeserializeFuncs[obj].Add(func);
+    VDFLoadOptions.prototype.AddObjPostDeserializeFunc = function (obj, func, early) {
+        if (early === void 0) { early = false; }
+        if (early) {
+            if (!this.objPostDeserializeFuncs_early.ContainsKey(obj))
+                this.objPostDeserializeFuncs_early.Add(obj, new List("Function"));
+            this.objPostDeserializeFuncs_early[obj].Add(func);
+        }
+        else {
+            if (!this.objPostDeserializeFuncs.ContainsKey(obj))
+                this.objPostDeserializeFuncs.Add(obj, new List("Function"));
+            this.objPostDeserializeFuncs[obj].Add(func);
+        }
     };
     VDFLoadOptions.prototype.ForJSON = function () {
         this.allowStringKeys = true;
@@ -91,7 +100,7 @@ var VDFLoader = (function () {
             node.primitiveValue = parseFloat(firstNonMetadataToken.text);
         else if (firstNonMetadataToken.type == VDFTokenType.String)
             node.primitiveValue = firstNonMetadataToken.text;
-        else if (typeName.StartsWith("List(")) {
+        else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker) {
             node.isList = true;
             for (var i = 0; i < tokensAtDepth1.Count; i++) {
                 var token = tokensAtDepth1[i];
@@ -112,7 +121,8 @@ var VDFLoader = (function () {
                 if (token.type == VDFTokenType.Key) {
                     var propName = token.text;
                     var propValueTypeName;
-                    if (typeName.StartsWith("Dictionary("))
+                    //if (typeName.StartsWith("Dictionary(")) //typeof(IDictionary).IsAssignableFrom(objType))
+                    if (typeGenericArgs.length >= 2)
                         propValueTypeName = typeGenericArgs[1];
                     else
                         propValueTypeName = typeInfo && typeInfo.props[propName] ? typeInfo.props[propName].typeName : null;

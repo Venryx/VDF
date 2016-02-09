@@ -120,9 +120,10 @@ namespace VDFN
 					var objAsDictionary = (IDictionary)obj;
 					foreach (object key in objAsDictionary.Keys)
 					{
-						var keyNode = ToVDFNode(key, typeGenericArgs[0], options, path, true);
-						if (!(keyNode.primitiveValue is string))
-							throw new VDFException("A map key object must either be a string or have an exporter that converts it into a string.");
+						var keyNode = ToVDFNode(key, typeGenericArgs[0], options, path, true); // stringify-attempt-1: use exporter
+						if (!(keyNode.primitiveValue is string)) // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
+							//throw new VDFException("A map key object must either be a string or have an exporter that converts it into a string.");
+							keyNode = new VDFNode(key.ToString());
 						var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 						if (valueNode == VDF.CancelSerialize)
 							continue;
@@ -163,7 +164,7 @@ namespace VDFN
 							propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 							result.mapChildren.Add(propName, propValueNode);
 						}
-						catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }
+						catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }/**/finally{}
 						/*catch (Exception ex)
 						{
 							var field = ex.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance) ?? ex.GetType().GetField("_message", BindingFlags.NonPublic | BindingFlags.Instance);

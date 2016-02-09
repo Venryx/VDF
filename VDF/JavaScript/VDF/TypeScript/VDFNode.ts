@@ -177,10 +177,13 @@
 	{
 		var typeNameRoot = VDF.GetTypeNameRoot(typeName);
 		var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
-		if (typeNameRoot == "List")
+		/*if (typeNameRoot == "List")
 			return new List(genericParameters[0]);
 		if (typeNameRoot == "Dictionary")
-			return new Dictionary(genericParameters[0], genericParameters[1]);
+			return new Dictionary(genericParameters[0], genericParameters[1]);*/
+		if (typeName.Contains("(")) // if generic type, supply generic-parameters as first arguments to constructor
+	    	//return window[typeNameRoot].apply(null, genericParameters);
+	    	return new (Function.prototype.bind.apply(window[typeNameRoot], [null].concat(genericParameters)));
 		if (!(window[typeNameRoot] instanceof Function))
 			throw new Error("Could not find type \"" + typeName + "\".");
 		return new (<{new(...args: any[]): any}><any>window[typeNameRoot]); // maybe todo: add code that resets props to their nulled-out/zeroed-out values (or just don't use any constructors, and just remember to set the __proto__ property afterward)
@@ -296,7 +299,7 @@
 					else
 						obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || {name: keyString}, null));
 				}
-			catch(ex) { ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"; throw ex; }
+			catch(ex) { ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n"; throw ex; }/**/finally{}
 		}
 
 		if (options.objPostDeserializeFuncs_early.ContainsKey(obj))

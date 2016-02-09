@@ -100,7 +100,7 @@ var VDFLoader = (function () {
             node.primitiveValue = parseFloat(firstNonMetadataToken.text);
         else if (firstNonMetadataToken.type == VDFTokenType.String)
             node.primitiveValue = firstNonMetadataToken.text;
-        else if (typeName.StartsWith("List(")) {
+        else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker) {
             node.isList = true;
             for (var i = 0; i < tokensAtDepth1.Count; i++) {
                 var token = tokensAtDepth1[i];
@@ -121,7 +121,8 @@ var VDFLoader = (function () {
                 if (token.type == VDFTokenType.Key) {
                     var propName = token.text;
                     var propValueTypeName;
-                    if (typeName.StartsWith("Dictionary("))
+                    //if (typeName.StartsWith("Dictionary(")) //typeof(IDictionary).IsAssignableFrom(objType))
+                    if (typeGenericArgs.length >= 2)
                         propValueTypeName = typeGenericArgs[1];
                     else
                         propValueTypeName = typeInfo && typeInfo.props[propName] ? typeInfo.props[propName].typeName : null;

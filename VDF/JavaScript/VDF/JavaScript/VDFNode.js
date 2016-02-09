@@ -143,10 +143,13 @@ var VDFNode = (function () {
     VDFNode.CreateNewInstanceOfType = function (typeName) {
         var typeNameRoot = VDF.GetTypeNameRoot(typeName);
         var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
-        if (typeNameRoot == "List")
+        /*if (typeNameRoot == "List")
             return new List(genericParameters[0]);
         if (typeNameRoot == "Dictionary")
-            return new Dictionary(genericParameters[0], genericParameters[1]);
+            return new Dictionary(genericParameters[0], genericParameters[1]);*/
+        if (typeName.Contains("("))
+            //return window[typeNameRoot].apply(null, genericParameters);
+            return new (Function.prototype.bind.apply(window[typeNameRoot], [null].concat(genericParameters)));
         if (!(window[typeNameRoot] instanceof Function))
             throw new Error("Could not find type \"" + typeName + "\".");
         return new window[typeNameRoot]; // maybe todo: add code that resets props to their nulled-out/zeroed-out values (or just don't use any constructors, and just remember to set the __proto__ property afterward)
@@ -243,7 +246,8 @@ var VDFNode = (function () {
                 catch (ex) {
                     ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n";
                     throw ex;
-                }
+                } /**/
+                finally { }
         }
         if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
             for (var i in options.objPostDeserializeFuncs_early.Get(obj))

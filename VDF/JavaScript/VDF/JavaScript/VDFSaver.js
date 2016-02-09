@@ -82,9 +82,10 @@ var VDFSaver = (function () {
                 result.isMap = true;
                 var objAsDictionary = obj;
                 for (var key in objAsDictionary.Keys) {
-                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true);
+                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true); // stringify-attempt-1: use exporter
                     if (typeof keyNode.primitiveValue != "string")
-                        throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
+                        //throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
+                        keyNode = new VDFNode(key.toString());
                     var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
                     if (valueNode == VDF.CancelSerialize)
                         continue;
@@ -125,7 +126,8 @@ var VDFSaver = (function () {
                     catch (ex) {
                         ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n";
                         throw ex;
-                    }
+                    } /**/
+                    finally { }
             }
         }
         if (declaredTypeName == null)

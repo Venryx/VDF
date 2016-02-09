@@ -107,9 +107,10 @@ class VDFSaver
 				var objAsDictionary = <Dictionary<any, any>>obj;
 				for (var key in objAsDictionary.Keys)
                 {
-                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true);
-                    if (typeof keyNode.primitiveValue != "string")
-                        throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
+                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true); // stringify-attempt-1: use exporter
+                	if (typeof keyNode.primitiveValue != "string") // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
+                		//throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
+						keyNode = new VDFNode(key.toString());
 					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
@@ -155,7 +156,7 @@ class VDFSaver
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.SetMapChild(propName, propValueNode);
 					}
-					catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }
+					catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }/**/finally{}
 			}
 		}
 

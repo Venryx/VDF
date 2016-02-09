@@ -169,7 +169,7 @@ three lines".Fix());
 		test("D0_EmptyMap", ()=> { (<Dictionary<object, object>>VDF.Deserialize("{}")).Count.Should().Be(0); });
 		test("D0_Map_ChildMetadata", ()=>
 		{
-			var a: VDFNode = VDFLoader.ToVDFNode("Dictionary(object object)>[a:string>\"1\" b:string>\"2\"]");
+			var a: VDFNode = VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
 			a.metadata.Should().Be("Dictionary(object object)");
 			a["a"].metadata.Should().Be("string");
 			a["b"].metadata.Should().Be("string");

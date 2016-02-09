@@ -143,10 +143,13 @@ var VDFNode = (function () {
     VDFNode.CreateNewInstanceOfType = function (typeName) {
         var typeNameRoot = VDF.GetTypeNameRoot(typeName);
         var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
-        if (typeNameRoot == "List")
+        /*if (typeNameRoot == "List")
             return new List(genericParameters[0]);
         if (typeNameRoot == "Dictionary")
-            return new Dictionary(genericParameters[0], genericParameters[1]);
+            return new Dictionary(genericParameters[0], genericParameters[1]);*/
+        if (typeName.Contains("("))
+            //return window[typeNameRoot].apply(null, genericParameters);
+            return new (Function.prototype.bind.apply(window[typeNameRoot], [null].concat(genericParameters)));
         if (!(window[typeNameRoot] instanceof Function))
             throw new Error("Could not find type \"" + typeName + "\".");
         return new window[typeNameRoot]; // maybe todo: add code that resets props to their nulled-out/zeroed-out values (or just don't use any constructors, and just remember to set the __proto__ property afterward)
@@ -175,8 +178,10 @@ var VDFNode = (function () {
         var finalTypeName;
         if (window[VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
             finalTypeName = declaredTypeName;
-        // porting-note: this is only a limited implementation of CS functionality of making sure from-vdf-type is more specific than declared-type
-        if (finalTypeName == null || ["object", "IList", "IDictionary"].Contains(finalTypeName))
+        // if there is no declared type, or the from-metadata type is more specific than the declared type
+        // (for last condition/way: also assume from-vdf-type is derived, if declared-type name is one of these extra (not actually implemented in JS) types)
+        //if (finalTypeName == null || (<Function><object>window[VDF.GetTypeNameRoot(fromVDFTypeName)] || (()=>{})).IsDerivedFrom(<Function><object>window[VDF.GetTypeNameRoot(finalTypeName)] || (()=>{})) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
+        if (finalTypeName == null || VDF.IsTypeXDerivedFromY(fromVDFTypeName, finalTypeName) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
             finalTypeName = fromVDFTypeName;
         var result;
         var deserializedByCustomMethod = false;
@@ -243,12 +248,15 @@ var VDFNode = (function () {
                     throw ex;
                 }
         }
+        if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
+            for (var i in options.objPostDeserializeFuncs_early.Get(obj))
+                options.objPostDeserializeFuncs_early.Get(obj)[i]();
         for (var propName in VDF.GetObjectProps(obj))
             if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
                 obj[propName](this, path, options);
         if (options.objPostDeserializeFuncs.ContainsKey(obj))
-            for (var i in options.objPostDeserializeFuncs[obj])
-                options.objPostDeserializeFuncs[obj][i]();
+            for (var i in options.objPostDeserializeFuncs.Get(obj))
+                options.objPostDeserializeFuncs.Get(obj)[i]();
     };
     return VDFNode;
 })();

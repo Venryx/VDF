@@ -139,7 +139,8 @@ namespace VDFN
 				node.primitiveValue = firstNonMetadataToken.text;
 
 			// if list, parse items
-			else if (type.IsDerivedFrom(typeof(IList)))
+			//else if (type.IsDerivedFrom(typeof(IList)))
+			else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
 			{
 				node.isList = true;
 				for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -158,7 +159,8 @@ namespace VDFN
 			}
 
 			// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
-			else //if (!objType.IsDerivedFrom(typeof(IList)))
+			//else //if (!objType.IsDerivedFrom(typeof(IList)))
+			else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
 			{
 				node.isMap = true;
 				for (var i = 0; i < tokensAtDepth1.Count; i++)

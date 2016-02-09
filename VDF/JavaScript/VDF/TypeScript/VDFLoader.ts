@@ -127,7 +127,8 @@ class VDFLoader
 			node.primitiveValue = firstNonMetadataToken.text;
 		
 		// if list, parse items
-		else if (typeName.StartsWith("List(")) //typeof(IList).IsAssignableFrom(objType))
+		//else if (typeName.StartsWith("List(")) //typeof(IList).IsAssignableFrom(objType))
+		else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
 		{
 			node.isList = true;
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -146,7 +147,8 @@ class VDFLoader
 		}
 
 		// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
-		else //if (!typeof(IList).IsAssignableFrom(objType))
+		//else //if (!typeof(IList).IsAssignableFrom(objType))
+		else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
 		{
 			node.isMap = true;
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -156,7 +158,8 @@ class VDFLoader
 				{
 					var propName = token.text;
 					var propValueTypeName;
-					if (typeName.StartsWith("Dictionary(")) //typeof(IDictionary).IsAssignableFrom(objType))
+					//if (typeName.StartsWith("Dictionary(")) //typeof(IDictionary).IsAssignableFrom(objType))
+					if (typeGenericArgs.length >= 2)
 						propValueTypeName = typeGenericArgs[1];
 					else
 						propValueTypeName = typeInfo && typeInfo.props[propName] ? typeInfo.props[propName].typeName : null;
