@@ -89,7 +89,8 @@ namespace VDFN
 			else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
 				fromVDFTypeName = "bool";
 			else if (firstNonMetadataToken.type == VDFTokenType.Number)
-				fromVDFTypeName = firstNonMetadataToken.text.Contains(".") ? "double" : "int";
+				//fromVDFTypeName = firstNonMetadataToken.text.Contains(".") ? "double" : "int";
+				fromVDFTypeName = firstNonMetadataToken.text == "Infinity" || firstNonMetadataToken.text == "-Infinity" || firstNonMetadataToken.text.Contains(".") || firstNonMetadataToken.text.Contains("e") ? "double" : "int";
 			else if (firstNonMetadataToken.type == VDFTokenType.String)
 				fromVDFTypeName = "string";
 			else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
@@ -104,6 +105,9 @@ namespace VDFN
 				if (type == null || fromVDFType.IsDerivedFrom(type)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 					type = fromVDFType;
 			}
+			// for keys, force load as string, since we're not at the use-importer stage
+			if (firstNonMetadataToken.type == VDFTokenType.Key)
+				type = typeof(string);
 			var typeGenericArgs = VDF.GetGenericArgumentsOfType(type);
 			var typeInfo = VDFTypeInfo.Get(type);
 
@@ -116,31 +120,40 @@ namespace VDFN
 			// if primitive, parse value
 			if (firstNonMetadataToken.type == VDFTokenType.Null)
 				node.primitiveValue = null;
-			else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
+			else if (type == typeof(bool))
 				node.primitiveValue = bool.Parse(firstNonMetadataToken.text);
-			else if (firstNonMetadataToken.type == VDFTokenType.Number)
+			else if (type == typeof(float)) // (only occurs if declared-type is float)
+				if (firstNonMetadataToken.text == "Infinity")
+					node.primitiveValue = float.PositiveInfinity;
+				else if (firstNonMetadataToken.text == "-Infinity")
+					node.primitiveValue = float.NegativeInfinity;
+				else
+					node.primitiveValue = float.Parse(firstNonMetadataToken.text);
+			else if (type == typeof(double))
 				if (firstNonMetadataToken.text == "Infinity")
 					node.primitiveValue = double.PositiveInfinity;
 				else if (firstNonMetadataToken.text == "-Infinity")
 					node.primitiveValue = double.NegativeInfinity;
-				else if (firstNonMetadataToken.text.Contains(".") || firstNonMetadataToken.text.Contains("e"))
+				else //if (firstNonMetadataToken.text.Contains(".") || firstNonMetadataToken.text.Contains("e"))
 					node.primitiveValue = double.Parse(firstNonMetadataToken.text);
+			else if (type == typeof(int))
+			{
+				//node.primitiveValue = int.Parse(firstNonMetadataToken.text);
+				// maybe make-so: changes in other places are done as well, to add good support for long's
+				var number = long.Parse(firstNonMetadataToken.text);
+				if ((int)number == number)
+					node.primitiveValue = (int)number;
 				else
-				{
-					//node.primitiveValue = int.Parse(firstNonMetadataToken.text);
-					// maybe make-so: changes in other places are done as well, to add good support for long's
-					var number = long.Parse(firstNonMetadataToken.text);
-					if ((int)number == number)
-						node.primitiveValue = (int)number;
-					else
-						node.primitiveValue = number;
-				}
-			else if (firstNonMetadataToken.type == VDFTokenType.String)
+					node.primitiveValue = number;
+			}
+			//else if (type == typeof(string))
+			// have in-vdf string type override declared type, since we're not at the use-importer stage
+			else if (type == typeof(string) || firstNonMetadataToken.type == VDFTokenType.String)
 				node.primitiveValue = firstNonMetadataToken.text;
 
 			// if list, parse items
-			//else if (type.IsDerivedFrom(typeof(IList)))
-			else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
+			//else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
+			else if (type.IsDerivedFrom(typeof(IList)))
 			{
 				node.isList = true;
 				for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -159,8 +172,8 @@ namespace VDFN
 			}
 
 			// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
-			//else //if (!objType.IsDerivedFrom(typeof(IList)))
-			else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
+			//else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
+			else //if (!objType.IsDerivedFrom(typeof(IList)))
 			{
 				node.isMap = true;
 				for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -168,17 +181,24 @@ namespace VDFN
 					var token = tokensAtDepth1[i];
 					if (token.type == VDFTokenType.Key)
 					{
-						var propName = token.text;
+						var propNameFirstToken = i >= 1 && tokensAtDepth1[i - 1].type == VDFTokenType.Metadata ? tokensAtDepth1[i - 1] : tokensAtDepth1[i];
+						var propNameEnderToken = tokensAtDepth1[i + 1];
+						var propNameType = propNameFirstToken.type == VDFTokenType.Metadata ? typeof(object) : typeof(string);
+						if (type.IsDerivedFrom(typeof(IDictionary)) && typeGenericArgs[0] != typeof(object))
+							propNameType = typeGenericArgs[0];
+						var propNameNode = ToVDFNode(tokens, propNameType, options, propNameFirstToken.index, propNameEnderToken.index);
+
 						Type propValueType;
 						if (type.IsDerivedFrom(typeof(IDictionary)))
 							propValueType = typeGenericArgs[1];
 						else
-							propValueType = typeInfo.props.ContainsKey(propName) ? typeInfo.props[propName].GetPropType() : null;
-
+							propValueType = propNameNode.primitiveValue is string && typeInfo.props.ContainsKey(propNameNode.primitiveValue as string) ? typeInfo.props[propNameNode.primitiveValue as string].GetPropType() : null;
 						var propValueFirstToken = tokensAtDepth1[i + 1];
 						var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.Key);
-						//node.mapChildren.Add(propName, ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options));
-						node.mapChildren.Add(propName, ToVDFNode(tokens, propValueType, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex));
+						//var propValueNode = ToVDFNode(GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueType, options);
+						var propValueNode = ToVDFNode(tokens, propValueType, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex);
+
+						node.mapChildren.Add(propNameNode, propValueNode);
 					}
 				}
 			}

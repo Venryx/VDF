@@ -54,18 +54,21 @@ Function.prototype._AddProperty("AddTags", function () {
 // classes
 // ==========
 var VDFNodePathNode = (function () {
-    function VDFNodePathNode(obj, prop, list_index, map_key) {
+    function VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key) {
         if (obj === void 0) { obj = null; }
         if (prop === void 0) { prop = null; }
         if (list_index === void 0) { list_index = -1; }
+        if (map_keyIndex === void 0) { map_keyIndex = -1; }
         if (map_key === void 0) { map_key = null; }
         this.list_index = -1;
+        this.map_keyIndex = -1;
         this.obj = obj;
         this.prop = prop;
         this.list_index = list_index;
+        this.map_keyIndex = map_keyIndex;
         this.map_key = map_key;
     }
-    VDFNodePathNode.prototype.Clone = function () { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_key); };
+    VDFNodePathNode.prototype.Clone = function () { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); };
     return VDFNodePathNode;
 })();
 var VDFNodePath = (function () {
@@ -90,14 +93,19 @@ var VDFNodePath = (function () {
         enumerable: true,
         configurable: true
     });
-    VDFNodePath.prototype.ExtendAsListChild = function (index, obj) {
+    VDFNodePath.prototype.ExtendAsListItem = function (index, obj) {
         var newNodes = this.nodes.Select(function (a) { return a.Clone(); }, "VDFNodePathNode");
         newNodes.Add(new VDFNodePathNode(obj, null, index));
         return new VDFNodePath(newNodes);
     };
-    VDFNodePath.prototype.ExtendAsMapChild = function (key, obj) {
+    VDFNodePath.prototype.ExtendAsMapKey = function (keyIndex, obj) {
         var newNodes = this.nodes.Select(function (a) { return a.Clone(); }, "VDFNodePathNode");
-        newNodes.Add(new VDFNodePathNode(obj, null, -1, key));
+        newNodes.Add(new VDFNodePathNode(obj, null, -1, keyIndex));
+        return new VDFNodePath(newNodes);
+    };
+    VDFNodePath.prototype.ExtendAsMapItem = function (key, obj) {
+        var newNodes = this.nodes.Select(function (a) { return a.Clone(); }, "VDFNodePathNode");
+        newNodes.Add(new VDFNodePathNode(obj, null, -1, -1, key));
         return new VDFNodePath(newNodes);
     };
     VDFNodePath.prototype.ExtendAsChild = function (prop, obj) {
@@ -651,6 +659,16 @@ var Dictionary = (function () {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Dictionary.prototype, "Pairs", {
+        get: function () {
+            var result = [];
+            for (var i = 0; i < this.keys.length; i++)
+                result.push({ key: this.keys[i], value: this.values[i] });
+            return result;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Dictionary.prototype, "Count", {
         get: function () { return this.keys.length; },
         enumerable: true,
@@ -663,7 +681,8 @@ var Dictionary = (function () {
         if (this.keys.indexOf(key) == -1)
             this.keys.push(key);
         this.values[this.keys.indexOf(key)] = value;
-        this[key] = value; // make value accessible directly on Dictionary object
+        if (typeof key == "string")
+            this[key] = value; // make value accessible directly on Dictionary object
     };
     Dictionary.prototype.Add = function (key, value) {
         if (this.keys.indexOf(key) != -1)

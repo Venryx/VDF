@@ -95,7 +95,7 @@ class VDFSaver
 				var objAsList = <List<any>>obj;
 				for (var i = 0; i < objAsList.length; i++)
 				{
-					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
+					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
 					result.AddListChild(itemNode);
@@ -105,16 +105,16 @@ class VDFSaver
 			{
 				result.isMap = true;
 				var objAsDictionary = <Dictionary<any, any>>obj;
-				for (var key in objAsDictionary.Keys)
+				for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++)
                 {
-                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true); // stringify-attempt-1: use exporter
+                    var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.key), true); // stringify-attempt-1: use exporter
                 	if (typeof keyNode.primitiveValue != "string") // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
                 		//throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
-						keyNode = new VDFNode(key.toString());
-					var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
+						keyNode = new VDFNode(pair.key.toString());
+					var valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
 					if (valueNode == VDF.CancelSerialize)
 						continue;
-					result.SetMapChild(keyNode.primitiveValue, valueNode);
+					result.SetMapChild(keyNode, valueNode);
 				}
 			}
 			else // if an object, with properties
@@ -149,12 +149,13 @@ class VDFSaver
 									canceled = true;
 						if (canceled)
 							continue;
-					
+
+						var propNameNode = new VDFNode(propName);
 						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
 						if (propValueNode == VDF.CancelSerialize)
 							continue;
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
-						result.SetMapChild(propName, propValueNode);
+						result.SetMapChild(propNameNode, propValueNode);
 					}
 					catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }/**/finally{}
 			}
@@ -174,6 +175,9 @@ class VDFSaver
 			options.typeMarking == VDFTypeMarking.ExternalNoCollapse
 		))
 			result.metadata = typeName;
+
+		if (result.metadata_override != null)
+			result.metadata = result.metadata_override;
 
 		if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.popOutL1)
 			result.childPopOut = true;

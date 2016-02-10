@@ -12,9 +12,10 @@ namespace VDFN
 	public class VDFNode
 	{
 		public string metadata;
+		public string metadata_override; // maybe temp
 		public object primitiveValue;
 		public List<VDFNode> listChildren = new List<VDFNode>();
-		public Dictionary<string, VDFNode> mapChildren = new Dictionary<string, VDFNode>(); // holds object-properties, as well as dictionary-key-value-pairs
+		public Dictionary<VDFNode, VDFNode> mapChildren = new Dictionary<VDFNode, VDFNode>(); // holds object-properties, as well as dictionary-key-value-pairs
 
 		public VDFNode(object primitiveValue = null, string metadata = null)
 		{
@@ -35,7 +36,14 @@ namespace VDFN
 		}
 		public VDFNode this[string key]
 		{
-			get { return mapChildren.ContainsKey(key) ? mapChildren[key] : null; }
+			get
+			{
+				//return mapChildren.ContainsKey(key) ? mapChildren[key] : null;
+				foreach (KeyValuePair<VDFNode, VDFNode> pair in mapChildren)
+					if (pair.Key.primitiveValue is string && (string)pair.Key.primitiveValue == key)
+						return pair.Value;
+				return null;
+			}
 			set { mapChildren[key] = value; }
 		}
 		public bool Equals(VDFNode other) { return ToVDF() == other.ToVDF(); } // base equality on whether their 'default output' is the same
@@ -71,7 +79,7 @@ namespace VDFN
 		public static implicit operator string(VDFNode node) { return node.As_Base<string>(); }
 		public static implicit operator VDFNode(string val) { return new VDFNode(val); }
 		//public override string ToString() { return this; } // another way of calling the above string cast; equivalent to: (string)vdfNode
-		public override string ToString() { return primitiveValue.ToString(); } // helpful for debugging
+		public override string ToString() { return primitiveValue != null ? primitiveValue.ToString() : ""; } // helpful for debugging
 
 		// saving
 		// ==========
@@ -90,7 +98,7 @@ namespace VDFN
 		public bool isMap; // can also be inferred from use of map-children collection
 		public bool childPopOut;
 		public string ToVDF(VDFSaveOptions options = null, int tabDepth = 0) { return ToVDF_InlinePart(options, tabDepth) + ToVDF_PoppedOutPart(options, tabDepth); }
-		public string ToVDF_InlinePart(VDFSaveOptions options = null, int tabDepth = 0)
+		public string ToVDF_InlinePart(VDFSaveOptions options = null, int tabDepth = 0, bool isKey = false)
 		{
 			options = options ?? new VDFSaveOptions();
 
@@ -109,7 +117,11 @@ namespace VDFN
 			else if (primitiveValue is string)
 			{
 				var unpaddedString = (string)primitiveValue;
-				if (unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>")) // the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency
+				// (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
+				var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
+				if (isKey)
+					needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
+				if (needsEscaping)
 				{
 					var literalStartMarkerString = "<<";
 					var literalEndMarkerString = ">>";
@@ -118,10 +130,10 @@ namespace VDFN
 						literalStartMarkerString += "<";
 						literalEndMarkerString += ">";
 					}
-					builder.Append("\"" + literalStartMarkerString + PadString(unpaddedString) + literalEndMarkerString + "\"");
+					builder.Append((isKey ? "" : "\"") + literalStartMarkerString + PadString(unpaddedString) + literalEndMarkerString + (isKey ? "" : "\""));
 				}
 				else
-					builder.Append("\"" + unpaddedString + "\"");
+					builder.Append((isKey ? "" : "\"") + unpaddedString + (isKey ? "" : "\""));
 			}
 			else if (VDF.GetIsTypePrimitive(primitiveValue.GetType())) // if number
 				builder.Append(options.useNumberTrimming && primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
@@ -140,9 +152,14 @@ namespace VDFN
 				if (isMap || mapChildren.Count > 0)
 				{
 					builder.Append("{");
-					var pairs = mapChildren.ToList();
-					for (var i = 0; i < pairs.Count; i++)
-						builder.Append((i == 0 ? "" : (options.useCommaSeparators ? "," : " ")) + (options.useStringKeys ? "\"" : "") + pairs[i].Key + (options.useStringKeys ? "\"" : "") + ":" + pairs[i].Value.ToVDF_InlinePart(options, tabDepth));
+					var i = -1;
+					foreach (KeyValuePair<VDFNode, VDFNode> pair in mapChildren)
+					{
+						i++;
+						var keyStr = pair.Key.ToVDF_InlinePart(options, tabDepth, true);
+						var valueStr = pair.Value.ToVDF_InlinePart(options, tabDepth);
+						builder.Append((i == 0 ? "" : (options.useCommaSeparators ? "," : " ")) + (options.useStringKeys ? "\"" : "") + keyStr + (options.useStringKeys ? "\"" : "") + ":" + valueStr);
+					}
 					builder.Append("}");
 				}
 				if (isList || listChildren.Count > 0)
@@ -169,9 +186,11 @@ namespace VDFN
 				for (var i = 0; i < tabDepth + 1; i++)
 					childTabStr += "\t";
 				if (isMap || mapChildren.Count > 0)
-					foreach (KeyValuePair<string, VDFNode> pair in mapChildren)
+					foreach (KeyValuePair<VDFNode, VDFNode> pair in mapChildren)
 					{
-						builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + pair.Key + (options.useStringKeys ? "\"" : "") + ":" + pair.Value.ToVDF_InlinePart(options, tabDepth + 1));
+						var keyStr = pair.Key.ToVDF_InlinePart(options, tabDepth, true);
+						var valueStr = pair.Value.ToVDF_InlinePart(options, tabDepth + 1);
+						builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + keyStr + (options.useStringKeys ? "\"" : "") + ":" + valueStr);
 						var poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(options, tabDepth + 1);
 						if (poppedOutChildText.Length > 0)
 							builder.Append(poppedOutChildText);
@@ -190,7 +209,7 @@ namespace VDFN
 				var poppedOutChildTexts = new List<string>();
 				string poppedOutChildText;
 				if (isMap || mapChildren.Count > 0)
-					foreach (KeyValuePair<string, VDFNode> pair in mapChildren)
+					foreach (KeyValuePair<VDFNode, VDFNode> pair in mapChildren)
 						if ((poppedOutChildText = pair.Value.ToVDF_PoppedOutPart(options, tabDepth)).Length > 0)
 							poppedOutChildTexts.Add(poppedOutChildText);
 				if (isList || listChildren.Count > 0)
@@ -268,7 +287,7 @@ namespace VDFN
 				else if (finalType.IsEnum) // helper importer for enums
 					result = Enum.Parse(finalType, primitiveValue.ToString()); //primitiveValue);
 				else if (VDF.GetIsTypePrimitive(finalType)) //primitiveValue != null)
-					result = Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
+					result = Convert.ChangeType(primitiveValue, finalType);
 				else
 					if (primitiveValue != null || isList || isMap)
 					{
@@ -313,33 +332,44 @@ namespace VDFN
 			{
 				for (var i = 0; i < listChildren.Count; i++)
 					if (obj is Array)
-						(obj as Array).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, listChildren[i])), i);
+						(obj as Array).SetValue(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, listChildren[i])), i);
 					else if (obj is IList)
 					//(obj as IList).Add(listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count, listChildren[i])));
 					{
-						var item = listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild((obj as IList).Count, listChildren[i]));
+						var item = listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem((obj as IList).Count, listChildren[i]));
 						if ((obj as IList).Count == i) // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
 							(obj as IList).Add(item);
 					}
-				foreach (string keyString in mapChildren.Keys)
+				var index = -1;
+				foreach (KeyValuePair<VDFNode, VDFNode> pair in mapChildren)
 					try
 					{
+						index++;
 						if (obj is IDictionary)
 						{
-							var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
-							//((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method
-							((IDictionary)obj)[key] = mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null)); // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
+							/*var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
+							//((IDictionary)obj).Add(key, mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method*/
+							var key = pair.Key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(index, null));
+							var value = pair.Value.ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null));
+							(obj as IDictionary)[key] = value; // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
 						}
-						else if (typeInfo.props.ContainsKey(keyString)) // maybe temp; just ignore props that are missing
-							typeInfo.props[keyString].SetValue(obj, mapChildren[keyString].ToObject(typeInfo.props[keyString].GetPropType(), options, path.ExtendAsChild(typeInfo.props[keyString], null)));
+						else // else, must be string prop-name
+						{
+							var propName = pair.Key.primitiveValue as string;
+							if (typeInfo.props.ContainsKey(propName)) // maybe temp; just ignore props that are missing
+							{
+								var value = pair.Value.ToObject(typeInfo.props[propName].GetPropType(), options, path.ExtendAsChild(typeInfo.props[propName], null));
+								typeInfo.props[propName].SetValue(obj, value);
+							}
+						}
 					}
-					catch (Exception ex) { throw new VDFException("Error loading map-child with key '" + keyString + "'.", ex); }/**/finally{}
 					/*catch (Exception ex)
 					{
 						var field = ex.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance) ?? ex.GetType().GetField("_message", BindingFlags.NonPublic | BindingFlags.Instance);
 						field.SetValue(ex, ex.Message + "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n");
 						throw;
 					}*/
+					catch (Exception ex) { throw new VDFException("Error loading map-child with key " + (pair.Key.primitiveValue is string ? "'" + pair.Key.primitiveValue + "'" : "of type " + pair.Key) + ".", ex); }/**/finally{}
 			}
 
 			if (options.objPostDeserializeFuncs_early.ContainsKey(obj))

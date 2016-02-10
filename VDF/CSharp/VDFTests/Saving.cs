@@ -89,6 +89,33 @@ that needs escaping.>>""".Fix());
 			a[2] = new VDFNode("This one doesn't need escaping.");
 			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<<Here's <<another>>.>>>\" \"This one doesn't need escaping.\"]");
 		}
+		[Fact] void D1_List_EscapedStrings2()
+		{
+			var a = new VDFNode();
+			a[0] = new VDFNode("ok {}");
+			a[1] = new VDFNode("ok []");
+			a[2] = new VDFNode("ok :");
+			a.ToVDF().Should().Be("[\"ok {}\" \"ok []\" \"ok :\"]");
+		}
+		[Fact] void D1_Map_EscapedStrings()
+		{
+			var a = new VDFNode();
+			a.mapChildren.Add(new VDFNode("escape {}"), new VDFNode());
+			a.mapChildren.Add(new VDFNode("escape []"), new VDFNode());
+			a.mapChildren.Add(new VDFNode("escape :"), new VDFNode());
+			a.ToVDF().Should().Be("{<<escape {}>>:null <<escape []>>:null <<escape :>>:null}");
+		}
+		[Fact] void D1_MetadataShowingNodeToBeOfTypeType()
+		{
+			/*VDFTypeInfo.AddSerializeMethod<Type>(a=>new VDFNode(a.Name, "Type"));
+			VDFTypeInfo.AddDeserializeMethod_FromParent<Type>(node=>Type.GetType(node.primitiveValue.ToString()));*/
+			VDFTypeInfo.Get(Type.GetType("System.RuntimeType")).AddExtraMethod((Type a)=>new VDFNode(a.Name) {metadata_override = "Type"}, new VDFSerialize());
+			VDFTypeInfo.Get(Type.GetType("System.RuntimeType")).AddExtraMethod((VDFNode node)=>Type.GetType(node.primitiveValue.ToString()), new VDFDeserialize(true));
+
+			var map = new Dictionary<object, object>();
+			map.Add(typeof(object), "hi there");
+			VDF.Serialize(map).Should().Be("{Type>Object:\"hi there\"}");
+		}
 		[Fact] void D0_EmptyArray() { VDF.Serialize(new object[0]).Should().Be("[]"); }
 
 		// from object

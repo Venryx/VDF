@@ -87,17 +87,19 @@ class VDFNodePathNode
 	// if not root (i.e. a child/descendant)
 	prop: VDFPropInfo; //string propName;
 	list_index = -1;
+	map_keyIndex = -1;
 	map_key: any;
 
-	constructor(obj = null, prop: VDFPropInfo = null, list_index = -1, map_key = null)
+	constructor(obj = null, prop: VDFPropInfo = null, list_index = -1, map_keyIndex = -1, map_key = null)
 	{
 		this.obj = obj;
 		this.prop = prop;
 		this.list_index = list_index;
+		this.map_keyIndex = map_keyIndex;
 		this.map_key = map_key;
 	}
 
-	Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_key); }
+	Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
 }
 class VDFNodePath
 {
@@ -116,16 +118,22 @@ class VDFNodePath
 	get parentNode() { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; }
 	get currentNode() { return this.nodes.Last(); }
 
-	ExtendAsListChild(index: number, obj)
+	ExtendAsListItem(index: number, obj)
 	{
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, null, index));
 		return new VDFNodePath(newNodes);
 	}
-	ExtendAsMapChild(key, obj)
+	ExtendAsMapKey(keyIndex, obj)
 	{
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, null, -1, key));
+		newNodes.Add(new VDFNodePathNode(obj, null, -1, keyIndex));
+		return new VDFNodePath(newNodes);
+	}
+	ExtendAsMapItem(key, obj)
+	{
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+		newNodes.Add(new VDFNodePathNode(obj, null, -1, -1, key));
 		return new VDFNodePath(newNodes);
 	}
 	ExtendAsChild(prop: VDFPropInfo, obj)
@@ -626,11 +634,18 @@ class Dictionary<K, V>
 	}
 
 	// properties
-	get Keys()
+	get Keys() // (note that this will return each key's toString() result (not the key itself, for non-string keys))
 	{
 		var result = {};
 		for (var i = 0; i < this.keys.length; i++)
 			result[<any>this.keys[i]] = null;
+		return result;
+	}
+	get Pairs()
+	{
+		var result = [];
+		for (var i = 0; i < this.keys.length; i++)
+			result.push({key: this.keys[i], value: this.values[i]});
 		return result;
 	}
 	get Count() { return this.keys.length; }
@@ -643,7 +658,8 @@ class Dictionary<K, V>
 		if (this.keys.indexOf(key) == -1)
 			this.keys.push(key);
 		this.values[this.keys.indexOf(key)] = value;
-        (<any>this)[<any>key] = value; // make value accessible directly on Dictionary object
+		if (typeof key == "string")
+			(<any>this)[<any>key] = value; // make value accessible directly on Dictionary object
 	}
 	Add(key: K, value: V)
 	{

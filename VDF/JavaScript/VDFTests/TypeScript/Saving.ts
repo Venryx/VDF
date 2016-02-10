@@ -137,10 +137,10 @@ that needs escaping.>>\"".Fix());
 		test("D1_Object_Primitives", ()=>
 		{
 			var a = new VDFNode();
-			a.SetMapChild("bool", new VDFNode(false));
-			a.SetMapChild("int", new VDFNode(5));
-			a.SetMapChild("double", new VDFNode(.5));
-			a.SetMapChild("string", new VDFNode("Prop value string."));
+			a.SetMapChild(new VDFNode("bool"), new VDFNode(false));
+			a.SetMapChild(new VDFNode("int"), new VDFNode(5));
+			a.SetMapChild(new VDFNode("double"), new VDFNode(.5));
+			a.SetMapChild(new VDFNode("string"), new VDFNode("Prop value string."));
 			a.ToVDF().Should().Be("{bool:false int:5 double:.5 string:\"Prop value string.\"}");
 		});
 		test("D1_List_EscapedStrings", ()=>
@@ -150,6 +150,44 @@ that needs escaping.>>\"".Fix());
 			a.SetListChild(1, new VDFNode("Here's <<another>>."));
 			a.SetListChild(2, new VDFNode("This one doesn't need escaping."));
 			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<<Here's <<another>>.>>>\" \"This one doesn't need escaping.\"]");
+		});
+		test("D1_List_EscapedStrings2", ()=>
+		{
+			var a = new VDFNode();
+			a.SetListChild(0, new VDFNode("ok {}"));
+			a.SetListChild(1, new VDFNode("ok []"));
+			a.SetListChild(2, new VDFNode("ok :"));
+			a.ToVDF().Should().Be("[\"ok {}\" \"ok []\" \"ok :\"]");
+		});
+		test("D1_Map_EscapedStrings", ()=>
+		{
+			var a = new VDFNode();
+			a.SetMapChild(new VDFNode("escape {}"), new VDFNode());
+			a.SetMapChild(new VDFNode("escape []"), new VDFNode());
+			a.SetMapChild(new VDFNode("escape :"), new VDFNode());
+			a.ToVDF().Should().Be("{<<escape {}>>:null <<escape []>>:null <<escape :>>:null}");
+		});
+		class TypeTest
+		{
+			Serialize(): VDFNode
+			{
+				var result = new VDFNode("Object");
+				result.metadata_override = "Type";
+				return result;
+			}
+			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
+		}
+		test("D1_MetadataShowingNodeToBeOfTypeType", ()=>
+		{
+			//VDFTypeInfo.AddSerializeMethod<Type>(a=>new VDFNode(a.Name, "Type"));
+			//VDFTypeInfo.AddDeserializeMethod_FromParent<Type>(node=>Type.GetType(node.primitiveValue.ToString()));
+
+			//var type_object = {Serialize: function() { return new VDFNode("System.Object", "Type"); }.AddTags(new VDFSerialize())}
+			var type_object = new TypeTest();
+
+			var map = new Dictionary<object, object>("object", "object");
+			map.Add(type_object, "hi there");
+			VDF.Serialize(map).Should().Be("{Type>Object:\"hi there\"}");
 		});
 
 		// from object
@@ -461,7 +499,7 @@ that needs escaping.>>\"".Fix());
 			Serialize(): VDFNode //VDFPropInfo prop, VDFSaveOptions options)
 			{
 				var result = new VDFNode();
-				result.SetMapChild("included", new VDFNode(this.included));
+				result.SetMapChild(new VDFNode("included"), new VDFNode(this.included));
 				return result;
 			}
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }

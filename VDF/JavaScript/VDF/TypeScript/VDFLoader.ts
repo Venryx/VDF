@@ -21,13 +21,13 @@
 		{
 			if (!this.objPostDeserializeFuncs_early.ContainsKey(obj))
 				this.objPostDeserializeFuncs_early.Add(obj, new List<Function>("Function"));
-			this.objPostDeserializeFuncs_early[obj].Add(func);
+			this.objPostDeserializeFuncs_early.Get(obj).Add(func);
 		}
 		else
 		{
 			if (!this.objPostDeserializeFuncs.ContainsKey(obj))
 				this.objPostDeserializeFuncs.Add(obj, new List<Function>("Function"));
-			this.objPostDeserializeFuncs[obj].Add(func);
+			this.objPostDeserializeFuncs.Get(obj).Add(func);
 		}
 	}
 
@@ -107,6 +107,9 @@ class VDFLoader
 			if (typeName == null || ["object", "IList", "IDictionary"].Contains(typeName)) // if there is no declared type, or the from-metadata type is more specific than the declared type (i.e. declared type is most basic type 'object')
 				typeName = fromVDFTypeName;
 		}
+		// for keys, force load as string, since we're not at the use-importer stage
+		if (firstNonMetadataToken.type == VDFTokenType.Key)
+			typeName = "string";
 		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
 		var typeInfo = VDFTypeInfo.Get(typeName);
 
@@ -119,16 +122,20 @@ class VDFLoader
 		// if primitive, parse value
 		if (firstNonMetadataToken.type == VDFTokenType.Null)
 			node.primitiveValue = null;
-		else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
+		else if (typeName == "bool")
 			node.primitiveValue = firstNonMetadataToken.text == "true" ? true : false;
-		else if (firstNonMetadataToken.type == VDFTokenType.Number)
+		else if (typeName == "float" || typeName == "double")
 			node.primitiveValue = parseFloat(firstNonMetadataToken.text);
-		else if (firstNonMetadataToken.type == VDFTokenType.String)
+		else if (typeName == "int")
+			node.primitiveValue = parseInt(firstNonMetadataToken.text);
+		//else if (typeName == "string")
+		// have in-vdf string type override declared type, since we're not at the use-importer stage
+		else if (typeName == "string" || firstNonMetadataToken.type == VDFTokenType.String)
 			node.primitiveValue = firstNonMetadataToken.text;
 		
 		// if list, parse items
-		//else if (typeName.StartsWith("List(")) //typeof(IList).IsAssignableFrom(objType))
-		else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
+		//else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
+		else if (typeName.StartsWith("List("))
 		{
 			node.isList = true;
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -147,8 +154,8 @@ class VDFLoader
 		}
 
 		// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
-		//else //if (!typeof(IList).IsAssignableFrom(objType))
-		else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
+		//else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
+		else //if (typeName.StartsWith("Dictionary("))
 		{
 			node.isMap = true;
 			for (var i = 0; i < tokensAtDepth1.Count; i++)
@@ -156,18 +163,27 @@ class VDFLoader
 				var token = tokensAtDepth1[i];
 				if (token.type == VDFTokenType.Key)
 				{
-					var propName = token.text;
-					var propValueTypeName;
+					var propNameFirstToken = i >= 1 && tokensAtDepth1[i - 1].type == VDFTokenType.Metadata ? tokensAtDepth1[i - 1] : tokensAtDepth1[i];
+					var propNameEnderToken = tokensAtDepth1[i + 1];
+					var propNameType = propNameFirstToken.type == VDFTokenType.Metadata ? "object" : "string";
+					if (typeName.StartsWith("Dictionary(") && typeGenericArgs[0] != "object")
+						propNameType = typeGenericArgs[0];
+					var propNameNode = VDFLoader.ToVDFNode(tokens, propNameType, options, propNameFirstToken.index, propNameEnderToken.index);
+
+					var propValueType;
 					//if (typeName.StartsWith("Dictionary(")) //typeof(IDictionary).IsAssignableFrom(objType))
 					if (typeGenericArgs.length >= 2)
-						propValueTypeName = typeGenericArgs[1];
+						propValueType = typeGenericArgs[1];
 					else
-						propValueTypeName = typeInfo && typeInfo.props[propName] ? typeInfo.props[propName].typeName : null;
+						//propValueTypeName = typeInfo && typeInfo.props[propName] ? typeInfo.props[propName].typeName : null;
+						propValueType = typeof propNameNode.primitiveValue == "string" && typeInfo && typeInfo.props[propNameNode.primitiveValue] ? typeInfo.props[propNameNode.primitiveValue].typeName : null;
 
 					var propValueFirstToken = tokensAtDepth1[i + 1];
 					var propValueEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > propValueFirstToken.index && a.type == VDFTokenType.Key);
-					//node.SetMapChild(propName, VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueTypeName, options));
-					node.SetMapChild(propName, VDFLoader.ToVDFNode(tokens, propValueTypeName, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex));
+					//var propValueNode = VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueTypeName, options);
+					var propValueNode = VDFLoader.ToVDFNode(tokens, propValueType, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex);
+
+					node.SetMapChild(propNameNode, propValueNode);
 				}
 			}
 		}

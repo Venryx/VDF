@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data.Common;
 //using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -70,17 +69,19 @@ namespace VDFN
 		// if not root (i.e. a child/descendant)
 		public VDFPropInfo prop; //string propName;
 		public int list_index = -1;
+		public int map_keyIndex = -1;
 		public object map_key;
 
-		public VDFNodePathNode(object obj = null, VDFPropInfo prop = null, int list_index = -1, object map_key = null)
+		public VDFNodePathNode(object obj = null, VDFPropInfo prop = null, int list_index = -1, int map_keyIndex = -1, object map_key = null)
 		{
 			this.obj = obj;
 			this.prop = prop;
 			this.list_index = list_index;
+			this.map_keyIndex = map_keyIndex;
 			this.map_key = map_key;
 		}
 
-		public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_key); }
+		public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key); }
 	}
 	public class VDFNodePath
 	{
@@ -92,16 +93,22 @@ namespace VDFN
 		public VDFNodePathNode parentNode { get { return nodes.Count >= 2 ? nodes[nodes.Count - 2] : null; } }
 		public VDFNodePathNode currentNode { get { return nodes.Last(); } }
 
-		public VDFNodePath ExtendAsListChild(int index, object obj)
+		public VDFNodePath ExtendAsListItem(int index, object obj)
 		{
 			var newNodes = nodes.Select(a=>a.Clone()).ToList();
-			newNodes.Add(new VDFNodePathNode(obj, null, index));
+			newNodes.Add(new VDFNodePathNode(obj, list_index: index));
 			return new VDFNodePath(newNodes);
 		}
-		public VDFNodePath ExtendAsMapChild(object key, object obj)
+		public VDFNodePath ExtendAsMapKey(int keyIndex, object obj)
+		{
+			var newNodes = nodes.Select(a => a.Clone()).ToList();
+			newNodes.Add(new VDFNodePathNode(obj, map_keyIndex: keyIndex));
+			return new VDFNodePath(newNodes);
+		}
+		public VDFNodePath ExtendAsMapItem(object key, object obj)
 		{
 			var newNodes = nodes.Select(a=>a.Clone()).ToList();
-			newNodes.Add(new VDFNodePathNode(obj, null, -1, key));
+			newNodes.Add(new VDFNodePathNode(obj, map_key: key));
 			return new VDFNodePath(newNodes);
 		}
 		public VDFNodePath ExtendAsChild(VDFPropInfo prop, object obj)

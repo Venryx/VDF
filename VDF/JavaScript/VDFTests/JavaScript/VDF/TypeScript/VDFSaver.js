@@ -72,7 +72,7 @@ var VDFSaver = (function () {
                 result.isList = true;
                 var objAsList = obj;
                 for (var i = 0; i < objAsList.length; i++) {
-                    var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
+                    var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
                     if (itemNode == VDF.CancelSerialize)
                         continue;
                     result.AddListChild(itemNode);
@@ -81,15 +81,15 @@ var VDFSaver = (function () {
             else if (typeName && typeName.startsWith("Dictionary(")) {
                 result.isMap = true;
                 var objAsDictionary = obj;
-                for (var key in objAsDictionary.Keys) {
-                    var keyNode = VDFSaver.ToVDFNode(key, typeGenericArgs[0], options, path, true); // stringify-attempt-1: use exporter
+                for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
+                    var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.value), true); // stringify-attempt-1: use exporter
                     if (typeof keyNode.primitiveValue != "string")
                         //throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
-                        keyNode = new VDFNode(key.toString());
-                    var valueNode = VDFSaver.ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
+                        keyNode = new VDFNode(pair.key.toString());
+                    var valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
                     if (valueNode == VDF.CancelSerialize)
                         continue;
-                    result.SetMapChild(keyNode.primitiveValue, valueNode);
+                    result.SetMapChild(keyNode, valueNode);
                 }
             }
             else {
@@ -117,16 +117,18 @@ var VDFSaver = (function () {
                                     canceled = true;
                         if (canceled)
                             continue;
+                        var propNameNode = new VDFNode(propName);
                         var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
                         if (propValueNode == VDF.CancelSerialize)
                             continue;
                         propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
-                        result.SetMapChild(propName, propValueNode);
+                        result.SetMapChild(propNameNode, propValueNode);
                     }
                     catch (ex) {
                         ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n";
                         throw ex;
-                    }
+                    } /**/
+                    finally { }
             }
         }
         if (declaredTypeName == null)
@@ -141,6 +143,8 @@ var VDFSaver = (function () {
                 (options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF)) ||
                 options.typeMarking == VDFTypeMarking.ExternalNoCollapse))
             result.metadata = typeName;
+        if (result.metadata_override != null)
+            result.metadata = result.metadata_override;
         if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.popOutL1)
             result.childPopOut = true;
         for (var propName in VDF.GetObjectProps(obj))

@@ -108,7 +108,7 @@ namespace VDFN
 					var objAsList = (IList)obj;
 					for (var i = 0; i < objAsList.Count; i++)
 					{
-						var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListChild(i, objAsList[i]), true);
+						var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
 						if (itemNode == VDF.CancelSerialize)
 							continue;
 						result.listChildren.Add(itemNode);
@@ -118,13 +118,15 @@ namespace VDFN
 				{
 					result.isMap = true;
 					var objAsDictionary = (IDictionary)obj;
+					var index = 0;
 					foreach (object key in objAsDictionary.Keys)
 					{
-						var keyNode = ToVDFNode(key, typeGenericArgs[0], options, path, true); // stringify-attempt-1: use exporter
+						index++;
+						var keyNode = ToVDFNode(key, typeGenericArgs[0], options, path.ExtendAsMapKey(index, key), true); // stringify-attempt-1: use exporter
 						if (!(keyNode.primitiveValue is string)) // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
 							//throw new VDFException("A map key object must either be a string or have an exporter that converts it into a string.");
 							keyNode = new VDFNode(key.ToString());
-						var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapChild(key, objAsDictionary[key]), true);
+						var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapItem(key, objAsDictionary[key]), true);
 						if (valueNode == VDF.CancelSerialize)
 							continue;
 						result.mapChildren.Add(keyNode, valueNode);
@@ -157,12 +159,13 @@ namespace VDFN
 							if (canceled)
 								continue;
 
+							var propNameNode = new VDFNode(propName);
 							// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
 							var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, childPath);
 							if (propValueNode == VDF.CancelSerialize)
 								continue;
 							propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
-							result.mapChildren.Add(propName, propValueNode);
+							result.mapChildren.Add(propNameNode, propValueNode);
 						}
 						catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }/**/finally{}
 						/*catch (Exception ex)
@@ -189,6 +192,9 @@ namespace VDFN
 			))
 				result.metadata = VDF.GetNameOfType(type, options);
 
+			if (result.metadata_override != null)
+				result.metadata = result.metadata_override;
+					
 			if (options.useChildPopOut && typeInfo != null && typeInfo.typeTag.popOutL1)
 				result.childPopOut = true;
 

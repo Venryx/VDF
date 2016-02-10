@@ -1,7 +1,7 @@
 var VDFNode = (function () {
     function VDFNode(primitiveValue, metadata) {
         this.listChildren = new List("VDFNode");
-        this.mapChildren = new Dictionary("string", "VDFNode"); // this also holds Dictionaries' keys/values
+        this.mapChildren = new Dictionary("VDFNode", "VDFNode"); // this also holds Dictionaries' keys/values
         this.primitiveValue = primitiveValue;
         this.metadata = metadata;
     }
@@ -20,9 +20,10 @@ var VDFNode = (function () {
     VDFNode.prototype.AddListChild = function (value) { this.SetListChild(this.listChildren.length, value); };
     VDFNode.prototype.SetMapChild = function (key, value) {
         this.mapChildren.Set(key, value);
-        this[key] = value;
+        if (typeof key.primitiveValue == "string")
+            this[key] = value;
     };
-    VDFNode.prototype.toString = function () { return this.primitiveValue.toString(); }; // helpful for debugging
+    VDFNode.prototype.toString = function () { return this.primitiveValue ? this.primitiveValue.toString() : ""; }; // helpful for debugging
     // saving
     // ==================
     VDFNode.PadString = function (unpaddedString) {
@@ -38,9 +39,10 @@ var VDFNode = (function () {
         if (tabDepth === void 0) { tabDepth = 0; }
         return this.ToVDF_InlinePart(options, tabDepth) + this.ToVDF_PoppedOutPart(options, tabDepth);
     };
-    VDFNode.prototype.ToVDF_InlinePart = function (options, tabDepth) {
+    VDFNode.prototype.ToVDF_InlinePart = function (options, tabDepth, isKey) {
         if (options === void 0) { options = null; }
         if (tabDepth === void 0) { tabDepth = 0; }
+        if (isKey === void 0) { isKey = false; }
         options = options || new VDFSaveOptions();
         var builder = new StringBuilder();
         if (options.useMetadata && this.metadata != null)
@@ -53,17 +55,21 @@ var VDFNode = (function () {
             builder.Append(this.primitiveValue.toString().toLowerCase());
         else if (typeof this.primitiveValue == "string") {
             var unpaddedString = this.primitiveValue;
-            if (unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>")) {
+            // (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
+            var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
+            if (isKey)
+                needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
+            if (needsEscaping) {
                 var literalStartMarkerString = "<<";
                 var literalEndMarkerString = ">>";
                 while (unpaddedString.Contains(literalStartMarkerString) || unpaddedString.Contains(literalEndMarkerString)) {
                     literalStartMarkerString += "<";
                     literalEndMarkerString += ">";
                 }
-                builder.Append("\"" + literalStartMarkerString + VDFNode.PadString(unpaddedString) + literalEndMarkerString + "\"");
+                builder.Append((isKey ? "" : "\"") + literalStartMarkerString + VDFNode.PadString(unpaddedString) + literalEndMarkerString + (isKey ? "" : "\""));
             }
             else
-                builder.Append("\"" + unpaddedString + "\"");
+                builder.Append((isKey ? "" : "\"") + unpaddedString + (isKey ? "" : "\""));
         }
         else if (VDF.GetIsTypePrimitive(VDF.GetTypeNameOfObject(this.primitiveValue)))
             builder.Append(options.useNumberTrimming && this.primitiveValue.toString().StartsWith("0.") ? this.primitiveValue.toString().substr(1) : this.primitiveValue);
@@ -78,8 +84,11 @@ var VDFNode = (function () {
         else {
             if (this.isMap || this.mapChildren.Count > 0) {
                 builder.Append("{");
-                for (var key in this.mapChildren.Keys)
-                    builder.Append((key == Object.keys(this.mapChildren.Keys)[0] ? "" : (options.useCommaSeparators ? "," : " ")) + (options.useStringKeys ? "\"" : "") + key + (options.useStringKeys ? "\"" : "") + ":" + this.mapChildren[key].ToVDF_InlinePart(options, tabDepth));
+                for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
+                    var keyStr = pair.key.ToVDF_InlinePart(options, tabDepth, true);
+                    var valueStr = pair.value.ToVDF_InlinePart(options, tabDepth);
+                    builder.Append((i == 0 ? "" : (options.useCommaSeparators ? "," : " ")) + (options.useStringKeys ? "\"" : "") + keyStr + (options.useStringKeys ? "\"" : "") + ":" + valueStr);
+                }
                 builder.Append("}");
             }
             if (this.isList || this.listChildren.Count > 0) {
@@ -102,9 +111,11 @@ var VDFNode = (function () {
             for (var i = 0; i < tabDepth + 1; i++)
                 childTabStr += "\t";
             if (this.isMap || this.mapChildren.Count > 0)
-                for (var key in this.mapChildren.Keys) {
-                    builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + key + (options.useStringKeys ? "\"" : "") + ":" + this.mapChildren[key].ToVDF_InlinePart(options, tabDepth + 1));
-                    var poppedOutChildText = this.mapChildren[key].ToVDF_PoppedOutPart(options, tabDepth + 1);
+                for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
+                    var keyStr = pair.key.ToVDF_InlinePart(options, tabDepth, true);
+                    var valueStr = pair.value.ToVDF_InlinePart(options, tabDepth + 1);
+                    builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + keyStr + (options.useStringKeys ? "\"" : "") + ":" + valueStr);
+                    var poppedOutChildText = pair.value.ToVDF_PoppedOutPart(options, tabDepth + 1);
                     if (poppedOutChildText.length > 0)
                         builder.Append(poppedOutChildText);
                 }
@@ -121,8 +132,8 @@ var VDFNode = (function () {
             var poppedOutChildTexts = new List("string");
             var poppedOutChildText;
             if (this.isMap || this.mapChildren.Count > 0)
-                for (var key in this.mapChildren.Keys)
-                    if ((poppedOutChildText = this.mapChildren[key].ToVDF_PoppedOutPart(options, tabDepth)).length)
+                for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
+                    if ((poppedOutChildText = pair.value.ToVDF_PoppedOutPart(options, tabDepth)).length)
                         poppedOutChildTexts.Add(poppedOutChildText);
             if (this.isList || this.listChildren.Count > 0)
                 for (var i in this.listChildren.Indexes())
@@ -187,7 +198,7 @@ var VDFNode = (function () {
         var deserializedByCustomMethod = false;
         var classProps = VDF.GetClassProps(window[finalTypeName]);
         for (var propName in classProps)
-            if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) { return a instanceof VDFDeserialize; })) {
+            if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) { return a instanceof VDFDeserialize && a.fromParent; })) {
                 var deserializeResult = classProps[propName](this, path, options);
                 if (deserializeResult != VDF.NoActionTaken) {
                     result = deserializeResult;
@@ -198,8 +209,13 @@ var VDFNode = (function () {
             if (finalTypeName == "object") { } //result = null;
             else if (EnumValue.IsEnum(finalTypeName))
                 result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
-            else if (VDF.GetIsTypePrimitive(finalTypeName))
-                result = this.primitiveValue; //Convert.ChangeType(primitiveValue, finalType); //primitiveValue;
+            else if (VDF.GetIsTypePrimitive(finalTypeName)) {
+                result = this.primitiveValue;
+                if (finalTypeName == "int")
+                    result = parseInt(this.primitiveValue);
+                else if (finalTypeName == "float" || finalTypeName == "double")
+                    result = parseFloat(this.primitiveValue);
+            }
             else if (this.primitiveValue != null || this.isList || this.isMap) {
                 result = VDFNode.CreateNewInstanceOfType(finalTypeName);
                 path.currentNode.obj = result;
@@ -220,31 +236,39 @@ var VDFNode = (function () {
                 obj[propName](this, path, options);
         var deserializedByCustomMethod2 = false;
         for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFDeserialize; })) {
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFDeserialize && !a.fromParent; })) {
                 var deserializeResult = obj[propName](this, path, options);
                 if (deserializeResult != VDF.NoActionTaken)
                     deserializedByCustomMethod2 = true;
             }
         if (!deserializedByCustomMethod2) {
             for (var i = 0; i < this.listChildren.Count; i++) 
-            //obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, this.listChildren[i])));
+            //obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i])));
             {
-                var item = this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListChild(i, this.listChildren[i]));
+                var item = this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i]));
                 if (obj.Count == i)
                     obj.Add(item);
             }
-            for (var keyString in this.mapChildren.Keys)
+            for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
                 try {
                     if (obj instanceof Dictionary) {
-                        var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
-                        //obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null)));
-                        obj.Set(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapChild(key, null))); // "obj" prop to be filled in at end of ToObject method // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
+                        /*var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
+                        //obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null)));*/
+                        var key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(i, null));
+                        var value = pair.value.ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null));
+                        obj.Set(key, value); // "obj" prop to be filled in at end of ToObject method // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
                     }
-                    else
-                        obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { name: keyString }, null));
+                    else {
+                        //obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { name: keyString }, null));
+                        var propName = pair.key.primitiveValue;
+                        /*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
+                        {*/
+                        var value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, path.ExtendAsChild(typeInfo.props[propName] || { name: propName }, null));
+                        obj[propName] = value;
+                    }
                 }
                 catch (ex) {
-                    ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + keyString + "'.") + "\n";
+                    ex.message += "\n==================\nRethrownAs) " + ("Error loading map-child with key '" + (typeof pair.key.primitiveValue == "string" ? "'" + pair.key.primitiveValue + "'" : "of type " + pair.key) + "'.") + "\n";
                     throw ex;
                 } /**/
                 finally { }

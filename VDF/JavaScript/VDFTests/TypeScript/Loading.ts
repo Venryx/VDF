@@ -280,6 +280,27 @@ of three lines in total.".Fix());
 			a["key3"].primitiveValue.Should().Be("value3");
 			a["key4"].primitiveValue.Should().Be("value4");
 		});
+		test("D1_Map_KeyWithHash", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("{#:'value1'}");
+			a["#"].primitiveValue.Should().Be("value1");
+		});
+		test("D1_Map_MixedTypeKeysWithMetadata", ()=>
+		{
+			var a = VDFLoader.ToVDFNode("{int>1:'value1' int>\"2\":'value2' 'key3':'value3' \"key4\":\"value4\"}");
+			var pairs = a.mapChildren.Pairs;
+			a["1"].primitiveValue.Should().Be("value1");
+			a["2"].primitiveValue.Should().Be("value2");
+			a["key3"].primitiveValue.Should().Be("value3");
+			a["key4"].primitiveValue.Should().Be("value4");
+			var b = a.ToObject();
+			ok(b instanceof Dictionary && b.keyType == "object" && b.valueType == "object");
+			var bMap = b;
+			bMap.Get(1).Should().Be("value1");
+			bMap.Get(2).Should().Be("value2");
+			bMap.Get("key3").Should().Be("value3");
+			bMap.Get("key4").Should().Be("value4");
+		});
 		test("D1_Dictionary_Complex", ()=>
 		{
 			var a: VDFNode = VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
