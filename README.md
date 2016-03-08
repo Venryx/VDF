@@ -21,7 +21,7 @@ list[2].Should().Be(1050);
 ##### Indent-Based Children (i.e. 'popped out' contents)
 VDF:
 ```
-{^} ;; This is a comment. To the left, the brackets mark the start and end of the object, and the caret symbol (^) marks the object's content as 'popped out', i.e. its properties laid out on the lines below it, with indentation.
+{^} ;; This is a comment. To the left, brackets mark start and end of object, and '^' marks the object's content as 'popped out', i.e. its properties laid out on the lines below it, with indentation.
 	terrain:{size:Vector2>"100 100"}
 	regions:[^] ;; Same thing here for a List, except its items are laid out below, rather than its properties.
 		{name:"Grass" soil:"Grass" enabled:true}
