@@ -39,7 +39,8 @@ namespace VDFN
 				result = typeof(List<>).MakeGenericType(result.GetElementType());
 			return result;
 		}
-		public static bool IsDerivedFrom(this Type s, Type baseType) { return baseType.IsAssignableFrom(s); } // just a more-sensible alias
+		// a more-understandably-named version of IsAssignableFrom
+		public static bool IsDerivedFrom(this Type s, Type baseType, bool allowSameType = true) { return baseType.IsAssignableFrom(s) && (allowSameType || baseType != s); }
 
 		// List<MemberInfo>
 		public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags)

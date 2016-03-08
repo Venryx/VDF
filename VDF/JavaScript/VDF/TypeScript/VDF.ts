@@ -414,12 +414,14 @@ PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value)
 {
 	var s = this;
 	var typeInfo = VDFTypeInfo.Get(s.type.name);
-
-	var propTag: any = {};
-	for (var i in s.tags)
-		if (s.tags[i] instanceof VDFProp)
-			propTag = s.tags[i];
-	typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
+	if (typeInfo.props[this.propName] == null)
+	{
+		var propTag: any = {};
+		for (var i in s.tags)
+			if (s.tags[i] instanceof VDFProp)
+				propTag = s.tags[i];
+		typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
+	}
 };
 function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) { return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags); };
 

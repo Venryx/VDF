@@ -120,23 +120,23 @@ namespace VDFN
 			// if primitive, parse value
 			if (firstNonMetadataToken.type == VDFTokenType.Null)
 				node.primitiveValue = null;
-			else if (type == typeof(bool))
+			else if (type == typeof(bool) || type == typeof(bool?))
 				node.primitiveValue = bool.Parse(firstNonMetadataToken.text);
-			else if (type == typeof(float)) // (only occurs if declared-type is float)
+			else if (type == typeof(float) || type == typeof(float?)) // (only occurs if declared-type is float)
 				if (firstNonMetadataToken.text == "Infinity")
 					node.primitiveValue = float.PositiveInfinity;
 				else if (firstNonMetadataToken.text == "-Infinity")
 					node.primitiveValue = float.NegativeInfinity;
 				else
 					node.primitiveValue = float.Parse(firstNonMetadataToken.text);
-			else if (type == typeof(double))
+			else if (type == typeof(double) || type == typeof(double?))
 				if (firstNonMetadataToken.text == "Infinity")
 					node.primitiveValue = double.PositiveInfinity;
 				else if (firstNonMetadataToken.text == "-Infinity")
 					node.primitiveValue = double.NegativeInfinity;
 				else //if (firstNonMetadataToken.text.Contains(".") || firstNonMetadataToken.text.Contains("e"))
 					node.primitiveValue = double.Parse(firstNonMetadataToken.text);
-			else if (type == typeof(int))
+			else if (type == typeof(int) || type == typeof(int?))
 			{
 				//node.primitiveValue = int.Parse(firstNonMetadataToken.text);
 				// maybe make-so: changes in other places are done as well, to add good support for long's
