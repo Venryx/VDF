@@ -30,21 +30,18 @@ VDF:
 		{^}
 			objectType:"Palisade Wall"
 			owner:Player>"Andy"
-			position:"63 97 4"
-			rotation:"0 0 0.923879504203796 0.382683426141739"
+			position:"63 97 4" ;; No type needs to be specified here (e.g. "Vector3>"), since the property is declared as of type Vector3. You can add a type-marker if you want, though. (e.g. for a derived type)
 			canBeRotated:true
 	units:[^]
 		{^}
 			objectType:"Wolf"
 			owner:Player>"Andy"
-			position:"48.5 95.5 4"
 			canBeDrafted:{^}
 				draftTime:1
 				undraftTime:1
 		{^}
 			objectType:"Zebra"
 			owner:Player>"Bob"
-			position:"37 115.5 4"
 			canBeDrafted:{^}
 				draftTime:2
 				undraftTime:2
