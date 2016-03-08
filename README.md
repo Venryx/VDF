@@ -30,7 +30,7 @@ VDF:
 		{^}
 			objectType:"Palisade Wall"
 			owner:Player>"Andy"
-			position:"63 97 4" ;; No type needs to be specified here (e.g. "Vector3>"), since the property is declared as of type Vector3. You can add a type-marker if you want, though. (e.g. for a derived type)
+			position:"63 97 4" ;; You don't need to specify a type here (e.g. "Vector3>"), since prop is already declared as Vector3 in C#. You can if you want, though. (e.g. for a derived type)
 			canBeRotated:true
 	units:[^]
 		{^}
