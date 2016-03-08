@@ -8,7 +8,7 @@ The entire serializer/deserializer system is contained in 6 files, and is implem
 ##### Type Metadata
 VDF:
 ```
-[Color>"Blue" double>0 int>"1050"]
+List(object)>[Color>"Blue" double>0 int>"1050"]
 ```
 Unit test:
 ```
