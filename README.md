@@ -51,6 +51,7 @@ Unit test:
 var map = VDF.Deserialize<Map>("[...]");
 map.terrain.size.Should().Be(new Vector2(100, 100));
 map.regions[0].soil.GetType().Should().Be(typeof(Soil));
+map.structures[0].position.GetType().Should().Be(typeof(Vector3));
 map.units[1].owner.name.Should().Be("Bob");
 map.units[1].canBeDrafted.draftTime.Should().Be(2);
 ```
