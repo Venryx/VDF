@@ -23,7 +23,7 @@ VDF:
 ```
 {^} ;; This is a comment. To the left, brackets mark start and end of object, and '^' marks the object's content as 'popped out', i.e. its properties laid out on the lines below it, with indentation.
 	terrain:{size:Vector2>"100 100"}
-	regions:[^] ;; Same thing here for a List, except its items are laid out below, rather than its properties.
+	regions:[^] ;; Same thing here for a list, except its items are laid out below, rather than its properties.
 		{name:"Grass" soil:"Grass" enabled:true}
 		{name:"Dirt" soil:"Dirt" enabled:true}
 	structures:[^]
