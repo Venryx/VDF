@@ -3,7 +3,7 @@
 
 The entire serializer/deserializer system is contained in 6 files, and is implemented in two languages (C# and JS) using almost exactly the same structure. (so it's easy to update one alongside the other)
 
-### Features
+#### Features
 ++++++++++
 ##### Type Metadata
 ```
