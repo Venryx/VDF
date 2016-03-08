@@ -1,7 +1,7 @@
 # VDF
-###### Like JSON, but with type metadata, indent-based children, and a rich tagging and override system. (versions in C# and JS)
+###### Like JSON, but with type metadata, indent-based children, and a rich tagging and override system. (versions in C# and TS/JS)
 
-The entire serializer/deserializer system is contained in 6 files, and is implemented in two languages (C# and JS) using almost exactly the same structure. (so it's easy to update one alongside the other)
+The entire serializer/deserializer system is contained in 6 files, and is implemented in two languages (C# and TS/JS) using almost exactly the same structure. (so it's easy to update one alongside the other)
 
 #### Features
 ++++++++++
