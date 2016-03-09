@@ -21,16 +21,16 @@ list[2].Should().Be(1050);
 ##### Indent-Based Children (i.e. 'popped out' contents)
 VDF:
 ```
-{^} ;; This is a comment. To the left, brackets mark start and end of object, and '^' marks the object's content as 'popped out', i.e. its properties laid out on the lines below it, with indentation.
+{^}   ;; This is a comment. To the left, brackets mark start and end of object, and '^' marks the object's content as 'popped out', i.e. its properties laid out on the lines below it, with indentation.
 	terrain:{size:Vector2>"100 100"}
-	regions:[^] ;; Same thing here for a list, except its items are laid out below, rather than its properties.
+	regions:[^]   ;; Same thing here for a list, except its items are laid out below, rather than its properties.
 		{name:"Grass" soil:"Grass" enabled:true}
 		{name:"Dirt" soil:"Dirt" enabled:true}
 	structures:[^]
 		{^}
 			objectType:"Palisade Wall"
 			owner:Player>"Andy"
-			position:"63 97 4" ;; You don't need to specify a type here (e.g. "Vector3>"), since prop is already declared as Vector3 in C#. You can if you want, though. (e.g. for a derived type)
+			position:"63 97 4"   ;; You don't need to specify a type here (e.g. "Vector3>"), since prop is already declared as Vector3 in C#. You can if you want, though. (e.g. for a derived type)
 			canBeRotated:true
 	units:[^]
 		{^}
