@@ -23,3 +23,11 @@ C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.pdb
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\VDF.dll
 C:\Projects\Visual C#\VDF\VDF\CSharp\VDFTests\bin\Debug\VDF.pdb
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\bin\Debug\VDFTests.dll
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\bin\Debug\VDFTests.pdb
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\bin\Debug\Microsoft.VisualStudio.QualityTools.UnitTestFramework.dll
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\bin\Debug\VDF.dll
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\bin\Debug\VDF.pdb
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\obj\Debug\VDF_Tests.csprojResolveAssemblyReference.cache
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.dll
+C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDFTests\obj\Debug\VDFTests.pdb

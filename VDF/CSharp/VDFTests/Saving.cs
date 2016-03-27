@@ -85,9 +85,10 @@ that needs escaping.>>""".Fix());
 		{
 			var a = new VDFNode();
 			a[0] = new VDFNode("This is a list item \"that needs escaping\".");
-			a[1] = new VDFNode("Here's <<another>>.");
-			a[2] = new VDFNode("This one doesn't need escaping.");
-			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<<Here's <<another>>.>>>\" \"This one doesn't need escaping.\"]");
+			a[1] = new VDFNode("Here's another.");
+			a[2] = new VDFNode("And <<another>>.");
+			a[3] = new VDFNode("This one does not need escaping.");
+			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<Here's another.>>\" \"<<<And <<another>>.>>>\" \"This one does not need escaping.\"]");
 		}
 		[Fact] void D1_List_EscapedStrings2()
 		{
@@ -103,7 +104,9 @@ that needs escaping.>>""".Fix());
 			a.mapChildren.Add(new VDFNode("escape {}"), new VDFNode());
 			a.mapChildren.Add(new VDFNode("escape []"), new VDFNode());
 			a.mapChildren.Add(new VDFNode("escape :"), new VDFNode());
-			a.ToVDF().Should().Be("{<<escape {}>>:null <<escape []>>:null <<escape :>>:null}");
+			a.mapChildren.Add(new VDFNode("escape \""), new VDFNode());
+			a.mapChildren.Add(new VDFNode("escape '"), new VDFNode());
+			a.ToVDF().Should().Be("{<<escape {}>>:null <<escape []>>:null <<escape :>>:null <<escape \">>:null <<escape '>>:null}");
 		}
 		[Fact] void D1_MetadataShowingNodeToBeOfTypeType()
 		{

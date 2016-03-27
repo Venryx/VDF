@@ -124,10 +124,10 @@ class VDFLoader
 			node.primitiveValue = null;
 		else if (typeName == "bool")
 			node.primitiveValue = firstNonMetadataToken.text == "true" ? true : false;
-		else if (typeName == "float" || typeName == "double")
-			node.primitiveValue = parseFloat(firstNonMetadataToken.text);
 		else if (typeName == "int")
 			node.primitiveValue = parseInt(firstNonMetadataToken.text);
+		else if (typeName == "float" || typeName == "double" || firstNonMetadataToken.type == VDFTokenType.Number)
+			node.primitiveValue = parseFloat(firstNonMetadataToken.text);
 		//else if (typeName == "string")
 		// have in-vdf string type override declared type, since we're not at the use-importer stage
 		else if (typeName == "string" || firstNonMetadataToken.type == VDFTokenType.String)

@@ -18,6 +18,7 @@
     <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="JavaScript\Helper.html" />
     <Content Include="JavaScript\Packages\General\QUnit 1.14.0.css" />
     <Content Include="JavaScript\Packages\JQueryUI\Content\AUTHORS.txt" />
     <Content Include="JavaScript\Packages\JQueryUI\Content\external\globalize.culture.de-DE.js" />

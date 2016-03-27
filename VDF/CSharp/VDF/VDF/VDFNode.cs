@@ -118,7 +118,7 @@ namespace VDFN
 			{
 				var unpaddedString = (string)primitiveValue;
 				// (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
-				var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
+				var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("'") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
 				if (isKey)
 					needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
 				if (needsEscaping)

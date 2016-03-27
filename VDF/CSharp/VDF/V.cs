@@ -1,4 +1,4 @@
-﻿// don't have the VDF system use anything in this file; it's just for quick use while debugging
+﻿// don't have the VDF system use anything in this file; it's just for quick use while debugging (and it needs to stay in the main VDF project, so it can be called from the VDF files)
 
 using System;
 using System.Collections.Generic;
