@@ -127,12 +127,17 @@ that needs escaping.>>""".Fix());
 		[Fact] void D0_Null() { VDF.Serialize(null).Should().Be("null"); }
 		[Fact] void D0_EmptyString() { VDF.Serialize("").Should().Be("\"\""); }
 
-		class TypeWithDefaultStringProp { [VDFProp(writeDefaultValue = false)] string defaultString; }
-		[Fact] void D1_IgnoreEmptyString() { VDF.Serialize<TypeWithDefaultStringProp>(new TypeWithDefaultStringProp()).Should().Be("{}"); }
-		class TypeWithNullProps { [VDFProp] public object obj; [VDFProp] public List<string> strings; [VDFProp] public List<string> strings2 = new List<string>(); }
+		[VDFType("")] class D1_IgnoreDefaultValues_Class {
+			[D] bool bool1; [D(true)] bool bool2 = true; bool bool3 = true;
+			[D] string string1; [D("value1")] string string2 = "value1"; string string3 = "value1";
+		}
+		[Fact] void D1_IgnoreDefaultValues() {
+			VDF.Serialize<D1_IgnoreDefaultValues_Class>(new D1_IgnoreDefaultValues_Class()).Should().Be("{bool3:true string3:\"value1\"}");
+		}
+		class D1_NullValues_Class { [P] public object obj; [P] public List<string> strings; [P] public List<string> strings2 = new List<string>(); }
 		[Fact] void D1_NullValues()
 		{
-			var a = VDFSaver.ToVDFNode(new TypeWithNullProps());
+			var a = VDFSaver.ToVDFNode(new D1_NullValues_Class());
 			a["obj"].metadata.Should().Be(null);
 			a["obj"].primitiveValue.Should().Be(null);
 			a["strings"].metadata.Should().Be(null);
@@ -141,9 +146,9 @@ that needs escaping.>>""".Fix());
 			a["strings2"].metadata.Should().Be(null); // old: auto-marked as list (needed, to specify sort of type, as required)
 			a["strings2"].primitiveValue.Should().Be(null); // it's a List, so it shouldn't have a base-value
 			a["strings2"].listChildren.Count.Should().Be(0);
-			a.ToVDF().Should().Be("TypeWithNullProps>{obj:null strings:null strings2:[]}");
+			a.ToVDF().Should().Be("D1_NullValues_Class>{obj:null strings:null strings2:[]}");
 		}
-		class TypeWithList_PopOutItemData { [VDFProp(popOutL2: true)] List<string> list = new List<string>{"A", "B"}; }
+		class TypeWithList_PopOutItemData { [P(popOutL2: true)] List<string> list = new List<string>{"A", "B"}; }
 		[Fact] void D1_ListItems_PoppedOutChildren()
 		{
 			var a = VDFSaver.ToVDFNode<TypeWithList_PopOutItemData>(new TypeWithList_PopOutItemData());
@@ -202,7 +207,7 @@ that needs escaping.>>""".Fix());
 		}
 		class TypeWithPreSerializePrepMethod
 		{
-			[VDFProp] bool preSerializeWasCalled;
+			[P] bool preSerializeWasCalled;
 			[VDFPreSerialize] void VDFPreSerialize() { preSerializeWasCalled = true; }
 		}
 		[Fact] void D1_PreSerializePreparation()
@@ -213,7 +218,7 @@ that needs escaping.>>""".Fix());
 		}
 		class TypeWithPostSerializeCleanupMethod
 		{
-			[VDFProp] bool postSerializeWasCalled;
+			[P] bool postSerializeWasCalled;
 			[VDFPostSerialize] void VDFPostSerialize() { postSerializeWasCalled = true; }
 		}
 		[Fact] void D1_PostSerializeCleanup()
@@ -224,12 +229,12 @@ that needs escaping.>>""".Fix());
 		}
 		class TypeWithMixOfProps
 		{
-			[VDFProp] bool Bool = true;
-			[VDFProp] int Int = 5;
-			[VDFProp] double Double = .5;
-			[VDFProp] string String = "Prop value string.";
-			[VDFProp] List<string> list = new List<string>{"2A", "2B"};
-			[VDFProp] List<List<string>> nestedList = new List<List<string>>{new List<string>{"1A"}};
+			[P] bool Bool = true;
+			[P] int Int = 5;
+			[P] double Double = .5;
+			[P] string String = "Prop value string.";
+			[P] List<string> list = new List<string>{"2A", "2B"};
+			[P] List<List<string>> nestedList = new List<List<string>>{new List<string>{"1A"}};
 		}
 		[Fact] void D1_TypeProperties_MarkForNone()
 		{
@@ -261,12 +266,12 @@ that needs escaping.>>""".Fix());
 
 		class D1_Object_DictionaryPoppedOutThenBool_Class1
 		{
-			[VDFProp(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			[P(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
 			};
-			[VDFProp] bool otherProperty = true;
+			[P] bool otherProperty = true;
 		}
 		[Fact] void D1_DictionaryPoppedOutThenBool()
 		{
@@ -277,12 +282,12 @@ that needs escaping.>>""".Fix());
 		}
 		[VDFType(popOutL1: true)] class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class
 		{
-			[VDFProp(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
+			[P(popOutL2: true)] Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
 			};
-			[VDFProp] bool otherProperty = true;
+			[P] bool otherProperty = true;
 		}
 		[Fact] void D1_Map_PoppedOutDictionary_PoppedOutPairs()
 		{
@@ -294,11 +299,11 @@ that needs escaping.>>""".Fix());
 	otherProperty:true".Replace("\r", ""));
 		}
 
-		class T1_Depth1 { [VDFProp] T1_Depth2 level2 = new T1_Depth2(); }
+		class T1_Depth1 { [P] T1_Depth2 level2 = new T1_Depth2(); }
 		class T1_Depth2
 		{
-			[VDFProp(popOutL2: true)] List<string> messages = new List<string> {"DeepString1_Line1\n\tDeepString1_Line2", "DeepString2"};
-			[VDFProp] bool otherProperty = true;
+			[P(popOutL2: true)] List<string> messages = new List<string> {"DeepString1_Line1\n\tDeepString1_Line2", "DeepString2"};
+			[P] bool otherProperty = true;
 		}
 		[Fact] void D2_Map_ListThenBool_PoppedOutStringsWithOneMultiline()
 		{
@@ -309,9 +314,9 @@ that needs escaping.>>""".Fix());
 	""DeepString2""".Replace("\r", ""));
 		}
 
-		class Level1 { [VDFProp] public Level2 level2 = new Level2(); }
-		class Level2 { [VDFProp] Level3 level3_first = new Level3(); [VDFProp] public Level3 level3_second = new Level3(); }
-		class Level3 { [VDFProp(popOutL2: true)] public List<string> messages = new List<string> { "DeepString1", "DeepString2" }; }
+		class Level1 { [P] public Level2 level2 = new Level2(); }
+		class Level2 { [P] Level3 level3_first = new Level3(); [P] public Level3 level3_second = new Level3(); }
+		class Level3 { [P(popOutL2: true)] public List<string> messages = new List<string> { "DeepString1", "DeepString2" }; }
 		[Fact] void D3_Map_Map_Maps_Lists_PoppedOutStrings()
 		{
 			var a = VDFSaver.ToVDFNode(new Level1(), new VDFSaveOptions(typeMarking: VDFTypeMarking.None));
@@ -331,13 +336,13 @@ that needs escaping.>>""".Fix());
 	""DeepString2""".Replace("\r", ""));
 		}
 
-		class T4_Depth1 { [VDFProp] T4_Depth2 level2 = new T4_Depth2(); }
-		class T4_Depth2 { [VDFProp] T4_Depth3 level3_first = new T4_Depth3(); [VDFProp] T4_Depth3 level3_second = new T4_Depth3(); }
-		class T4_Depth3 { [VDFProp(popOutL2: true)] List<T4_Depth4> level4s = new List<T4_Depth4> { new T4_Depth4(), new T4_Depth4() }; }
+		class T4_Depth1 { [P] T4_Depth2 level2 = new T4_Depth2(); }
+		class T4_Depth2 { [P] T4_Depth3 level3_first = new T4_Depth3(); [P] T4_Depth3 level3_second = new T4_Depth3(); }
+		class T4_Depth3 { [P(popOutL2: true)] List<T4_Depth4> level4s = new List<T4_Depth4> { new T4_Depth4(), new T4_Depth4() }; }
 		class T4_Depth4
 		{
-			[VDFProp(popOutL2: true)] List<string> messages = new List<string>{"text1", "text2"};
-			[VDFProp] bool otherProperty = false;
+			[P(popOutL2: true)] List<string> messages = new List<string>{"text1", "text2"};
+			[P] bool otherProperty = false;
 		}
 		[Fact] void D4_Map_Map_Maps_Lists_PoppedOutMaps_ListsThenBools_PoppedOutStrings()
 		{
@@ -359,8 +364,8 @@ that needs escaping.>>""".Fix());
 
 		[VDFType(popOutL1: true)] class T5_Depth2
 		{
-			[VDFProp] bool firstProperty = false;
-			[VDFProp] bool otherProperty = false;
+			[P] bool firstProperty = false;
+			[P] bool otherProperty = false;
 		}
 		[Fact] void D4_List_Map_PoppedOutBools()
 		{
@@ -406,7 +411,7 @@ that needs escaping.>>""".Fix());
 			public bool notIncluded = true;
 			public bool included = true;
 
-			[VDFSerialize] VDFNode Serialize() //VDFPropInfo prop, VDFSaveOptions options)
+			[VDFSerialize] VDFNode Serialize() //PInfo prop, VDFSaveOptions options)
 			{
 				var result = new VDFNode();
 				result.mapChildren["included"] = new VDFNode(included);
@@ -418,7 +423,7 @@ that needs escaping.>>""".Fix());
 
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
 		{
-			[VDFProp] public bool boolProp = true;
+			[P] public bool boolProp = true;
 			[VDFSerialize] VDFNode Serialize() { return VDF.NoActionTaken; }
 		}
 		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop()
@@ -428,11 +433,11 @@ that needs escaping.>>""".Fix());
 		{
 			[VDFPreSerializeProp] VDFNode PreSerializeProp(VDFNodePath propPath, VDFSaveOptions options) { return VDF.CancelSerialize; }
 			
-			[VDFProp] public bool boolProp = true;
+			[P] public bool boolProp = true;
 		}
 		[Fact] void D1_Map_BoolWhoseSerializeIsCanceledFromParent() { VDF.Serialize<D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class>(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class()).Should().Be("{}"); }
 
-		class D1_Map_MapThatCancelsItsSerialize_Class_Parent { [VDFProp] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
+		class D1_Map_MapThatCancelsItsSerialize_Class_Parent { [P] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
 		class D1_Map_MapThatCancelsItsSerialize_Class_Child { [VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; } }
 		[Fact] void D1_Map_MapThatCancelsItsSerialize() { VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}"); }
 
@@ -445,7 +450,7 @@ that needs escaping.>>""".Fix());
 			var a = VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaveOptions(useMetadata: false));
 			a.metadata.Should().Be(null);
 		}
-		class D0_Map_List_BoolsWithPopOutDisabled_Class { [VDFProp(true, true)] List<int> ints = new List<int>{0, 1}; }
+		class D0_Map_List_BoolsWithPopOutDisabled_Class { [P(true, true)] List<int> ints = new List<int>{0, 1}; }
 		[Fact] void D0_Map_List_BoolsWithPopOutDisabled()
 		{
 			var a = VDFSaver.ToVDFNode<D0_Map_List_BoolsWithPopOutDisabled_Class>(new D0_Map_List_BoolsWithPopOutDisabled_Class(), new VDFSaveOptions(useChildPopOut: false));
@@ -478,13 +483,13 @@ that needs escaping.>>""".Fix());
 			var a = new SpecialList2<string>{"A", "B", "C"};
 			VDF.Serialize<SpecialList2<string>>(a).Should().Be("\"You'll never see the items!\"");
 		}*/
-		class D1_ListOfTypeArray_Strings_Class { [VDFProp] string[] array = {"A", "B"}; }
+		class D1_ListOfTypeArray_Strings_Class { [P] string[] array = {"A", "B"}; }
 		[Fact] void D1_ListOfTypeArray_Strings()
 		{
 			var a = VDFSaver.ToVDFNode<D1_ListOfTypeArray_Strings_Class>(new D1_ListOfTypeArray_Strings_Class());
 			a.ToVDF().Should().Be("{array:[\"A\" \"B\"]}");
 		}
-		class D1_ListOfTypeArrayList_Strings_Class { [VDFProp] ArrayList array = new ArrayList{ "A", "B" }; }
+		class D1_ListOfTypeArrayList_Strings_Class { [P] ArrayList array = new ArrayList{ "A", "B" }; }
 		[Fact] void D1_ListOfTypeArrayList_Strings()
 		{
 			var a = VDFSaver.ToVDFNode<D1_ListOfTypeArrayList_Strings_Class>(new D1_ListOfTypeArrayList_Strings_Class());

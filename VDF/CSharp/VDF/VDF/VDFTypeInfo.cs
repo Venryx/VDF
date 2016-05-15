@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -134,18 +135,32 @@ namespace VDFN
 		}
 	}
 
-	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute
-	{
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class VDFProp : Attribute {
 		public bool includeL2;
-		public bool writeDefaultValue;
 		public bool popOutL2;
 		// maybe old: issue: attribute constructors can't have nullables, so if tag is added, its would-be-optional override-props (popOutL2) are as well
-		public VDFProp(bool includeL2 = true, bool writeDefaultValue = true, bool popOutL2 = false)
-		{
+		public VDFProp(bool includeL2 = true, bool popOutL2 = false) {
 			this.includeL2 = includeL2;
-			this.writeDefaultValue = writeDefaultValue;
 			this.popOutL2 = popOutL2;
 		}
+	}
+	public class P : VDFProp { // alias for VDFProp
+		public P() { }
+		public P(bool includeL2 = true, bool popOutL2 = false) : base(includeL2, popOutL2) {}
+	}
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class DefaultValue : Attribute {
+		public object defaultValue;
+		public DefaultValue() { defaultValue = D.DefaultDefault; }
+		public DefaultValue(object defaultValue) { this.defaultValue = defaultValue; }
+	}
+	public class D : DefaultValue { // alias for DefaultValue
+		//public const string NoDefault = "DefaultValue_NoDefault"; // i.e. the prop has no default, so whatever value it has is always saved [commented out, since: if you want no default, just don't add the D tag]
+		public const string DefaultDefault = "DefaultValue_DefaultDefault"; // i.e. the default value for the type (not the prop) ['false' for a bool, etc.]
+		public const string NullOrEmpty = "DefaultValue_NullOrEmpty"; // i.e. null, or an empty string or collection
+		public const string Empty = "DefaultValue_Empty"; // i.e. an empty string or collection
+
+		public D() { }
+		public D(object defaultValue) : base(defaultValue) {}
 	}
 	public class VDFPropInfo
 	{
@@ -153,25 +168,41 @@ namespace VDFN
 		public static VDFPropInfo Get(MemberInfo prop)
 		{
 			if (!cachedPropInfo.ContainsKey(prop))
-				cachedPropInfo[prop] = new VDFPropInfo {memberInfo = prop, propTag = prop.GetCustomAttributes(true).OfType<VDFProp>().FirstOrDefault()};
+				cachedPropInfo[prop] = new VDFPropInfo {memberInfo = prop, propTag = prop.GetCustomAttributes(true).OfType<VDFProp>().FirstOrDefault(), defaultValueTag = prop.GetCustomAttributes(true).OfType<DefaultValue>().FirstOrDefault() };
 			return cachedPropInfo[prop];
 		}
 
 		public MemberInfo memberInfo;
 		public VDFProp propTag;
+		public DefaultValue defaultValueTag;
 
 		public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
-		public bool IsXValueTheDefault(object x)
+		public bool ShouldValueBeSaved(object val)
 		{
-			if (x == null) // if null
+			//if (defaultValueTag == null || defaultValueTag.defaultValue == D.NoDefault)
+			if (defaultValueTag == null)
 				return true;
-			if (GetPropType().IsValueType && x.Equals(Activator.CreateInstance(GetPropType()))) //x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
-				return true;
-			/*if (x is IList && ((IList)x).Count == 0) // if list, and empty
-				return true;
-			if (x is string && ((string)x).Length == 0) // if string, and empty
-				return true;*/
-			return false;
+
+			if (defaultValueTag.defaultValue as string == D.DefaultDefault)
+			{
+				if (val == null) // if null
+					return false;
+				if (GetPropType().IsValueType && val.Equals(Activator.CreateInstance(GetPropType()))) //x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
+					return false;
+			}
+			if (defaultValueTag.defaultValue as string == D.NullOrEmpty && val == null)
+				return false;
+			if (defaultValueTag.defaultValue as string == D.NullOrEmpty || defaultValueTag.defaultValue as string == D.Empty)
+			{
+				if (val is string && ((string)val).Length == 0) // if string, and empty
+					return false;
+				if (val is IList && ((IList)val).Count == 0) // if list, and empty
+					return false;
+			}
+			if (Equals(val, defaultValueTag.defaultValue))
+				return false;
+
+			return true;
 		}
 		public object GetValue(object objParent)
 		{

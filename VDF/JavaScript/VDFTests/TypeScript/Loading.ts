@@ -491,7 +491,7 @@ of three lines in total.".Fix());
 
 		class TypeWithPreDeserializeMethod
 		{
-			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+			flag = Prop(this, "flag", "bool", new P()).set = false;
 			PreDeserialize(): void { this.flag = true; }
 			constructor() { this.PreDeserialize.AddTags(new VDFPreDeserialize()); }
 		}
@@ -502,7 +502,7 @@ of three lines in total.".Fix());
 		});
 		class TypeWithPostDeserializeMethod
 		{
-			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+			flag = Prop(this, "flag", "bool", new P()).set = false;
 			PostDeserialize(): void { this.flag = true; }
 			constructor() { this.PostDeserialize.AddTags(new VDFPostDeserialize()); }
 		}
@@ -513,7 +513,7 @@ of three lines in total.".Fix());
 		});
 		class ObjectWithPostDeserializeMethodRequiringCustomMessage_Class
 		{
-			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+			flag = Prop(this, "flag", "bool", new P()).set = false;
 			PostDeserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): void { if (<string>options.messages[0] == "RequiredMessage") this.flag = true; }
 			constructor() { this.PostDeserialize.AddTags(new VDFPostDeserialize()); }
 		}
@@ -522,7 +522,7 @@ of three lines in total.".Fix());
 		{
 			static typeInfo = new VDFTypeInfo(
 			{
-				flag: new VDFPropInfo("bool")
+				flag: new PInfo("bool")
 			});
 			flag = false;
 			ObjectWithPostDeserializeConstructor_Class() { flag = true; }
@@ -548,7 +548,7 @@ of three lines in total.".Fix());
 
 		class TypeInstantiatedManuallyThenFilled
 		{
-			flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+			flag = Prop(this, "flag", "bool", new P()).set = false;
 		}
 		test("D1_InstantiateTypeManuallyThenFill", ()=>
 		{
@@ -559,12 +559,12 @@ of three lines in total.".Fix());
 		class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
 			_helper = Type(new VDFType(null, true)).set = this;
-			messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp()).set = new Dictionary<string, string>("string", "string",
+			messages = Prop(this, "messages", "Dictionary(string string)", new P()).set = new Dictionary<string, string>("string", "string",
 			{
 				title1: "message1",
 				title2: "message2"
 			});
-			otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
+			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
 		}
 		test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", ()=>
 		{
@@ -585,7 +585,7 @@ of three lines in total.".Fix());
 
 		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class
 		{
-			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
 			Deserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
 			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
 		}
@@ -593,7 +593,7 @@ of three lines in total.".Fix());
 
 		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class
 		{
-			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
 			Deserialize(node: VDFNode) { return VDF.NoActionTaken; }
 			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
 		}
@@ -601,7 +601,7 @@ of three lines in total.".Fix());
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent
 		{
-			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new VDFProp()).set = null;
+			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new P()).set = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child
 		{
@@ -612,11 +612,11 @@ of three lines in total.".Fix());
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent
 		{
-			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new VDFProp()).set = null;
+			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new P()).set = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child
 		{
-			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
 			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions) { return VDF.NoActionTaken; }
 			constructor() { D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true)); }
 		}
@@ -624,12 +624,12 @@ of three lines in total.".Fix());
 
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent
 		{
-			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
-			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null; // doesn't actually have tag; just pretend it does
+			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new P()).set = null;
+			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new P()).set = null; // doesn't actually have tag; just pretend it does
 		}
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child
 		{
-			methodCalled = Prop(this, "methodCalled", "bool", new VDFProp()).set = false;
+			methodCalled = Prop(this, "methodCalled", "bool", new P()).set = false;
 			Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): void
 			{
 				ok(path.parentNode.obj instanceof D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent);

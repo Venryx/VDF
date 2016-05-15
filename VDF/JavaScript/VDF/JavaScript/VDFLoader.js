@@ -99,10 +99,10 @@ var VDFLoader = (function () {
             node.primitiveValue = null;
         else if (typeName == "bool")
             node.primitiveValue = firstNonMetadataToken.text == "true" ? true : false;
-        else if (typeName == "float" || typeName == "double")
-            node.primitiveValue = parseFloat(firstNonMetadataToken.text);
         else if (typeName == "int")
             node.primitiveValue = parseInt(firstNonMetadataToken.text);
+        else if (typeName == "float" || typeName == "double" || firstNonMetadataToken.type == VDFTokenType.Number)
+            node.primitiveValue = parseFloat(firstNonMetadataToken.text);
         else if (typeName == "string" || firstNonMetadataToken.type == VDFTokenType.String)
             node.primitiveValue = firstNonMetadataToken.text;
         else if (typeName.StartsWith("List(")) {

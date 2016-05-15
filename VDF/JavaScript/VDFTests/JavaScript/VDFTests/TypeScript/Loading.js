@@ -406,7 +406,7 @@ of three lines in total.".Fix());
         //test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
         var TypeWithPreDeserializeMethod = (function () {
             function TypeWithPreDeserializeMethod() {
-                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+                this.flag = Prop(this, "flag", "bool", new P()).set = false;
                 this.PreDeserialize.AddTags(new VDFPreDeserialize());
             }
             TypeWithPreDeserializeMethod.prototype.PreDeserialize = function () { this.flag = true; };
@@ -418,7 +418,7 @@ of three lines in total.".Fix());
         });
         var TypeWithPostDeserializeMethod = (function () {
             function TypeWithPostDeserializeMethod() {
-                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+                this.flag = Prop(this, "flag", "bool", new P()).set = false;
                 this.PostDeserialize.AddTags(new VDFPostDeserialize());
             }
             TypeWithPostDeserializeMethod.prototype.PostDeserialize = function () { this.flag = true; };
@@ -430,7 +430,7 @@ of three lines in total.".Fix());
         });
         var ObjectWithPostDeserializeMethodRequiringCustomMessage_Class = (function () {
             function ObjectWithPostDeserializeMethodRequiringCustomMessage_Class() {
-                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+                this.flag = Prop(this, "flag", "bool", new P()).set = false;
                 this.PostDeserialize.AddTags(new VDFPostDeserialize());
             }
             ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.PostDeserialize = function (node, path, options) { if (options.messages[0] == "RequiredMessage")
@@ -442,7 +442,7 @@ of three lines in total.".Fix());
         {
             static typeInfo = new VDFTypeInfo(
             {
-                flag: new VDFPropInfo("bool")
+                flag: new PInfo("bool")
             });
             flag = false;
             ObjectWithPostDeserializeConstructor_Class() { flag = true; }
@@ -472,7 +472,7 @@ of three lines in total.".Fix());
         });
         var TypeInstantiatedManuallyThenFilled = (function () {
             function TypeInstantiatedManuallyThenFilled() {
-                this.flag = Prop(this, "flag", "bool", new VDFProp()).set = false;
+                this.flag = Prop(this, "flag", "bool", new P()).set = false;
             }
             return TypeInstantiatedManuallyThenFilled;
         })();
@@ -484,11 +484,11 @@ of three lines in total.".Fix());
         var D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
             function D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
                 this._helper = Type(new VDFType(null, true)).set = this;
-                this.messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp()).set = new Dictionary("string", "string", {
+                this.messages = Prop(this, "messages", "Dictionary(string string)", new P()).set = new Dictionary("string", "string", {
                     title1: "message1",
                     title2: "message2"
                 });
-                this.otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
+                this.otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
             }
             return D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1;
         })();
@@ -507,7 +507,7 @@ of three lines in total.".Fix());
         // ==========
         var D1_MapWithEmbeddedDeserializeMethod_Prop_Class = (function () {
             function D1_MapWithEmbeddedDeserializeMethod_Prop_Class() {
-                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+                this.boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
                 this.Deserialize.AddTags(new VDFDeserialize());
             }
             D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype.Deserialize = function (node) { this.boolProp = node["boolProp"].primitiveValue; };
@@ -516,7 +516,7 @@ of three lines in total.".Fix());
         test("D1_MapWithEmbeddedDeserializeMethod_Prop", function () { VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
         var D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class = (function () {
             function D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class() {
-                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+                this.boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
                 this.Deserialize.AddTags(new VDFDeserialize());
             }
             D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) { return VDF.NoActionTaken; };
@@ -525,7 +525,7 @@ of three lines in total.".Fix());
         test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () { VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
         var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
-                this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new VDFProp()).set = null;
+                this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new P()).set = null;
             }
             return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent;
         })();
@@ -539,13 +539,13 @@ of three lines in total.".Fix());
         test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () { ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
         var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {
-                this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new VDFProp()).set = null;
+                this.child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new P()).set = null;
             }
             return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent;
         })();
         var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = (function () {
             function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child() {
-                this.boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = false;
+                this.boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
                 D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
             }
             D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) { return VDF.NoActionTaken; };
@@ -554,14 +554,14 @@ of three lines in total.".Fix());
         test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () { VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
         var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent = (function () {
             function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent() {
-                this.withoutTag = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null;
-                this.withTag = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new VDFProp()).set = null; // doesn't actually have tag; just pretend it does
+                this.withoutTag = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new P()).set = null;
+                this.withTag = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new P()).set = null; // doesn't actually have tag; just pretend it does
             }
             return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent;
         })();
         var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = (function () {
             function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child() {
-                this.methodCalled = Prop(this, "methodCalled", "bool", new VDFProp()).set = false;
+                this.methodCalled = Prop(this, "methodCalled", "bool", new P()).set = false;
                 this.Deserialize.AddTags(new VDFDeserialize());
             }
             D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype.Deserialize = function (node, path, options) {

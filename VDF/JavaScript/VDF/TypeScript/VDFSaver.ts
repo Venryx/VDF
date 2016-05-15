@@ -138,7 +138,7 @@ class VDFSaver
 							continue;
 
 						var propValue = obj[propName];
-						if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
+						if (propInfo && !propInfo.ShouldValueBeSaved(propValue))
 							continue;
 
 						var childPath = path.ExtendAsChild(propInfo, propValue);

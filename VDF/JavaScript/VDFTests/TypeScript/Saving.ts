@@ -149,8 +149,8 @@ that needs escaping.>>\"".Fix());
 			a.SetListChild(0, new VDFNode("This is a list item \"that needs escaping\"."));
 			a.SetListChild(1, new VDFNode("Here's another."));
 			a.SetListChild(2, new VDFNode("And <<another>>."));
-			a.SetListChild(3, new VDFNode("This one doesn't need escaping."));
-			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<Here's another.>>\" \"<<<And <<another>>.>>>\" \"This one doesn't need escaping.\"]");
+			a.SetListChild(3, new VDFNode("This one does not need escaping."));
+			a.ToVDF().Should().Be("[\"<<This is a list item \"that needs escaping\".>>\" \"<<Here's another.>>\" \"<<<And <<another>>.>>>\" \"This one does not need escaping.\"]");
 		});
 		test("D1_List_EscapedStrings2", ()=>
 		{
@@ -199,16 +199,47 @@ that needs escaping.>>\"".Fix());
 		test("D0_Null", ()=> { VDF.Serialize(null).Should().Be("null"); });
 		test("D0_EmptyString", ()=> { VDF.Serialize("").Should().Be("\"\""); });
 
+		class D1_IgnoreDefaultValues_Class {
+			_helper = Type(new VDFType("^(?!_)")).set = this;
+
+			bool1: boolean = Prop(this, "bool1", "bool", new D()).set = null;
+			bool2: boolean = Prop(this, "bool2", "bool", new D(true)).set = true;
+			bool3: boolean = Prop(this, "bool3", "bool").set = true;
+
+			string1: string = Prop(this, "string1", "string", new D()).set = null;
+			string2: string = Prop(this, "string2", "string", new D("value1")).set = "value1";
+			string3: string = Prop(this, "string3", "string").set = "value1";
+		}
+		test("D1_IgnoreDefaultValues", ()=>{
+			VDF.Serialize(new D1_IgnoreDefaultValues_Class(), "D1_IgnoreDefaultValues_Class").Should().Be("{bool3:true string3:\"value1\"}");
+		});
+		class D1_NullValues_Class {
+			obj: any = Prop(this, "obj", "object", new P()).set = null;
+			strings: List<string> = Prop(this, "strings", "List(string)", new P()).set = null;
+			strings2 = Prop(this, "strings2", "List(string)", new P()).set = new List<string>("string");
+		}
+		test("D1_NullValues", () => {
+			var a = VDFSaver.ToVDFNode(new D1_NullValues_Class());
+			ok(a["obj"].metadata == null); //a["obj"].metadata.Should().Be(null);
+			ok(a["obj"].primitiveValue == null); //a["obj"].primitiveValue.Should().Be(null);
+			ok(a["strings"].metadata == null); //a["strings"].metadata.Should().Be(null);
+			ok(a["strings"].primitiveValue == null); //a["strings"].primitiveValue.Should().Be(null);
+			//ok(a["strings2"].metadata == null); //a["strings2"].metadata.Should().Be(null); // unmarked type
+			ok(a["strings2"].metadata == null); //a["strings2"].metadata.Should().Be(null); // old: auto-marked as list (needed, to specify sort of type, as required)
+			ok(a["strings2"].primitiveValue == null); //a["strings2"].primitiveValue.Should().Be(null); // it's a List, so it shouldn't have a base-value
+			a["strings2"].listChildren.Count.Should().Be(0);
+			a.ToVDF().Should().Be("D1_NullValues_Class>{obj:null strings:null strings2:[]}");
+		});
 		class TypeWithDefaultStringProp
 		{
-			defaultString: string = Prop(this, "defaultString", "string", new VDFProp(true, false)).set = null;
+			defaultString: string = Prop(this, "defaultString", "string", new P(true), new D()).set = null;
 		}
 		test("D1_IgnoreEmptyString", ()=> { VDF.Serialize(new TypeWithDefaultStringProp(), "TypeWithDefaultStringProp").Should().Be("{}"); });
 		class TypeWithNullProps
 		{
-			obj: any = Prop(this, "obj", "object", new VDFProp()).set = null;
-			strings: List<string> = Prop(this, "strings", "List(string)", new VDFProp()).set = null;
-			strings2 = Prop(this, "strings2", "List(string)", new VDFProp()).set = new List<string>("string");
+			obj: any = Prop(this, "obj", "object", new P()).set = null;
+			strings: List<string> = Prop(this, "strings", "List(string)", new P()).set = null;
+			strings2 = Prop(this, "strings2", "List(string)", new P()).set = new List<string>("string");
 		}
 		test("D1_NullValues", ()=>
 		{
@@ -225,7 +256,7 @@ that needs escaping.>>\"".Fix());
 		});
 		class TypeWithList_PopOutItemData
 		{
-			list = Prop(this, "list", "List(string)", new VDFProp(true, true, true)).set = new List<string>("string", "A", "B");
+			list = Prop(this, "list", "List(string)", new P(true, true)).set = new List<string>("string", "A", "B");
 		}
 		test("D1_ListItems_PoppedOutChildren", ()=>
 		{
@@ -272,7 +303,7 @@ that needs escaping.>>\"".Fix());
 		});
 		class TypeWithPreSerializePrepMethod
 		{
-			preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new VDFProp()).set = false;
+			preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new P()).set = false;
 			PreSerialize(): void { this.preSerializeWasCalled = true; }
 			constructor() { this.PreSerialize.AddTags(new VDFPreSerialize()); }
 		}
@@ -284,7 +315,7 @@ that needs escaping.>>\"".Fix());
 		});
 		class TypeWithPostSerializeCleanupMethod
 		{
-			postSerializeWasCalled = Prop(this, "postSerializeWasCalled", "bool", new VDFProp()).set = false;
+			postSerializeWasCalled = Prop(this, "postSerializeWasCalled", "bool", new P()).set = false;
 			PostSerialize(): void { this.postSerializeWasCalled = true; }
 			constructor() { this.PostSerialize.AddTags(new VDFPostSerialize()); }
 		}
@@ -296,12 +327,12 @@ that needs escaping.>>\"".Fix());
 		});
 		class TypeWithMixOfProps
 		{
-			Bool = Prop(this, "Bool", "bool", new VDFProp()).set = true;
-			Int = Prop(this, "Int", "int", new VDFProp()).set = 5;
-			Double = Prop(this, "Double", "double", new VDFProp()).set = .5;
-			String = Prop(this, "String", "string", new VDFProp()).set = "Prop value string.";
-			list = Prop(this, "list", "List(string)", new VDFProp()).set = new List<string>("string", "2A", "2B");
-			nestedList = Prop(this, "nestedList", "List(List(string))", new VDFProp()).set = new List<List<string>>("List(string)", new List<string>("string", "1A"));
+			Bool = Prop(this, "Bool", "bool", new P()).set = true;
+			Int = Prop(this, "Int", "int", new P()).set = 5;
+			Double = Prop(this, "Double", "double", new P()).set = .5;
+			String = Prop(this, "String", "string", new P()).set = "Prop value string.";
+			list = Prop(this, "list", "List(string)", new P()).set = new List<string>("string", "2A", "2B");
+			nestedList = Prop(this, "nestedList", "List(List(string))", new P()).set = new List<List<string>>("List(string)", new List<string>("string", "1A"));
 		}
 		test("D1_TypeProperties_MarkForNone", ()=>
 		{
@@ -333,8 +364,8 @@ that needs escaping.>>\"".Fix());
 
 		class D1_Object_DictionaryPoppedOutThenBool_Class1
 		{
-			messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp(true, true, true)).set = new Dictionary<string, string>("string", "string", {title1: "message1", title2:"message2"});
-			otherProperty = Prop(this, "otherProperty", "Dictionary(string string)", new VDFProp()).set = true;
+			messages = Prop(this, "messages", "Dictionary(string string)", new P(true, true)).set = new Dictionary<string, string>("string", "string", {title1: "message1", title2:"message2"});
+			otherProperty = Prop(this, "otherProperty", "Dictionary(string string)", new P()).set = true;
 		}
 		test("D1_DictionaryPoppedOutThenBool", ()=>
 		{
@@ -347,12 +378,12 @@ that needs escaping.>>\"".Fix());
 		{
 			_helper = Type(new VDFType(null, true)).set = this;
 
-			messages = Prop(this, "messages", "Dictionary(string string)", new VDFProp(true, true, true)).set = new Dictionary<string, string>("string", "string",
+			messages = Prop(this, "messages", "Dictionary(string string)", new P(true, true)).set = new Dictionary<string, string>("string", "string",
 			{
 				title1: "message1",
 				title2: "message2"
 			});
-			otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = true;
+			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = true;
 		}
 		test("D1_Map_PoppedOutDictionary_PoppedOutPairs", ()=>
 		{
@@ -366,12 +397,12 @@ that needs escaping.>>\"".Fix());
 
 		class T1_Depth1
 		{
-			level2 = Prop(this, "level2", "T1_Depth2", new VDFProp()).set = new T1_Depth2();
+			level2 = Prop(this, "level2", "T1_Depth2", new P()).set = new T1_Depth2();
 		}
 		class T1_Depth2
 		{
-			messages = Prop(this, "messages", "List(string)", new VDFProp(true, true, true)).set = new List<string>("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
-			otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = true;
+			messages = Prop(this, "messages", "List(string)", new P(true, true)).set = new List<string>("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
+			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = true;
 		}
 		test("D2_Map_ListThenBool_PoppedOutStringsWithOneMultiline", ()=>
 		{
@@ -384,16 +415,16 @@ that needs escaping.>>\"".Fix());
 
 		class Level1
 		{
-			level2 = Prop(this, "level2", "Level2", new VDFProp()).set = new Level2();
+			level2 = Prop(this, "level2", "Level2", new P()).set = new Level2();
 		}
 		class Level2
 		{
-			level3_first = Prop(this, "level3_first", "Level3", new VDFProp()).set = new Level3();
-			level3_second = Prop(this, "level3_second", "Level3", new VDFProp()).set = new Level3();
+			level3_first = Prop(this, "level3_first", "Level3", new P()).set = new Level3();
+			level3_second = Prop(this, "level3_second", "Level3", new P()).set = new Level3();
 		}
 		class Level3
 		{
-			messages = Prop(this, "messages", "List(string)", new VDFProp(true, true, true)).set = new List<string>("string", "DeepString1", "DeepString2");
+			messages = Prop(this, "messages", "List(string)", new P(true, true)).set = new List<string>("string", "DeepString1", "DeepString2");
 		}
 		test("D3_Map_Map_Maps_Lists_PoppedOutStrings", ()=>
 		{
@@ -416,21 +447,21 @@ that needs escaping.>>\"".Fix());
 
 		class T4_Depth1
 		{
-			level2 = Prop(this, "level2", "T4_Depth2)", new VDFProp()).set = new T4_Depth2();
+			level2 = Prop(this, "level2", "T4_Depth2)", new P()).set = new T4_Depth2();
 		}
 		class T4_Depth2
 		{
-			level3_first = Prop(this, "level3_first", "T4_Depth3", new VDFProp()).set = new T4_Depth3();
-			level3_second = Prop(this, "level3_second", "T4_Depth3", new VDFProp()).set = new T4_Depth3();
+			level3_first = Prop(this, "level3_first", "T4_Depth3", new P()).set = new T4_Depth3();
+			level3_second = Prop(this, "level3_second", "T4_Depth3", new P()).set = new T4_Depth3();
 		}
 		class T4_Depth3
 		{
-			level4s = Prop(this, "level4s", "List(T4_Depth4)", new VDFProp(true, true, true)).set = new List<T4_Depth4>("T4_Depth4", new T4_Depth4(), new T4_Depth4());
+			level4s = Prop(this, "level4s", "List(T4_Depth4)", new P(true, true)).set = new List<T4_Depth4>("T4_Depth4", new T4_Depth4(), new T4_Depth4());
 		}
 		class T4_Depth4
 		{
-			messages = Prop(this, "messages", "List(string)", new VDFProp(true, true, true)).set = new List<string>("string", "text1", "text2");
-			otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
+			messages = Prop(this, "messages", "List(string)", new P(true, true)).set = new List<string>("string", "text1", "text2");
+			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
 		}
 		test("D4_Map_Map_Maps_Lists_PoppedOutMaps_ListsThenBools_PoppedOutStrings", ()=>
 		{
@@ -454,8 +485,8 @@ that needs escaping.>>\"".Fix());
 		{
 			_helper = Type(new VDFType(null, true)).set = this;
 
-			firstProperty = Prop(this, "firstProperty", "bool", new VDFProp()).set = false;
-			otherProperty = Prop(this, "otherProperty", "bool", new VDFProp()).set = false;
+			firstProperty = Prop(this, "firstProperty", "bool", new P()).set = false;
+			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
 		}
 		test("D4_List_Map_PoppedOutBools", ()=>
 		{
@@ -499,7 +530,7 @@ that needs escaping.>>\"".Fix());
 			notIncluded = Prop(this, "notIncluded", "bool").set = true;
 			included = Prop(this, "included", "bool").set = true;
 
-			Serialize(): VDFNode //VDFPropInfo prop, VDFSaveOptions options)
+			Serialize(): VDFNode //PInfo prop, VDFSaveOptions options)
 			{
 				var result = new VDFNode();
 				result.SetMapChild(new VDFNode("included"), new VDFNode(this.included));
@@ -512,7 +543,7 @@ that needs escaping.>>\"".Fix());
 
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
 		{
-			boolProp = Prop(this, "boolProp", "bool", new VDFProp()).set = true;
+			boolProp = Prop(this, "boolProp", "bool", new P()).set = true;
 			Serialize() { return VDF.NoActionTaken; }
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
@@ -523,12 +554,12 @@ that needs escaping.>>\"".Fix());
 			PreSerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
 			constructor() { this.PreSerializeProp.AddTags(new VDFPreSerializeProp()); }
 			
-			boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new VDFProp()).set = true;
+			boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new P()).set = true;
 		}
 		test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", ()=>{ VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}"); });
 
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
-			{ child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new VDFProp()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
+			{ child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new P()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
 		class D1_Map_MapThatCancelsItsSerialize_Class_Child
 		{
 			Serialize() { return VDF.CancelSerialize; }
@@ -547,7 +578,7 @@ that needs escaping.>>\"".Fix());
 		});
 		class D0_Map_List_BoolsWithPopOutDisabled_Class
 		{
-			ints = Prop(this, "ints", "List(int)", new VDFProp()).set = new List<number>("int", 0, 1);
+			ints = Prop(this, "ints", "List(int)", new P()).set = new List<number>("int", 0, 1);
 		}
 		test("D0_Map_List_BoolsWithPopOutDisabled", ()=>
 		{

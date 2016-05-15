@@ -417,10 +417,13 @@ PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value)
 	if (typeInfo.props[this.propName] == null)
 	{
 		var propTag: any = {};
+		var defaultValueTag: any = {};
 		for (var i in s.tags)
 			if (s.tags[i] instanceof VDFProp)
 				propTag = s.tags[i];
-		typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
+			else if (s.tags[i] instanceof DefaultValue)
+				defaultValueTag = s.tags[i];
+		typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag, defaultValueTag);
 	}
 };
 function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) { return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags); };

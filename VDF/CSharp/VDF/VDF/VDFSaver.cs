@@ -148,7 +148,7 @@ namespace VDFN
 								continue;
 
 							object propValue = propInfo.GetValue(obj);
-							if (propInfo.IsXValueTheDefault(propValue) && propInfo.propTag != null && !propInfo.propTag.writeDefaultValue)
+							if (!propInfo.ShouldValueBeSaved(propValue))
 								continue;
 
 							VDFNodePath childPath = path.ExtendAsChild(propInfo, propValue);

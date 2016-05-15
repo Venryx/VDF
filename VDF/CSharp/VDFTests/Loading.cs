@@ -461,7 +461,7 @@ of three lines in total.".Fix());
 
 		class TypeWithPreDeserializeMethod
 		{
-			[VDFProp] public bool flag;
+			[P] public bool flag;
 			[VDFPreDeserialize] void VDFPreDeserialize() { flag = true; }
 		}
 		[Fact] void D1_PreDeserializeMethod()
@@ -471,7 +471,7 @@ of three lines in total.".Fix());
 		}
 		class TypeWithPostDeserializeMethod
 		{
-			[VDFProp] public bool flag;
+			[P] public bool flag;
 			[VDFPostDeserialize] void VDFPostDeserialize() { flag = true; }
 		}
 		[Fact] void D1_PostDeserializeMethod()
@@ -516,7 +516,7 @@ of three lines in total.".Fix());
 		class D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Derived : D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Base {}
 		[Fact] void D1_MapWithPostDeserializeMethodInBaseClass_Prop() { VDF.Deserialize<D1_MapWithPostDeserializeMethodInBaseClass_Prop_Class_Derived>("{}").called.Should().Be(true); }*/
 
-		class TypeInstantiatedManuallyThenFilled { [VDFProp] public bool flag; }
+		class TypeInstantiatedManuallyThenFilled { [P] public bool flag; }
 		[Fact] void D1_InstantiateTypeManuallyThenFill()
 		{
 			var a = new TypeInstantiatedManuallyThenFilled();
@@ -525,12 +525,12 @@ of three lines in total.".Fix());
 		}
 		[VDFType(popOutL1: true)] class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
-			[VDFProp(popOutL2: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
+			[P(popOutL2: true)] public Dictionary<string, string> messages = new Dictionary<string, string>
 			{
 				{"title1", "message1"},
 				{"title2", "message2"}
 			};
-			[VDFProp] public bool otherProperty;
+			[P] public bool otherProperty;
 		}
 		[Fact] void D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool()
 		{
@@ -584,8 +584,8 @@ of three lines in total.".Fix());
 
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent
 		{
-			[VDFProp] public D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child withoutTag;
-			[VDFProp, Tags("tag")] public D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child withTag;
+			[P] public D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child withoutTag;
+			[P, Tags("tag")] public D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child withTag;
 		}
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child
 		{

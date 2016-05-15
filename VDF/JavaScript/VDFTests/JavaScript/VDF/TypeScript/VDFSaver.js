@@ -82,7 +82,7 @@ var VDFSaver = (function () {
                 result.isMap = true;
                 var objAsDictionary = obj;
                 for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
-                    var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.value), true); // stringify-attempt-1: use exporter
+                    var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.key), true); // stringify-attempt-1: use exporter
                     if (typeof keyNode.primitiveValue != "string")
                         //throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
                         keyNode = new VDFNode(pair.key.toString());
@@ -107,7 +107,7 @@ var VDFSaver = (function () {
                         if (!include)
                             continue;
                         var propValue = obj[propName];
-                        if (propInfo && propInfo.IsXValueTheDefault(propValue) && propInfo.propTag && propInfo.propTag.writeDefaultValue == false)
+                        if (propInfo && !propInfo.ShouldValueBeSaved(propValue))
                             continue;
                         var childPath = path.ExtendAsChild(propInfo, propValue);
                         var canceled = false;

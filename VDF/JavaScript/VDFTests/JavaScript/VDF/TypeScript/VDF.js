@@ -471,11 +471,16 @@ function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags)
 PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
     var s = this;
     var typeInfo = VDFTypeInfo.Get(s.type.name);
-    var propTag = {};
-    for (var i in s.tags)
-        if (s.tags[i] instanceof VDFProp)
-            propTag = s.tags[i];
-    typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag);
+    if (typeInfo.props[this.propName] == null) {
+        var propTag = {};
+        var defaultValueTag = {};
+        for (var i in s.tags)
+            if (s.tags[i] instanceof VDFProp)
+                propTag = s.tags[i];
+            else if (s.tags[i] instanceof DefaultValue)
+                defaultValueTag = s.tags[i];
+        typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag, defaultValueTag);
+    }
 };
 function Prop(typeOrObj, propName, propType_orFirstTag) {
     var tags = [];
