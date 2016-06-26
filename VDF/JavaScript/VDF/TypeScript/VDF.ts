@@ -334,18 +334,15 @@ class VDFUtils
 		}
 	}
 }
-class StringBuilder implements Array<string>
-{
+class StringBuilder implements Array<string> {
 	public Length: number = 0;
-	constructor(startData?: string)
-	{
+	constructor(startData?: string) {
 		if (startData)
 			this.Append(startData);
 	}
 	Append(str) { this.push(str); this.Length += str.length; return this; } // adds string str to the StringBuilder
 	Insert(index, str) { this.splice(index, 0, str); this.Length += str.length; return this; } // inserts string 'str' at 'index'
-	Remove(index, count) // starting at 'index', removes specified number of elements (if not specified, count defaults to 1)
-	{
+	Remove(index, count) { // starting at 'index', removes specified number of elements (if not specified, count defaults to 1)
 		var removedItems = this.splice(index, count || 1);
 		for (var i = 0; i < removedItems.length; i++)
 			this.Length -= removedItems[i].length;
@@ -382,12 +379,10 @@ class StringBuilder implements Array<string>
 	// fakes for extended members
 	Contains(...args: any[]) { return null; }
 }
-(()=>
-{
+(() => {
 	StringBuilder.prototype["__proto__"] = Array.prototype; // makes "(new StringBuilder()) instanceof Array" be true
 	var reachedFakes = false;
-	for (var name in StringBuilder.prototype)
-	{
+	for (var name in StringBuilder.prototype) {
 		if (name == "toString")
 			reachedFakes = true;
 		if (reachedFakes)
@@ -398,8 +393,7 @@ class StringBuilder implements Array<string>
 // tags
 // ----------
 
-function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags): void
-{
+function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags): void {
 	if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
 		return Prop.apply(this, [type_orObj, propName, null, propType_orFirstTag].concat(tags));
 	var propType = propType_orFirstTag;
@@ -410,12 +404,10 @@ function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags)
 	s.propType = propType;
 	s.tags = tags;
 };
-PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value)
-{
+PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
 	var s = this;
 	var typeInfo = VDFTypeInfo.Get(s.type.name);
-	if (typeInfo.props[this.propName] == null)
-	{
+	if (typeInfo.props[this.propName] == null) {
 		var propTag: any = {};
 		var defaultValueTag: any = {};
 		for (var i in s.tags)
@@ -433,8 +425,7 @@ MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) { me
 function Method(...tags) { return new MethodDeclarationWrapper(tags); };*/
 
 function TypeDeclarationWrapper(tags) { this.tags = tags; };
-TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type)
-{
+TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
 	var s = this;
 	type = type instanceof Function ? type : type.constructor;
 	var typeInfo = VDFTypeInfo.Get(type.name);
@@ -457,13 +448,11 @@ function Type(...tags) { return new TypeDeclarationWrapper(tags); };
 //object["typeInfo"] = new VDFTypeInfo(null, true);
 class object {} // just an alias for Object, to be consistent with C# version
 
-class EnumValue
-{
+class EnumValue {
 	realTypeName: string; // prop-name is special; used to identify 'true' or 'represented' type of object
 	//intValue: number;
 	stringValue: string;
-	constructor(enumTypeName: string, intValue: number)
-	{
+	constructor(enumTypeName: string, intValue: number) {
 		this.realTypeName = enumTypeName;
 		//this.intValue = intValue;
 		this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
@@ -476,8 +465,7 @@ class EnumValue
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 
-window["List"] = function List(itemType: string, ...items): void // actual constructor
-{
+window["List"] = function List(itemType: string, ...items): void { // actual constructor
 	var s = Object.create(Array.prototype);
 	s = (Array.apply(s, items) || s);
 	s["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
@@ -489,8 +477,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	Object.defineProperty(s, "itemType", {enumerable: false, value: itemType});
 	return s;
 };
-(()=> // actual properties and methods
-{
+(()=> { // actual properties and methods
 	var s = List.prototype;
 	s["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
 
@@ -498,16 +485,14 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	Object.defineProperty(s, "Count", {enumerable: false, get: function() { return this.length; }});
 
 	// new methods
-	s.Indexes = function()
-	{
+	s.Indexes = function () {
 		var result = {};
 		for (var i = 0; i < this.length; i++)
 			result[i] = this[i];
 		return result;
 	};
-	s.Add = function(...items) { return this.push.apply(this, items); };
-	s.AddRange = function(items)
-	{
+	s.Add = function (...items) { return this.push.apply(this, items); };
+	s.AddRange = function (items) {
 		for (var i = 0; i < items.length; i++)
 			this.push(items[i]);
 	};
@@ -516,38 +501,32 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	s.Remove = function(item) { this.RemoveAt(this.indexOf(item)); };
 	s.RemoveAt = function(index) { this.splice(index, 1); };
 	s.RemoveRange = function(index, count) { return this.splice(index, count); };
-	s.Any = function(matchFunc)
-	{
+	s.Any = function(matchFunc) {
 		for (var i in this.Indexes())
 			if (matchFunc.call(this[i], this[i]))
 				return true;
 		return false;
 	};
-	s.All = function(matchFunc)
-	{
+	s.All = function(matchFunc) {
 		for (var i in this.Indexes())
 			if (!matchFunc.call(this[i], this[i]))
 				return false;
 		return true;
 	};
-	s.Select = function(selectFunc, itemType)
-	{
+	s.Select = function(selectFunc, itemType) {
 		var result = new List(itemType || "object");
 		for (var i in this.Indexes())
 			result.Add(selectFunc.call(this[i], this[i]));
 		return result;
 	};
-	s.First = function(matchFunc)
-	{
+	s.First = function(matchFunc) {
 		var result = this.FirstOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	};
-	s.FirstOrDefault = function(matchFunc)
-	{
-		if (matchFunc)
-		{
+	s.FirstOrDefault = function(matchFunc) {
+		if (matchFunc) {
 			for (var i in this.Indexes())
 				if (matchFunc.call(this[i], this[i]))
 					return this[i];
@@ -556,17 +535,14 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 		else
 			return this[0];
 	};
-	s.Last = function(matchFunc)
-	{
+	s.Last = function(matchFunc) {
 		var result = this.LastOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	};
-	s.LastOrDefault = function(matchFunc)
-	{
-		if (matchFunc)
-		{
+	s.LastOrDefault = function(matchFunc) {
+		if (matchFunc) {
 			for (var i = this.length - 1; i >= 0; i--)
 				if (matchFunc.call(this[i], this[i]))
 					return this[i];
@@ -575,8 +551,7 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 		else
 			return this[this.length - 1];
 	};
-	s.GetRange = function(index, count)
-	{
+	s.GetRange = function(index, count) {
 		var result = new List(this.itemType);
 		for (var i = index; i < index + count; i++)
 			result.Add(this[i]);
@@ -585,13 +560,11 @@ window["List"] = function List(itemType: string, ...items): void // actual const
 	s.Contains = function(item) { return this.indexOf(item) != -1; };
 	VDFUtils.MakePropertiesHidden(s, true);
 })();
-declare var List: // static/constructor declaration stuff
-{
+declare var List: { // static/constructor declaration stuff
 	new <T>(itemType?: string, ...items: T[]): List<T>;
 	prototype: List<any>;
 }
-interface List<T> extends Array<T> // class/instance declaration stuff
-{
+interface List<T> extends Array<T> { // class/instance declaration stuff
 	// new properties
 	//realTypeName: string;
 	itemType: string;
@@ -624,8 +597,7 @@ class Dictionary<K, V>
 	valueType: string;
 	private keys: K[];
 	private values: V[];
-	constructor(keyType?: string, valueType?: string, keyValuePairsObj?)
-	{
+	constructor(keyType?: string, valueType?: string, keyValuePairsObj?) {
 		//VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
 		this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
 		this.keyType = keyType;
@@ -646,11 +618,10 @@ class Dictionary<K, V>
 			result[<any>this.keys[i]] = null;
 		return result;
 	}
-	get Pairs()
-	{
+	get Pairs() {
 		var result = [];
 		for (var i = 0; i < this.keys.length; i++)
-			result.push({key: this.keys[i], value: this.values[i]});
+			result.push({ key: this.keys[i], value: this.values[i] });
 		return result;
 	}
 	get Count() { return this.keys.length; }
@@ -658,22 +629,19 @@ class Dictionary<K, V>
 	// methods
 	ContainsKey(key: K) { return this.keys.indexOf(key) != -1; }
 	Get(key: K) { return this.values[this.keys.indexOf(key)]; }
-	Set(key: K, value: V)
-	{
+	Set(key: K, value: V) {
 		if (this.keys.indexOf(key) == -1)
 			this.keys.push(key);
 		this.values[this.keys.indexOf(key)] = value;
 		if (typeof key == "string")
 			(<any>this)[<any>key] = value; // make value accessible directly on Dictionary object
 	}
-	Add(key: K, value: V)
-	{
+	Add(key: K, value: V) {
 		if (this.keys.indexOf(key) != -1)
 			throw new Error("Dictionary already contains key '" + key + "'.");
 		this.Set(key, value);
 	}
-	Remove(key: K)
-	{
+	Remove(key: K) {
 		var itemIndex = this.keys.indexOf(key);
 		this.keys.splice(itemIndex, 1);
 		this.values.splice(itemIndex, 1);

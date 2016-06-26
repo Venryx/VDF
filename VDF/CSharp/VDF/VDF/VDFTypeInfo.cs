@@ -5,40 +5,31 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace VDFN
-{
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute
-	{
+namespace VDFN {
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)] public class VDFType : Attribute {
 		public string propIncludeRegexL1;
 		public bool popOutL1;
-		public VDFType(string propIncludeRegexL1 = null, bool popOutL1 = false)
-		{
+		public VDFType(string propIncludeRegexL1 = null, bool popOutL1 = false) {
 			this.propIncludeRegexL1 = propIncludeRegexL1;
 			this.popOutL1 = popOutL1;
 		}
 	}
-	public class VDFTypeInfo
-	{
+	public class VDFTypeInfo {
 		static Dictionary<Type, VDFTypeInfo> cachedTypeInfo = new Dictionary<Type, VDFTypeInfo>();
-		public static VDFTypeInfo Get(Type type)
-		{
-			if (!cachedTypeInfo.ContainsKey(type))
-			{
+		public static VDFTypeInfo Get(Type type) {
+			if (!cachedTypeInfo.ContainsKey(type)) {
 				var result = new VDFTypeInfo();
 				foreach (MemberInfo member in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
-					if (member is FieldInfo)
-					{
+					if (member is FieldInfo) {
 						var field = member as FieldInfo;
 						if (!field.Name.StartsWith("<")) // anonymous types will have some extra field names starting with '<'
 							result.props[field.Name] = VDFPropInfo.Get(field);
 					}
-					else if (member is PropertyInfo)
-					{
+					else if (member is PropertyInfo) {
 						var property = member as PropertyInfo;
 						result.props[property.Name] = VDFPropInfo.Get(property);
 					}
-				foreach (MethodBase method in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).OfType<MethodBase>()) // include constructors
-				{
+				foreach (MethodBase method in type.GetMembers_Full(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance).OfType<MethodBase>()) { // include constructors
 					var methodName = method.Name;
 					if (result.methods.ContainsKey(methodName))
 						methodName += "(from base type: " + method.DeclaringType.Name + ")";
@@ -51,8 +42,7 @@ namespace VDFN
 					result.typeTag.propIncludeRegexL1 = VDF.PropRegex_Any;
 
 				var currentType = type.BaseType;
-				while (currentType != null && currentType.GetCustomAttributes(typeof(VDFType), true).Length > 0)
-				{
+				while (currentType != null && currentType.GetCustomAttributes(typeof(VDFType), true).Length > 0) {
 					var typeTag2 = currentType.GetCustomAttributes(typeof(VDFType), true).OfType<VDFType>().First();
 					if (result.typeTag.propIncludeRegexL1 == null)
 						result.typeTag.propIncludeRegexL1 = typeTag2.propIncludeRegexL1;
@@ -71,8 +61,7 @@ namespace VDFN
 		//public delegate void Action<A1, A2, A3, A4, A5>(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5);
 		//public delegate R Func<A1, A2, A3, A4, A5, R>(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5);
 
-		public void AddExtraMethod_Base(Delegate method, List<Attribute> tags)
-		{
+		public void AddExtraMethod_Base(Delegate method, List<Attribute> tags) {
 			var methodInfo = new VDFMethodInfo();
 			methodInfo.method = method;
 			methodInfo.memberInfo = method.Method;
@@ -99,8 +88,7 @@ namespace VDFN
 
 		public static void AddSerializeMethod<T>(Func<T, VDFNode> method, params Attribute[] tags) { AddSerializeMethod<T>((obj, path, options)=>method(obj), tags); }
 		public static void AddSerializeMethod<T>(Func<T, VDFNodePath, VDFNode> method, params Attribute[] tags) { AddSerializeMethod<T>((obj, path, options)=>method(obj, path), tags); }
-		public static void AddSerializeMethod<T>(Func<T, VDFNodePath, VDFSaveOptions, VDFNode> method, params Attribute[] tags)
-		{
+		public static void AddSerializeMethod<T>(Func<T, VDFNodePath, VDFSaveOptions, VDFNode> method, params Attribute[] tags) {
 			var finalTags = tags.ToList();
 			if (!finalTags.Any(a=>a is VDFSerialize))
 				finalTags.Add(new VDFSerialize());
@@ -108,8 +96,7 @@ namespace VDFN
 		}
 		public static void AddDeserializeMethod<T>(Action<T, VDFNode> method, params Attribute[] tags) { AddDeserializeMethod<T>((obj, node, path, options)=>method(obj, node), tags); }
 		public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFNodePath> method, params Attribute[] tags) { AddDeserializeMethod<T>((obj, node, path, options)=>method(obj, node, path), tags); }
-		public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFNodePath, VDFLoadOptions> method, params Attribute[] tags)
-		{
+		public static void AddDeserializeMethod<T>(Action<T, VDFNode, VDFNodePath, VDFLoadOptions> method, params Attribute[] tags) {
 			var finalTags = tags.ToList();
 			if (!finalTags.Any(a=>a is VDFDeserialize))
 				finalTags.Add(new VDFDeserialize());
@@ -117,8 +104,7 @@ namespace VDFN
 		}
 		public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, object> method, params Attribute[] tags) { AddDeserializeMethod_WithReturn<T>((obj, node, path, options)=>method(obj, node), tags); }
 		public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFNodePath, object> method, params Attribute[] tags) { AddDeserializeMethod_WithReturn<T>((obj, node, path, options)=>method(obj, node, path), tags); }
-		public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFNodePath, VDFLoadOptions, object> method, params Attribute[] tags)
-		{
+		public static void AddDeserializeMethod_WithReturn<T>(Func<T, VDFNode, VDFNodePath, VDFLoadOptions, object> method, params Attribute[] tags) {
 			var finalTags = tags.ToList();
 			if (!finalTags.Any(a=>a is VDFDeserialize))
 				finalTags.Add(new VDFDeserialize());
@@ -126,8 +112,7 @@ namespace VDFN
 		}
 		public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, T> method, params Attribute[] tags) { AddDeserializeMethod_FromParent((node, path, options)=>method(node), tags); }
 		public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFNodePath, T> method, params Attribute[] tags) { AddDeserializeMethod_FromParent((node, path, options)=>method(node, path), tags); }
-		public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFNodePath, VDFLoadOptions, T> method, params Attribute[] tags)
-		{
+		public static void AddDeserializeMethod_FromParent<T>(Func<VDFNode, VDFNodePath, VDFLoadOptions, T> method, params Attribute[] tags) {
 			var finalTags = tags.ToList();
 			if (!finalTags.Any(a=>a is VDFDeserialize))
 				finalTags.Add(new VDFDeserialize(fromParent: true));
@@ -145,7 +130,7 @@ namespace VDFN
 		}
 	}
 	public class P : VDFProp { // alias for VDFProp
-		public P() { }
+		public P() {}
 		public P(bool includeL2 = true, bool popOutL2 = false) : base(includeL2, popOutL2) {}
 	}
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class DefaultValue : Attribute {
@@ -159,16 +144,14 @@ namespace VDFN
 		public const string NullOrEmpty = "DefaultValue_NullOrEmpty"; // i.e. null, or an empty string or collection
 		public const string Empty = "DefaultValue_Empty"; // i.e. an empty string or collection
 
-		public D() { }
+		public D() {}
 		public D(object defaultValue) : base(defaultValue) {}
 	}
-	public class VDFPropInfo
-	{
+	public class VDFPropInfo {
 		static Dictionary<MemberInfo, VDFPropInfo> cachedPropInfo = new Dictionary<MemberInfo, VDFPropInfo>();
-		public static VDFPropInfo Get(MemberInfo prop)
-		{
+		public static VDFPropInfo Get(MemberInfo prop) {
 			if (!cachedPropInfo.ContainsKey(prop))
-				cachedPropInfo[prop] = new VDFPropInfo {memberInfo = prop, propTag = prop.GetCustomAttributes(true).OfType<VDFProp>().FirstOrDefault(), defaultValueTag = prop.GetCustomAttributes(true).OfType<DefaultValue>().FirstOrDefault() };
+				cachedPropInfo[prop] = new VDFPropInfo {memberInfo = prop, propTag = prop.GetCustomAttributes(true).OfType<VDFProp>().FirstOrDefault(), defaultValueTag = prop.GetCustomAttributes(true).OfType<DefaultValue>().FirstOrDefault()};
 			return cachedPropInfo[prop];
 		}
 
@@ -177,14 +160,12 @@ namespace VDFN
 		public DefaultValue defaultValueTag;
 
 		public Type GetPropType() { return memberInfo is PropertyInfo ? ((PropertyInfo)memberInfo).PropertyType : ((FieldInfo)memberInfo).FieldType; }
-		public bool ShouldValueBeSaved(object val)
-		{
+		public bool ShouldValueBeSaved(object val) {
 			//if (defaultValueTag == null || defaultValueTag.defaultValue == D.NoDefault)
 			if (defaultValueTag == null)
 				return true;
 
-			if (defaultValueTag.defaultValue as string == D.DefaultDefault)
-			{
+			if (defaultValueTag.defaultValue as string == D.DefaultDefault) {
 				if (val == null) // if null
 					return false;
 				if (GetPropType().IsValueType && val.Equals(Activator.CreateInstance(GetPropType()))) //x == Activator.CreateInstance(GetPropType())) // if struct, and equal to struct's default value
@@ -192,8 +173,7 @@ namespace VDFN
 			}
 			if (defaultValueTag.defaultValue as string == D.NullOrEmpty && val == null)
 				return false;
-			if (defaultValueTag.defaultValue as string == D.NullOrEmpty || defaultValueTag.defaultValue as string == D.Empty)
-			{
+			if (defaultValueTag.defaultValue as string == D.NullOrEmpty || defaultValueTag.defaultValue as string == D.Empty) {
 				if (val is string && ((string)val).Length == 0) // if string, and empty
 					return false;
 				if (val is IList && ((IList)val).Count == 0) // if list, and empty
@@ -204,14 +184,12 @@ namespace VDFN
 
 			return true;
 		}
-		public object GetValue(object objParent)
-		{
+		public object GetValue(object objParent) {
 			if (memberInfo is FieldInfo)
 				return ((FieldInfo)memberInfo).GetValue(objParent);
 			return ((PropertyInfo)memberInfo).GetValue(objParent, null);
 		}
-		public void SetValue(object objParent, object value)
-		{
+		public void SetValue(object objParent, object value) {
 			if (memberInfo is FieldInfo)
 				((FieldInfo)memberInfo).SetValue(objParent, value);
 			else
@@ -230,19 +208,16 @@ namespace VDFN
 	[AttributeUsage(AttributeTargets.Method)] public class VDFSerialize : Attribute {}
 	[AttributeUsage(AttributeTargets.Method)] public class VDFPostSerialize : Attribute {}
 	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)] public class VDFPreDeserialize : Attribute {}
-	[AttributeUsage(AttributeTargets.Method)] public class VDFDeserialize : Attribute
-	{
+	[AttributeUsage(AttributeTargets.Method)] public class VDFDeserialize : Attribute {
 		public bool fromParent;
 		public VDFDeserialize(bool fromParent = false) { this.fromParent = fromParent; }
 	}
-	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)] public class VDFPostDeserialize : Attribute {}
-	public class VDFMethodInfo
-	{
+	[AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)] public class VDFPostDeserialize : Attribute {
+	}
+	public class VDFMethodInfo {
 		static Dictionary<MemberInfo, VDFMethodInfo> cachedMethodInfo = new Dictionary<MemberInfo, VDFMethodInfo>();
-		public static VDFMethodInfo Get(MethodBase method)
-		{
-			if (!cachedMethodInfo.ContainsKey(method))
-			{
+		public static VDFMethodInfo Get(MethodBase method) {
+			if (!cachedMethodInfo.ContainsKey(method)) {
 				var result = new VDFMethodInfo();
 				result.memberInfo = method;
 				result.preSerializePropTag = method.GetCustomAttributes(true).OfType<VDFPreSerializeProp>().FirstOrDefault();
@@ -268,8 +243,7 @@ namespace VDFN
 
 		public Delegate method; // if a method delegate/lambda was supplied (i.e. if an extension method)
 
-		public object Call(object objParent, params object[] args)
-		{
+		public object Call(object objParent, params object[] args) {
 			var hasSelfFirstArg = method != null && memberInfo.GetParameters().First().ParameterType != typeof(VDFNode); // if accepts a "self" argument (e.g. an added-as-extra-method standard Deserialize method);
 			if (hasSelfFirstArg)
 				args = new[] {objParent}.Concat(args).ToArray();

@@ -7,25 +7,29 @@
 	<script src="../../VDF/JavaScript/VDF.js"></script>
 	<script src="../../VDF/JavaScript/VDFTypeInfo.js"></script>
 	<script src="../../VDF/JavaScript/VDFNode.js"></script>
-	<script src="../../VDF/JavaScript/VDFSaver.js"></script>
-	<script src="../../VDF/JavaScript/VDFLoader.js"></script>
-	<script src="../../VDF/JavaScript/VDFTokenParser.js"></script>
-    <script src="VDFTests/TypeScript/Saving.js"></script>
-	<script src="VDFTests/TypeScript/Loading.js"></script>
+    <script src="../../VDF/JavaScript/VDFLoader.js"></script>
+    <script src="../../VDF/JavaScript/VDFTokenParser.js"></script>
+    <script src="../../VDF/JavaScript/VDFSaver.js"></script>
+    <script src="VDFTests/TypeScript/GeneralInit.js"></script>
+    <script src="VDFTests/TypeScript/Loading/L_General.js"></script>
+    <script src="VDFTests/TypeScript/Loading/ToVDFNode.js"></script>
+    <script src="VDFTests/TypeScript/Loading/ToObject.js"></script>
+    <script src="VDFTests/TypeScript/Loading/SpeedTests.js"></script>
+    <script src="VDFTests/TypeScript/Saving/S_General.js"></script>
+    <script src="VDFTests/TypeScript/Saving/FromVDFNode.js"></script>
+    <script src="VDFTests/TypeScript/Saving/FromObject.js"></script>
+    <script src="VDFTests/TypeScript/Saving/SpeedTests.js"></script>
     <script>
-    $(function()
-    {
+    $(function() {
 		// probably old: note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
-        $("#runSavingTests").click(function()
-        {
+        $("#runSavingTests").click(function() {
         	var startTime = new Date().getTime();
         	//Saving.Init();
         	//Saving.RunTests();
         	Saving_RunTests();
         	$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
         });
-        $("#runLoadingTests").click(function()
-        {
+        $("#runLoadingTests").click(function() {
         	var startTime = new Date().getTime();
 	        //Loading.Init();
         	//Loading.RunTests();

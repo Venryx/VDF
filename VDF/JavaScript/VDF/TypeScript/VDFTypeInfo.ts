@@ -1,39 +1,32 @@
-﻿class VDFType
-{
+﻿class VDFType {
 	propIncludeRegexL1: string;
 	popOutL1: boolean;
-	constructor(propIncludeRegexL1?: string, popOutL1?: boolean)
-	{
+	constructor(propIncludeRegexL1?: string, popOutL1?: boolean) {
 		this.propIncludeRegexL1 = propIncludeRegexL1;
 		this.popOutL1 = popOutL1;
 	}
 
-	AddDataOf(typeTag: VDFType)
-	{
+	AddDataOf(typeTag: VDFType) {
 		if (typeTag.propIncludeRegexL1 != null)
 			this.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
 		if (typeTag.popOutL1 != null)
 			this.popOutL1 = typeTag.popOutL1;
 	}
 }
-class VDFTypeInfo
-{
-	static Get(type_orTypeName: any): VDFTypeInfo
-	{
+class VDFTypeInfo {
+	static Get(type_orTypeName: any): VDFTypeInfo {
 		//var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
 		var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
 
 		var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
-		if (VDF.GetIsTypeAnonymous(typeNameBase))
-		{
+		if (VDF.GetIsTypeAnonymous(typeNameBase)) {
 			var result = new VDFTypeInfo();
 			result.typeTag = new VDFType(VDF.PropRegex_Any);
 			return result;
 		}
 
 		var typeBase = <any>window[typeNameBase];
-		if (typeBase && typeBase.typeInfo == null)
-		{
+		if (typeBase && typeBase.typeInfo == null) {
 			var result = new VDFTypeInfo();
 			result.typeTag = new VDFType();
 
@@ -54,9 +47,8 @@ class VDFTypeInfo
 			result.typeTag = typeTag;*/
 
 			var currentType = typeNameBase;
-			while (currentType != null)
-			{
-			    var currentTypeConstructor = <any>window[currentType];
+			while (currentType != null) {
+				var currentTypeConstructor = <any>window[currentType];
                 var typeTag2 = (currentTypeConstructor.typeInfo || {}).typeTag;
 				for (var key in typeTag2)
 					if (result.typeTag[key] == null)
@@ -74,8 +66,7 @@ class VDFTypeInfo
 	tags: any[];
 	typeTag: VDFType;
 
-	GetProp(propName: string): VDFPropInfo
-	{
+	GetProp(propName: string): VDFPropInfo {
 		if (!(propName in this.props))
 			this.props[propName] = new VDFPropInfo(propName, null, [], null, null);
 		return this.props[propName];
@@ -111,15 +102,13 @@ class D extends DefaultValue {
 		super(defaultValue);
 	}
 }
-class VDFPropInfo
-{
+class VDFPropInfo {
 	name: string;
 	typeName: string;
 	tags: any[];
 	propTag: VDFProp;
 	defaultValueTag: DefaultValue;
-	constructor(propName: string, propTypeName: string, tags: any[], propTag: VDFProp, defaultValueTag: DefaultValue)
-	{
+	constructor(propName: string, propTypeName: string, tags: any[], propTag: VDFProp, defaultValueTag: DefaultValue) {
 		this.name = propName;
 		this.typeName = propTypeName;
 		this.tags = tags;
@@ -127,8 +116,7 @@ class VDFPropInfo
 		this.defaultValueTag = defaultValueTag;
 	}
 
-	ShouldValueBeSaved(val: any)
-	{
+	ShouldValueBeSaved(val: any) {
 		//if (this.defaultValueTag == null || this.defaultValueTag.defaultValue == D.NoDefault)
 		if (this.defaultValueTag == null)
 			return true;
@@ -161,8 +149,7 @@ class VDFPreSerialize {}
 class VDFSerialize {}
 class VDFPostSerialize {}
 class VDFPreDeserialize {}
-class VDFDeserialize
-{
+class VDFDeserialize {
 	fromParent: boolean;
 	constructor(fromParent = false) { this.fromParent = fromParent; }
 }

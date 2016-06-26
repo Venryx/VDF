@@ -60,10 +60,16 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Loading\ToObject.cs" />
+    <Compile Include="Loading\ToVDFNode.cs" />
+    <Compile Include="Loading\SpeedTests.cs" />
     <Compile Include="Quick.cs" />
-    <Compile Include="Loading.cs" />
+    <Compile Include="Loading\L_General.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Saving.cs" />
+    <Compile Include="Saving\FromVDFNode.cs" />
+    <Compile Include="Saving\FromObject.cs" />
+    <Compile Include="Saving\SpeedTests.cs" />
+    <Compile Include="Saving\S_General.cs" />
     <Compile Include="V.cs" />
   </ItemGroup>
   <ItemGroup>

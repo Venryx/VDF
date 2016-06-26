@@ -111,12 +111,19 @@
     <Content Include="web.config" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="TypeScript\GeneralInit.ts" />
+    <TypeScriptCompile Include="TypeScript\Loading\SpeedTests.ts" />
+    <TypeScriptCompile Include="TypeScript\Loading\ToObject.ts" />
+    <TypeScriptCompile Include="TypeScript\Loading\ToVDFNode.ts" />
     <TypeScriptCompile Include="TypeScript\Packages\General\qunit.d.ts" />
-    <TypeScriptCompile Include="TypeScript\Loading.ts" />
+    <TypeScriptCompile Include="TypeScript\Loading\L_General.ts" />
     <TypeScriptCompile Include="TypeScript\Packages\General\ClassExtensions.ts" />
     <TypeScriptCompile Include="TypeScript\Packages\General\jquery.d.ts" />
     <TypeScriptCompile Include="TypeScript\Packages\V\V.ts" />
-    <TypeScriptCompile Include="TypeScript\Saving.ts" />
+    <TypeScriptCompile Include="TypeScript\Saving\SpeedTests.ts" />
+    <TypeScriptCompile Include="TypeScript\Saving\FromObject.ts" />
+    <TypeScriptCompile Include="TypeScript\Saving\FromVDFNode.ts" />
+    <TypeScriptCompile Include="TypeScript\Saving\S_General.ts" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

@@ -1,25 +1,19 @@
-/*class Loading
-{
+/*class Loading {
     static initialized = false;
-    static Init()
-    {
+    static Init() {
         if (this.initialized)
             return;
         this.initialized = true;
-        Object.prototype._AddFunction_Inline = function Should()
-        {
-            return 0 || // fix for auto-semicolon-insertion
-            {
+        Object.prototype._AddFunction_Inline = function Should() {
+            return {
                 Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
                 BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
             };
         };
     }
 
-    static RunTests()
-    {
-        /*test("testName()
-        {
+    static RunTests() {
+        /*test("testName() {
             ok(null == null);
         });*#/
     }
@@ -34,8 +28,7 @@ function Loading_RunTests() {
 window["test"] = function (name, func) { loading[name] = func; };
 // tests
 // ==========
-var VDFTests // added to match C# indentation
-;
+var VDFTests;
 (function (VDFTests) {
     var Loading;
     (function (Loading) {
@@ -814,7 +807,5 @@ Debug.Log(VInput.WebUIHasMouseFocus);>>\"\n\
             ok(true);
         });
     })(Loading_SpeedTests || (Loading_SpeedTests = {}));
-})(VDFTests // added to match C# indentation
- || (VDFTests // added to match C# indentation
- = {}));
+})(VDFTests || (VDFTests = {}));
 //# sourceMappingURL=Loading.js.map
