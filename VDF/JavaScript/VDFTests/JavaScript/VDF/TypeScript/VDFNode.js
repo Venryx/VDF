@@ -56,9 +56,11 @@ var VDFNode = (function () {
         else if (typeof this.primitiveValue == "string") {
             var unpaddedString = this.primitiveValue;
             // (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
-            var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("'") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
+            //var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("'") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
+            var needsEscaping = VDFNode.charsThatNeedEscaping_1_regex.test(unpaddedString);
             if (isKey)
-                needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
+                //needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
+                needsEscaping = needsEscaping || VDFNode.charsThatNeedEscaping_2_regex.test(unpaddedString);
             if (needsEscaping) {
                 var literalStartMarkerString = "<<";
                 var literalEndMarkerString = ">>";
@@ -242,9 +244,8 @@ var VDFNode = (function () {
                     deserializedByCustomMethod2 = true;
             }
         if (!deserializedByCustomMethod2) {
-            for (var i = 0; i < this.listChildren.Count; i++) 
-            //obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i])));
-            {
+            for (var i = 0; i < this.listChildren.Count; i++) {
+                //obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i])));
                 var item = this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i]));
                 if (obj.Count == i)
                     obj.Add(item);
@@ -283,6 +284,10 @@ var VDFNode = (function () {
             for (var i in options.objPostDeserializeFuncs.Get(obj))
                 options.objPostDeserializeFuncs.Get(obj)[i]();
     };
+    /*static charsThatNeedEscaping_1 = ['"', '\'', '\n'];
+    static charsThatNeedEscaping_2 = ['{', '}', '[', ']', ':'];*/
+    VDFNode.charsThatNeedEscaping_1_regex = /"|'|\n|<<|>>/;
+    VDFNode.charsThatNeedEscaping_2_regex = /{|}|\[|\]|:/;
     return VDFNode;
 })();
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

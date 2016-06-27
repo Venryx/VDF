@@ -13,6 +13,5 @@ C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.csprojRes
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\bin\VDF.dll.config
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\bin\VDF.dll
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\bin\VDF.pdb
-C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.csprojResolveAssemblyReference.cache
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.dll
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.pdb

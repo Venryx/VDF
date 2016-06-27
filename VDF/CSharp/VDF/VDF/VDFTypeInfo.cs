@@ -130,7 +130,7 @@ namespace VDFN {
 		}
 	}
 	public class P : VDFProp { // alias for VDFProp
-		public P() {}
+		//public P() {}
 		public P(bool includeL2 = true, bool popOutL2 = false) : base(includeL2, popOutL2) {}
 	}
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)] public class DefaultValue : Attribute {

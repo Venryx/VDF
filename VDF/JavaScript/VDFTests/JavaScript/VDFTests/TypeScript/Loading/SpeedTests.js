@@ -4,32 +4,11 @@ var VDFTests;
 (function (VDFTests) {
     var Loading_SpeedTests;
     (function (Loading_SpeedTests) {
-        test("D5_SpeedTester", function () {
-            var vdf = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^] tasksScriptText:'<<Grab Flag\n\
-	(Crate ensure contains an EnemyFlag) ensure is false\n\
-	targetFlag be EnemyFlag_OnEnemyGround [objectRefreshInterval: infinity] [lifetime: infinity]\n\
-	targetFlag set tag 'taken'\n\
-	FrontLeftWheel turn to targetFlag [with: FrontRightWheel]\n\
-	FrontLeftWheel roll forward\n\
-	FrontRightWheel roll forward\n\
-	BackLeftWheel roll forward\n\
-	BackRightWheel roll forward\n\
-	targetFlag put into Crate\n\
-				\n\
-Bring Flag to Safer Allied Ground\n\
-	Crate ensure contains an EnemyFlag\n\
-	targetLocation be AlliedGround_NoEnemyFlag_Safest [objectRefreshInterval: infinity]\n\
-	targetLocation set tag 'taken'\n\
-	FrontLeftWheel turn to targetLocation [with: FrontRightWheel]\n\
-	FrontLeftWheel roll forward\n\
-	FrontRightWheel roll forward\n\
-	BackLeftWheel roll forward\n\
-	BackRightWheel roll forward\n\
-	targetFlag put at targetLocation\n\
-				\n\
-Shoot at Enemy Vehicle\n\
-	Gun1 aim at EnemyVehicle_NonBroken\n\
-	Gun1 fire>>'}\n\
+        // run tests once ahead of time, so VDF-type-data is pre-loaded for profiled tests
+        /*loading["D3_SpeedTester"]();
+        loading["D5_SpeedTester2"]();*/
+        test("D3_SpeedTester", function () {
+            var vdf = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^]}\n\
 	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}\n\
 	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}\n\
 	{id:'52854b70-c200-478f-bcd2-c69a03cd808f' typeName:'Wheel' name:'FrontLeftWheel' pivotPoint_unit:'-0.5,0.5,0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
@@ -46,30 +25,7 @@ Shoot at Enemy Vehicle\n\
             var vdf = "{^}\n\
 	mainMenu:{}\n\
 	console:{^}\n\
-		jsCode:\"<<//Log(BD.live.liveMatch.map.plants[0]._parent.toString())\n\
-		//Log(new Vector3(1, 2, 3).Swapped());\n\
-		//Log(ToVDF(BD.live.liveMatch.players[0].selectedObjects[0].GetPath()));\n\
-		//Log(BD.live.liveMatch.units[0]._pathNode.toString());\n\
-		//Log(BD.objects.objects[5].name)\n\
-		//Log(BD.live.liveMatch.map.structures[1].typeVObject.type);\n\
-		//Log(BD.objects.objects[4].structures.length)\n\
-		//Log(BD.objects.objects[6].structures[1].name);\n\
-			\n\
-//Log(BD.objects.objects[0].overrideBounds_bounds.toString());\n\
-Log(BD.maps.maps[1].players.length)>>\"\n\
-		logRunJSResult:false\n\
-		csCode:\"<<//Debug.Log(BD.main.live.liveMatch.players[0].selectedObjects[0].health);\n\
-//Debug.Log(BD.main.objects.objects[0].type);\n\
-//Debug.Log(BD.main.maps.selectedMap.plants[0].wood);\n\
-//Debug.Log(BD.main.live.liveMatch.map.plants[0].type);\n\
-\n\
-//Debug.Log(V.Vector3Null.Equals(V.Vector3Null));\n\
-//Debug.Log(VConvert.ToVDF(BD.main.live.liveMatch.players[0].selectedObjects[0].GetPath()));\n\
-//Debug.Log(BD.main.live.liveMatch.units[0]._pathNode);\n\
-//Debug.Log(BD.main.objects.objects[6].structures[1].name);\n\
-//Debug.Log(BD.main.objects.objects[0].overrideBounds_bounds.size.x);\n\
-//BD.main.live.liveMatch.players[0].waterSupply = 100;\n\
-Debug.Log(VInput.WebUIHasMouseFocus);>>\"\n\
+		jsCode:\"\"\n\
 		logRunCSResult:false\n\
 		callLoggerEnabled:false\n\
 		calls_maxEntries:500\n\
@@ -167,6 +123,7 @@ Debug.Log(VInput.WebUIHasMouseFocus);>>\"\n\
 			salt:1000\n\
 			fogOfWar:false\n\
 	live:{}";
+            //for (var i = 0; i < 100; i++)
             VDFLoader.ToVDFNode(vdf);
             ok(true);
         });

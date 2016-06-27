@@ -161,6 +161,16 @@ var VDFTests;
             var a = VDF.Deserialize("AsObjectOfType_Class>{}", "AsObjectOfType_Class");
             ok(a instanceof AsObjectOfType_Class);
         });
+        // quick tests
+        // ==========
+        test("QuickTest1", function () {
+            var a = VDF.Deserialize('{^}\n\
+	structures:[^]\n\
+		{typeVObject:string>"VObject>Flag" id:0}\n\
+		{typeVObject:string>"VObject>Flag" id:1}', "object");
+            a.structures[0].typeVObject.Should().Be("VObject>Flag");
+            a.structures[1].id.Should().Be(1);
+        });
         // export all classes/enums to global scope
         ExportInternalClassesTo(window, function (str) { return eval(str); });
     })(Loading_General || (Loading_General = {}));

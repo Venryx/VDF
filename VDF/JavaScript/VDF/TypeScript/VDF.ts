@@ -204,7 +204,7 @@ class VDF
 				return obj.realTypeName;
 			if (obj.itemType)
 				return "List(" + obj.itemType + ")";
-			var nativeTypeName = obj.constructor.name != "" ? obj.constructor.name : null;
+			var nativeTypeName = obj.constructor.name_fake || obj.constructor.name || null;
 			if (nativeTypeName == "Boolean")
 				return "bool";
 			if (nativeTypeName == "Number")
@@ -406,7 +406,7 @@ function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags)
 };
 PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
 	var s = this;
-	var typeInfo = VDFTypeInfo.Get(s.type.name);
+	var typeInfo = VDFTypeInfo.Get(s.type.name_fake || s.type.name);
 	if (typeInfo.props[this.propName] == null) {
 		var propTag: any = {};
 		var defaultValueTag: any = {};
@@ -428,7 +428,7 @@ function TypeDeclarationWrapper(tags) { this.tags = tags; };
 TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
 	var s = this;
 	type = type instanceof Function ? type : type.constructor;
-	var typeInfo = VDFTypeInfo.Get(type.name);
+	var typeInfo = VDFTypeInfo.Get(type.name_fake || type.name);
 
 	var typeTag: any = {};
 	for (var i in s.tags)
