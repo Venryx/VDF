@@ -128,7 +128,7 @@ namespace VDFN {
 							include = options.propExcludesL4.Contains(propInfo.memberInfo) || options.propExcludesL4.Contains(VDF.AnyMember) ? false : include;
 							include = options.propIncludesL5.Contains(propInfo.memberInfo) || options.propIncludesL5.Contains(VDF.AnyMember) ? true : include;*/
 							bool include = options.propInclusionL3.GetValueOrX(propInfo.memberInfo) ?? options.propInclusionL3.GetValueOrX(VDF.AnyMember)
-								?? propInfo.propTag?.includeL2
+								?? (propInfo.propTag != null ? propInfo.propTag.includeL2 : (bool?)null)
 								?? typeInfo.typeTag.propIncludeRegexL1 != null && new Regex(typeInfo.typeTag.propIncludeRegexL1).IsMatch(propName);
 							if (!include)
 								continue;
