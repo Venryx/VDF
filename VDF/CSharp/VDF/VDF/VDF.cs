@@ -6,19 +6,15 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace VDFN
-{
-	public class VDFException : Exception
-	{
+namespace VDFN {
+	public class VDFException : Exception {
 		string message;
 		Exception innerException;
-		public VDFException(string message, Exception innerException = null)
-		{
+		public VDFException(string message, Exception innerException = null) {
 			this.message = message;
 			this.innerException = innerException;
 		}
-		public override string ToString()
-		{
+		public override string ToString() {
 			if (innerException != null)
 				return innerException + (innerException.ToString().EndsWith("\n==================") ? "" : "\n==================") + "\nRethrownAs) " + message + "\n" + base.StackTrace + "\n==================";
 			return message + "\n" + base.StackTrace + "\n==================";
@@ -28,8 +24,7 @@ namespace VDFN
 		public override string StackTrace { get { return ToString(); } }
 	}
 
-	public static class VDFClassExtensions
-	{
+	public static class VDFClassExtensions {
 		// Type
 		public static Type GetVDFType(this object s) { return s.GetType().ToVDFType(); } // get an object's type, as the VDF system sees it
 		public static Type ToVDFType(this Type s) // get the type that the VDF system sees type 's' as
@@ -43,12 +38,10 @@ namespace VDFN
 		public static bool IsDerivedFrom(this Type s, Type baseType, bool allowSameType = true) { return baseType.IsAssignableFrom(s) && (allowSameType || baseType != s); }
 
 		// List<MemberInfo>
-		public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags)
-		{
+		public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags) {
 			var result = new List<MemberInfo>(); //HashSet<MemberInfo>();
 			var currentType = self;
-			while (currentType != null)
-			{
+			while (currentType != null) {
 				/*foreach (MemberInfo member in currentType.GetMembers(flags | BindingFlags.DeclaredOnly)) // only get members declared in this class (not in base, since we're getting those ourselves soon anyway)
 					//if (!result.Contains(member))
 					result.Add(member);*/
@@ -56,6 +49,14 @@ namespace VDFN
 				currentType = currentType.BaseType;
 			}
 			return result; //.ToList(); //Distinct().ToList();
+		}
+
+		// Dictionary
+		public static TValue? GetValueOrX<TKey, TValue>(this Dictionary<TKey, TValue> obj, TKey key, TValue? defaultValueX = default(TValue?)) where TValue : struct {
+			TValue result;
+			if (obj.TryGetValue(key, out result))
+				return result;
+			return null;
 		}
 
 		// VDFNode

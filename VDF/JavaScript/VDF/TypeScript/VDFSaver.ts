@@ -1,15 +1,13 @@
-﻿enum VDFTypeMarking
-{
+﻿enum VDFTypeMarking {
 	None,
 	Internal,
 	External,
 	ExternalNoCollapse // maybe temp
 }
-class VDFSaveOptions
-{
+class VDFSaveOptions {
 	constructor(initializerObj?: any, messages?: any[], typeMarking = VDFTypeMarking.Internal,
-		useMetadata = true, useChildPopOut = true, useStringKeys = false, useNumberTrimming = true, useCommaSeparators = false)
-	{
+		useMetadata = true, useChildPopOut = true, useStringKeys = false, useNumberTrimming = true, useCommaSeparators = false
+	) {
 		this.messages = messages || [];
 		this.typeMarking = typeMarking;
 		this.useMetadata = useMetadata;
@@ -33,8 +31,7 @@ class VDFSaveOptions
 	useNumberTrimming: boolean; // e.g. trims 0.123 to .123
 	useCommaSeparators: boolean; // currently only applies to non-popped-out children
 
-	ForJSON(): VDFSaveOptions // helper function for JSON compatibility
-	{
+	ForJSON(): VDFSaveOptions { // helper function for JSON compatibility
 		this.useMetadata = false;
 		this.useChildPopOut = false;
 		this.useStringKeys = true;
@@ -44,12 +41,10 @@ class VDFSaveOptions
 	}
 }
 
-class VDFSaver
-{
+class VDFSaver {
 	static ToVDFNode(obj: any, options?: VDFSaveOptions): VDFNode;
 	static ToVDFNode(obj: any, declaredTypeName?: string, options?: VDFSaveOptions, path?: VDFNodePath, declaredTypeFromParent?: boolean): VDFNode;
-	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), path?: VDFNodePath, declaredTypeInParentVDF?: boolean): VDFNode
-	{
+	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), path?: VDFNodePath, declaredTypeInParentVDF?: boolean): VDFNode {
 		if (declaredTypeName_orOptions instanceof VDFSaveOptions)
 			return VDFSaver.ToVDFNode(obj, null, declaredTypeName_orOptions);
 
@@ -62,8 +57,7 @@ class VDFSaver
 		var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
 
 		for (var propName in VDF.GetObjectProps(obj))
-			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=>a instanceof VDFPreSerialize))
-			{
+			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFPreSerialize)) {
 				if (obj[propName](path, options) == VDF.CancelSerialize)
 					return VDF.CancelSerialize;
 			}
@@ -71,45 +65,38 @@ class VDFSaver
 		var result;
 		var serializedByCustomMethod = false;
 		for (var propName in VDF.GetObjectProps(obj))
-			if(obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=>a instanceof VDFSerialize))
-			{
+			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFSerialize)) {
 				var serializeResult = obj[propName](path, options);
-				if (serializeResult != VDF.NoActionTaken)
-				{
+				if (serializeResult != VDF.NoActionTaken) {
 					result = serializeResult;
 					serializedByCustomMethod = true;
 				}
 			}
 
-		if (!serializedByCustomMethod)
-		{
+		if (!serializedByCustomMethod) {
 			result = new VDFNode();
-			if (obj == null) {} //result.primitiveValue = null;
+			if (obj == null) { } //result.primitiveValue = null;
 			else if (VDF.GetIsTypePrimitive(typeName))
 				result.primitiveValue = obj;
 			else if (EnumValue.IsEnum(typeName)) // helper exporter for enums (at bottom, TypeScript enums are numbers; but we can get the nice-name based on type info)
 				result.primitiveValue = new EnumValue(typeName, obj).toString();
-			else if (typeName && typeName.startsWith("List("))
-			{
+			else if (typeName && typeName.startsWith("List(")) {
 				result.isList = true;
 				var objAsList = <List<any>>obj;
-				for (var i = 0; i < objAsList.length; i++)
-				{
+				for (var i = 0; i < objAsList.length; i++) {
 					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
 					if (itemNode == VDF.CancelSerialize)
 						continue;
 					result.AddListChild(itemNode);
 				}
 			}
-			else if (typeName && typeName.startsWith("Dictionary("))
-			{
+			else if (typeName && typeName.startsWith("Dictionary(")) {
 				result.isMap = true;
 				var objAsDictionary = <Dictionary<any, any>>obj;
-				for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++)
-                {
+				for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
                     var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.key), true); // stringify-attempt-1: use exporter
-                	if (typeof keyNode.primitiveValue != "string") // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
-                		//throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
+					if (typeof keyNode.primitiveValue != "string") // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
+						//throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
 						keyNode = new VDFNode(pair.key.toString());
 					var valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
 					if (valueNode == VDF.CancelSerialize)
@@ -117,23 +104,23 @@ class VDFSaver
 					result.SetMapChild(keyNode, valueNode);
 				}
 			}
-			else // if an object, with properties
-			{
+			else { // if an object, with properties
 				result.isMap = true;
 
 				// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
-				for (var propName in typeInfo.props)
-				{
+				for (var propName in typeInfo.props) {
 					if (!(propName in obj))
 						obj[propName] = null;
 				}
 
 				for (var propName in obj)
-					try
-					{
+					try {
 						var propInfo: VDFPropInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
-						var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
-						include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;
+						/*var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
+						include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;*/
+						var include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : (
+							typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null && new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName)
+						);
 						if (!include)
 							continue;
 
@@ -168,11 +155,10 @@ class VDFSaver
 				declaredTypeName = "Dictionary(object object)";
 			else
 				declaredTypeName = "object";
-		if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) &&
-		(
-			(options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName) ||
-			(options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF)) ||
-			options.typeMarking == VDFTypeMarking.ExternalNoCollapse
+		if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) && (
+			(options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName)
+			|| (options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF))
+			|| options.typeMarking == VDFTypeMarking.ExternalNoCollapse
 		))
 			result.metadata = typeName;
 
