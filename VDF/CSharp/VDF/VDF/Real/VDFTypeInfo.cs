@@ -33,8 +33,18 @@ namespace VDFN {
 					var methodName = method.Name;
 					if (result.methods.ContainsKey(methodName))
 						methodName += "(from base type: " + method.DeclaringType.Name + ")";
-					if (!result.methods.ContainsKey(methodName))
-						result.AddMethod(methodName, VDFMethodInfo.Get(method));
+					if (!result.methods.ContainsKey(methodName)) {
+						var methodInfo = VDFMethodInfo.Get(method);
+						result.methods.Add(methodName, methodInfo);
+						if (methodInfo.preSerializeTag != null)
+							result.methods_preSerialize.Add(methodInfo);
+						if (methodInfo.serializeTag != null)
+							result.methods_serialize.Add(methodInfo);
+						if (methodInfo.preSerializePropTag != null)
+							result.methods_preSerializeProp.Add(methodInfo);
+						if (methodInfo.postSerializeTag != null)
+							result.methods_postSerialize.Add(methodInfo);
+					}
 				}
 
 				result.typeTag = type.GetCustomAttributes(true).OfType<VDFType>().FirstOrDefault() ?? new VDFType();
@@ -60,17 +70,6 @@ namespace VDFN {
 		public List<VDFMethodInfo> methods_serialize = new List<VDFMethodInfo>();
 		public List<VDFMethodInfo> methods_preSerializeProp = new List<VDFMethodInfo>();
 		public List<VDFMethodInfo> methods_postSerialize = new List<VDFMethodInfo>();
-		void AddMethod(string methodName, VDFMethodInfo methodInfo) {
-			methods.Add(methodName, methodInfo);
-			if (methodInfo.preSerializeTag != null)
-				methods_preSerialize.Add(methodInfo);
-			if (methodInfo.serializeTag != null)
-				methods_serialize.Add(methodInfo);
-			if (methodInfo.preSerializePropTag != null)
-				methods_preSerializeProp.Add(methodInfo);
-			if (methodInfo.postSerializeTag != null)
-				methods_postSerialize.Add(methodInfo);
-		}
 		public VDFType typeTag;
 
 		//public delegate void Action<A1, A2, A3, A4, A5>(A1 a1, A2 a2, A3 a3, A4 a4, A5 a5);
@@ -86,7 +85,7 @@ namespace VDFN {
 			methodInfo.preDeserializeTag = tags.OfType<VDFPreDeserialize>().FirstOrDefault();
 			methodInfo.deserializeTag = tags.OfType<VDFDeserialize>().FirstOrDefault();
 			methodInfo.postDeserializeTag = tags.OfType<VDFPostDeserialize>().FirstOrDefault();
-			AddMethod(method.Method.Name, methodInfo);
+			methods.Add(method.Method.Name, methodInfo);
 		}
 		public void AddExtraMethod(Action method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
 		public void AddExtraMethod<A>(Action<A> method, params Attribute[] tags) { AddExtraMethod_Base(method, tags.ToList()); }
