@@ -56,12 +56,34 @@ namespace VDFN {
 
 		public Dictionary<string, VDFPropInfo> props = new Dictionary<string, VDFPropInfo>();
 		public Dictionary<string, VDFMethodInfo> methods = new Dictionary<string, VDFMethodInfo>();
+		// deserializing
+		public List<VDFMethodInfo> methods_preDeserialize_constructor = new List<VDFMethodInfo>();
+		public List<VDFMethodInfo> methods_preDeserialize_method = new List<VDFMethodInfo>();
+		public List<VDFMethodInfo> methods_deserialize_fromParent = new List<VDFMethodInfo>();
+		public List<VDFMethodInfo> methods_deserialize_notFromParent = new List<VDFMethodInfo>();
+		public List<VDFMethodInfo> methods_postDeserialize_constructor = new List<VDFMethodInfo>();
+		public List<VDFMethodInfo> methods_postDeserialize_method = new List<VDFMethodInfo>();
+		// serializing
 		public List<VDFMethodInfo> methods_preSerialize = new List<VDFMethodInfo>();
 		public List<VDFMethodInfo> methods_serialize = new List<VDFMethodInfo>();
 		public List<VDFMethodInfo> methods_preSerializeProp = new List<VDFMethodInfo>();
 		public List<VDFMethodInfo> methods_postSerialize = new List<VDFMethodInfo>();
 		void AddMethod(string methodName, VDFMethodInfo methodInfo) {
 			methods.Add(methodName, methodInfo);
+			// deserializing
+			if (methodInfo.preDeserializeTag != null && methodInfo.memberInfo is ConstructorInfo)
+				methods_preDeserialize_constructor.Add(methodInfo);
+			if (methodInfo.preDeserializeTag != null && methodInfo.memberInfo is MethodInfo)
+				methods_preDeserialize_method.Add(methodInfo);
+			if (methodInfo.deserializeTag != null && methodInfo.deserializeTag.fromParent)
+				methods_deserialize_fromParent.Add(methodInfo);
+			if (methodInfo.deserializeTag != null && !methodInfo.deserializeTag.fromParent)
+				methods_deserialize_notFromParent.Add(methodInfo);
+			if (methodInfo.postDeserializeTag != null && methodInfo.memberInfo is ConstructorInfo)
+				methods_postDeserialize_constructor.Add(methodInfo);
+			if (methodInfo.postDeserializeTag != null && methodInfo.memberInfo is MethodInfo)
+				methods_postDeserialize_method.Add(methodInfo);
+			// serializing
 			if (methodInfo.preSerializeTag != null)
 				methods_preSerialize.Add(methodInfo);
 			if (methodInfo.serializeTag != null)

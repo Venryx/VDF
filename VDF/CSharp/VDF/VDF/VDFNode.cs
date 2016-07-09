@@ -255,7 +255,7 @@ namespace VDFN {
 			object result = null;
 			bool deserializedByCustomMethod = false;
 			// make-so: the Where clauses like this are removed
-			foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods.Values.Where(a=>a.deserializeTag != null && a.deserializeTag.fromParent)) {
+			foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods_deserialize_fromParent) {
 				object deserializeResult = method.Call(null, this, path, options);
 				if (deserializeResult != VDF.NoActionTaken) {
 					result = deserializeResult;
@@ -292,13 +292,13 @@ namespace VDFN {
 			var typeInfo = VDFTypeInfo.Get(type);
 
 			// call pre-deserialize constructors before pre-deserialize normal methods
-			foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.preDeserializeTag != null))
+			foreach (VDFMethodInfo method in typeInfo.methods_preDeserialize_constructor)
 				method.Call(obj, this, path, options);
-			foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.preDeserializeTag != null))
+			foreach (VDFMethodInfo method in typeInfo.methods_preDeserialize_method)
 				method.Call(obj, this, path, options);
 
 			bool deserializedByCustomMethod2 = false;
-			foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.deserializeTag != null && !a.deserializeTag.fromParent)) {
+			foreach (VDFMethodInfo method in typeInfo.methods_deserialize_notFromParent) {
 				object deserializeResult = method.Call(obj, this, path, options);
 				if (deserializeResult != VDF.NoActionTaken)
 					deserializedByCustomMethod2 = true;
@@ -346,9 +346,9 @@ namespace VDFN {
 					func();
 
 			// call post-deserialize constructors before post-deserialize normal methods
-			foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is ConstructorInfo && a.postDeserializeTag != null))
+			foreach (VDFMethodInfo method in typeInfo.methods_postDeserialize_constructor)
 				method.Call(obj, this, path, options);
-			foreach (VDFMethodInfo method in typeInfo.methods.Values.Where(a=>a.memberInfo is MethodInfo && a.postDeserializeTag != null))
+			foreach (VDFMethodInfo method in typeInfo.methods_postDeserialize_method)
 				method.Call(obj, this, path, options);
 
 			if (options.objPostDeserializeFuncs.ContainsKey(obj))
