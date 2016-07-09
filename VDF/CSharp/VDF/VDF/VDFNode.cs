@@ -254,7 +254,6 @@ namespace VDFN {
 
 			object result = null;
 			bool deserializedByCustomMethod = false;
-			// make-so: the Where clauses like this are removed
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods_deserialize_fromParent) {
 				object deserializeResult = method.Call(null, this, path, options);
 				if (deserializeResult != VDF.NoActionTaken) {
