@@ -29,14 +29,13 @@ var VDFTypeInfo = (function () {
             result.typeTag = new VDFType(VDF.PropRegex_Any);
             return result;
         }
-        var typeBase = window[typeNameBase];
+        var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
         if (typeBase && typeBase.typeInfo == null) {
             var result = new VDFTypeInfo();
             result.typeTag = new VDFType();
             /*var typeTag = new VDFType();
             var currentTypeName = typeNameBase;
-            while (window[currentTypeName]) //true)
-            {
+            while (window[currentTypeName]) //true) {
                 if (window[currentTypeName].typeInfo.typeTag)
                     for (var key in window[currentTypeName].typeInfo.typeTag)
                         if (typeTag[key] == null)

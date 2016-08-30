@@ -388,7 +388,7 @@ function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) {
 	var type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
 	var propType = propType_orFirstTag;
 
-	var typeInfo = VDFTypeInfo.Get(type.name_fake || type.name);
+	var typeInfo = VDFTypeInfo.Get(type);
 	if (typeInfo.props[propName] == null) {
 		var propTag: any = {};
 		var defaultValueTag: any = {};
