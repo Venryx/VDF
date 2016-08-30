@@ -408,7 +408,7 @@ of three lines in total.".Fix());
 			var tokens = VDFTokenParser.ParseTokens(vdf1, null, true, false);
 
 			// shift each within-string literal-end-marker token to after its containing-string's token
-			for (var i = <any>0; i < tokens.Count; i++)
+			for (let i = 0; i < tokens.Count; i++)
 				if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String)
 				{
 					var oldFirst = tokens[i];
@@ -418,7 +418,7 @@ of three lines in total.".Fix());
 				}
 
 			var vdf2 = "";
-			for (var i in tokens.Indexes())
+			for (let i in tokens.Indexes())
 				vdf2 += tokens[i].text;
 			vdf1.Should().Be(vdf2);
 		});

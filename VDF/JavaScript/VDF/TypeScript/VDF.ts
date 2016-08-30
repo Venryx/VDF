@@ -1,26 +1,21 @@
 ﻿// init
 // ==========
 
-interface Object
-{
+interface Object {
 	_AddProperty(name: string, value): void;
 }
 // the below lets you easily add non-enumerable properties
-Object.defineProperty(Object.prototype, "_AddProperty",
-{
+Object.defineProperty(Object.prototype, "_AddProperty", {
 	enumerable: false,
-	value: function(name, value)
-	{
-		Object.defineProperty(this, name,
-		{
+	value: function(name, value) {
+		Object.defineProperty(this, name, {
 			enumerable: false,
 			value: value
 		});
 	}
 });
 
-interface String
-{
+interface String {
 	Contains(str: string): boolean;
 	StartsWith(str: string): boolean;
 	EndsWith(str: string): boolean;
@@ -28,13 +23,11 @@ interface String
 }
 String.prototype._AddProperty("Contains", function(str) { return this.indexOf(str) != -1; });
 String.prototype._AddProperty("StartsWith", function(str) { return this.indexOf(str) == 0; });
-String.prototype._AddProperty("EndsWith", function(str)
-{
+String.prototype._AddProperty("EndsWith", function(str) {
 	var expectedPos = this.length - str.length;
 	return this.indexOf(str, expectedPos) == expectedPos;
 });
-String.prototype._AddProperty("TrimStart", function(chars: Array<string>)
-{
+String.prototype._AddProperty("TrimStart", function(chars: Array<string>) {
 	var result = "";
 	var doneTrimming = false;
 	for (var i = 0; i < this.length; i++)
@@ -45,31 +38,26 @@ String.prototype._AddProperty("TrimStart", function(chars: Array<string>)
 		}
 	return result;
 });
-interface Array<T>
-{
+interface Array<T> {
 	Contains(str: T): boolean;
 }
 Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(item) != -1; });
-interface Function
-{
+interface Function {
 	AddTags(...tags: any[]): string;
 	//IsDerivedFrom(baseType: Function): boolean;
 }
-Function.prototype._AddProperty("AddTags", function(...tags)
-{
+Function.prototype._AddProperty("AddTags", function(...tags) {
 	if (this.tags == null)
 		this.tags = new List("object");
 	for (var i = 0; i < tags.length; i++)
 		this.tags.push(tags[i]);
 	return this;
 });
-/*Function.prototype._AddProperty("IsDerivedFrom", function(baseType)
-{
+/*Function.prototype._AddProperty("IsDerivedFrom", function(baseType) {
 	if (baseType == null)
 		return false;
 	var currentDerived = this.prototype;
-	while (currentDerived.__proto__)
-	{
+	while (currentDerived.__proto__)	{
 		if (currentDerived == baseType.prototype)
 			return true;
 		currentDerived = currentDerived.__proto__;
@@ -80,8 +68,7 @@ Function.prototype._AddProperty("AddTags", function(...tags)
 // classes
 // ==========
 
-class VDFNodePathNode
-{
+class VDFNodePathNode {
 	obj: any;
 
 	// if not root (i.e. a child/descendant)
@@ -90,8 +77,7 @@ class VDFNodePathNode
 	map_keyIndex = -1;
 	map_key: any;
 
-	constructor(obj = null, prop: VDFPropInfo = null, list_index = -1, map_keyIndex = -1, map_key = null)
-	{
+	constructor(obj = null, prop: VDFPropInfo = null, list_index = -1, map_keyIndex = -1, map_key = null) {
 		this.obj = obj;
 		this.prop = prop;
 		this.list_index = list_index;
@@ -101,13 +87,11 @@ class VDFNodePathNode
 
 	Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
 }
-class VDFNodePath
-{
+class VDFNodePath {
 	nodes: List<VDFNodePathNode>;
 	constructor(nodes: List<VDFNodePathNode>);
 	constructor(rootNode: VDFNodePathNode);
-	constructor(nodes_orRootNode)
-	{
+	constructor(nodes_orRootNode) {
 		if (nodes_orRootNode instanceof Array)
 			this.nodes = List.apply(null, ["VDFNodePathNode"].concat(nodes_orRootNode));
 		else
@@ -393,6 +377,7 @@ class StringBuilder implements Array<string> {
 // tags
 // ----------
 
+
 function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags): void {
 	if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
 		return Prop.apply(this, [type_orObj, propName, null, propType_orFirstTag].concat(tags));
@@ -418,7 +403,9 @@ PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
 		typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag, defaultValueTag);
 	}
 };
-function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) { return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags); };
+function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) {
+	return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags);
+};
 
 /*function MethodDeclarationWrapper(tags) { this.tags = tags; };
 MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) { method.methodInfo = new VDFMethodInfo(this.tags); };
@@ -607,7 +594,7 @@ class Dictionary<K, V>
 
 		if (keyValuePairsObj)
 			for (var key in keyValuePairsObj)
-				this.Set(key, keyValuePairsObj[key]);
+				this.Set(<K><any>key, keyValuePairsObj[key]);
 	}
 
 	// properties

@@ -32,7 +32,7 @@ var VDFLoadOptions = (function () {
         return this;
     };
     return VDFLoadOptions;
-})();
+}());
 var VDFLoader = (function () {
     function VDFLoader() {
     }
@@ -148,5 +148,5 @@ var VDFLoader = (function () {
         return node;
     };
     return VDFLoader;
-})();
+}());
 //# sourceMappingURL=VDFLoader.js.map

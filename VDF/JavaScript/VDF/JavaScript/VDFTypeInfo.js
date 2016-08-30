@@ -15,7 +15,7 @@ var VDFType = (function () {
             this.popOutL1 = typeTag.popOutL1;
     };
     return VDFType;
-})();
+}());
 var VDFTypeInfo = (function () {
     function VDFTypeInfo() {
         this.props = {};
@@ -67,7 +67,7 @@ var VDFTypeInfo = (function () {
         return this.props[propName];
     };
     return VDFTypeInfo;
-})();
+}());
 var VDFProp = (function () {
     function VDFProp(includeL2, popOutL2) {
         if (includeL2 === void 0) { includeL2 = true; }
@@ -75,7 +75,7 @@ var VDFProp = (function () {
         this.popOutL2 = popOutL2;
     }
     return VDFProp;
-})();
+}());
 var P = (function (_super) {
     __extends(P, _super);
     function P(includeL2, popOutL2) {
@@ -83,14 +83,14 @@ var P = (function (_super) {
         _super.call(this, includeL2, popOutL2);
     }
     return P;
-})(VDFProp);
+}(VDFProp));
 var DefaultValue = (function () {
     function DefaultValue(defaultValue) {
         if (defaultValue === void 0) { defaultValue = D.DefaultDefault; }
         this.defaultValue = defaultValue;
     }
     return DefaultValue;
-})();
+}());
 var D = (function (_super) {
     __extends(D, _super);
     function D(defaultValue) {
@@ -102,7 +102,7 @@ var D = (function (_super) {
     D.NullOrEmpty = new object(); // i.e. null, or an empty string or collection
     D.Empty = new object(); // i.e. an empty string or collection
     return D;
-})(DefaultValue);
+}(DefaultValue));
 var VDFPropInfo = (function () {
     function VDFPropInfo(propName, propTypeName, tags, propTag, defaultValueTag) {
         this.name = propName;
@@ -135,44 +135,44 @@ var VDFPropInfo = (function () {
         return true;
     };
     return VDFPropInfo;
-})();
+}());
 var VDFPreSerializeProp = (function () {
     function VDFPreSerializeProp() {
     }
     return VDFPreSerializeProp;
-})();
+}());
 var VDFPreSerialize = (function () {
     function VDFPreSerialize() {
     }
     return VDFPreSerialize;
-})();
+}());
 var VDFSerialize = (function () {
     function VDFSerialize() {
     }
     return VDFSerialize;
-})();
+}());
 var VDFPostSerialize = (function () {
     function VDFPostSerialize() {
     }
     return VDFPostSerialize;
-})();
+}());
 var VDFPreDeserialize = (function () {
     function VDFPreDeserialize() {
     }
     return VDFPreDeserialize;
-})();
+}());
 var VDFDeserialize = (function () {
     function VDFDeserialize(fromParent) {
         if (fromParent === void 0) { fromParent = false; }
         this.fromParent = fromParent;
     }
     return VDFDeserialize;
-})();
+}());
 var VDFPostDeserialize = (function () {
     function VDFPostDeserialize() {
     }
     return VDFPostDeserialize;
-})();
+}());
 /*class VDFMethodInfo
 {
     tags: any[];

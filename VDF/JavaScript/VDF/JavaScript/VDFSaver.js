@@ -33,7 +33,7 @@ var VDFSaveOptions = (function () {
         return this;
     };
     return VDFSaveOptions;
-})();
+}());
 var VDFSaver = (function () {
     function VDFSaver() {
     }
@@ -153,5 +153,5 @@ var VDFSaver = (function () {
         return result;
     };
     return VDFSaver;
-})();
+}());
 //# sourceMappingURL=VDFSaver.js.map

@@ -132,7 +132,7 @@ var VDFNode = (function () {
         }
         else {
             var poppedOutChildTexts = new List("string");
-            var poppedOutChildText;
+            var poppedOutChildText = void 0;
             if (this.isMap || this.mapChildren.Count > 0)
                 for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
                     if ((poppedOutChildText = pair.value.ToVDF_PoppedOutPart(options, tabDepth)).length)
@@ -261,11 +261,11 @@ var VDFNode = (function () {
                     }
                     else {
                         //obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { name: keyString }, null));
-                        var propName = pair.key.primitiveValue;
+                        var propName_1 = pair.key.primitiveValue;
                         /*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
                         {*/
-                        var value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, path.ExtendAsChild(typeInfo.props[propName] || { name: propName }, null));
-                        obj[propName] = value;
+                        var value = pair.value.ToObject(typeInfo.props[propName_1] && typeInfo.props[propName_1].typeName, options, path.ExtendAsChild(typeInfo.props[propName_1] || { name: propName_1 }, null));
+                        obj[propName_1] = value;
                     }
                 }
                 catch (ex) {
@@ -275,21 +275,21 @@ var VDFNode = (function () {
                 finally { }
         }
         if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
-            for (var i in options.objPostDeserializeFuncs_early.Get(obj))
-                options.objPostDeserializeFuncs_early.Get(obj)[i]();
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
-                obj[propName](this, path, options);
+            for (var i_1 in options.objPostDeserializeFuncs_early.Get(obj))
+                options.objPostDeserializeFuncs_early.Get(obj)[i_1]();
+        for (var propName_2 in VDF.GetObjectProps(obj))
+            if (obj[propName_2] instanceof Function && obj[propName_2].tags && obj[propName_2].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
+                obj[propName_2](this, path, options);
         if (options.objPostDeserializeFuncs.ContainsKey(obj))
-            for (var i in options.objPostDeserializeFuncs.Get(obj))
-                options.objPostDeserializeFuncs.Get(obj)[i]();
+            for (var i_2 in options.objPostDeserializeFuncs.Get(obj))
+                options.objPostDeserializeFuncs.Get(obj)[i_2]();
     };
     /*static charsThatNeedEscaping_1 = ['"', '\'', '\n'];
     static charsThatNeedEscaping_2 = ['{', '}', '[', ']', ':'];*/
     VDFNode.charsThatNeedEscaping_1_regex = /"|'|\n|<<|>>/;
     VDFNode.charsThatNeedEscaping_2_regex = /{|}|\[|\]|:/;
     return VDFNode;
-})();
+}());
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 VDF.NoActionTaken = new VDFNode();
 VDF.CancelSerialize = new VDFNode();

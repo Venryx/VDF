@@ -375,8 +375,8 @@ class VDFTokenParser {
 				tokens.RemoveAt(i);*/
 
 		var result = new List<VDFToken>(); //"VDFToken");
-		for (var i in tokens.Indexes()) {
-			var token = tokens[i];
+		for (let i in tokens.Indexes()) {
+			let token = tokens[i];
 			if (!(token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.KeyValueSeparator || token.type == VDFTokenType.PoppedOutChildGroupMarker))
 				result.Add(token);
 		}

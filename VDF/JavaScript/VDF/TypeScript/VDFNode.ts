@@ -124,38 +124,38 @@
 		// include popped-out-content of direct children (i.e. a single directly-under group)
 		if (options.useChildPopOut && this.childPopOut) {
 			var childTabStr = "";
-			for (var i = <any>0; i < tabDepth + 1; i++)
+			for (let i = 0; i < tabDepth + 1; i++)
 				childTabStr += "\t";
 			if (this.isMap || this.mapChildren.Count > 0)
-				for (var i = <any>0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
+				for (let i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
 					var keyStr = pair.key.ToVDF_InlinePart(options, tabDepth, true);
 					var valueStr = pair.value.ToVDF_InlinePart(options, tabDepth + 1);
 					builder.Append("\n" + childTabStr + (options.useStringKeys ? "\"" : "") + keyStr + (options.useStringKeys ? "\"" : "") + ":" + valueStr);
-					var poppedOutChildText: string = pair.value.ToVDF_PoppedOutPart(options, tabDepth + 1);
+					let poppedOutChildText: string = pair.value.ToVDF_PoppedOutPart(options, tabDepth + 1);
 					if (poppedOutChildText.length > 0)
 						builder.Append(poppedOutChildText);
 				}
 			if (this.isList || this.listChildren.Count > 0)
-				for (var i in this.listChildren.Indexes()) {
+				for (let i in this.listChildren.Indexes()) {
 					var item = this.listChildren[i];
 					builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(options, tabDepth + 1));
-					var poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth + 1);
+					let poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth + 1);
 					if (poppedOutChildText.length > 0)
 						builder.Append(poppedOutChildText);
 				}
 		}
 		else { // include popped-out-content of inline-items' descendents (i.e. one or more pulled-up groups)
 			var poppedOutChildTexts = new List<string>("string");
-			var poppedOutChildText: string;
+			let poppedOutChildText: string;
 			if (this.isMap || this.mapChildren.Count > 0)
-				for (var i = <any>0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
+				for (let i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
 					if ((poppedOutChildText = pair.value.ToVDF_PoppedOutPart(options, tabDepth)).length)
 						poppedOutChildTexts.Add(poppedOutChildText);
 			if (this.isList || this.listChildren.Count > 0)
-				for (var i in this.listChildren.Indexes())
+				for (let i in this.listChildren.Indexes())
 					if ((poppedOutChildText = this.listChildren[i].ToVDF_PoppedOutPart(options, tabDepth)).length)
 						poppedOutChildTexts.Add(poppedOutChildText);
-			for (var i = <any>0; i < poppedOutChildTexts.Count; i++) {
+			for (let i = 0; i < poppedOutChildTexts.Count; i++) {
 				poppedOutChildText = poppedOutChildTexts[i];
 				var insertPoint = 0;
 				while (poppedOutChildText[insertPoint] == '\n' || poppedOutChildText[insertPoint] == '\t')
@@ -290,7 +290,7 @@
 					}
 					else {
 						//obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { name: keyString }, null));
-						var propName = pair.key.primitiveValue;
+						let propName = pair.key.primitiveValue;
 						/*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
 						{*/
 						var value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, path.ExtendAsChild(typeInfo.props[propName] || {name: propName}, null));
@@ -301,15 +301,15 @@
 		}
 
 		if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
-			for (var i in options.objPostDeserializeFuncs_early.Get(obj))
+			for (let i in options.objPostDeserializeFuncs_early.Get(obj))
 				options.objPostDeserializeFuncs_early.Get(obj)[i]();
 
-		for (var propName in VDF.GetObjectProps(obj))
+		for (let propName in VDF.GetObjectProps(obj))
 			if(obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=>a instanceof VDFPostDeserialize))
 				obj[propName](this, path, options);
 
 		if (options.objPostDeserializeFuncs.ContainsKey(obj))
-			for (var i in options.objPostDeserializeFuncs.Get(obj))
+			for (let i in options.objPostDeserializeFuncs.Get(obj))
 				options.objPostDeserializeFuncs.Get(obj)[i]();
 	}
 }

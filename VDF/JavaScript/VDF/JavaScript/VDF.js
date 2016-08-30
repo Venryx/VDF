@@ -38,13 +38,11 @@ Function.prototype._AddProperty("AddTags", function () {
         this.tags.push(tags[i]);
     return this;
 });
-/*Function.prototype._AddProperty("IsDerivedFrom", function(baseType)
-{
+/*Function.prototype._AddProperty("IsDerivedFrom", function(baseType) {
     if (baseType == null)
         return false;
     var currentDerived = this.prototype;
-    while (currentDerived.__proto__)
-    {
+    while (currentDerived.__proto__)	{
         if (currentDerived == baseType.prototype)
             return true;
         currentDerived = currentDerived.__proto__;
@@ -70,7 +68,7 @@ var VDFNodePathNode = (function () {
     }
     VDFNodePathNode.prototype.Clone = function () { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); };
     return VDFNodePathNode;
-})();
+}());
 var VDFNodePath = (function () {
     function VDFNodePath(nodes_orRootNode) {
         if (nodes_orRootNode instanceof Array)
@@ -114,7 +112,7 @@ var VDFNodePath = (function () {
         return new VDFNodePath(newNodes);
     };
     return VDFNodePath;
-})();
+}());
 var VDF = (function () {
     function VDF() {
     }
@@ -231,7 +229,7 @@ var VDF = (function () {
     // for use with VDFType
     VDF.PropRegex_Any = ""; //"^.+$";
     return VDF;
-})();
+}());
 // helper classes
 // ==================
 var VDFUtils = (function () {
@@ -271,7 +269,7 @@ var VDFUtils = (function () {
         }
     };
     return VDFUtils;
-})();
+}());
 var StringBuilder = (function () {
     function StringBuilder(startData) {
         this.Length = 0;
@@ -444,7 +442,7 @@ var StringBuilder = (function () {
         return null;
     };
     return StringBuilder;
-})();
+}());
 (function () {
     StringBuilder.prototype["__proto__"] = Array.prototype; // makes "(new StringBuilder()) instanceof Array" be true
     var reachedFakes = false;
@@ -524,7 +522,7 @@ var object = (function () {
     function object() {
     }
     return object;
-})(); // just an alias for Object, to be consistent with C# version
+}()); // just an alias for Object, to be consistent with C# version
 var EnumValue = (function () {
     function EnumValue(enumTypeName, intValue) {
         this.realTypeName = enumTypeName;
@@ -537,7 +535,7 @@ var EnumValue = (function () {
     EnumValue.GetEnumIntForStringValue = function (enumTypeName, stringValue) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); };
     EnumValue.GetEnumStringForIntValue = function (enumTypeName, intValue) { return eval(enumTypeName + "[" + intValue + "]"); };
     return EnumValue;
-})();
+}());
 window["List"] = function List(itemType) {
     var items = [];
     for (var _i = 1; _i < arguments.length; _i++) {
@@ -701,6 +699,6 @@ var Dictionary = (function () {
         delete this[key];
     };
     return Dictionary;
-})();
+}());
 //VDFUtils.MakePropertiesHidden(Dictionary.prototype, true); 
 //# sourceMappingURL=VDF.js.map
