@@ -378,33 +378,29 @@ class StringBuilder implements Array<string> {
 // ----------
 
 
-function PropDeclarationWrapper(type_orObj, propName, propType_orFirstTag, tags): void {
+class PropDeclarationWrapper {
+	set set(value) {}
+}
+function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) {
 	if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
-		return Prop.apply(this, [type_orObj, propName, null, propType_orFirstTag].concat(tags));
+		return Prop.apply(this, [typeOrObj, propName, null, propType_orFirstTag].concat(tags));
+
+	var type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
 	var propType = propType_orFirstTag;
 
-	var s = this;
-	s.type = type_orObj instanceof Function ? type_orObj : type_orObj.constructor;
-	s.propName = propName;
-	s.propType = propType;
-	s.tags = tags;
-};
-PropDeclarationWrapper.prototype._AddSetter_Inline = function set(value) {
-	var s = this;
-	var typeInfo = VDFTypeInfo.Get(s.type.name_fake || s.type.name);
-	if (typeInfo.props[this.propName] == null) {
+	var typeInfo = VDFTypeInfo.Get(type.name_fake || type.name);
+	if (typeInfo.props[propName] == null) {
 		var propTag: any = {};
 		var defaultValueTag: any = {};
-		for (var i in s.tags)
-			if (s.tags[i] instanceof VDFProp)
-				propTag = s.tags[i];
-			else if (s.tags[i] instanceof DefaultValue)
-				defaultValueTag = s.tags[i];
-		typeInfo.props[this.propName] = new VDFPropInfo(s.propName, s.propType, s.tags, propTag, defaultValueTag);
+		for (var i in tags)
+			if (tags[i] instanceof VDFProp)
+				propTag = tags[i];
+			else if (tags[i] instanceof DefaultValue)
+				defaultValueTag = tags[i];
+		typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags, propTag, defaultValueTag);
 	}
-};
-function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) {
-	return new PropDeclarationWrapper(typeOrObj, propName, propType_orFirstTag, tags);
+
+	return new PropDeclarationWrapper();
 };
 
 /*function MethodDeclarationWrapper(tags) { this.tags = tags; };
