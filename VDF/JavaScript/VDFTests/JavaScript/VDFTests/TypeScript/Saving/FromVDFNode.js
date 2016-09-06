@@ -107,7 +107,7 @@ that needs escaping.>>\"".Fix());
                 return result;
             };
             return TypeTest;
-        })();
+        }());
         test("D1_MetadataShowingNodeToBeOfTypeType", function () {
             //VDFTypeInfo.AddSerializeMethod<Type>(a=>new VDFNode(a.Name, "Type"));
             //VDFTypeInfo.AddDeserializeMethod_FromParent<Type>(node=>Type.GetType(node.primitiveValue.ToString()));

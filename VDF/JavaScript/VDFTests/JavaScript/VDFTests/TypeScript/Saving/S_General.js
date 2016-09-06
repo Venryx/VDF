@@ -38,27 +38,27 @@ var VDFTests;
         // ==========
         var D1_Map_PropWithNameMatchingIncludeRegex_Class = (function () {
             function D1_Map_PropWithNameMatchingIncludeRegex_Class() {
-                this._helper = Type(new VDFType("^[^_]")).set = this;
+                this._helper = TypeInfo(new VDFType("^[^_]")).set = this;
                 this._notMatching = Prop(this, "_notMatching", "bool").set = true;
                 this.matching = Prop(this, "matching", "bool").set = true;
             }
             return D1_Map_PropWithNameMatchingIncludeRegex_Class;
-        })();
+        }());
         test("D1_Map_PropWithNameMatchingIncludeRegex", function () { VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}"); });
         var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base = (function () {
             function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base() {
-                this._helper = Type(new VDFType("^[^_]")).set = this;
+                this._helper = TypeInfo(new VDFType("^[^_]")).set = this;
             }
             return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base;
-        })();
+        }());
         var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived = (function () {
             function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived() {
-                this._helper = Type(new VDFType()).set = this;
+                this._helper = TypeInfo(new VDFType()).set = this;
                 this._notMatching = Prop(this, "_notMatching", "bool").set = true;
                 this.matching = Prop(this, "matching", "bool").set = true;
             }
             return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived;
-        })();
+        }());
         D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
         test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", function () { VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}"); });
         // serialize-related methods
@@ -75,7 +75,7 @@ var VDFTests;
                 return result;
             };
             return D1_MapWithEmbeddedSerializeMethod_Prop_Class;
-        })();
+        }());
         //AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
         test("D1_MapWithEmbeddedSerializeMethod_Prop", function () { VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}"); });
         var D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class = (function () {
@@ -85,7 +85,7 @@ var VDFTests;
             }
             D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype.Serialize = function () { return VDF.NoActionTaken; };
             return D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class;
-        })();
+        }());
         test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", function () { VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
         var D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class = (function () {
             function D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class() {
@@ -94,21 +94,21 @@ var VDFTests;
             }
             D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.PreSerializeProp = function (propPath, options) { return VDF.CancelSerialize; };
             return D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class;
-        })();
+        }());
         test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", function () { VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}"); });
         var D1_Map_MapThatCancelsItsSerialize_Class_Parent = (function () {
             function D1_Map_MapThatCancelsItsSerialize_Class_Parent() {
                 this.child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new P()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child();
             }
             return D1_Map_MapThatCancelsItsSerialize_Class_Parent;
-        })();
+        }());
         var D1_Map_MapThatCancelsItsSerialize_Class_Child = (function () {
             function D1_Map_MapThatCancelsItsSerialize_Class_Child() {
                 this.Serialize.AddTags(new VDFSerialize());
             }
             D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype.Serialize = function () { return VDF.CancelSerialize; };
             return D1_Map_MapThatCancelsItsSerialize_Class_Child;
-        })();
+        }());
         test("D1_Map_MapThatCancelsItsSerialize", function () { VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}"); });
         // for JSON compatibility
         // ==========
@@ -116,7 +116,7 @@ var VDFTests;
             function D0_MapWithMetadataDisabled_Class() {
             }
             return D0_MapWithMetadataDisabled_Class;
-        })();
+        }());
         test("D0_MapWithMetadataDisabled", function () {
             var a = VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaveOptions({ useMetadata: false }));
             ok(a.metadata == null); //a.metadata.Should().Be(null);
@@ -126,7 +126,7 @@ var VDFTests;
                 this.ints = Prop(this, "ints", "List(int)", new P()).set = new List("int", 0, 1);
             }
             return D0_Map_List_BoolsWithPopOutDisabled_Class;
-        })();
+        }());
         test("D0_Map_List_BoolsWithPopOutDisabled", function () {
             var a = VDFSaver.ToVDFNode(new D0_Map_List_BoolsWithPopOutDisabled_Class(), "D0_Map_List_BoolsWithPopOutDisabled_Class", new VDFSaveOptions({ useChildPopOut: false }));
             a.ToVDF().Should().Be("{ints:[0 1]}");

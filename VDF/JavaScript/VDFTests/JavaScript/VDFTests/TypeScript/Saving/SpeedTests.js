@@ -14,7 +14,7 @@ var VDFTests;
                 this.nestedList = Prop(this, "nestedList", "List(List(string))", new P()).set = new List("List(string)", new List("string", "1A"));
             }
             return SpeedTest1_Class;
-        })();
+        }());
         test("SpeedTest1", function () {
             var a = VDFSaver.ToVDFNode(new SpeedTest1_Class(), new VDFSaveOptions({ typeMarking: VDFTypeMarking.None }));
             a["Bool"].primitiveValue.Should().Be(true);
