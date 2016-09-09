@@ -73,6 +73,7 @@ class VDFTypeInfo {
 	}
 
 	props = {};
+	//chainProps_cache = {}; // all props
 	tags: any[];
 	typeTag: VDFType;
 

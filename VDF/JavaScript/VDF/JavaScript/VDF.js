@@ -186,6 +186,12 @@ var VDF = (function () {
             return result;
         var currentType = type;
         while (currentType && currentType != Object) {
+            // if found type-info, grab props from it, then just return, since it has them all
+            /*if (currentType.typeInfo) {
+                for (var propName in currentType.typeInfo.props)
+                    result[propName] = currentType[propName];
+                return result;
+            }*/
             for (var _i = 0, _a = Object.getOwnPropertyNames(currentType); _i < _a.length; _i++) {
                 var propName = _a[_i];
                 if (!(propName in result)) {
@@ -209,6 +215,13 @@ var VDF = (function () {
             result[propName] = null;*/
         var currentObj = obj;
         while (currentObj && currentObj != Object.prototype) {
+            // if found type-info, grab props from it, then just return, since it has them all
+            /*var currentType = currentObj.constructor;
+            if (currentType.typeInfo) {
+                for (var propName in currentType.typeInfo.props)
+                    result[propName] = currentType[propName];
+                return result;
+            }*/
             for (var _i = 0, _a = Object.getOwnPropertyNames(currentObj); _i < _a.length; _i++) {
                 var propName = _a[_i];
                 var propInfo = Object.getOwnPropertyDescriptor(currentObj, propName);

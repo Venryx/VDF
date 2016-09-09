@@ -218,8 +218,16 @@ class VDF
 		var result = {};
         if (type == null)
             return result;
+
         var currentType = type;
         while (currentType && currentType != Object) {
+			// if found type-info, grab props from it, then just return, since it has them all
+			/*if (currentType.typeInfo) {
+				for (var propName in currentType.typeInfo.props)
+					result[propName] = currentType[propName];
+				return result;
+			}*/
+
             for (var propName of Object.getOwnPropertyNames(currentType))
 				if (!(propName in result)) {
             		var propInfo = Object.getOwnPropertyDescriptor(currentType, propName);
@@ -242,6 +250,14 @@ class VDF
 
         var currentObj = obj;
         while (currentObj && currentObj != Object.prototype) {
+			// if found type-info, grab props from it, then just return, since it has them all
+	        /*var currentType = currentObj.constructor;
+			if (currentType.typeInfo) {
+				for (var propName in currentType.typeInfo.props)
+					result[propName] = currentType[propName];
+				return result;
+			}*/
+
         	for (var propName of Object.getOwnPropertyNames(currentObj)) {
         		var propInfo = Object.getOwnPropertyDescriptor(currentObj, propName);
         		// don't include if prop is a getter or setter func (causes problems when enumerating)
