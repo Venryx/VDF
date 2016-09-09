@@ -170,7 +170,7 @@
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptOutDir>C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDFTests\JavaScript</TypeScriptOutDir>
+    <TypeScriptOutDir>C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\JavaScript</TypeScriptOutDir>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>

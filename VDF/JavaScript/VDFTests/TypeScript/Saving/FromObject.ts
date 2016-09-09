@@ -10,7 +10,7 @@ module VDFTests { // added to match C# indentation
 		test("D0_EmptyString", ()=> { VDF.Serialize("").Should().Be("\"\""); });
 
 		class D1_IgnoreDefaultValues_Class {
-			_helper = Type(new VDFType("^(?!_)")).set = this;
+			_helper = TypeInfo(new VDFType("^(?!_)")).set = this;
 
 			bool1: boolean = Prop(this, "bool1", "bool", new D()).set = null;
 			bool2: boolean = Prop(this, "bool2", "bool", new D(true)).set = true;
@@ -184,9 +184,8 @@ module VDFTests { // added to match C# indentation
 	title1:\"message1\"\n\
 	title2:\"message2\"".replace(/\r/g, ""));
 		});
-		class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class
-		{
-			_helper = Type(new VDFType(null, true)).set = this;
+		class D1_Map_PoppedOutDictionary_PoppedOutPairs_Class {
+			_helper = TypeInfo(new VDFType(null, true)).set = this;
 
 			messages = Prop(this, "messages", "Dictionary(string string)", new P(true, true)).set = new Dictionary<string, string>("string", "string",
 			{
@@ -255,26 +254,21 @@ module VDFTests { // added to match C# indentation
 	\"DeepString2\"".replace(/\r/g, ""));
 		});
 
-		class T4_Depth1
-		{
+		class T4_Depth1 {
 			level2 = Prop(this, "level2", "T4_Depth2)", new P()).set = new T4_Depth2();
 		}
-		class T4_Depth2
-		{
+		class T4_Depth2 {
 			level3_first = Prop(this, "level3_first", "T4_Depth3", new P()).set = new T4_Depth3();
 			level3_second = Prop(this, "level3_second", "T4_Depth3", new P()).set = new T4_Depth3();
 		}
-		class T4_Depth3
-		{
+		class T4_Depth3 {
 			level4s = Prop(this, "level4s", "List(T4_Depth4)", new P(true, true)).set = new List<T4_Depth4>("T4_Depth4", new T4_Depth4(), new T4_Depth4());
 		}
-		class T4_Depth4
-		{
+		class T4_Depth4 {
 			messages = Prop(this, "messages", "List(string)", new P(true, true)).set = new List<string>("string", "text1", "text2");
 			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
 		}
-		test("D4_Map_Map_Maps_Lists_PoppedOutMaps_ListsThenBools_PoppedOutStrings", ()=>
-		{
+		test("D4_Map_Map_Maps_Lists_PoppedOutMaps_ListsThenBools_PoppedOutStrings", ()=> {
 			var a = VDFSaver.ToVDFNode(new T4_Depth1(), new VDFSaveOptions({typeMarking: VDFTypeMarking.None}));
 			a.ToVDF().Should().Be("{level2:{level3_first:{level4s:[^]} level3_second:{level4s:[^]}}}\n\
 	{messages:[^] otherProperty:false}\n\
@@ -291,15 +285,13 @@ module VDFTests { // added to match C# indentation
 		\"text2\"".replace(/\r/g, ""));
 		});
 
-		class T5_Depth2
-		{
-			_helper = Type(new VDFType(null, true)).set = this;
+		class T5_Depth2 {
+			_helper = TypeInfo(new VDFType(null, true)).set = this;
 
 			firstProperty = Prop(this, "firstProperty", "bool", new P()).set = false;
 			otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
 		}
-		test("D4_List_Map_PoppedOutBools", ()=>
-		{
+		test("D4_List_Map_PoppedOutBools", ()=> {
 			var a = VDFSaver.ToVDFNode(new List<T5_Depth2>("T5_Depth2", new T5_Depth2()), new VDFSaveOptions({typeMarking: VDFTypeMarking.External}));
 			a.ToVDF().Should().Be("List(T5_Depth2)>[{^}]\n\
 	firstProperty:false\n\

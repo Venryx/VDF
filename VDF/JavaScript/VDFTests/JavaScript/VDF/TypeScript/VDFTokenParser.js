@@ -44,7 +44,7 @@ var VDFToken = (function () {
         this.text = text;
     }
     return VDFToken;
-})();
+}());
 var VDFTokenParser = (function () {
     function VDFTokenParser() {
     }
@@ -342,10 +342,10 @@ var VDFTokenParser = (function () {
             if (tokens[i].type == VDFTokenType.Tab || tokens[i].type == VDFTokenType.LineBreak || tokens[i].type == VDFTokenType.MetadataEndMarker || tokens[i].type == VDFTokenType.KeyValueSeparator || tokens[i].type == VDFTokenType.PoppedOutChildGroupMarker)
                 tokens.RemoveAt(i);*/
         var result = new List(); //"VDFToken");
-        for (var i in tokens.Indexes()) {
-            var token = tokens[i];
-            if (!(token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.KeyValueSeparator || token.type == VDFTokenType.PoppedOutChildGroupMarker))
-                result.Add(token);
+        for (var i_1 in tokens.Indexes()) {
+            var token_1 = tokens[i_1];
+            if (!(token_1.type == VDFTokenType.Tab || token_1.type == VDFTokenType.LineBreak || token_1.type == VDFTokenType.MetadataEndMarker || token_1.type == VDFTokenType.KeyValueSeparator || token_1.type == VDFTokenType.PoppedOutChildGroupMarker))
+                result.Add(token_1);
         }
         // pass 4: fix token position-and-index properties
         // ----------
@@ -365,5 +365,5 @@ var VDFTokenParser = (function () {
     VDFTokenParser.charsAToZ = List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
     VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
     return VDFTokenParser;
-})();
+}());
 //# sourceMappingURL=VDFTokenParser.js.map

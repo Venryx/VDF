@@ -87,7 +87,7 @@ module VDFTests { // added to match C# indentation
 		});
 		class D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1
 		{
-			_helper = Type(new VDFType(null, true)).set = this;
+			_helper = TypeInfo(new VDFType(null, true)).set = this;
 			messages = Prop(this, "messages", "Dictionary(string string)", new P()).set = new Dictionary<string, string>("string", "string",
 			{
 				title1: "message1",

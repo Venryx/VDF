@@ -30,7 +30,7 @@ var VDFTypeInfo = (function () {
             return result;
         }
         var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
-        if (typeBase && typeBase.typeInfo == null) {
+        if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
             var result = new VDFTypeInfo();
             result.typeTag = new VDFType();
             /*var typeTag = new VDFType();
@@ -50,10 +50,18 @@ var VDFTypeInfo = (function () {
             var currentType = typeNameBase;
             while (currentType != null) {
                 var currentTypeConstructor = window[currentType];
-                var typeTag2 = (currentTypeConstructor.typeInfo || {}).typeTag;
+                if (currentTypeConstructor == null)
+                    throw new Error("Could not find constructor for type: " + currentType);
+                var currentTypeInfo = currentTypeConstructor.typeInfo;
+                // load type-tag from base-types
+                var typeTag2 = (currentTypeInfo || {}).typeTag;
                 for (var key in typeTag2)
                     if (result.typeTag[key] == null)
                         result.typeTag[key] = typeTag2[key];
+                // load prop-info from base-types
+                if (currentTypeInfo)
+                    for (var propName in currentTypeInfo.props)
+                        result.props[propName] = currentTypeInfo.props[propName];
                 currentType = currentTypeConstructor.prototype && currentTypeConstructor.prototype.__proto__ && currentTypeConstructor.prototype.__proto__.constructor.name;
             }
             typeBase.typeInfo = result;

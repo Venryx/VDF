@@ -40,22 +40,19 @@ module VDFTests { // added to match C# indentation
 		// prop-inclusion by regex
 		// ==========
 
-		class D1_Map_PropWithNameMatchingIncludeRegex_Class
-		{
-			_helper = Type(new VDFType("^[^_]")).set = this;
+		class D1_Map_PropWithNameMatchingIncludeRegex_Class {
+			_helper = TypeInfo(new VDFType("^[^_]")).set = this;
 
 			_notMatching = Prop(this, "_notMatching", "bool").set = true;
 			matching = Prop(this, "matching", "bool").set = true;
 		}
 		test("D1_Map_PropWithNameMatchingIncludeRegex", ()=>{ VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}"); });
 
-		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base
-		{
-			_helper = Type(new VDFType("^[^_]")).set = this;
+		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {
+			_helper = TypeInfo(new VDFType("^[^_]")).set = this;
 		}
-		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived
-		{
-			_helper = Type(new VDFType()).set = this;
+		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived {
+			_helper = TypeInfo(new VDFType()).set = this;
 
 			_notMatching = Prop(this, "_notMatching", "bool").set = true;
 			matching = Prop(this, "matching", "bool").set = true;
@@ -66,8 +63,7 @@ module VDFTests { // added to match C# indentation
 		// serialize-related methods
 		// ==========
 
-		class D1_MapWithEmbeddedSerializeMethod_Prop_Class
-		{
+		class D1_MapWithEmbeddedSerializeMethod_Prop_Class {
 			notIncluded = Prop(this, "notIncluded", "bool").set = true;
 			included = Prop(this, "included", "bool").set = true;
 

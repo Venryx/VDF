@@ -23,7 +23,7 @@ var VDFTests;
             }
             TypeWithPreDeserializeMethod.prototype.PreDeserialize = function () { this.flag = true; };
             return TypeWithPreDeserializeMethod;
-        })();
+        }());
         test("D1_PreDeserializeMethod", function () {
             var a = VDF.Deserialize("{}", "TypeWithPreDeserializeMethod");
             a.flag.Should().Be(true);
@@ -35,7 +35,7 @@ var VDFTests;
             }
             TypeWithPostDeserializeMethod.prototype.PostDeserialize = function () { this.flag = true; };
             return TypeWithPostDeserializeMethod;
-        })();
+        }());
         test("D1_PostDeserializeMethod", function () {
             var a = VDF.Deserialize("{}", "TypeWithPostDeserializeMethod");
             a.flag.Should().Be(true);
@@ -48,7 +48,7 @@ var VDFTests;
             ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype.PostDeserialize = function (node, path, options) { if (options.messages[0] == "RequiredMessage")
                 this.flag = true; };
             return ObjectWithPostDeserializeMethodRequiringCustomMessage_Class;
-        })();
+        }());
         test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () { VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false); });
         /*class ObjectWithPostDeserializeConstructor_Class
         {
@@ -65,7 +65,7 @@ var VDFTests;
                 this.child = Prop(this, "child", "ObjectWithPostDeserializeOptionsFunc_Class_Child").set = null;
             }
             return ObjectWithPostDeserializeOptionsFunc_Class_Parent;
-        })();
+        }());
         var ObjectWithPostDeserializeOptionsFunc_Class_Child = (function () {
             function ObjectWithPostDeserializeOptionsFunc_Class_Child() {
             }
@@ -75,7 +75,7 @@ var VDFTests;
             };
             ObjectWithPostDeserializeOptionsFunc_Class_Child.flag = false;
             return ObjectWithPostDeserializeOptionsFunc_Class_Child;
-        })();
+        }());
         ObjectWithPostDeserializeOptionsFunc_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
         test("D1_ObjectWithPostDeserializeOptionsFunc", function () {
             var options = new VDFLoadOptions();
@@ -87,7 +87,7 @@ var VDFTests;
                 this.flag = Prop(this, "flag", "bool", new P()).set = false;
             }
             return TypeInstantiatedManuallyThenFilled;
-        })();
+        }());
         test("D1_InstantiateTypeManuallyThenFill", function () {
             var a = new TypeInstantiatedManuallyThenFilled();
             VDF.DeserializeInto("{flag:true}", a);
@@ -95,7 +95,7 @@ var VDFTests;
         });
         var D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
             function D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
-                this._helper = Type(new VDFType(null, true)).set = this;
+                this._helper = TypeInfo(new VDFType(null, true)).set = this;
                 this.messages = Prop(this, "messages", "Dictionary(string string)", new P()).set = new Dictionary("string", "string", {
                     title1: "message1",
                     title2: "message2"
@@ -103,7 +103,7 @@ var VDFTests;
                 this.otherProperty = Prop(this, "otherProperty", "bool", new P()).set = false;
             }
             return D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1;
-        })();
+        }());
         test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", function () {
             var a = VDF.Deserialize("{^}\n\
 	messages:{^}\n\

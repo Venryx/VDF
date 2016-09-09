@@ -68,5 +68,5 @@ var VDebug = (function () {
     VDebug.sectionTotals = {};
     VDebug.waitTimerIDs = {};
     return VDebug;
-})();
+}());
 //# sourceMappingURL=V.js.map

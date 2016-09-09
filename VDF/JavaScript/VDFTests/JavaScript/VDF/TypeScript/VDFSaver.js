@@ -33,7 +33,7 @@ var VDFSaveOptions = (function () {
         return this;
     };
     return VDFSaveOptions;
-})();
+}());
 var VDFSaver = (function () {
     function VDFSaver() {
     }
@@ -102,8 +102,9 @@ var VDFSaver = (function () {
                 for (var propName in obj)
                     try {
                         var propInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
-                        var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
-                        include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;
+                        /*var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
+                        include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;*/
+                        var include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : (typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null && new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName));
                         if (!include)
                             continue;
                         var propValue = obj[propName];
@@ -138,10 +139,9 @@ var VDFSaver = (function () {
                 declaredTypeName = "Dictionary(object object)";
             else
                 declaredTypeName = "object";
-        if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) &&
-            ((options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName) ||
-                (options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF)) ||
-                options.typeMarking == VDFTypeMarking.ExternalNoCollapse))
+        if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName)
+            || (options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF))
+            || options.typeMarking == VDFTypeMarking.ExternalNoCollapse))
             result.metadata = typeName;
         if (result.metadata_override != null)
             result.metadata = result.metadata_override;
@@ -153,5 +153,5 @@ var VDFSaver = (function () {
         return result;
     };
     return VDFSaver;
-})();
+}());
 //# sourceMappingURL=VDFSaver.js.map

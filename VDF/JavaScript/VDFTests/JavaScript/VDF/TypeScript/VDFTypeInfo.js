@@ -15,7 +15,7 @@ var VDFType = (function () {
             this.popOutL1 = typeTag.popOutL1;
     };
     return VDFType;
-})();
+}());
 var VDFTypeInfo = (function () {
     function VDFTypeInfo() {
         this.props = {};
@@ -29,14 +29,13 @@ var VDFTypeInfo = (function () {
             result.typeTag = new VDFType(VDF.PropRegex_Any);
             return result;
         }
-        var typeBase = window[typeNameBase];
-        if (typeBase && typeBase.typeInfo == null) {
+        var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
+        if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
             var result = new VDFTypeInfo();
             result.typeTag = new VDFType();
             /*var typeTag = new VDFType();
             var currentTypeName = typeNameBase;
-            while (window[currentTypeName]) //true)
-            {
+            while (window[currentTypeName]) //true) {
                 if (window[currentTypeName].typeInfo.typeTag)
                     for (var key in window[currentTypeName].typeInfo.typeTag)
                         if (typeTag[key] == null)
@@ -51,10 +50,18 @@ var VDFTypeInfo = (function () {
             var currentType = typeNameBase;
             while (currentType != null) {
                 var currentTypeConstructor = window[currentType];
-                var typeTag2 = (currentTypeConstructor.typeInfo || {}).typeTag;
+                if (currentTypeConstructor == null)
+                    throw new Error("Could not find constructor for type: " + currentType);
+                var currentTypeInfo = currentTypeConstructor.typeInfo;
+                // load type-tag from base-types
+                var typeTag2 = (currentTypeInfo || {}).typeTag;
                 for (var key in typeTag2)
                     if (result.typeTag[key] == null)
                         result.typeTag[key] = typeTag2[key];
+                // load prop-info from base-types
+                if (currentTypeInfo)
+                    for (var propName in currentTypeInfo.props)
+                        result.props[propName] = currentTypeInfo.props[propName];
                 currentType = currentTypeConstructor.prototype && currentTypeConstructor.prototype.__proto__ && currentTypeConstructor.prototype.__proto__.constructor.name;
             }
             typeBase.typeInfo = result;
@@ -67,7 +74,7 @@ var VDFTypeInfo = (function () {
         return this.props[propName];
     };
     return VDFTypeInfo;
-})();
+}());
 var VDFProp = (function () {
     function VDFProp(includeL2, popOutL2) {
         if (includeL2 === void 0) { includeL2 = true; }
@@ -75,7 +82,7 @@ var VDFProp = (function () {
         this.popOutL2 = popOutL2;
     }
     return VDFProp;
-})();
+}());
 var P = (function (_super) {
     __extends(P, _super);
     function P(includeL2, popOutL2) {
@@ -83,14 +90,14 @@ var P = (function (_super) {
         _super.call(this, includeL2, popOutL2);
     }
     return P;
-})(VDFProp);
+}(VDFProp));
 var DefaultValue = (function () {
     function DefaultValue(defaultValue) {
         if (defaultValue === void 0) { defaultValue = D.DefaultDefault; }
         this.defaultValue = defaultValue;
     }
     return DefaultValue;
-})();
+}());
 var D = (function (_super) {
     __extends(D, _super);
     function D(defaultValue) {
@@ -102,7 +109,7 @@ var D = (function (_super) {
     D.NullOrEmpty = new object(); // i.e. null, or an empty string or collection
     D.Empty = new object(); // i.e. an empty string or collection
     return D;
-})(DefaultValue);
+}(DefaultValue));
 var VDFPropInfo = (function () {
     function VDFPropInfo(propName, propTypeName, tags, propTag, defaultValueTag) {
         this.name = propName;
@@ -135,44 +142,44 @@ var VDFPropInfo = (function () {
         return true;
     };
     return VDFPropInfo;
-})();
+}());
 var VDFPreSerializeProp = (function () {
     function VDFPreSerializeProp() {
     }
     return VDFPreSerializeProp;
-})();
+}());
 var VDFPreSerialize = (function () {
     function VDFPreSerialize() {
     }
     return VDFPreSerialize;
-})();
+}());
 var VDFSerialize = (function () {
     function VDFSerialize() {
     }
     return VDFSerialize;
-})();
+}());
 var VDFPostSerialize = (function () {
     function VDFPostSerialize() {
     }
     return VDFPostSerialize;
-})();
+}());
 var VDFPreDeserialize = (function () {
     function VDFPreDeserialize() {
     }
     return VDFPreDeserialize;
-})();
+}());
 var VDFDeserialize = (function () {
     function VDFDeserialize(fromParent) {
         if (fromParent === void 0) { fromParent = false; }
         this.fromParent = fromParent;
     }
     return VDFDeserialize;
-})();
+}());
 var VDFPostDeserialize = (function () {
     function VDFPostDeserialize() {
     }
     return VDFPostDeserialize;
-})();
+}());
 /*class VDFMethodInfo
 {
     tags: any[];

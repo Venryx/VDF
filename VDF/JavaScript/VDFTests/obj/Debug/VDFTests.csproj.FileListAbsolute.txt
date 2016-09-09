@@ -10,9 +10,8 @@ C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.dll.config
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.dll
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.pdb
 C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.csprojResolveAssemblyReference.cache
-C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.csprojResolveAssemblyReference.cache
-C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.dll
-C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.pdb
 C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.dll.config
 C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.dll
 C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\bin\VDFTests.pdb
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.dll
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDFTests\obj\Debug\VDFTests.pdb

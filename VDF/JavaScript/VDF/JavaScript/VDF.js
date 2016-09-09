@@ -185,27 +185,39 @@ var VDF = (function () {
         if (type == null)
             return result;
         var currentType = type;
-        var resultSets = [];
-        while (currentType != null) {
-            var resultSet = [];
-            for (var propName in currentType)
-                resultSet[propName] = currentType[propName];
-            resultSets.push(resultSet);
-            currentType = currentType.prototype.__proto__ && currentType.prototype.__proto__.constructor;
+        while (currentType && currentType != Object) {
+            for (var _i = 0, _a = Object.getOwnPropertyNames(currentType); _i < _a.length; _i++) {
+                var propName = _a[_i];
+                if (!(propName in result)) {
+                    var propInfo = Object.getOwnPropertyDescriptor(currentType, propName);
+                    // don't include if prop is a getter or setter func (causes problems when enumerating)
+                    if (propInfo == null || (propInfo.get == null && propInfo.set == null))
+                        result[propName] = currentType[propName];
+                }
+            }
+            currentType = Object.getPrototypeOf(currentType.prototype).constructor;
         }
-        for (var i = resultSets.length - 1; i >= 0; i--)
-            for (var propName in resultSets[i])
-                result[propName] = resultSets[i][propName];
         return result;
     };
     VDF.GetObjectProps = function (obj) {
         var result = {};
         if (obj == null)
             return result;
-        for (var propName in obj.__proto__)
+        /*for (var propName in obj.__proto__) // add base-class props first
             result[propName] = null;
         for (var propName in obj)
-            result[propName] = null;
+            result[propName] = null;*/
+        var currentObj = obj;
+        while (currentObj && currentObj != Object.prototype) {
+            for (var _i = 0, _a = Object.getOwnPropertyNames(currentObj); _i < _a.length; _i++) {
+                var propName = _a[_i];
+                var propInfo = Object.getOwnPropertyDescriptor(currentObj, propName);
+                // don't include if prop is a getter or setter func (causes problems when enumerating)
+                if (propInfo == null || (propInfo.get == null && propInfo.set == null))
+                    result[propName] = null;
+            }
+            currentObj = Object.getPrototypeOf(currentObj);
+        }
         return result;
     };
     VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {
@@ -279,12 +291,15 @@ var StringBuilder = (function () {
     StringBuilder.prototype.Append = function (str) { this.push(str); this.Length += str.length; return this; }; // adds string str to the StringBuilder
     StringBuilder.prototype.Insert = function (index, str) { this.splice(index, 0, str); this.Length += str.length; return this; }; // inserts string 'str' at 'index'
     StringBuilder.prototype.Remove = function (index, count) {
-        var removedItems = this.splice(index, count || 1);
+        var removedItems = this.splice(index, count != null ? count : 1);
         for (var i = 0; i < removedItems.length; i++)
             this.Length -= removedItems[i].length;
         return this;
     };
-    StringBuilder.prototype.Clear = function () { this.Remove(0, this.length); };
+    StringBuilder.prototype.Clear = function () {
+        this.splice(0, this.length);
+        this.Length = 0;
+    };
     StringBuilder.prototype.ToString = function (joinerString) { return this.join(joinerString || ""); }; // builds the string
     StringBuilder.prototype.toString = function () {
         var args = [];
@@ -465,6 +480,7 @@ var PropDeclarationWrapper = (function () {
     });
     return PropDeclarationWrapper;
 }());
+// maybe make-so: this is renamed PropInfo
 function Prop(typeOrObj, propName, propType_orFirstTag) {
     var tags = [];
     for (var _i = 3; _i < arguments.length; _i++) {
@@ -504,7 +520,7 @@ TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
     typeInfo.tags = s.tags;
     typeInfo.typeTag.AddDataOf(typeTag);
 };
-function Type() {
+function TypeInfo() {
     var tags = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         tags[_i - 0] = arguments[_i];
