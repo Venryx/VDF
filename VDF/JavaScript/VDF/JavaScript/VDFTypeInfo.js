@@ -30,29 +30,14 @@ var VDFTypeInfo = (function () {
             return result;
         }
         var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
+        /*if (typeBase == null)
+            throw new Error("Could not find constructor for type: " + typeNameBase);*/
         if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
             var result = new VDFTypeInfo();
             result.typeTag = new VDFType();
-            /*var typeTag = new VDFType();
-            var currentTypeName = typeNameBase;
-            while (window[currentTypeName]) //true) {
-                if (window[currentTypeName].typeInfo.typeTag)
-                    for (var key in window[currentTypeName].typeInfo.typeTag)
-                        if (typeTag[key] == null)
-                            typeTag[key] = window[currentTypeName].typeInfo.typeTag[key];
-
-                if (window[currentTypeName].prototype && window[currentTypeName].prototype.__proto__) // if has base-type
-                    currentTypeName = window[currentTypeName].prototype.__proto__.constructor.name; // set current-type-name to base-type's name
-                else
-                    break;
-            }
-            result.typeTag = typeTag;*/
-            var currentType = typeNameBase;
+            var currentType = typeBase;
             while (currentType != null) {
-                var currentTypeConstructor = window[currentType];
-                if (currentTypeConstructor == null)
-                    throw new Error("Could not find constructor for type: " + currentType);
-                var currentTypeInfo = currentTypeConstructor.typeInfo;
+                var currentTypeInfo = currentType.typeInfo;
                 // load type-tag from base-types
                 var typeTag2 = (currentTypeInfo || {}).typeTag;
                 for (var key in typeTag2)
@@ -62,7 +47,7 @@ var VDFTypeInfo = (function () {
                 if (currentTypeInfo)
                     for (var propName in currentTypeInfo.props)
                         result.props[propName] = currentTypeInfo.props[propName];
-                currentType = currentTypeConstructor.prototype && currentTypeConstructor.prototype.__proto__ && currentTypeConstructor.prototype.__proto__.constructor.name;
+                currentType = currentType.prototype && currentType.prototype.__proto__ && currentType.prototype.__proto__.constructor;
             }
             typeBase.typeInfo = result;
         }

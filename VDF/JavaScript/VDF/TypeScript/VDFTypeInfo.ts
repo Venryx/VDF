@@ -25,51 +25,29 @@ class VDFTypeInfo {
 			return result;
 		}
 
-		var typeBase = type_orTypeName instanceof Function ? type_orTypeName : <any>window[typeNameBase];
-		if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
-			var result = new VDFTypeInfo();
-			result.typeTag = new VDFType();
-
-			/*var typeTag = new VDFType();
-			var currentTypeName = typeNameBase;
-			while (window[currentTypeName]) //true) {
-				if (window[currentTypeName].typeInfo.typeTag)
-					for (var key in window[currentTypeName].typeInfo.typeTag)
-						if (typeTag[key] == null)
-							typeTag[key] = window[currentTypeName].typeInfo.typeTag[key];
-
-				if (window[currentTypeName].prototype && window[currentTypeName].prototype.__proto__) // if has base-type
-					currentTypeName = window[currentTypeName].prototype.__proto__.constructor.name; // set current-type-name to base-type's name
-				else
-					break;
-			}
-			result.typeTag = typeTag;*/
-
-			var currentType = typeNameBase;
-			while (currentType != null) {
-            	var currentTypeConstructor = <any>window[currentType];
-				if (currentTypeConstructor == null)
-		            throw new Error("Could not find constructor for type: " + currentType);
-            	var currentTypeInfo = currentTypeConstructor.typeInfo;
-
-				// load type-tag from base-types
-            	var typeTag2 = (currentTypeInfo || {}).typeTag;
+		var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
+        /*if (typeBase == null)
+			throw new Error("Could not find constructor for type: " + typeNameBase);*/
+        if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
+            var result = new VDFTypeInfo();
+            result.typeTag = new VDFType();
+            var currentType = typeBase;
+            while (currentType != null) {
+				var currentTypeInfo = currentType.typeInfo;
+                // load type-tag from base-types
+                var typeTag2 = (currentTypeInfo || {}).typeTag;
                 for (var key in typeTag2)
                     if (result.typeTag[key] == null)
-                    	result.typeTag[key] = typeTag2[key];
-
-				// load prop-info from base-types
+                        result.typeTag[key] = typeTag2[key];
+                // load prop-info from base-types
                 if (currentTypeInfo)
-	                for (var propName in currentTypeInfo.props)
-		                result.props[propName] = currentTypeInfo.props[propName];
-
-                currentType = currentTypeConstructor.prototype && currentTypeConstructor.prototype.__proto__ && currentTypeConstructor.prototype.__proto__.constructor.name;
+                    for (var propName in currentTypeInfo.props)
+                        result.props[propName] = currentTypeInfo.props[propName];
+                currentType = currentType.prototype && currentType.prototype.__proto__ && currentType.prototype.__proto__.constructor;
             }
-
-			typeBase.typeInfo = result;
-		}
-
-		return typeBase && typeBase.typeInfo;
+            typeBase.typeInfo = result;
+        }
+        return typeBase && typeBase.typeInfo;
 	}
 
 	props = {};
