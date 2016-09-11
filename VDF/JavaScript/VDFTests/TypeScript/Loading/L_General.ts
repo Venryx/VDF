@@ -49,7 +49,7 @@ module VDFTests { // added to match C# indentation
 
 		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class {
 			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
-			Deserialize(node: VDFNode) { return VDF.NoActionTaken; }
+			Deserialize(node: VDFNode) { return; }
 			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
@@ -68,7 +68,7 @@ module VDFTests { // added to match C# indentation
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child {
 			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
-			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions) { return VDF.NoActionTaken; }
+			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions) { return; }
 			constructor() { D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true)); }
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });

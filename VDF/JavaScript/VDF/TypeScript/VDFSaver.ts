@@ -1,4 +1,6 @@
-﻿enum VDFTypeMarking {
+﻿var {Log, Assert} = g;
+
+enum VDFTypeMarking {
 	None,
 	Internal,
 	External,
@@ -48,26 +50,26 @@ class VDFSaver {
 		if (declaredTypeName_orOptions instanceof VDFSaveOptions)
 			return VDFSaver.ToVDFNode(obj, null, declaredTypeName_orOptions);
 
-		var declaredTypeName: string = declaredTypeName_orOptions;
+		let declaredTypeName: string = declaredTypeName_orOptions;
 
 		path = path || new VDFNodePath(new VDFNodePathNode(obj));
 
-		var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
-		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-		var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
+		let typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
+		let typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
+		let typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
 
-		for (var propName in VDF.GetObjectProps(obj))
-			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFPreSerialize)) {
+		for (let propName in VDF.GetObjectProps(obj))
+			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFSerialize)) {
 				if (obj[propName](path, options) == VDF.CancelSerialize)
 					return VDF.CancelSerialize;
 			}
 
-		var result;
-		var serializedByCustomMethod = false;
-		for (var propName in VDF.GetObjectProps(obj))
+		let result;
+		let serializedByCustomMethod = false;
+		for (let propName in VDF.GetObjectProps(obj))
 			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFSerialize)) {
-				var serializeResult = obj[propName](path, options);
-				if (serializeResult != VDF.NoActionTaken) {
+				let serializeResult = obj[propName](path, options);
+				if (serializeResult !== undefined) {
 					result = serializeResult;
 					serializedByCustomMethod = true;
 				}
@@ -75,32 +77,30 @@ class VDFSaver {
 
 		if (!serializedByCustomMethod) {
 			result = new VDFNode();
-			if (obj == null) { } //result.primitiveValue = null;
+			if (obj == null) {} //result.primitiveValue = null;
 			else if (VDF.GetIsTypePrimitive(typeName))
 				result.primitiveValue = obj;
 			else if (EnumValue.IsEnum(typeName)) // helper exporter for enums (at bottom, TypeScript enums are numbers; but we can get the nice-name based on type info)
 				result.primitiveValue = new EnumValue(typeName, obj).toString();
 			else if (typeName && typeName.startsWith("List(")) {
 				result.isList = true;
-				var objAsList = <List<any>>obj;
-				for (var i = 0; i < objAsList.length; i++) {
-					var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
-					if (itemNode == VDF.CancelSerialize)
-						continue;
+				let objAsList = <List<any>>obj;
+				for (let i = 0; i < objAsList.length; i++) {
+					let itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
+					if (itemNode == VDF.CancelSerialize) continue;
 					result.AddListChild(itemNode);
 				}
 			}
 			else if (typeName && typeName.startsWith("Dictionary(")) {
 				result.isMap = true;
-				var objAsDictionary = <Dictionary<any, any>>obj;
-				for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
-                    var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.key), true); // stringify-attempt-1: use exporter
+				let objAsDictionary = <Dictionary<any, any>>obj;
+				for (let i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
+                    let keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.key), true); // stringify-attempt-1: use exporter
 					if (typeof keyNode.primitiveValue != "string") // if stringify-attempt-1 failed (i.e. exporter did not return string), use stringify-attempt-2
 						//throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
 						keyNode = new VDFNode(pair.key.toString());
-					var valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
-					if (valueNode == VDF.CancelSerialize)
-						continue;
+					let valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
+					if (valueNode == VDF.CancelSerialize) continue;
 					result.SetMapChild(keyNode, valueNode);
 				}
 			}
@@ -108,39 +108,38 @@ class VDFSaver {
 				result.isMap = true;
 
 				// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
-				for (var propName in typeInfo.props) {
+				for (let propName in typeInfo.props) {
 					if (!(propName in obj))
 						obj[propName] = null;
 				}
 
-				for (var propName in obj)
+				for (let propName in obj)
 					try {
-						var propInfo: VDFPropInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
-						/*var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
+						let propInfo: VDFPropInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
+						/*let include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
 						include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;*/
-						var include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : (
+						let include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : (
 							typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null && new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName)
 						);
-						if (!include)
-							continue;
+						if (!include) continue;
 
-						var propValue = obj[propName];
-						if (propInfo && !propInfo.ShouldValueBeSaved(propValue))
-							continue;
+						let propValue = obj[propName];
+						if (propInfo && !propInfo.ShouldValueBeSaved(propValue)) continue;
 
-						var childPath = path.ExtendAsChild(propInfo, propValue);
-						var canceled = false;
-						for (var propName2 in VDF.GetObjectProps(obj))
-							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFPreSerializeProp))
-								if (obj[propName2](path, options) == VDF.CancelSerialize)
-									canceled = true;
-						if (canceled)
-							continue;
+						let propNameNode = new VDFNode(propName);
+						let propValueNode;
 
-						var propNameNode = new VDFNode(propName);
-						var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
-						if (propValueNode == VDF.CancelSerialize)
-							continue;
+						let childPath = path.ExtendAsChild(propInfo, propValue);
+						for (let propName2 in VDF.GetObjectProps(obj))
+							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFSerializeProp)) {
+								let serializeResult = obj[propName2](path, options);
+								if (serializeResult !== undefined)
+									propValueNode = serializeResult;
+							}
+						if (propValueNode === undefined)
+							propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
+						if (propValueNode == VDF.CancelSerialize) continue;
+
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.SetMapChild(propNameNode, propValueNode);
 					}

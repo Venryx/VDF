@@ -226,7 +226,7 @@
 		for (var propName in classProps) //VDF.GetObjectProps(window[finalTypeName]))
 			if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(a=> a instanceof VDFDeserialize && a.fromParent)) {
 				var deserializeResult = classProps[propName](this, path, options);
-				if (deserializeResult != VDF.NoActionTaken) {
+				if (deserializeResult !== undefined) {
 					result = deserializeResult;
 					deserializedByCustomMethod = true;
 				}
@@ -256,36 +256,36 @@
 		options = options || new VDFLoadOptions();
 		path = path || new VDFNodePath(new VDFNodePathNode(obj));
 
-		var typeName = VDF.GetTypeNameOfObject(obj);
-		var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-		var typeInfo = VDFTypeInfo.Get(typeName);
+		let typeName = VDF.GetTypeNameOfObject(obj);
+		let typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
+		let typeInfo = VDFTypeInfo.Get(typeName);
 
-		for (var propName in VDF.GetObjectProps(obj))
+		for (let propName in VDF.GetObjectProps(obj))
 			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFPreDeserialize))
 				obj[propName](this, path, options);
 
-		var deserializedByCustomMethod2 = false;
-		for (var propName in VDF.GetObjectProps(obj))
+		let deserializedByCustomMethod2 = false;
+		for (let propName in VDF.GetObjectProps(obj))
 			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFDeserialize && !a.fromParent)) {
-				var deserializeResult = obj[propName](this, path, options);
-				if (deserializeResult != VDF.NoActionTaken)
+				let deserializeResult = obj[propName](this, path, options);
+				if (deserializeResult !== undefined)
 					deserializedByCustomMethod2 = true;
 			}
 
 		if (!deserializedByCustomMethod2) {
-			for (var i = <any>0; i < this.listChildren.Count; i++) {
+			for (let i = 0; i < this.listChildren.Count; i++) {
 				//obj.Add(this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i])));
-				var item = this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i]));
+				let item = this.listChildren[i].ToObject(typeGenericArgs[0], options, path.ExtendAsListItem(i, this.listChildren[i]));
 				if (obj.Count == i) // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
 					obj.Add(item);
             }
-			for (var i = <any>0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
+			for (let pair of this.mapChildren.Pairs)
 				try {
 					if (obj instanceof Dictionary) { //is IDictionary)
-						/*var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
+						/*let key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
 						//obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null)));*/
-						var key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(i, null));
-						var value = pair.value.ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null));
+						let key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(pair.index, null));
+						let value = pair.value.ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null));
 						obj.Set(key, value); // "obj" prop to be filled in at end of ToObject method // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
 					}
 					else {
@@ -293,7 +293,16 @@
 						let propName = pair.key.primitiveValue;
 						/*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
 						{*/
-						var value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, path.ExtendAsChild(typeInfo.props[propName] || {name: propName}, null));
+
+						let value;
+						for (let propName2 in VDF.GetObjectProps(obj))
+							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFDeserializeProp)) {
+								let deserializeResult = obj[propName2](path, options);
+								if (deserializeResult !== undefined)
+									value = deserializeResult;
+							}
+						if (value === undefined)
+							value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, path.ExtendAsChild(typeInfo.props[propName] || {name: propName}, null));
 						obj[propName] = value;
 					}
 				}
@@ -315,5 +324,4 @@
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 
-VDF.NoActionTaken = new VDFNode();
 VDF.CancelSerialize = new VDFNode();

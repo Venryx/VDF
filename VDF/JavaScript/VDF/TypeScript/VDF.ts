@@ -65,6 +65,15 @@ Function.prototype._AddProperty("AddTags", function(...tags) {
 	return false;
 });*/
 
+var g = <any>window;
+g.Log = g.Log || console.log;
+g.Assert = g.Assert || ((condition, message)=> {
+	if (condition) return;
+	g.Log("Assert failed) " + message);
+	debugger;
+});
+var Log = g.Log, Assert = g.Assert;
+
 // classes
 // ==========
 
@@ -138,7 +147,6 @@ class VDF
 	static PropRegex_Any = ""; //"^.+$";
 
 	// for use with VDFSerialize/VDFDeserialize methods
-	static NoActionTaken; //= new VDFNode(); // workaround: initialization moved to VDFNode class file
 	static CancelSerialize; //= new VDFNode();
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
@@ -629,7 +637,7 @@ class Dictionary<K, V>
 	get Pairs() {
 		var result = [];
 		for (var i = 0; i < this.keys.length; i++)
-			result.push({ key: this.keys[i], value: this.values[i] });
+			result.push({index: i, key: this.keys[i], value: this.values[i]});
 		return result;
 	}
 	get Count() { return this.keys.length; }

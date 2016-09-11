@@ -97,8 +97,7 @@ module VDFTests { // added to match C# indentation
 			ok(a["key1"].primitiveValue == null); //a["key1"].primitiveValue.Should().Be(null);
 			a.ToVDF().Should().Be("Dictionary(string string)>{key1:null}");
 		});
-		test("D1_AnonymousTypeProperties_MarkNoTypes", ()=>
-		{
+		test("D1_AnonymousTypeProperties_MarkNoTypes", ()=> {
 			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Double: .5, String: "Prop value string."}, new VDFSaveOptions({typeMarking: VDFTypeMarking.None}));
 			a["Bool"].primitiveValue.Should().Be(false);
 			a["Int"].primitiveValue.Should().Be(5);
@@ -106,37 +105,31 @@ module VDFTests { // added to match C# indentation
 			a["String"].primitiveValue.Should().Be("Prop value string.");
 			a.ToVDF().Should().Be("{Bool:false Int:5 Double:.5 String:\"Prop value string.\"}");
 		});
-		test("D1_AnonymousTypeProperties_MarkAllTypes", ()=>
-		{
+		test("D1_AnonymousTypeProperties_MarkAllTypes", ()=> {
 			var a = VDFSaver.ToVDFNode({Bool: false, Int: 5, Double: .5, String: "Prop value string."}, new VDFSaveOptions({typeMarking: VDFTypeMarking.External}));
 			a.ToVDF().Should().Be("{Bool:false Int:5 Double:.5 String:\"Prop value string.\"}");
 		});
-		class TypeWithPreSerializePrepMethod
-		{
-			preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new P()).set = false;
-			PreSerialize(): void { this.preSerializeWasCalled = true; }
-			constructor() { this.PreSerialize.AddTags(new VDFPreSerialize()); }
+		class TypeWithSerializePrepMethod {
+			serializeWasCalled = Prop(this, "serializeWasCalled", "bool", new P()).set = false;
+			Serialize(): void { this.serializeWasCalled = true; }
+			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
-		test("D1_PreSerializePreparation", ()=>
-		{
-			var a = VDFSaver.ToVDFNode(new TypeWithPreSerializePrepMethod(), "TypeWithPreSerializePrepMethod");
-			a["preSerializeWasCalled"].primitiveValue.Should().Be(true);
-			a.ToVDF().Should().Be("{preSerializeWasCalled:true}");
+		test("D1_SerializePreparation", ()=> {
+			var a = VDFSaver.ToVDFNode(new TypeWithSerializePrepMethod(), "TypeWithSerializePrepMethod");
+			a["serializeWasCalled"].primitiveValue.Should().Be(true);
+			a.ToVDF().Should().Be("{serializeWasCalled:true}");
 		});
-		class TypeWithPostSerializeCleanupMethod
-		{
+		class TypeWithPostSerializeCleanupMethod {
 			postSerializeWasCalled = Prop(this, "postSerializeWasCalled", "bool", new P()).set = false;
 			PostSerialize(): void { this.postSerializeWasCalled = true; }
 			constructor() { this.PostSerialize.AddTags(new VDFPostSerialize()); }
 		}
-		test("D1_PostSerializeCleanup", ()=>
-		{
+		test("D1_PostSerializeCleanup", ()=> {
 			var a = VDFSaver.ToVDFNode(new TypeWithPostSerializeCleanupMethod(), "TypeWithPostSerializeCleanupMethod");
 			a["postSerializeWasCalled"].primitiveValue.Should().Be(false); // should be false for VDFNode, since serialization happened before method-call
 			a.ToVDF().Should().Be("{postSerializeWasCalled:false}");
 		});
-		class TypeWithMixOfProps
-		{
+		class TypeWithMixOfProps {
 			Bool = Prop(this, "Bool", "bool", new P()).set = true;
 			Int = Prop(this, "Int", "int", new P()).set = 5;
 			Double = Prop(this, "Double", "double", new P()).set = .5;
@@ -144,8 +137,7 @@ module VDFTests { // added to match C# indentation
 			list = Prop(this, "list", "List(string)", new P()).set = new List<string>("string", "2A", "2B");
 			nestedList = Prop(this, "nestedList", "List(List(string))", new P()).set = new List<List<string>>("List(string)", new List<string>("string", "1A"));
 		}
-		test("D1_TypeProperties_MarkForNone", ()=>
-		{
+		test("D1_TypeProperties_MarkForNone", ()=> {
 			var a = VDFSaver.ToVDFNode(new TypeWithMixOfProps(), new VDFSaveOptions({typeMarking: VDFTypeMarking.None}));
 			a["Bool"].primitiveValue.Should().Be(true);
 			a["Int"].primitiveValue.Should().Be(5);

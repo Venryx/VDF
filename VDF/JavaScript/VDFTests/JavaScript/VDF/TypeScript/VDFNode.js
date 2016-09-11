@@ -202,7 +202,7 @@ var VDFNode = (function () {
         for (var propName in classProps)
             if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) { return a instanceof VDFDeserialize && a.fromParent; })) {
                 var deserializeResult = classProps[propName](this, path, options);
-                if (deserializeResult != VDF.NoActionTaken) {
+                if (deserializeResult !== undefined) {
                     result = deserializeResult;
                     deserializedByCustomMethod = true;
                 }
@@ -240,7 +240,7 @@ var VDFNode = (function () {
         for (var propName in VDF.GetObjectProps(obj))
             if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFDeserialize && !a.fromParent; })) {
                 var deserializeResult = obj[propName](this, path, options);
-                if (deserializeResult != VDF.NoActionTaken)
+                if (deserializeResult !== undefined)
                     deserializedByCustomMethod2 = true;
             }
         if (!deserializedByCustomMethod2) {
@@ -250,7 +250,8 @@ var VDFNode = (function () {
                 if (obj.Count == i)
                     obj.Add(item);
             }
-            for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
+            for (var _i = 0, _a = this.mapChildren.Pairs; _i < _a.length; _i++) {
+                var pair = _a[_i];
                 try {
                     if (obj instanceof Dictionary) {
                         /*var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
@@ -264,8 +265,18 @@ var VDFNode = (function () {
                         var propName_1 = pair.key.primitiveValue;
                         /*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
                         {*/
-                        var value = pair.value.ToObject(typeInfo.props[propName_1] && typeInfo.props[propName_1].typeName, options, path.ExtendAsChild(typeInfo.props[propName_1] || { name: propName_1 }, null));
-                        obj[propName_1] = value;
+                        var value_1 = void 0;
+                        if (obj.constructor.name == "D1_DeserializePropMethod_Class")
+                            debugger;
+                        for (var propName2 in VDF.GetObjectProps(obj))
+                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFDeserializeProp; })) {
+                                var deserializeResult_1 = obj[propName2](path, options);
+                                if (deserializeResult_1 !== undefined)
+                                    value_1 = deserializeResult_1;
+                            }
+                        if (value_1 === undefined)
+                            value_1 = pair.value.ToObject(typeInfo.props[propName_1] && typeInfo.props[propName_1].typeName, options, path.ExtendAsChild(typeInfo.props[propName_1] || { name: propName_1 }, null));
+                        obj[propName_1] = value_1;
                     }
                 }
                 catch (ex) {
@@ -273,6 +284,7 @@ var VDFNode = (function () {
                     throw ex;
                 } /**/
                 finally { }
+            }
         }
         if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
             for (var i_1 in options.objPostDeserializeFuncs_early.Get(obj))
@@ -291,6 +303,5 @@ var VDFNode = (function () {
     return VDFNode;
 }());
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
-VDF.NoActionTaken = new VDFNode();
 VDF.CancelSerialize = new VDFNode();
 //# sourceMappingURL=VDFNode.js.map

@@ -1,4 +1,5 @@
-﻿/*class Saving {
+﻿/// <reference path="../../../VDF/TypeScript/VDFTypeInfo.ts" />
+/*class Saving {
 	static initialized: boolean;
 	static Init() 	{
 		if (this.initialized)
@@ -81,19 +82,19 @@ module VDFTests { // added to match C# indentation
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
 		{
 			boolProp = Prop(this, "boolProp", "bool", new P()).set = true;
-			Serialize() { return VDF.NoActionTaken; }
+			Serialize() { return; }
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
 		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
 
-		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class
-		{
-			PreSerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
-			constructor() { this.PreSerializeProp.AddTags(new VDFPreSerializeProp()); }
-			
+		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class {
+			SerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
 			boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new P()).set = true;
 		}
-		test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", ()=>{ VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}"); });
+		D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.SerializeProp.AddTags(new VDFSerializeProp());
+		test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", ()=> {
+			VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}");
+		});
 
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
 			{ child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new P()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }

@@ -1,3 +1,4 @@
+var Log = g.Log, Assert = g.Assert;
 var VDFTypeMarking;
 (function (VDFTypeMarking) {
     VDFTypeMarking[VDFTypeMarking["None"] = 0] = "None";
@@ -46,17 +47,17 @@ var VDFSaver = (function () {
         var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
         var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
         var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPreSerialize; })) {
-                if (obj[propName](path, options) == VDF.CancelSerialize)
+        for (var propName_1 in VDF.GetObjectProps(obj))
+            if (obj[propName_1] instanceof Function && obj[propName_1].tags && obj[propName_1].tags.Any(function (a) { return a instanceof VDFSerialize; })) {
+                if (obj[propName_1](path, options) == VDF.CancelSerialize)
                     return VDF.CancelSerialize;
             }
         var result;
         var serializedByCustomMethod = false;
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFSerialize; })) {
-                var serializeResult = obj[propName](path, options);
-                if (serializeResult != VDF.NoActionTaken) {
+        for (var propName_2 in VDF.GetObjectProps(obj))
+            if (obj[propName_2] instanceof Function && obj[propName_2].tags && obj[propName_2].tags.Any(function (a) { return a instanceof VDFSerialize; })) {
+                var serializeResult = obj[propName_2](path, options);
+                if (serializeResult !== undefined) {
                     result = serializeResult;
                     serializedByCustomMethod = true;
                 }
@@ -95,38 +96,39 @@ var VDFSaver = (function () {
             else {
                 result.isMap = true;
                 // special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
-                for (var propName in typeInfo.props) {
-                    if (!(propName in obj))
-                        obj[propName] = null;
+                for (var propName_3 in typeInfo.props) {
+                    if (!(propName_3 in obj))
+                        obj[propName_3] = null;
                 }
-                for (var propName in obj)
+                for (var propName_4 in obj)
                     try {
-                        var propInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
-                        /*var include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
+                        var propInfo = typeInfo.props[propName_4]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
+                        /*let include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
                         include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : include;*/
-                        var include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : (typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null && new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName));
+                        var include = propInfo && propInfo.propTag && propInfo.propTag.includeL2 != null ? propInfo.propTag.includeL2 : (typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null && new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName_4));
                         if (!include)
                             continue;
-                        var propValue = obj[propName];
+                        var propValue = obj[propName_4];
                         if (propInfo && !propInfo.ShouldValueBeSaved(propValue))
                             continue;
+                        var propNameNode = new VDFNode(propName_4);
+                        var propValueNode = void 0;
                         var childPath = path.ExtendAsChild(propInfo, propValue);
-                        var canceled = false;
                         for (var propName2 in VDF.GetObjectProps(obj))
-                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFPreSerializeProp; }))
-                                if (obj[propName2](path, options) == VDF.CancelSerialize)
-                                    canceled = true;
-                        if (canceled)
-                            continue;
-                        var propNameNode = new VDFNode(propName);
-                        var propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
+                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFSerializeProp; })) {
+                                var serializeResult = obj[propName2](path, options);
+                                if (serializeResult !== undefined)
+                                    propValueNode = serializeResult;
+                            }
+                        if (propValueNode === undefined)
+                            propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
                         if (propValueNode == VDF.CancelSerialize)
                             continue;
                         propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
                         result.SetMapChild(propNameNode, propValueNode);
                     }
                     catch (ex) {
-                        ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n";
+                        ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName_4 + "'.") + "\n";
                         throw ex;
                     } /**/
                     finally { }

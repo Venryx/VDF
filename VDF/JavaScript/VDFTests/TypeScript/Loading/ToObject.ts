@@ -18,19 +18,26 @@ module VDFTests { // added to match C# indentation
 		test("D0_Double", ()=> { VDF.Deserialize("1.5").Should().Be(1.5); });
 		//test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
 
-		class TypeWithPreDeserializeMethod
-		{
+		class D1_DeserializePropMethod_Class {
+			DeserializeProp(propPath: VDFNodePath, options: VDFLoadOptions) { return 1; }
+			prop1 = Prop(this, "prop1", "D1_PreDeserializePropMethod_Class", new P()).set = 0;
+		}
+		D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFDeserializeProp());
+		test("D1_DeserializePropMethod", ()=> {
+			var a = VDF.Deserialize("{prop1:0}", "D1_DeserializePropMethod_Class");
+			a.prop1.Should().Be(1);
+		});
+
+		class TypeWithPreDeserializeMethod {
 			flag = Prop(this, "flag", "bool", new P()).set = false;
 			PreDeserialize(): void { this.flag = true; }
 			constructor() { this.PreDeserialize.AddTags(new VDFPreDeserialize()); }
 		}
-		test("D1_PreDeserializeMethod", ()=>
-		{
+		test("D1_PreDeserializeMethod", ()=> {
 			var a = VDF.Deserialize("{}", "TypeWithPreDeserializeMethod");
 			a.flag.Should().Be(true);
 		});
-		class TypeWithPostDeserializeMethod
-		{
+		class TypeWithPostDeserializeMethod {
 			flag = Prop(this, "flag", "bool", new P()).set = false;
 			PostDeserialize(): void { this.flag = true; }
 			constructor() { this.PostDeserialize.AddTags(new VDFPostDeserialize()); }

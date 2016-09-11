@@ -128,10 +128,15 @@ var VDFPropInfo = (function () {
     };
     return VDFPropInfo;
 }());
-var VDFPreSerializeProp = (function () {
-    function VDFPreSerializeProp() {
+var VDFSerializeProp = (function () {
+    function VDFSerializeProp() {
     }
-    return VDFPreSerializeProp;
+    return VDFSerializeProp;
+}());
+var VDFDeserializeProp = (function () {
+    function VDFDeserializeProp() {
+    }
+    return VDFDeserializeProp;
 }());
 var VDFPreSerialize = (function () {
     function VDFPreSerialize() {

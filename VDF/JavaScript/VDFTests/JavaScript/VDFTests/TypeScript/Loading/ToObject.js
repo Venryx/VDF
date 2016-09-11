@@ -16,6 +16,18 @@ var VDFTests;
         test("D0_Bool", function () { VDF.Deserialize("true", "bool").Should().Be(true); });
         test("D0_Double", function () { VDF.Deserialize("1.5").Should().Be(1.5); });
         //test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
+        var D1_DeserializePropMethod_Class = (function () {
+            function D1_DeserializePropMethod_Class() {
+                this.prop1 = Prop(this, "prop1", "D1_PreDeserializePropMethod_Class", new P()).set = 0;
+            }
+            D1_DeserializePropMethod_Class.prototype.DeserializeProp = function (propPath, options) { return 1; };
+            return D1_DeserializePropMethod_Class;
+        }());
+        D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFDeserializeProp());
+        test("D1_DeserializePropMethod", function () {
+            var a = VDF.Deserialize("{prop1:0}", "D1_DeserializePropMethod_Class");
+            a.prop1.Should().Be(1);
+        });
         var TypeWithPreDeserializeMethod = (function () {
             function TypeWithPreDeserializeMethod() {
                 this.flag = Prop(this, "flag", "bool", new P()).set = false;

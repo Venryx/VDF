@@ -132,7 +132,8 @@ class VDFPropInfo {
 	}
 }
 
-class VDFPreSerializeProp {}
+class VDFSerializeProp {}
+class VDFDeserializeProp {}
 
 class VDFPreSerialize {}
 class VDFSerialize {}

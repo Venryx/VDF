@@ -50,7 +50,7 @@ var VDFTests;
                 this.boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
                 this.Deserialize.AddTags(new VDFDeserialize());
             }
-            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) { return VDF.NoActionTaken; };
+            D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) { return; };
             return D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class;
         }());
         test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () { VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
@@ -79,7 +79,7 @@ var VDFTests;
                 this.boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
                 D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
             }
-            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) { return VDF.NoActionTaken; };
+            D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) { return; };
             return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
         }());
         test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () { VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });

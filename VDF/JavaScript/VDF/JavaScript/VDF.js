@@ -49,6 +49,15 @@ Function.prototype._AddProperty("AddTags", function () {
     }
     return false;
 });*/
+var g = window;
+g.Log = g.Log || console.log;
+g.Assert = g.Assert || (function (condition, message) {
+    if (condition)
+        return;
+    g.Log("Assert failed) " + message);
+    debugger;
+});
+var Log = g.Log, Assert = g.Assert;
 // classes
 // ==========
 var VDFNodePathNode = (function () {
@@ -695,7 +704,7 @@ var Dictionary = (function () {
         get: function () {
             var result = [];
             for (var i = 0; i < this.keys.length; i++)
-                result.push({ key: this.keys[i], value: this.values[i] });
+                result.push({ index: i, key: this.keys[i], value: this.values[i] });
             return result;
         },
         enumerable: true,
