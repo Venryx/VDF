@@ -294,15 +294,16 @@
 						/*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
 						{*/
 
+						let childPath = path.ExtendAsChild(typeInfo.props[propName] || {name: propName}, null);
 						let value;
 						for (let propName2 in VDF.GetObjectProps(obj))
 							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFDeserializeProp)) {
-								let deserializeResult = obj[propName2](path, options);
+								let deserializeResult = obj[propName2](pair.value, childPath, options);
 								if (deserializeResult !== undefined)
 									value = deserializeResult;
 							}
 						if (value === undefined)
-							value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, path.ExtendAsChild(typeInfo.props[propName] || {name: propName}, null));
+							value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, childPath);
 						obj[propName] = value;
 					}
 				}

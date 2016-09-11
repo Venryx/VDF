@@ -19,7 +19,7 @@ module VDFTests { // added to match C# indentation
 		//test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
 
 		class D1_DeserializePropMethod_Class {
-			DeserializeProp(propPath: VDFNodePath, options: VDFLoadOptions) { return 1; }
+			DeserializeProp(node: VDFNode, propPath: VDFNodePath, options: VDFLoadOptions) { return 1; }
 			prop1 = Prop(this, "prop1", "D1_PreDeserializePropMethod_Class", new P()).set = 0;
 		}
 		D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFDeserializeProp());

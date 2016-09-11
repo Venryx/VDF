@@ -254,29 +254,28 @@ var VDFNode = (function () {
                 var pair = _a[_i];
                 try {
                     if (obj instanceof Dictionary) {
-                        /*var key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
+                        /*let key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
                         //obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null)));*/
-                        var key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(i, null));
+                        var key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(pair.index, null));
                         var value = pair.value.ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null));
                         obj.Set(key, value); // "obj" prop to be filled in at end of ToObject method // maybe temp; allow child to have already attached itself (by way of the VDF event methods)
                     }
                     else {
                         //obj[keyString] = this.mapChildren[keyString].ToObject(typeInfo.props[keyString] && typeInfo.props[keyString].typeName, options, path.ExtendAsChild(typeInfo.props[keyString] || { name: keyString }, null));
-                        var propName_1 = pair.key.primitiveValue;
+                        var propName = pair.key.primitiveValue;
                         /*if (typeInfo.props[propName]) // maybe temp; just ignore props that are missing
                         {*/
-                        var value_1 = void 0;
-                        if (obj.constructor.name == "D1_DeserializePropMethod_Class")
-                            debugger;
+                        var childPath = path.ExtendAsChild(typeInfo.props[propName] || { name: propName }, null);
+                        var value = void 0;
                         for (var propName2 in VDF.GetObjectProps(obj))
                             if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFDeserializeProp; })) {
-                                var deserializeResult_1 = obj[propName2](path, options);
-                                if (deserializeResult_1 !== undefined)
-                                    value_1 = deserializeResult_1;
+                                var deserializeResult = obj[propName2](pair.value, childPath, options);
+                                if (deserializeResult !== undefined)
+                                    value = deserializeResult;
                             }
-                        if (value_1 === undefined)
-                            value_1 = pair.value.ToObject(typeInfo.props[propName_1] && typeInfo.props[propName_1].typeName, options, path.ExtendAsChild(typeInfo.props[propName_1] || { name: propName_1 }, null));
-                        obj[propName_1] = value_1;
+                        if (value === undefined)
+                            value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, childPath);
+                        obj[propName] = value;
                     }
                 }
                 catch (ex) {
@@ -287,14 +286,14 @@ var VDFNode = (function () {
             }
         }
         if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
-            for (var i_1 in options.objPostDeserializeFuncs_early.Get(obj))
-                options.objPostDeserializeFuncs_early.Get(obj)[i_1]();
-        for (var propName_2 in VDF.GetObjectProps(obj))
-            if (obj[propName_2] instanceof Function && obj[propName_2].tags && obj[propName_2].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
-                obj[propName_2](this, path, options);
+            for (var i in options.objPostDeserializeFuncs_early.Get(obj))
+                options.objPostDeserializeFuncs_early.Get(obj)[i]();
+        for (var propName in VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
+                obj[propName](this, path, options);
         if (options.objPostDeserializeFuncs.ContainsKey(obj))
-            for (var i_2 in options.objPostDeserializeFuncs.Get(obj))
-                options.objPostDeserializeFuncs.Get(obj)[i_2]();
+            for (var i in options.objPostDeserializeFuncs.Get(obj))
+                options.objPostDeserializeFuncs.Get(obj)[i]();
     };
     /*static charsThatNeedEscaping_1 = ['"', '\'', '\n'];
     static charsThatNeedEscaping_2 = ['{', '}', '[', ']', ':'];*/

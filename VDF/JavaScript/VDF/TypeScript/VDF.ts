@@ -38,10 +38,25 @@ String.prototype._AddProperty("TrimStart", function(chars: Array<string>) {
 		}
 	return result;
 });
+
 interface Array<T> {
 	Contains(str: T): boolean;
+	Where(matchFunc: Function): T[];
+	First(matchFunc: Function): T;
 }
-Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(item) != -1; });
+if (!Array.prototype["Contains"])
+	Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(item) != -1; });
+if (!Array.prototype["Where"])
+	Array.prototype._AddProperty("Where", function(matchFunc = (()=>true)) {
+		var result = this instanceof List ? new List(this.itemType) : [];
+		for (let item of this)
+			if (matchFunc.call(item, item)) // call, having the item be "this", as well as the first argument
+				result[this instanceof List ? "Add" : "push"](item);
+		return result;
+	});
+if (!Array.prototype["First"])
+	Array.prototype._AddProperty("First", function(matchFunc = (()=>true)) { return this.Where(matchFunc)[0]; });
+
 interface Function {
 	AddTags(...tags: any[]): string;
 	//IsDerivedFrom(baseType: Function): boolean;
@@ -111,34 +126,29 @@ class VDFNodePath {
 	get parentNode() { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; }
 	get currentNode() { return this.nodes.Last(); }
 
-	ExtendAsListItem(index: number, obj)
-	{
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+	ExtendAsListItem(index: number, obj) {
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, null, index));
 		return new VDFNodePath(newNodes);
 	}
-	ExtendAsMapKey(keyIndex, obj)
-	{
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+	ExtendAsMapKey(keyIndex, obj) {
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, null, -1, keyIndex));
 		return new VDFNodePath(newNodes);
 	}
-	ExtendAsMapItem(key, obj)
-	{
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
+	ExtendAsMapItem(key, obj) {
+		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, null, -1, -1, key));
 		return new VDFNodePath(newNodes);
 	}
-	ExtendAsChild(prop: VDFPropInfo, obj)
-	{
+	ExtendAsChild(prop: VDFPropInfo, obj) {
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, prop));
 		return new VDFNodePath(newNodes);
 	}
 }
 
-class VDF
-{
+class VDF {
 	// for use with VDFSaveOptions
 	static AnyMember: string = "#AnyMember";
 	static AllMembers: Array<string> = ["#AnyMember"];
@@ -150,14 +160,12 @@ class VDF
 	static CancelSerialize; //= new VDFNode();
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
-	static GetGenericArgumentsOfType(typeName: string): string[]
-	{
+	static GetGenericArgumentsOfType(typeName: string): string[] {
 		var genericArgumentTypes = new Array<string>(); //<string[]>[];
 		var depth = 0;
 		var lastStartBracketPos = -1;
 		if (typeName != null)
-			for (var i = 0; i < typeName.length; i++)
-			{
+			for (var i = 0; i < typeName.length; i++) {
 				var ch = typeName[i];
 				if (ch == ')')
 					depth--;
@@ -170,13 +178,11 @@ class VDF
 			}
 		return genericArgumentTypes;
 	}
-	static IsTypeXDerivedFromY(xTypeName: string, yTypeName: string)
-	{
+	static IsTypeXDerivedFromY(xTypeName: string, yTypeName: string) {
 		if (xTypeName == null || yTypeName == null || window[xTypeName] == null || window[yTypeName] == null)
 			return false;
 		var currentDerived = window[xTypeName].prototype;
-		while (currentDerived.__proto__)
-		{
+		while (currentDerived.__proto__) {
 			if (currentDerived == window[yTypeName].prototype)
 				return true;
 			currentDerived = currentDerived.__proto__;
@@ -187,11 +193,9 @@ class VDF
 	static GetIsTypePrimitive(typeName: string): boolean // (technically strings are not primitives in C#, but we consider them such)
 		{ return ["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "bool", "char", "string"].Contains(typeName); }
 	static GetIsTypeAnonymous(typeName: string): boolean { return typeName != null && typeName == "object"; }
-	static GetTypeNameOfObject(obj)
-	{
+	static GetTypeNameOfObject(obj) {
 		var rawType = typeof obj;
-		if (rawType == "object") // if an object (i.e. a thing with real properties that could indicate a more specific type)
-		{
+		if (rawType == "object") { // if an object (i.e. a thing with real properties that could indicate a more specific type)
 			if (obj.realTypeName)
 				return obj.realTypeName;
 			if (obj.itemType)
@@ -280,8 +284,7 @@ class VDF
 
 	static Serialize(obj: any, options: VDFSaveOptions): string;
 	static Serialize(obj: any, declaredTypeName?: string, saveOptions?: VDFSaveOptions): string;
-	static Serialize(obj: any, declaredTypeName_orOptions?: any, options_orNothing?: any): string
-	{
+	static Serialize(obj: any, declaredTypeName_orOptions?: any, options_orNothing?: any): string {
 		if (declaredTypeName_orOptions instanceof VDFSaveOptions)
 			return VDF.Serialize(obj, null, declaredTypeName_orOptions);
 
@@ -292,8 +295,7 @@ class VDF
 	}
 	static Deserialize(vdf: string, options: VDFLoadOptions): any;
 	static Deserialize(vdf: string, declaredTypeName?: string, options?: VDFLoadOptions): any;
-	static Deserialize(vdf: string, declaredTypeName_orOptions?: any, options_orNothing?: any): any
-	{
+	static Deserialize(vdf: string, declaredTypeName_orOptions?: any, options_orNothing?: any): any {
 		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
 			return VDF.Deserialize(vdf, null, declaredTypeName_orOptions);
 
@@ -309,8 +311,7 @@ class VDF
 
 class VDFUtils
 {
-	/*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
-	{
+	/*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames) 	{
 		if (addSetters && !obj._hiddenFieldStore)
 			Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
 		for (var i in fieldNames)
@@ -318,28 +319,23 @@ class VDFUtils
 				var propName = fieldNames[i];
 				var origValue = obj[propName];
 				if (addSetters)
-					Object.defineProperty(obj, propName,
-					{
+					Object.defineProperty(obj, propName, 					{
 						enumerable: false,
 						get: ()=>obj["_hiddenFieldStore"][propName],
 						set: value=>obj["_hiddenFieldStore"][propName] = value
 					});
 				else
-					Object.defineProperty(obj, propName,
-					{
+					Object.defineProperty(obj, propName, 					{
 						enumerable: false,
 						value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
 					});
 				obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
 			})();
 	}*/
-	static MakePropertiesHidden(obj, alsoMakeFunctionsHidden?: boolean, addSetters?: boolean)
-	{
-		for (var propName in obj)
-		{
+	static MakePropertiesHidden(obj, alsoMakeFunctionsHidden?: boolean, addSetters?: boolean) {
+		for (var propName in obj) {
 			var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
-			if (propDescriptor)
-			{
+			if (propDescriptor) {
 				propDescriptor.enumerable = false;
 				Object.defineProperty(obj, propName, propDescriptor);
 			}
@@ -392,9 +388,11 @@ class StringBuilder implements Array<string> {
     reduce(...args: any[]) { return null; }
     reduceRight(...args: any[]) { return null; }
 	[n: number]: string;
-    
+
 	// fakes for extended members
 	Contains(...args: any[]) { return null; }
+	Where(...args: any[]) { return null; }
+	First(...args: any[]) { return null; }
 }
 (() => {
 	StringBuilder.prototype["__proto__"] = Array.prototype; // makes "(new StringBuilder()) instanceof Array" be true
@@ -422,16 +420,8 @@ function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) {
 	var propType = propType_orFirstTag;
 
 	var typeInfo = VDFTypeInfo.Get(type);
-	if (typeInfo.props[propName] == null) {
-		var propTag: any = {};
-		var defaultValueTag: any = {};
-		for (var i in tags)
-			if (tags[i] instanceof VDFProp)
-				propTag = tags[i];
-			else if (tags[i] instanceof DefaultValue)
-				defaultValueTag = tags[i];
-		typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags, propTag, defaultValueTag);
-	}
+	if (typeInfo.props[propName] == null)
+		typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags);
 
 	return new PropDeclarationWrapper();
 };

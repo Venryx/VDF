@@ -59,7 +59,7 @@ class VDFSaver {
 		let typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
 
 		for (let propName in VDF.GetObjectProps(obj))
-			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFSerialize)) {
+			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFPreSerialize)) {
 				if (obj[propName](path, options) == VDF.CancelSerialize)
 					return VDF.CancelSerialize;
 			}
@@ -132,7 +132,7 @@ class VDFSaver {
 						let childPath = path.ExtendAsChild(propInfo, propValue);
 						for (let propName2 in VDF.GetObjectProps(obj))
 							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFSerializeProp)) {
-								let serializeResult = obj[propName2](path, options);
+								let serializeResult = obj[propName2](childPath, options);
 								if (serializeResult !== undefined)
 									propValueNode = serializeResult;
 							}

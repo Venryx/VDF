@@ -57,7 +57,7 @@ class VDFTypeInfo {
 
 	GetProp(propName: string): VDFPropInfo {
 		if (!(propName in this.props))
-			this.props[propName] = new VDFPropInfo(propName, null, [], null, null);
+			this.props[propName] = new VDFPropInfo(propName, null, []);
 		return this.props[propName];
 	}
 }
@@ -97,12 +97,18 @@ class VDFPropInfo {
 	tags: any[];
 	propTag: VDFProp;
 	defaultValueTag: DefaultValue;
-	constructor(propName: string, propTypeName: string, tags: any[], propTag: VDFProp, defaultValueTag: DefaultValue) {
+	constructor(propName: string, propTypeName: string, tags: any[]) {
 		this.name = propName;
 		this.typeName = propTypeName;
 		this.tags = tags;
-		this.propTag = propTag;
-		this.defaultValueTag = defaultValueTag;
+		this.propTag = tags.First(a=>a instanceof VDFProp);
+		this.defaultValueTag = tags.First(a=>a instanceof DefaultValue);
+	}
+
+	AddTags(...tags) {
+		this.tags.push(...tags);
+		this.propTag = tags.First(a=>a instanceof VDFProp);
+		this.defaultValueTag = tags.First(a=>a instanceof DefaultValue);
 	}
 
 	ShouldValueBeSaved(val: any) {

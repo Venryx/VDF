@@ -26,7 +26,24 @@ String.prototype._AddProperty("TrimStart", function (chars) {
         }
     return result;
 });
-Array.prototype._AddProperty("Contains", function (item) { return this.indexOf(item) != -1; });
+if (!Array.prototype["Contains"])
+    Array.prototype._AddProperty("Contains", function (item) { return this.indexOf(item) != -1; });
+if (!Array.prototype["Where"])
+    Array.prototype._AddProperty("Where", function (matchFunc) {
+        if (matchFunc === void 0) { matchFunc = (function () { return true; }); }
+        var result = this instanceof List ? new List(this.itemType) : [];
+        for (var _i = 0, _a = this; _i < _a.length; _i++) {
+            var item = _a[_i];
+            if (matchFunc.call(item, item))
+                result[this instanceof List ? "Add" : "push"](item);
+        }
+        return result;
+    });
+if (!Array.prototype["First"])
+    Array.prototype._AddProperty("First", function (matchFunc) {
+        if (matchFunc === void 0) { matchFunc = (function () { return true; }); }
+        return this.Where(matchFunc)[0];
+    });
 Function.prototype._AddProperty("AddTags", function () {
     var tags = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -269,8 +286,7 @@ var VDF = (function () {
 var VDFUtils = (function () {
     function VDFUtils() {
     }
-    /*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames)
-    {
+    /*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames) 	{
         if (addSetters && !obj._hiddenFieldStore)
             Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
         for (var i in fieldNames)
@@ -278,15 +294,13 @@ var VDFUtils = (function () {
                 var propName = fieldNames[i];
                 var origValue = obj[propName];
                 if (addSetters)
-                    Object.defineProperty(obj, propName,
-                    {
+                    Object.defineProperty(obj, propName, 					{
                         enumerable: false,
                         get: ()=>obj["_hiddenFieldStore"][propName],
                         set: value=>obj["_hiddenFieldStore"][propName] = value
                     });
                 else
-                    Object.defineProperty(obj, propName,
-                    {
+                    Object.defineProperty(obj, propName, 					{
                         enumerable: false,
                         value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
                     });
@@ -478,6 +492,20 @@ var StringBuilder = (function () {
         }
         return null;
     };
+    StringBuilder.prototype.Where = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
+    StringBuilder.prototype.First = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i - 0] = arguments[_i];
+        }
+        return null;
+    };
     return StringBuilder;
 }());
 (function () {
@@ -513,16 +541,8 @@ function Prop(typeOrObj, propName, propType_orFirstTag) {
     var type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
     var propType = propType_orFirstTag;
     var typeInfo = VDFTypeInfo.Get(type);
-    if (typeInfo.props[propName] == null) {
-        var propTag = {};
-        var defaultValueTag = {};
-        for (var i in tags)
-            if (tags[i] instanceof VDFProp)
-                propTag = tags[i];
-            else if (tags[i] instanceof DefaultValue)
-                defaultValueTag = tags[i];
-        typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags, propTag, defaultValueTag);
-    }
+    if (typeInfo.props[propName] == null)
+        typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags);
     return new PropDeclarationWrapper();
 }
 ;
@@ -704,7 +724,7 @@ var Dictionary = (function () {
         get: function () {
             var result = [];
             for (var i = 0; i < this.keys.length; i++)
-                result.push({ key: this.keys[i], value: this.values[i] });
+                result.push({ index: i, key: this.keys[i], value: this.values[i] });
             return result;
         },
         enumerable: true,

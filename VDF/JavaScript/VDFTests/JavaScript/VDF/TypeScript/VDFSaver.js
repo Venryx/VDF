@@ -48,7 +48,7 @@ var VDFSaver = (function () {
         var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
         var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
         for (var propName_1 in VDF.GetObjectProps(obj))
-            if (obj[propName_1] instanceof Function && obj[propName_1].tags && obj[propName_1].tags.Any(function (a) { return a instanceof VDFSerialize; })) {
+            if (obj[propName_1] instanceof Function && obj[propName_1].tags && obj[propName_1].tags.Any(function (a) { return a instanceof VDFPreSerialize; })) {
                 if (obj[propName_1](path, options) == VDF.CancelSerialize)
                     return VDF.CancelSerialize;
             }
@@ -116,7 +116,7 @@ var VDFSaver = (function () {
                         var childPath = path.ExtendAsChild(propInfo, propValue);
                         for (var propName2 in VDF.GetObjectProps(obj))
                             if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFSerializeProp; })) {
-                                var serializeResult = obj[propName2](path, options);
+                                var serializeResult = obj[propName2](childPath, options);
                                 if (serializeResult !== undefined)
                                     propValueNode = serializeResult;
                             }

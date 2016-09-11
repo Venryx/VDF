@@ -20,7 +20,7 @@ var VDFTests;
             function D1_DeserializePropMethod_Class() {
                 this.prop1 = Prop(this, "prop1", "D1_PreDeserializePropMethod_Class", new P()).set = 0;
             }
-            D1_DeserializePropMethod_Class.prototype.DeserializeProp = function (propPath, options) { return 1; };
+            D1_DeserializePropMethod_Class.prototype.DeserializeProp = function (node, propPath, options) { return 1; };
             return D1_DeserializePropMethod_Class;
         }());
         D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFDeserializeProp());

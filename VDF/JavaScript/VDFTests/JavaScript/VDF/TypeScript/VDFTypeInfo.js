@@ -55,7 +55,7 @@ var VDFTypeInfo = (function () {
     };
     VDFTypeInfo.prototype.GetProp = function (propName) {
         if (!(propName in this.props))
-            this.props[propName] = new VDFPropInfo(propName, null, [], null, null);
+            this.props[propName] = new VDFPropInfo(propName, null, []);
         return this.props[propName];
     };
     return VDFTypeInfo;
@@ -96,13 +96,23 @@ var D = (function (_super) {
     return D;
 }(DefaultValue));
 var VDFPropInfo = (function () {
-    function VDFPropInfo(propName, propTypeName, tags, propTag, defaultValueTag) {
+    function VDFPropInfo(propName, propTypeName, tags) {
         this.name = propName;
         this.typeName = propTypeName;
         this.tags = tags;
-        this.propTag = propTag;
-        this.defaultValueTag = defaultValueTag;
+        this.propTag = tags.First(function (a) { return a instanceof VDFProp; });
+        this.defaultValueTag = tags.First(function (a) { return a instanceof DefaultValue; });
     }
+    VDFPropInfo.prototype.AddTags = function () {
+        var tags = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            tags[_i - 0] = arguments[_i];
+        }
+        (_a = this.tags).push.apply(_a, tags);
+        this.propTag = tags.First(function (a) { return a instanceof VDFProp; });
+        this.defaultValueTag = tags.First(function (a) { return a instanceof DefaultValue; });
+        var _a;
+    };
     VDFPropInfo.prototype.ShouldValueBeSaved = function (val) {
         //if (this.defaultValueTag == null || this.defaultValueTag.defaultValue == D.NoDefault)
         if (this.defaultValueTag == null)
