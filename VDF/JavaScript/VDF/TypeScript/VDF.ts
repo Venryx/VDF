@@ -97,11 +97,11 @@ class VDFNodePathNode {
 
 	// if not root (i.e. a child/descendant)
 	prop: VDFPropInfo; //string propName;
-	list_index = -1;
-	map_keyIndex = -1;
+	list_index: Number = null;
+	map_keyIndex: Number = null;
 	map_key: any;
 
-	constructor(obj = null, prop: VDFPropInfo = null, list_index = -1, map_keyIndex = -1, map_key = null) {
+	constructor(obj = null, prop: VDFPropInfo = null, list_index: Number = null, map_keyIndex: Number = null, map_key = null) {
 		this.obj = obj;
 		this.prop = prop;
 		this.list_index = list_index;
@@ -133,12 +133,12 @@ class VDFNodePath {
 	}
 	ExtendAsMapKey(keyIndex, obj) {
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, null, -1, keyIndex));
+		newNodes.Add(new VDFNodePathNode(obj, null, null, keyIndex));
 		return new VDFNodePath(newNodes);
 	}
 	ExtendAsMapItem(key, obj) {
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, null, -1, -1, key));
+		newNodes.Add(new VDFNodePathNode(obj, null, null, null, key));
 		return new VDFNodePath(newNodes);
 	}
 	ExtendAsChild(prop: VDFPropInfo, obj) {

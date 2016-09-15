@@ -81,11 +81,11 @@ var VDFNodePathNode = (function () {
     function VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key) {
         if (obj === void 0) { obj = null; }
         if (prop === void 0) { prop = null; }
-        if (list_index === void 0) { list_index = -1; }
-        if (map_keyIndex === void 0) { map_keyIndex = -1; }
+        if (list_index === void 0) { list_index = null; }
+        if (map_keyIndex === void 0) { map_keyIndex = null; }
         if (map_key === void 0) { map_key = null; }
-        this.list_index = -1;
-        this.map_keyIndex = -1;
+        this.list_index = null;
+        this.map_keyIndex = null;
         this.obj = obj;
         this.prop = prop;
         this.list_index = list_index;
@@ -124,12 +124,12 @@ var VDFNodePath = (function () {
     };
     VDFNodePath.prototype.ExtendAsMapKey = function (keyIndex, obj) {
         var newNodes = this.nodes.Select(function (a) { return a.Clone(); }, "VDFNodePathNode");
-        newNodes.Add(new VDFNodePathNode(obj, null, -1, keyIndex));
+        newNodes.Add(new VDFNodePathNode(obj, null, null, keyIndex));
         return new VDFNodePath(newNodes);
     };
     VDFNodePath.prototype.ExtendAsMapItem = function (key, obj) {
         var newNodes = this.nodes.Select(function (a) { return a.Clone(); }, "VDFNodePathNode");
-        newNodes.Add(new VDFNodePathNode(obj, null, -1, -1, key));
+        newNodes.Add(new VDFNodePathNode(obj, null, null, null, key));
         return new VDFNodePath(newNodes);
     };
     VDFNodePath.prototype.ExtendAsChild = function (prop, obj) {
