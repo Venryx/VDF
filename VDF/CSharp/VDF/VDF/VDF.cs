@@ -64,18 +64,16 @@ namespace VDFN {
 		public static T As<T>(this VDFNode s, T defaultValue) { return s != null ? s.As_Base<T>() : defaultValue; } // implemented as extension method so that it can be called on null
 	}
 
-	public class VDFNodePathNode
-	{
+	public class VDFNodePathNode {
 		public object obj;
 
 		// if not root (i.e. a child/descendant)
 		public VDFPropInfo prop; //string propName;
-		public int list_index = -1;
-		public int map_keyIndex = -1;
+		public int? list_index;
+		public int? map_keyIndex;
 		public object map_key;
 
-		public VDFNodePathNode(object obj = null, VDFPropInfo prop = null, int list_index = -1, int map_keyIndex = -1, object map_key = null)
-		{
+		public VDFNodePathNode(object obj = null, VDFPropInfo prop = null, int? list_index = null, int? map_keyIndex = null, object map_key = null) {
 			this.obj = obj;
 			this.prop = prop;
 			this.list_index = list_index;
@@ -85,8 +83,7 @@ namespace VDFN {
 
 		public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key); }
 	}
-	public class VDFNodePath
-	{
+	public class VDFNodePath {
 		public List<VDFNodePathNode> nodes;
 		public VDFNodePath(List<VDFNodePathNode> nodes) { this.nodes = nodes; }
 		public VDFNodePath(VDFNodePathNode rootNode) { nodes = new List<VDFNodePathNode> {rootNode}; }
@@ -95,34 +92,29 @@ namespace VDFN {
 		public VDFNodePathNode parentNode { get { return nodes.Count >= 2 ? nodes[nodes.Count - 2] : null; } }
 		public VDFNodePathNode currentNode { get { return nodes.Last(); } }
 
-		public VDFNodePath ExtendAsListItem(int index, object obj)
-		{
+		public VDFNodePath ExtendAsListItem(int index, object obj) {
 			var newNodes = nodes.Select(a=>a.Clone()).ToList();
 			newNodes.Add(new VDFNodePathNode(obj, list_index: index));
 			return new VDFNodePath(newNodes);
 		}
-		public VDFNodePath ExtendAsMapKey(int keyIndex, object obj)
-		{
-			var newNodes = nodes.Select(a => a.Clone()).ToList();
+		public VDFNodePath ExtendAsMapKey(int keyIndex, object obj) {
+			var newNodes = nodes.Select(a=>a.Clone()).ToList();
 			newNodes.Add(new VDFNodePathNode(obj, map_keyIndex: keyIndex));
 			return new VDFNodePath(newNodes);
 		}
-		public VDFNodePath ExtendAsMapItem(object key, object obj)
-		{
+		public VDFNodePath ExtendAsMapItem(object key, object obj) {
 			var newNodes = nodes.Select(a=>a.Clone()).ToList();
 			newNodes.Add(new VDFNodePathNode(obj, map_key: key));
 			return new VDFNodePath(newNodes);
 		}
-		public VDFNodePath ExtendAsChild(VDFPropInfo prop, object obj)
-		{
+		public VDFNodePath ExtendAsChild(VDFPropInfo prop, object obj) {
 			var newNodes = nodes.Select(a=>a.Clone()).ToList();
 			newNodes.Add(new VDFNodePathNode(obj, prop));
 			return new VDFNodePath(newNodes);
 		}
 	}
 
-	public static class VDF
-	{
+	public static class VDF {
 		// for use with VDFSaveOptions
 		public static MemberInfo AnyMember = typeof(VDF).GetMember("AnyMember")[0];
 		public static List<MemberInfo> AllMembers = new List<MemberInfo> {AnyMember};
@@ -131,16 +123,14 @@ namespace VDFN {
 		public const string PropRegex_Any = ""; //"^.+$";
 
 		// for use with VDFSerialize/VDFDeserialize methods
-		public static VDFNode NoActionTaken = new VDFNode();
+		public static VDFNode Undefined = new VDFNode();
 		public static VDFNode CancelSerialize = new VDFNode();
 
 		static Dictionary<Type, string> builtInTypeAliasesByType;
 		static Dictionary<string, Type> builtInTypeAliasesByTypeName;
-	
-		static VDF()
-		{
-			builtInTypeAliasesByType = new Dictionary<Type, string>
-			{
+
+		static VDF() {
+			builtInTypeAliasesByType = new Dictionary<Type, string> {
 				{typeof(byte), "byte"}, {typeof(sbyte), "sbyte"}, {typeof(short), "short"}, {typeof(ushort), "ushort"},
 				{typeof(int), "int"}, {typeof(uint), "uint"}, {typeof(long), "long"}, {typeof(ulong), "ulong"},
 				{typeof(float), "float"}, {typeof(double), "double"}, {typeof(decimal), "decimal"},
@@ -157,8 +147,7 @@ namespace VDFN {
 		}
 
 		// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"
-		static int GetGenericParamsCountOfTypeName(string typeName)
-		{
+		static int GetGenericParamsCountOfTypeName(string typeName) {
 			if (!typeName.Contains("("))
 				return 0;
 			int result = 1;
@@ -170,8 +159,7 @@ namespace VDFN {
 					result++;
 			return result;
 		}
-		static Type GetTypeByNameRoot(string nameRoot, int genericsParams, VDFLoadOptions options)
-		{
+		static Type GetTypeByNameRoot(string nameRoot, int genericsParams, VDFLoadOptions options) {
 			if (options.typeAliasesByType.Values.Contains(nameRoot))
 				return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
 			//if (builtInTypeAliasesByType.Values.Contains(nameRoot))
@@ -183,8 +171,7 @@ namespace VDFN {
 			if (result != null)
 				return result;
 			var namespaceAlias = nameRoot.Contains(".") ? nameRoot.Substring(0, nameRoot.LastIndexOf(".")) : null;
-			if (namespaceAlias != null) // if alias value when saving was not an empty string
-			{
+			if (namespaceAlias != null) { // if alias value when saving was not an empty string
 				foreach (KeyValuePair<string, string> pair in options.namespaceAliasesByName)
 					if (pair.Value == namespaceAlias)
 						return Type.GetType(pair.Key + "." + nameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
@@ -195,8 +182,7 @@ namespace VDFN {
 						return Type.GetType(pair.Key + "." + nameRoot + (genericsParams > 0 ? "`" + genericsParams : ""));
 			return null;
 		}
-		public static Type GetTypeByName(string typeName, VDFLoadOptions options = null)
-		{
+		public static Type GetTypeByName(string typeName, VDFLoadOptions options = null) {
 			options = options ?? new VDFLoadOptions();
 			if (options.typeAliasesByType.Values.Contains(typeName))
 				return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
@@ -211,13 +197,11 @@ namespace VDFN {
 			var rootType = GetTypeByNameRoot(rootName, GetGenericParamsCountOfTypeName(typeName), options);
 			if (rootType == null)
 				throw new Exception("Could not find type \"" + rootName + "\"."); //throw new VDFException("Could not find type \"" + rootName + "\".");
-			if (rootType.IsGenericType)
-			{
+			if (rootType.IsGenericType) {
 				var genericArgumentTypes = new List<Type>();
 				int depth = 0;
 				int lastStartBracketPos = -1;
-				for (var i = 0; i < typeName.Length; i++)
-				{
+				for (var i = 0; i < typeName.Length; i++) {
 					char ch = typeName[i];
 					if (ch == ')')
 						depth--;
@@ -235,15 +219,13 @@ namespace VDFN {
 
 		public static bool GetIsTypePrimitive(Type type) { return type.IsPrimitive || type == typeof(string); } // (technically strings are not primitives in C#, but we consider them such)
 		public static bool GetIsTypeAnonymous(Type type) { return type != null && type.Name.StartsWith("<>"); }
-		public static string GetNameOfType(Type type, VDFSaveOptions options)
-		{
+		public static string GetNameOfType(Type type, VDFSaveOptions options) {
 			if (options.typeAliasesByType.ContainsKey(type))
 				return options.typeAliasesByType[type];
 			if (builtInTypeAliasesByType.ContainsKey(type))
 				return builtInTypeAliasesByType[type];
 
-			if (type.IsGenericType)
-			{
+			if (type.IsGenericType) {
 				var rootType = type.GetGenericTypeDefinition();
 				if (options.typeAliasesByType.ContainsKey(rootType))
 					return options.typeAliasesByType[rootType] + "(" + String.Join(" ", type.GetGenericArguments().Select(type2=>GetNameOfType(type2, options)).ToArray()) + ")";
@@ -261,8 +243,7 @@ namespace VDFN {
 						result = (pair.Value != null ? pair.Value + "." : "") + result.Substring(pair.Key.Length + 1);
 				return result;
 			}
-			else
-			{
+			else {
 				string result = type.FullName;
 				//if (result.EndsWith("[]"))
 				if (type.IsArray)
@@ -275,8 +256,7 @@ namespace VDFN {
 				return result;
 			}
 		}
-		public static List<Type> GetGenericArgumentsOfType(Type type) // if array, actually returns the element-type (which is equivalent)
-		{
+		public static List<Type> GetGenericArgumentsOfType(Type type) { // if array, actually returns the element-type (which is equivalent)
 			if (type.IsDerivedFrom(typeof(IList)))
 				return new List<Type> {type.HasElementType ? type.GetElementType() : type.GetGenericArguments().FirstOrDefault()};
 			return type != null ? type.GetGenericArguments().ToList() : null;

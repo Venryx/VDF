@@ -92,14 +92,22 @@ namespace VDFTests {
 			var a = VDFSaver.ToVDFNode(new {Bool = false, Int = 5, Double = .5, String = "Prop value string."}, new VDFSaveOptions(typeMarking: VDFTypeMarking.External));
 			a.ToVDF().Should().Be("{Bool:false Int:5 Double:.5 String:\"Prop value string.\"}");
 		}
-		class TypeWithPreSerializePrepMethod {
+		class D1_PreSerialize_Class {
 			[P] bool preSerializeWasCalled;
 			[VDFPreSerialize] void VDFPreSerialize() { preSerializeWasCalled = true; }
 		}
-		[Fact] void D1_PreSerializePreparation() {
-			var a = VDFSaver.ToVDFNode<TypeWithPreSerializePrepMethod>(new TypeWithPreSerializePrepMethod());
+		[Fact] void D1_PreSerialize() {
+			var a = VDFSaver.ToVDFNode<D1_PreSerialize_Class>(new D1_PreSerialize_Class());
 			((bool)a["preSerializeWasCalled"]).Should().Be(true);
 			a.ToVDF().Should().Be("{preSerializeWasCalled:true}");
+		}
+		class D1_SerializePropMethod_Class {
+			[VDFSerializeProp] VDFNode SerializeProp(VDFNodePath propPath, VDFSaveOptions options) { return new VDFNode(1); }
+			[P] object prop1 = 0;
+		}
+		[Fact] void D1_SerializePropMethod() {
+			var a = VDF.Serialize<D1_SerializePropMethod_Class>(new D1_SerializePropMethod_Class());
+			a.Should().Be("{prop1:1}");
 		}
 		class TypeWithPostSerializeCleanupMethod {
 			[P] bool postSerializeWasCalled;

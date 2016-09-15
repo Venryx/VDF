@@ -68,8 +68,7 @@ module VDFTests { // added to match C# indentation
 			notIncluded = Prop(this, "notIncluded", "bool").set = true;
 			included = Prop(this, "included", "bool").set = true;
 
-			Serialize(): VDFNode //PInfo prop, VDFSaveOptions options)
-			{
+			Serialize(): VDFNode { //PInfo prop, VDFSaveOptions options)
 				var result = new VDFNode();
 				result.SetMapChild(new VDFNode("included"), new VDFNode(this.included));
 				return result;
@@ -79,27 +78,16 @@ module VDFTests { // added to match C# indentation
 		//AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
 		test("D1_MapWithEmbeddedSerializeMethod_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}"); });
 
-		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class
-		{
+		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class {
 			boolProp = Prop(this, "boolProp", "bool", new P()).set = true;
 			Serialize() { return; }
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
 		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
 
-		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class {
-			SerializeProp(propPath: VDFNodePath, options: VDFSaveOptions) { return VDF.CancelSerialize; }
-			boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new P()).set = true;
-		}
-		D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.SerializeProp.AddTags(new VDFSerializeProp());
-		test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", ()=> {
-			VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}");
-		});
-
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
 			{ child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new P()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
-		class D1_Map_MapThatCancelsItsSerialize_Class_Child
-		{
+		class D1_Map_MapThatCancelsItsSerialize_Class_Child {
 			Serialize() { return VDF.CancelSerialize; }
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
@@ -109,36 +97,29 @@ module VDFTests { // added to match C# indentation
 		// ==========
 
 		class D0_MapWithMetadataDisabled_Class {}
-		test("D0_MapWithMetadataDisabled", ()=>
-		{
+		test("D0_MapWithMetadataDisabled", ()=> {
 			var a = VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaveOptions({useMetadata: false}));
 			ok(a.metadata == null); //a.metadata.Should().Be(null);
 		});
-		class D0_Map_List_BoolsWithPopOutDisabled_Class
-		{
+		class D0_Map_List_BoolsWithPopOutDisabled_Class {
 			ints = Prop(this, "ints", "List(int)", new P()).set = new List<number>("int", 0, 1);
 		}
-		test("D0_Map_List_BoolsWithPopOutDisabled", ()=>
-		{
+		test("D0_Map_List_BoolsWithPopOutDisabled", ()=> {
 			var a = VDFSaver.ToVDFNode(new D0_Map_List_BoolsWithPopOutDisabled_Class(), "D0_Map_List_BoolsWithPopOutDisabled_Class", new VDFSaveOptions({useChildPopOut: false}));
 			a.ToVDF().Should().Be("{ints:[0 1]}");
 		});
-		test("D1_Map_IntsWithStringKeys", ()=>
-		{
-			var a = VDFSaver.ToVDFNode(new Dictionary<object, object>("object", "object",
-			{
+		test("D1_Map_IntsWithStringKeys", ()=> {
+			var a = VDFSaver.ToVDFNode(new Dictionary<object, object>("object", "object", {
 				key1: 0,
 				key2: 1
 			}), new VDFSaveOptions({useStringKeys: true}));
 			a.ToVDF(new VDFSaveOptions({useStringKeys: true})).Should().Be("{\"key1\":0 \"key2\":1}");
 		});
-		test("D1_Map_DoublesWithNumberTrimmingDisabled", ()=>
-		{
+		test("D1_Map_DoublesWithNumberTrimmingDisabled", ()=> {
 			var a = VDFSaver.ToVDFNode(new List<object>("object", .1, 1.1), new VDFSaveOptions({useNumberTrimming: false}));
 			a.ToVDF(new VDFSaveOptions({useNumberTrimming: false})).Should().Be("[0.1 1.1]");
 		});
-		test("D1_List_IntsWithCommaSeparators", ()=>
-		{
+		test("D1_List_IntsWithCommaSeparators", ()=> {
 			var a = VDFSaver.ToVDFNode(new List<object>("object", 0, 1), new VDFSaveOptions({useCommaSeparators: true}));
 			a.listChildren.Count.Should().Be(2);
 			a.ToVDF(new VDFSaveOptions({useCommaSeparators: true})).Should().Be("[0,1]");

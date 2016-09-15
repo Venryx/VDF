@@ -157,6 +157,7 @@ class VDF {
 	static PropRegex_Any = ""; //"^.+$";
 
 	// for use with VDFSerialize/VDFDeserialize methods
+	//static Undefined; //= new VDFNode(); // JS doesn't need this; it just uses its native "undefined" pseudo-keyword
 	static CancelSerialize; //= new VDFNode();
 
 	// v-name examples: "List(string)", "System.Collections.Generic.List(string)", "Dictionary(string string)"

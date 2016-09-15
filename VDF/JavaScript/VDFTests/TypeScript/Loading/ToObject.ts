@@ -20,7 +20,7 @@ module VDFTests { // added to match C# indentation
 
 		class D1_DeserializePropMethod_Class {
 			DeserializeProp(node: VDFNode, propPath: VDFNodePath, options: VDFLoadOptions) { return 1; }
-			prop1 = Prop(this, "prop1", "D1_PreDeserializePropMethod_Class", new P()).set = 0;
+			prop1 = Prop(this, "prop1", new P()).set = 0;
 		}
 		D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFDeserializeProp());
 		test("D1_DeserializePropMethod", ()=> {

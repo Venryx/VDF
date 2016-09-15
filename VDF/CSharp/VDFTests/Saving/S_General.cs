@@ -10,8 +10,7 @@ namespace VDFTests {
 		// prop-inclusion by regex
 		// ==========
 
-		/*class D1_Map_PropWithTagInSaveOptionsIncludeTags_Class
-		{
+		/*class D1_Map_PropWithTagInSaveOptionsIncludeTags_Class {
 			public bool withoutTag = true;
 			[Tags("include")] public bool withTag = true;
 		}
@@ -39,8 +38,7 @@ namespace VDFTests {
 			public bool notIncluded = true;
 			public bool included = true;
 
-			[VDFSerialize] VDFNode Serialize() //PInfo prop, VDFSaveOptions options)
-			{
+			[VDFSerialize] VDFNode Serialize() { //PInfo prop, VDFSaveOptions options)
 				var result = new VDFNode();
 				result.mapChildren["included"] = new VDFNode(included);
 				return result;
@@ -50,16 +48,9 @@ namespace VDFTests {
 
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class {
 			[P] public bool boolProp = true;
-			[VDFSerialize] VDFNode Serialize() { return VDF.NoActionTaken; }
+			[VDFSerialize] VDFNode Serialize() { return VDF.Undefined; }
 		}
 		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop() { VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}"); }
-
-		class D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class {
-			[VDFPreSerializeProp] VDFNode PreSerializeProp(VDFNodePath propPath, VDFSaveOptions options) { return VDF.CancelSerialize; }
-
-			[P] public bool boolProp = true;
-		}
-		[Fact] void D1_Map_BoolWhoseSerializeIsCanceledFromParent() { VDF.Serialize<D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class>(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class()).Should().Be("{}"); }
 
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent {
 			[P] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child();

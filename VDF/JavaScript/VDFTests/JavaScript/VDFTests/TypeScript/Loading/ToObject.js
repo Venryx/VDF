@@ -18,7 +18,7 @@ var VDFTests;
         //test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
         var D1_DeserializePropMethod_Class = (function () {
             function D1_DeserializePropMethod_Class() {
-                this.prop1 = Prop(this, "prop1", "D1_PreDeserializePropMethod_Class", new P()).set = 0;
+                this.prop1 = Prop(this, "prop1", new P()).set = 0;
             }
             D1_DeserializePropMethod_Class.prototype.DeserializeProp = function (node, propPath, options) { return 1; };
             return D1_DeserializePropMethod_Class;

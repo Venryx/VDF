@@ -20,6 +20,15 @@ namespace VDFTests {
 		[Fact] void D0_Double() { VDF.Deserialize("1.5").Should().Be(1.5); }
 		[Fact] void D0_Float() { VDF.Deserialize<float>("1.5").Should().Be(1.5f); }
 
+		class D1_DeserializePropMethod_Class {
+			[VDFDeserializeProp] object DeserializeProp(VDFNode node, VDFNodePath propPath, VDFLoadOptions options) { return 1; }
+			[P] public object prop1 = 0;
+		}
+		[Fact] void D1_DeserializePropMethod() {
+			var a = VDF.Deserialize<D1_DeserializePropMethod_Class>("{prop1:0}");
+			a.prop1.Should().Be(1);
+		}
+
 		class TypeWithPreDeserializeMethod {
 			[P] public bool flag;
 			[VDFPreDeserialize] void VDFPreDeserialize() { flag = true; }

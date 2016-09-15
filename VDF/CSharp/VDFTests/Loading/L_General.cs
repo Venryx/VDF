@@ -23,7 +23,7 @@ namespace VDFTests {
 
 		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class {
 			public bool boolProp;
-			[VDFDeserialize] object Deserialize(VDFNode node) { return VDF.NoActionTaken; }
+			[VDFDeserialize] object Deserialize(VDFNode node) { return VDF.Undefined; }
 		}
 		[Fact] void D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop() { VDF.Deserialize<D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class>("{boolProp:true}").boolProp.Should().Be(true); }
 
@@ -40,7 +40,7 @@ namespace VDFTests {
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child {
 			public bool boolProp;
-			[VDFDeserialize(fromParent: true)] static object Deserialize(VDFNode node, VDFNodePath path, VDFLoadOptions options) { return VDF.NoActionTaken; }
+			[VDFDeserialize(fromParent: true)] static object Deserialize(VDFNode node, VDFNodePath path, VDFLoadOptions options) { return VDF.Undefined; }
 		}
 		[Fact] void D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop() { VDF.Deserialize<D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent>("{child:{boolProp:true}}").child.boolProp.Should().Be(true); }
 

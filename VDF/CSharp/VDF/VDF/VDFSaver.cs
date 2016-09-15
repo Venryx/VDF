@@ -77,7 +77,7 @@ namespace VDFN {
 			if (obj != null)
 				foreach (VDFMethodInfo method in VDFTypeInfo.Get(type).methods_serialize) {
 					object serializeResult = method.Call(obj, path, options);
-					if (serializeResult != VDF.NoActionTaken) {
+					if (serializeResult != VDF.Undefined) {
 						result = (VDFNode)serializeResult;
 						serializedByCustomMethod = true;
 					}
@@ -95,8 +95,7 @@ namespace VDFN {
 					var objAsList = (IList)obj;
 					for (var i = 0; i < objAsList.Count; i++) {
 						var itemNode = ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
-						if (itemNode == VDF.CancelSerialize)
-							continue;
+						if (itemNode == VDF.CancelSerialize) continue;
 						result.listChildren.Add(itemNode);
 					}
 				}
@@ -111,8 +110,7 @@ namespace VDFN {
 							//throw new VDFException("A map key object must either be a string or have an exporter that converts it into a string.");
 							keyNode = new VDFNode(key.ToString());
 						var valueNode = ToVDFNode(objAsDictionary[key], typeGenericArgs[1], options, path.ExtendAsMapItem(key, objAsDictionary[key]), true);
-						if (valueNode == VDF.CancelSerialize)
-							continue;
+						if (valueNode == VDF.CancelSerialize) continue;
 						result.mapChildren.Add(keyNode, valueNode);
 					}
 				}
@@ -130,26 +128,25 @@ namespace VDFN {
 							bool include = options.propInclusionL3.GetValueOrX(propInfo.memberInfo) ?? options.propInclusionL3.GetValueOrX(VDF.AnyMember)
 								?? (propInfo.propTag != null ? propInfo.propTag.includeL2 : (bool?)null)
 								?? typeInfo.typeTag.propIncludeRegexL1 != null && new Regex(typeInfo.typeTag.propIncludeRegexL1).IsMatch(propName);
-							if (!include)
-								continue;
+							if (!include) continue;
 
 							object propValue = propInfo.GetValue(obj);
-							if (!propInfo.ShouldValueBeSaved(propValue))
-								continue;
-
-							VDFNodePath childPath = path.ExtendAsChild(propInfo, propValue);
-							var canceled = false;
-							foreach (VDFMethodInfo method in typeInfo.methods_preSerializeProp)
-								if (method.Call(obj, childPath, options) == VDF.CancelSerialize)
-									canceled = true;
-							if (canceled)
-								continue;
+							if (!propInfo.ShouldValueBeSaved(propValue)) continue;
 
 							var propNameNode = new VDFNode(propName);
-							// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
-							var propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, childPath);
-							if (propValueNode == VDF.CancelSerialize)
-								continue;
+							VDFNode propValueNode = VDF.Undefined;
+
+							VDFNodePath childPath = path.ExtendAsChild(propInfo, propValue);
+							foreach (VDFMethodInfo method in typeInfo.methods_serializeProp) {
+								var serializeResult = (VDFNode)method.Call(obj, childPath, options);
+								if (serializeResult != VDF.Undefined)
+									propValueNode = serializeResult;
+							}
+							if (propValueNode == VDF.Undefined)
+								// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
+								propValueNode = ToVDFNode(propValue, !type.Name.Contains("<") ? propInfo.GetPropType() : null, options, childPath);
+							if (propValueNode == VDF.CancelSerialize) continue;
+
 							propValueNode.childPopOut = options.useChildPopOut && (propInfo.propTag != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 							result.mapChildren.Add(propNameNode, propValueNode);
 						}

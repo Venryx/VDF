@@ -88,17 +88,6 @@ var VDFTests;
             return D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class;
         }());
         test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", function () { VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
-        var D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class = (function () {
-            function D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class() {
-                this.boolProp = Prop(this, "boolProp", "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class", new P()).set = true;
-            }
-            D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.SerializeProp = function (propPath, options) { return VDF.CancelSerialize; };
-            return D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class;
-        }());
-        D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class.prototype.SerializeProp.AddTags(new VDFSerializeProp());
-        test("D1_Map_BoolWhoseSerializeIsCanceledFromParent", function () {
-            VDF.Serialize(new D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class(), "D1_Map_BoolWhoseSerializeIsCanceledFromParent_Class").Should().Be("{}");
-        });
         var D1_Map_MapThatCancelsItsSerialize_Class_Parent = (function () {
             function D1_Map_MapThatCancelsItsSerialize_Class_Parent() {
                 this.child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new P()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child();

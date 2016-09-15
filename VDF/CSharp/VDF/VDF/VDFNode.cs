@@ -260,7 +260,7 @@ namespace VDFN {
 			bool deserializedByCustomMethod = false;
 			foreach (VDFMethodInfo method in VDFTypeInfo.Get(finalType).methods_deserialize_fromParent) {
 				object deserializeResult = method.Call(null, this, path, options);
-				if (deserializeResult != VDF.NoActionTaken) {
+				if (deserializeResult != VDF.Undefined) {
 					result = deserializeResult;
 					deserializedByCustomMethod = true;
 				}
@@ -303,7 +303,7 @@ namespace VDFN {
 			bool deserializedByCustomMethod2 = false;
 			foreach (VDFMethodInfo method in typeInfo.methods_deserialize_notFromParent) {
 				object deserializeResult = method.Call(obj, this, path, options);
-				if (deserializeResult != VDF.NoActionTaken)
+				if (deserializeResult != VDF.Undefined)
 					deserializedByCustomMethod2 = true;
 			}
 
@@ -331,7 +331,14 @@ namespace VDFN {
 						else { // else, must be string prop-name
 							var propName = pair.Key.primitiveValue as string;
 							if (typeInfo.props.ContainsKey(propName)) { // maybe temp; just ignore props that are missing
-								var value = pair.Value.ToObject(typeInfo.props[propName].GetPropType(), options, path.ExtendAsChild(typeInfo.props[propName], null));
+								object value = VDF.Undefined;
+								foreach (VDFMethodInfo method in typeInfo.methods_deserializeProp) {
+									object deserializeResult = method.Call(obj, this, path, options);
+									if (deserializeResult != VDF.Undefined)
+										value = deserializeResult;
+								}
+								if (value == VDF.Undefined)
+									value = pair.Value.ToObject(typeInfo.props[propName].GetPropType(), options, path.ExtendAsChild(typeInfo.props[propName], null));
 								typeInfo.props[propName].SetValue(obj, value);
 							}
 						}

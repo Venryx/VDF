@@ -113,18 +113,30 @@ var VDFTests;
             var a = VDFSaver.ToVDFNode({ Bool: false, Int: 5, Double: .5, String: "Prop value string." }, new VDFSaveOptions({ typeMarking: VDFTypeMarking.External }));
             a.ToVDF().Should().Be("{Bool:false Int:5 Double:.5 String:\"Prop value string.\"}");
         });
-        var TypeWithSerializePrepMethod = (function () {
-            function TypeWithSerializePrepMethod() {
-                this.serializeWasCalled = Prop(this, "serializeWasCalled", "bool", new P()).set = false;
-                this.Serialize.AddTags(new VDFSerialize());
+        var D1_PreSerialize_Class = (function () {
+            function D1_PreSerialize_Class() {
+                this.preSerializeWasCalled = Prop(this, "preSerializeWasCalled", "bool", new P()).set = false;
+                this.PreSerialize.AddTags(new VDFPreSerialize());
             }
-            TypeWithSerializePrepMethod.prototype.Serialize = function () { this.serializeWasCalled = true; };
-            return TypeWithSerializePrepMethod;
+            D1_PreSerialize_Class.prototype.PreSerialize = function () { this.preSerializeWasCalled = true; };
+            return D1_PreSerialize_Class;
         }());
-        test("D1_SerializePreparation", function () {
-            var a = VDFSaver.ToVDFNode(new TypeWithSerializePrepMethod(), "TypeWithSerializePrepMethod");
-            a["serializeWasCalled"].primitiveValue.Should().Be(true);
-            a.ToVDF().Should().Be("{serializeWasCalled:true}");
+        test("D1_PreSerialize", function () {
+            var a = VDFSaver.ToVDFNode(new D1_PreSerialize_Class(), "D1_PreSerialize_Class");
+            a["preSerializeWasCalled"].primitiveValue.Should().Be(true);
+            a.ToVDF().Should().Be("{preSerializeWasCalled:true}");
+        });
+        var D1_SerializePropMethod_Class = (function () {
+            function D1_SerializePropMethod_Class() {
+                this.prop1 = Prop(this, "prop1", new P()).set = 0;
+            }
+            D1_SerializePropMethod_Class.prototype.SerializeProp = function (propPath, options) { return new VDFNode(1); };
+            return D1_SerializePropMethod_Class;
+        }());
+        D1_SerializePropMethod_Class.prototype.SerializeProp.AddTags(new VDFSerializeProp());
+        test("D1_SerializePropMethod", function () {
+            var a = VDF.Serialize(new D1_SerializePropMethod_Class(), "D1_SerializePropMethod_Class");
+            a.Should().Be("{prop1:1}");
         });
         var TypeWithPostSerializeCleanupMethod = (function () {
             function TypeWithPostSerializeCleanupMethod() {
