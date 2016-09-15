@@ -23,3 +23,11 @@ C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDFN.Properties.Reso
 C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
 C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.dll
 C:\Root\Programs\@Projects\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.pdb
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\bin\Debug\VDF.dll.config
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\bin\Debug\VDF.dll
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\bin\Debug\VDF.pdb
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csprojResolveAssemblyReference.cache
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDFN.Properties.Resources.resources
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.csproj.GenerateResource.Cache
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.dll
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Debug\VDF.pdb

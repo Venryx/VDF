@@ -130,8 +130,12 @@ namespace VDFN {
 				else
 					builder.Append(isKey ? "" : "\"").Append(unpaddedString).Append(isKey ? "" : "\"");
 			}
-			else if (VDF.GetIsTypePrimitive(primitiveValue.GetType())) // if number
-				builder.Append(options.useNumberTrimming && primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
+			else if (VDF.GetIsTypePrimitive(primitiveValue.GetType())) { // if number
+				if (double.IsInfinity(primitiveValue as double? ?? primitiveValue as float? ?? 0))
+					builder.Append(double.IsPositiveInfinity(primitiveValue as double? ?? (float)primitiveValue) ? "Infinity" : "-Infinity");
+				else
+					builder.Append(options.useNumberTrimming && primitiveValue.ToString().StartsWith("0.") ? primitiveValue.ToString().Substring(1) : primitiveValue);
+			}
 			else
 				builder.Append("\"").Append(primitiveValue).Append("\"");
 
