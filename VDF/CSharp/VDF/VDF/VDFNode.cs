@@ -331,14 +331,15 @@ namespace VDFN {
 						else { // else, must be string prop-name
 							var propName = pair.Key.primitiveValue as string;
 							if (typeInfo.props.ContainsKey(propName)) { // maybe temp; just ignore props that are missing
+								var childPath = path.ExtendAsChild(typeInfo.props[propName], null);
 								object value = VDF.Undefined;
 								foreach (VDFMethodInfo method in typeInfo.methods_deserializeProp) {
-									object deserializeResult = method.Call(obj, this, path, options);
+									object deserializeResult = method.Call(obj, pair.Value, childPath, options);
 									if (deserializeResult != VDF.Undefined)
 										value = deserializeResult;
 								}
 								if (value == VDF.Undefined)
-									value = pair.Value.ToObject(typeInfo.props[propName].GetPropType(), options, path.ExtendAsChild(typeInfo.props[propName], null));
+									value = pair.Value.ToObject(typeInfo.props[propName].GetPropType(), options, childPath);
 								typeInfo.props[propName].SetValue(obj, value);
 							}
 						}
