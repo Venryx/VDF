@@ -80,6 +80,7 @@ namespace VDFN {
 					if (serializeResult != VDF.Undefined) {
 						result = (VDFNode)serializeResult;
 						serializedByCustomMethod = true;
+						break;
 					}
 				}
 
@@ -139,8 +140,10 @@ namespace VDFN {
 							VDFNodePath childPath = path.ExtendAsChild(propInfo, propValue);
 							foreach (VDFMethodInfo method in typeInfo.methods_serializeProp) {
 								var serializeResult = (VDFNode)method.Call(obj, childPath, options);
-								if (serializeResult != VDF.Undefined)
+								if (serializeResult != VDF.Undefined) {
 									propValueNode = serializeResult;
+									break;
+								}
 							}
 							if (propValueNode == VDF.Undefined)
 								// if obj is an anonymous type, considers its props' declared-types to be null, since even internal loading doesn't have a class declaration it can look up
@@ -151,8 +154,7 @@ namespace VDFN {
 							result.mapChildren.Add(propNameNode, propValueNode);
 						}
 						catch (Exception ex) { throw new VDFException("Error saving property '" + propName + "'.", ex); }/**/finally{}
-						/*catch (Exception ex)
-						{
+						/*catch (Exception ex) {
 							var field = ex.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance) ?? ex.GetType().GetField("_message", BindingFlags.NonPublic | BindingFlags.Instance);
 							field.SetValue(ex, ex.Message + "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n");
 							throw;

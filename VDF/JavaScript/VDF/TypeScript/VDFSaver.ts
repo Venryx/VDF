@@ -72,6 +72,7 @@ class VDFSaver {
 				if (serializeResult !== undefined) {
 					result = serializeResult;
 					serializedByCustomMethod = true;
+					break;
 				}
 			}
 
@@ -133,8 +134,10 @@ class VDFSaver {
 						for (let propName2 in VDF.GetObjectProps(obj))
 							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFSerializeProp)) {
 								let serializeResult = obj[propName2](childPath, options);
-								if (serializeResult !== undefined)
+								if (serializeResult !== undefined) {
 									propValueNode = serializeResult;
+									break;
+								}
 							}
 						if (propValueNode === undefined)
 							propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);

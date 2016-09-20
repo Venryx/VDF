@@ -56,8 +56,9 @@
 
 		var builder = new StringBuilder();
 
-		if (options.useMetadata && this.metadata != null)
-			builder.Append(this.metadata + ">");
+		var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
+		if (options.useMetadata && metadata != null)
+			builder.Append(metadata + ">");
 
 		if (this.primitiveValue == null) {
 			if (!this.isMap && this.mapChildren.Count == 0 && !this.isList && this.listChildren.Count == 0)
@@ -197,8 +198,9 @@
 		path = path || new VDFNodePath(new VDFNodePathNode());
 
 		var fromVDFTypeName = "object";
-		if (this.metadata != null && (window[VDF.GetTypeNameRoot(this.metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
-			fromVDFTypeName = this.metadata;
+		var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
+		if (metadata != null && (window[VDF.GetTypeNameRoot(metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
+			fromVDFTypeName = metadata;
 		else if (typeof this.primitiveValue == "boolean")
 			fromVDFTypeName = "bool";
 		else if (typeof this.primitiveValue == "number")
@@ -229,6 +231,7 @@
 				if (deserializeResult !== undefined) {
 					result = deserializeResult;
 					deserializedByCustomMethod = true;
+					break;
 				}
 			}
 
@@ -268,8 +271,10 @@
 		for (let propName in VDF.GetObjectProps(obj))
 			if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=> a instanceof VDFDeserialize && !a.fromParent)) {
 				let deserializeResult = obj[propName](this, path, options);
-				if (deserializeResult !== undefined)
+				if (deserializeResult !== undefined) {
 					deserializedByCustomMethod2 = true;
+					break;
+				}
 			}
 
 		if (!deserializedByCustomMethod2) {
@@ -299,8 +304,10 @@
 						for (let propName2 in VDF.GetObjectProps(obj))
 							if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(a=>a instanceof VDFDeserializeProp)) {
 								let deserializeResult = obj[propName2](pair.value, childPath, options);
-								if (deserializeResult !== undefined)
+								if (deserializeResult !== undefined) {
 									value = deserializeResult;
+									break;
+								}
 							}
 						if (value === undefined)
 							value = pair.value.ToObject(typeInfo.props[propName] && typeInfo.props[propName].typeName, options, childPath);

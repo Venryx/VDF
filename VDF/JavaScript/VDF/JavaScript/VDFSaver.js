@@ -60,6 +60,7 @@ var VDFSaver = (function () {
                 if (serializeResult !== undefined) {
                     result = serializeResult;
                     serializedByCustomMethod = true;
+                    break;
                 }
             }
         if (!serializedByCustomMethod) {
@@ -117,8 +118,10 @@ var VDFSaver = (function () {
                         for (var propName2 in VDF.GetObjectProps(obj))
                             if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFSerializeProp; })) {
                                 var serializeResult = obj[propName2](childPath, options);
-                                if (serializeResult !== undefined)
+                                if (serializeResult !== undefined) {
                                     propValueNode = serializeResult;
+                                    break;
+                                }
                             }
                         if (propValueNode === undefined)
                             propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);

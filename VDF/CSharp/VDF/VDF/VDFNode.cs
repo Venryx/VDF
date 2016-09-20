@@ -99,6 +99,7 @@ namespace VDFN {
 
 			var builder = new StringBuilder();
 
+			var metadata = metadata_override ?? this.metadata;
 			if (options.useMetadata && metadata != null)
 				builder.Append(metadata).Append(">");
 
@@ -235,6 +236,7 @@ namespace VDFN {
 			path = path ?? new VDFNodePath(new VDFNodePathNode());
 
 			var fromVDFTypeName = "object";
+			var metadata = metadata_override ?? this.metadata;
 			if (metadata != null)
 				fromVDFTypeName = metadata;
 			else if (primitiveValue is bool)
@@ -263,6 +265,7 @@ namespace VDFN {
 				if (deserializeResult != VDF.Undefined) {
 					result = deserializeResult;
 					deserializedByCustomMethod = true;
+					break;
 				}
 			}
 
@@ -303,8 +306,10 @@ namespace VDFN {
 			bool deserializedByCustomMethod2 = false;
 			foreach (VDFMethodInfo method in typeInfo.methods_deserialize_notFromParent) {
 				object deserializeResult = method.Call(obj, this, path, options);
-				if (deserializeResult != VDF.Undefined)
+				if (deserializeResult != VDF.Undefined) {
 					deserializedByCustomMethod2 = true;
+					break;
+				}
 			}
 
 			if (!deserializedByCustomMethod2) {
@@ -335,8 +340,10 @@ namespace VDFN {
 								object value = VDF.Undefined;
 								foreach (VDFMethodInfo method in typeInfo.methods_deserializeProp) {
 									object deserializeResult = method.Call(obj, pair.Value, childPath, options);
-									if (deserializeResult != VDF.Undefined)
+									if (deserializeResult != VDF.Undefined) {
 										value = deserializeResult;
+										break;
+									}
 								}
 								if (value == VDF.Undefined)
 									value = pair.Value.ToObject(typeInfo.props[propName].GetPropType(), options, childPath);

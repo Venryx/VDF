@@ -45,7 +45,8 @@ namespace VDFN {
 				/*foreach (MemberInfo member in currentType.GetMembers(flags | BindingFlags.DeclaredOnly)) // only get members declared in this class (not in base, since we're getting those ourselves soon anyway)
 					//if (!result.Contains(member))
 					result.Add(member);*/
-				result.InsertRange(0, currentType.GetMembers(flags | BindingFlags.DeclaredOnly));
+				//result.InsertRange(0, currentType.GetMembers(flags | BindingFlags.DeclaredOnly));
+				result.AddRange(currentType.GetMembers(flags | BindingFlags.DeclaredOnly));
 				currentType = currentType.BaseType;
 			}
 			return result; //.ToList(); //Distinct().ToList();

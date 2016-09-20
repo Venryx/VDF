@@ -3,12 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace VDFN
-{
-	public class VDFLoadOptions
-	{
-		public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null)
-		{
+namespace VDFN {
+	public class VDFLoadOptions {
+		public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null) {
 			this.messages = message ?? new List<object>();
 			this.allowStringKeys = allowStringKeys;
 			this.allowCommaSeparators = allowCommaSeparators;
@@ -19,16 +16,13 @@ namespace VDFN
 		public List<object> messages;
 		public Dictionary<object, List<Action>> objPostDeserializeFuncs_early = new Dictionary<object, List<Action>>();
 		public Dictionary<object, List<Action>> objPostDeserializeFuncs = new Dictionary<object, List<Action>>();
-		public void AddObjPostDeserializeFunc(object obj, Action func, bool early = false)
-		{
-			if (early)
-			{
+		public void AddObjPostDeserializeFunc(object obj, Action func, bool early = false) {
+			if (early) {
 				if (!objPostDeserializeFuncs_early.ContainsKey(obj))
 					objPostDeserializeFuncs_early.Add(obj, new List<Action>());
 				objPostDeserializeFuncs_early[obj].Add(func);
 			}
-			else
-			{
+			else {
 				if (!objPostDeserializeFuncs.ContainsKey(obj))
 					objPostDeserializeFuncs.Add(obj, new List<Action>());
 				objPostDeserializeFuncs[obj].Add(func);
@@ -44,21 +38,18 @@ namespace VDFN
 		public Dictionary<Type, string> typeAliasesByType;
 		//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
-		public VDFLoadOptions ForJSON() // helper function for JSON compatibility
-		{
+		public VDFLoadOptions ForJSON() { // helper function for JSON compatibility
 			allowStringKeys = true;
 			allowCommaSeparators = true;
 			return this;
 		}
 	}
 
-	public static class VDFLoader
-	{
+	public static class VDFLoader {
 		public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions options = null) { return ToVDFNode(text, typeof(T), options); }
 		public static VDFNode ToVDFNode(string text, VDFLoadOptions options) { return ToVDFNode(text, null, options); }
 		public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions options = null) { return ToVDFNode(VDFTokenParser.ParseTokens(text, options), declaredType, options); }
-		public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null, int firstTokenIndex = 0, int enderTokenIndex = -1)
-		{
+		public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null, int firstTokenIndex = 0, int enderTokenIndex = -1) {
 			options = options ?? new VDFLoadOptions();
 			enderTokenIndex = enderTokenIndex != -1 ? enderTokenIndex : tokens.Count;
 
@@ -69,8 +60,7 @@ namespace VDFN
 			var tokensAtDepth0 = new List<VDFToken>();
 			var tokensAtDepth1 = new List<VDFToken>();
 			//foreach (VDFToken token in tokens)
-			for (var i = firstTokenIndex; i < enderTokenIndex; i++)
-			{
+			for (var i = firstTokenIndex; i < enderTokenIndex; i++) {
 				var token = tokens[i];
 				if (token.type == VDFTokenType.ListEndMarker || token.type == VDFTokenType.MapEndMarker)
 					depth--;
@@ -99,8 +89,7 @@ namespace VDFN
 				fromVDFTypeName = "Dictionary(object object)"; //"object";
 
 			Type type = declaredType;
-			if (fromVDFTypeName != null && fromVDFTypeName.Length > 0)
-			{
+			if (fromVDFTypeName != null && fromVDFTypeName.Length > 0) {
 				var fromVDFType = VDF.GetTypeByName(fromVDFTypeName, options);
 				if (type == null || fromVDFType.IsDerivedFrom(type)) // if there is no declared type, or the from-vdf type is more specific than the declared type
 					type = fromVDFType;
@@ -122,8 +111,7 @@ namespace VDFN
 				node.primitiveValue = null;
 			else if (type == typeof(bool) || type == typeof(bool?))
 				node.primitiveValue = bool.Parse(firstNonMetadataToken.text);
-			else if (type == typeof(int) || type == typeof(int?))
-			{
+			else if (type == typeof(int) || type == typeof(int?)) {
 				//node.primitiveValue = int.Parse(firstNonMetadataToken.text);
 				// maybe make-so: changes in other places are done as well, to add good support for long's
 				var number = long.Parse(firstNonMetadataToken.text);
@@ -153,14 +141,11 @@ namespace VDFN
 
 			// if list, parse items
 			//else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
-			else if (type.IsDerivedFrom(typeof(IList)))
-			{
+			else if (type.IsDerivedFrom(typeof(IList))) {
 				node.isList = true;
-				for (var i = 0; i < tokensAtDepth1.Count; i++)
-				{
+				for (var i = 0; i < tokensAtDepth1.Count; i++) {
 					var token = tokensAtDepth1[i];
-					if (token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker)
-					{
+					if (token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker) {
 						var itemFirstToken = tokens[token.index];
 						var itemEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker);
 						//node.listChildren.Add(ToVDFNode(GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
@@ -173,14 +158,11 @@ namespace VDFN
 
 			// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
 			//else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
-			else //if (!objType.IsDerivedFrom(typeof(IList)))
-			{
+			else { //if (!objType.IsDerivedFrom(typeof(IList))) {
 				node.isMap = true;
-				for (var i = 0; i < tokensAtDepth1.Count; i++)
-				{
+				for (var i = 0; i < tokensAtDepth1.Count; i++) {
 					var token = tokensAtDepth1[i];
-					if (token.type == VDFTokenType.Key)
-					{
+					if (token.type == VDFTokenType.Key) {
 						var propNameFirstToken = i >= 1 && tokensAtDepth1[i - 1].type == VDFTokenType.Metadata ? tokensAtDepth1[i - 1] : tokensAtDepth1[i];
 						var propNameEnderToken = tokensAtDepth1[i + 1];
 						var propNameType = propNameFirstToken.type == VDFTokenType.Metadata ? typeof(object) : typeof(string);
@@ -205,8 +187,7 @@ namespace VDFN
 
 			return node;
 		}
-		/*static List<VDFToken> GetTokenRange_Tokens(List<VDFToken> tokens, VDFToken firstToken, VDFToken enderToken)
-		{
+		/*static List<VDFToken> GetTokenRange_Tokens(List<VDFToken> tokens, VDFToken firstToken, VDFToken enderToken) {
 			//return tokens.GetRange(firstToken.index, (enderToken != null ? enderToken.index : tokens.Count) - firstToken.index).Select(a=>new VDFToken(a.type, a.position - firstToken.position, a.index - firstToken.index, a.text)).ToList();
 
 			var result = new List<VDFToken>(); //(enderToken != null ? enderToken.index : tokens.Count) - firstToken.index);
