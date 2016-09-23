@@ -40,15 +40,20 @@ namespace VDFN {
 		// List<MemberInfo>
 		public static List<MemberInfo> GetMembers_Full(this Type self, BindingFlags flags) {
 			var result = new List<MemberInfo>(); //HashSet<MemberInfo>();
+
+			// for *functions*, order it derived-class-then-base (so eg the correct static deserialize method is called)
+			//   BUT, for *normal* members, order it base-class-then-derived (so eg prop order makes more sense in vdf output)
 			var currentType = self;
-			while (currentType != null) {
-				/*foreach (MemberInfo member in currentType.GetMembers(flags | BindingFlags.DeclaredOnly)) // only get members declared in this class (not in base, since we're getting those ourselves soon anyway)
-					//if (!result.Contains(member))
-					result.Add(member);*/
-				//result.InsertRange(0, currentType.GetMembers(flags | BindingFlags.DeclaredOnly));
-				result.AddRange(currentType.GetMembers(flags | BindingFlags.DeclaredOnly));
+			while (currentType != null) { // for functions
+				result.AddRange(currentType.GetMembers(flags | BindingFlags.DeclaredOnly).Where(a=>a is MethodBase));
 				currentType = currentType.BaseType;
 			}
+			currentType = self;
+			while (currentType != null) { // for normal members
+				result.InsertRange(0, currentType.GetMembers(flags | BindingFlags.DeclaredOnly).Where(a=>!(a is MethodBase)));
+				currentType = currentType.BaseType;
+			}
+
 			return result; //.ToList(); //Distinct().ToList();
 		}
 
