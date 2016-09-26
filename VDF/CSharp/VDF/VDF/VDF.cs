@@ -98,10 +98,13 @@ namespace VDFN {
 				return "ki:" + map_keyIndex;
 			if (map_key != null)
 				return "k:" + map_key;
-			//return "p:" + prop.memberInfo.Name;
-			return prop.memberInfo.Name;
+			if (prop != null)
+				//return "p:" + prop.memberInfo.Name;
+				return prop.memberInfo.Name;
+			return "";
 		}
 	}
+
 	public class VDFNodePath {
 		public List<VDFNodePathNode> nodes;
 		public VDFNodePath(List<VDFNodePathNode> nodes) { this.nodes = nodes; }
@@ -134,11 +137,11 @@ namespace VDFN {
 
 		// for debugging
 		public override string ToString() {
-			var resultBuilder = new StringBuilder();
+			var result = "";
 			var index = 0;
 			foreach (var node in nodes)
-				resultBuilder.Append(index++ == 0 ? "" : "/").Append(node);
-			return resultBuilder.ToString();
+				result += (index++ == 0 ? "" : "/") + node;
+			return result;
 		}
 	}
 
