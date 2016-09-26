@@ -47,18 +47,27 @@ namespace VDFTests {
 			a.ToVDF().Should().Be("\"A\"");
 		}
 		[Fact] void D0_EscapedString() {
-			var a = VDFSaver.ToVDFNode<string>(
-@"Multiline string
-that needs escaping.".Fix());
-			a.ToVDF().Should().Be(
-@"""<<Multiline string
-that needs escaping.>>""".Fix());
-
-			a = VDFSaver.ToVDFNode<string>("String \"that needs escaping\".");
-			a.ToVDF().Should().Be("\"<<String \"that needs escaping\".>>\"");
-
-			a = VDFSaver.ToVDFNode<string>("String <<that needs escaping>>.");
-			a.ToVDF().Should().Be("\"<<<String <<that needs escaping>>.>>>\"");
+			var options = new VDFSaveOptions(typeMarking: VDFTypeMarking.None);
+			// escape line-breaks
+			var a = VDFSaver.ToVDFNode("this\nneeds escaping", options);
+			a.ToVDF().Should().Be("\"<<this\nneeds escaping>>\"");
+			// escape single-quotes
+			a = VDFSaver.ToVDFNode("this 'needs' escaping", options);
+			a.ToVDF().Should().Be("\"<<this 'needs' escaping>>\"");
+			// escape double-quotes
+			a = VDFSaver.ToVDFNode("this \"needs\" escaping", options);
+			a.ToVDF().Should().Be("\"<<this \"needs\" escaping>>\"");
+			// escape double angle-brackets
+			a = VDFSaver.ToVDFNode("this<<needs escaping", options);
+			a.ToVDF().Should().Be("\"<<<this<<needs escaping>>>\"");
+			a = VDFSaver.ToVDFNode("this>>needs escaping", options);
+			a.ToVDF().Should().Be("\"<<<this>>needs escaping>>>\"");
+		}
+		[Fact] void D0_EscapedStringIfNonQuoted() {
+			var options = new VDFSaveOptions(typeMarking: VDFTypeMarking.None);
+			VDF.Serialize(new Dictionary<string, string> {{"{", "val1"}}, options).Should().Be("{<<{>>:\"val1\"}");
+			VDF.Serialize(new Dictionary<string, string> {{"^", "val1"}}, options).Should().Be("{<<^>>:\"val1\"}");
+			VDF.Serialize(new Dictionary<string, string> {{"3", "val1"}}, options).Should().Be("{<<3>>:\"val1\"}");
 		}
 
 		[Fact] void D1_ListInferredFromHavingItem_String() {

@@ -47,10 +47,8 @@
 	isMap: boolean; // can also be inferred from use of map-children collection
 	childPopOut: boolean;
 	ToVDF(options: VDFSaveOptions = null, tabDepth = 0): string { return this.ToVDF_InlinePart(options, tabDepth) + this.ToVDF_PoppedOutPart(options, tabDepth); }
-	/*static charsThatNeedEscaping_1 = ['"', '\'', '\n'];
-	static charsThatNeedEscaping_2 = ['{', '}', '[', ']', ':'];*/
-	static charsThatNeedEscaping_1_regex = /"|'|\n|<<|>>/;
-	static charsThatNeedEscaping_2_regex = /{|}|\[|\]|:/;
+	static charsThatNeedEscaping_ifAnywhere_regex = /"|'|\n|\t|<<|>>/; // (well, anywhere in string)
+	static charsThatNeedEscaping_ifNonQuoted_regex = /^([\t^# ,0-9.\-+]|null|true|false)|{|}|\[|\]|:/;
 	ToVDF_InlinePart(options: VDFSaveOptions = null, tabDepth = 0, isKey = false): string {
 		options = options || new VDFSaveOptions();
 
@@ -69,11 +67,9 @@
 		else if (typeof this.primitiveValue == "string") {
 			var unpaddedString = <string>this.primitiveValue;
 			// (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
-			//var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("'") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
-			var needsEscaping = VDFNode.charsThatNeedEscaping_1_regex.test(unpaddedString);
-			if (isKey)
-				//needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
-				needsEscaping = needsEscaping || VDFNode.charsThatNeedEscaping_2_regex.test(unpaddedString);
+			var needsEscaping = VDFNode.charsThatNeedEscaping_ifAnywhere_regex.test(unpaddedString);
+			if (isKey) // if key, we'll be trying to save without quotes, so be super escapy
+				needsEscaping = needsEscaping || VDFNode.charsThatNeedEscaping_ifNonQuoted_regex.test(unpaddedString);
 			if (needsEscaping) {
 				var literalStartMarkerString = "<<";
 				var literalEndMarkerString = ">>";

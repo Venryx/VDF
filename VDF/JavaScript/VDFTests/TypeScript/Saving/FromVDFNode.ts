@@ -40,30 +40,36 @@ module VDFTests { // added to match C# indentation
 		});
 		enum Enum1 { _IsEnum, A, B, C }
 		//enum Enum1 { A, B, C }
-		test("D0_EnumDefault", ()=>
-		{
+		test("D0_EnumDefault", ()=> {
 			var a = VDFSaver.ToVDFNode(Enum1.A, "Enum1");
 			a.ToVDF().Should().Be("\"A\"");
 		});
-		test("D0_EnumDefault_IncludeType", ()=>
-		{
+		test("D0_EnumDefault_IncludeType", ()=> {
 			var a = VDFSaver.ToVDFNode(Enum1.A, "Enum1", new VDFSaveOptions({typeMarking: VDFTypeMarking.External}));
 			a.ToVDF().Should().Be("Enum1>\"A\"");
 		});
-		test("D0_EscapedString", ()=>
-		{
-			var a = VDFSaver.ToVDFNode(
-"Multiline string\n\
-that needs escaping.".Fix(), "string");
-			a.ToVDF().Should().Be(
-"\"<<Multiline string\n\
-that needs escaping.>>\"".Fix());
-
-			a = VDFSaver.ToVDFNode("String \"that needs escaping\".", "string");
-			a.ToVDF().Should().Be("\"<<String \"that needs escaping\".>>\"");
-
-			a = VDFSaver.ToVDFNode("String <<that needs escaping>>.", "string");
-			a.ToVDF().Should().Be("\"<<<String <<that needs escaping>>.>>>\"");
+		test("D0_EscapedString", ()=> {
+			var options = new VDFSaveOptions(null, null, VDFTypeMarking.None);
+			// escape line-breaks
+			var a = VDFSaver.ToVDFNode("this\nneeds escaping", options);
+			a.ToVDF().Should().Be("\"<<this\nneeds escaping>>\"");
+			// escape single-quotes
+			a = VDFSaver.ToVDFNode("this 'needs' escaping", options);
+			a.ToVDF().Should().Be("\"<<this 'needs' escaping>>\"");
+			// escape double-quotes
+			a = VDFSaver.ToVDFNode("this \"needs\" escaping", options);
+			a.ToVDF().Should().Be("\"<<this \"needs\" escaping>>\"");
+			// escape double angle-brackets
+			a = VDFSaver.ToVDFNode("this<<needs escaping", options);
+			a.ToVDF().Should().Be("\"<<<this<<needs escaping>>>\"");
+			a = VDFSaver.ToVDFNode("this>>needs escaping", options);
+			a.ToVDF().Should().Be("\"<<<this>>needs escaping>>>\"");
+		});
+		test("D0_EscapedStringIfNonQuoted", ()=> {
+			var options = new VDFSaveOptions(null, null, VDFTypeMarking.None);
+			VDF.Serialize(new Dictionary("string", "string", {"{": "val1"}), options).Should().Be("{<<{>>:\"val1\"}");
+			VDF.Serialize(new Dictionary("string", "string", {"^": "val1"}), options).Should().Be("{<<^>>:\"val1\"}");
+			VDF.Serialize(new Dictionary("string", "string", {"3": "val1"}), options).Should().Be("{<<3>>:\"val1\"}");
 		});
 		test("D0_EmptyArray", ()=>{ VDF.Serialize([]).Should().Be("[]"); });
 

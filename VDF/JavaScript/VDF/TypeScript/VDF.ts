@@ -620,8 +620,7 @@ interface List<T> extends Array<T> { // class/instance declaration stuff
 	Contains(item: T): boolean;
 }
 
-class Dictionary<K, V>
-{
+class Dictionary<K, V> {
 	realTypeName: string;
 	keyType: string;
 	valueType: string;

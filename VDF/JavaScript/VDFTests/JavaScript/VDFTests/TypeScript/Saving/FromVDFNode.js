@@ -50,14 +50,27 @@ var VDFTests;
             a.ToVDF().Should().Be("Enum1>\"A\"");
         });
         test("D0_EscapedString", function () {
-            var a = VDFSaver.ToVDFNode("Multiline string\n\
-that needs escaping.".Fix(), "string");
-            a.ToVDF().Should().Be("\"<<Multiline string\n\
-that needs escaping.>>\"".Fix());
-            a = VDFSaver.ToVDFNode("String \"that needs escaping\".", "string");
-            a.ToVDF().Should().Be("\"<<String \"that needs escaping\".>>\"");
-            a = VDFSaver.ToVDFNode("String <<that needs escaping>>.", "string");
-            a.ToVDF().Should().Be("\"<<<String <<that needs escaping>>.>>>\"");
+            var options = new VDFSaveOptions(null, null, VDFTypeMarking.None);
+            // escape line-breaks
+            var a = VDFSaver.ToVDFNode("this\nneeds escaping", options);
+            a.ToVDF().Should().Be("\"<<this\nneeds escaping>>\"");
+            // escape single-quotes
+            a = VDFSaver.ToVDFNode("this 'needs' escaping", options);
+            a.ToVDF().Should().Be("\"<<this 'needs' escaping>>\"");
+            // escape double-quotes
+            a = VDFSaver.ToVDFNode("this \"needs\" escaping", options);
+            a.ToVDF().Should().Be("\"<<this \"needs\" escaping>>\"");
+            // escape double angle-brackets
+            a = VDFSaver.ToVDFNode("this<<needs escaping", options);
+            a.ToVDF().Should().Be("\"<<<this<<needs escaping>>>\"");
+            a = VDFSaver.ToVDFNode("this>>needs escaping", options);
+            a.ToVDF().Should().Be("\"<<<this>>needs escaping>>>\"");
+        });
+        test("D0_EscapedStringIfNonQuoted", function () {
+            var options = new VDFSaveOptions(null, null, VDFTypeMarking.None);
+            VDF.Serialize(new Dictionary("string", "string", { "{": "val1" }), options).Should().Be("{<<{>>:\"val1\"}");
+            VDF.Serialize(new Dictionary("string", "string", { "^": "val1" }), options).Should().Be("{<<^>>:\"val1\"}");
+            VDF.Serialize(new Dictionary("string", "string", { "3": "val1" }), options).Should().Be("{<<3>>:\"val1\"}");
         });
         test("D0_EmptyArray", function () { VDF.Serialize([]).Should().Be("[]"); });
         test("D1_ListInferredFromHavingItem_String", function () {

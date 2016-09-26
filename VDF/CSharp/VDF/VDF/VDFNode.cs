@@ -90,10 +90,9 @@ namespace VDFN {
 		public bool isMap; // can also be inferred from use of map-children collection
 		public bool childPopOut;
 		public string ToVDF(VDFSaveOptions options = null, int tabDepth = 0) { return ToVDF_InlinePart(options, tabDepth) + ToVDF_PoppedOutPart(options, tabDepth); }
-		public char[] charsThatNeedEscaping_1 = {'"', '\'', '\n'};
-		public char[] charsThatNeedEscaping_2 = {'{', '}', '[', ']', ':'};
-		/*public Regex charsThatNeedEscaping_1_regex = new Regex("\"|'|\n|<<|>>");
-		public Regex charsThatNeedEscaping_2_regex = new Regex(@"{|}|\[|\]|:");*/
+		//public Regex charsThatNeedEscaping_ifAnywhere_regex = new Regex("\"|'|\n|<<|>>"); // (well, anywhere in string)
+		public char[] charsThatNeedEscaping_ifAnywhere = {'"', '\'', '\n'}; // char-list instead of regex, for speed
+		public Regex charsThatNeedEscaping_ifNonQuoted_regex = new Regex(@"(^([\t^# ,0-9.\-+]|null|true|false))" + @"|{|}|\[|\]|:");
 		public string ToVDF_InlinePart(VDFSaveOptions options = null, int tabDepth = 0, bool isKey = false) {
 			options = options ?? new VDFSaveOptions();
 
@@ -112,13 +111,11 @@ namespace VDFN {
 			else if (primitiveValue is string) {
 				var unpaddedString = (string)primitiveValue;
 				// (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
-				//var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("'") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
-				var needsEscaping = unpaddedString.IndexOfAny(charsThatNeedEscaping_1) != -1 || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
-				//var needsEscaping = charsThatNeedEscaping_1_regex.IsMatch(unpaddedString);
-				if (isKey)
-					//needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
-					needsEscaping = needsEscaping || unpaddedString.IndexOfAny(charsThatNeedEscaping_2) != -1;
-					//needsEscaping = needsEscaping || charsThatNeedEscaping_2_regex.IsMatch(unpaddedString);
+				var needsEscaping = unpaddedString.IndexOfAny(charsThatNeedEscaping_ifAnywhere) != -1
+					|| unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
+				//var needsEscaping = charsThatNeedEscaping_ifAnywhere_regex.IsMatch(unpaddedString);
+				if (isKey) // if key, we'll be trying to save without quotes, so be super escapy
+					needsEscaping = needsEscaping|| charsThatNeedEscaping_ifNonQuoted_regex.IsMatch(unpaddedString);
 				if (needsEscaping) {
 					var literalStartMarkerString = "<<";
 					var literalEndMarkerString = ">>";

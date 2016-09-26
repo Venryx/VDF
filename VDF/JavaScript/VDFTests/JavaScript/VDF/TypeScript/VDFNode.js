@@ -57,11 +57,9 @@ var VDFNode = (function () {
         else if (typeof this.primitiveValue == "string") {
             var unpaddedString = this.primitiveValue;
             // (the parser doesn't actually need '<<' and '>>' wrapped for single-line strings, but we do so for consistency)
-            //var needsEscaping = unpaddedString.Contains("\"") || unpaddedString.Contains("'") || unpaddedString.Contains("\n") || unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
-            var needsEscaping = VDFNode.charsThatNeedEscaping_1_regex.test(unpaddedString);
+            var needsEscaping = VDFNode.charsThatNeedEscaping_ifAnywhere_regex.test(unpaddedString);
             if (isKey)
-                //needsEscaping = needsEscaping || unpaddedString.Contains("{") || unpaddedString.Contains("}") || unpaddedString.Contains("[") || unpaddedString.Contains("]") || unpaddedString.Contains(":");
-                needsEscaping = needsEscaping || VDFNode.charsThatNeedEscaping_2_regex.test(unpaddedString);
+                needsEscaping = needsEscaping || VDFNode.charsThatNeedEscaping_ifNonQuoted_regex.test(unpaddedString);
             if (needsEscaping) {
                 var literalStartMarkerString = "<<";
                 var literalEndMarkerString = ">>";
@@ -302,10 +300,8 @@ var VDFNode = (function () {
             for (var i in options.objPostDeserializeFuncs.Get(obj))
                 options.objPostDeserializeFuncs.Get(obj)[i]();
     };
-    /*static charsThatNeedEscaping_1 = ['"', '\'', '\n'];
-    static charsThatNeedEscaping_2 = ['{', '}', '[', ']', ':'];*/
-    VDFNode.charsThatNeedEscaping_1_regex = /"|'|\n|<<|>>/;
-    VDFNode.charsThatNeedEscaping_2_regex = /{|}|\[|\]|:/;
+    VDFNode.charsThatNeedEscaping_ifAnywhere_regex = /"|'|\n|\t|<<|>>/; // (well, anywhere in string)
+    VDFNode.charsThatNeedEscaping_ifNonQuoted_regex = /^([\t^# ,0-9.\-+]|null|true|false)|{|}|\[|\]|:/;
     return VDFNode;
 }());
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);

@@ -101,8 +101,10 @@ var VDFNodePathNode = (function () {
             return "ki:" + this.map_keyIndex;
         if (this.map_key != null)
             return "k:" + this.map_key;
-        //return "p:" + this.prop.name;
-        return this.prop.name;
+        if (this.prop != null)
+            //return "p:" + this.prop.name;
+            return this.prop.name;
+        return "";
     };
     return VDFNodePathNode;
 }());
