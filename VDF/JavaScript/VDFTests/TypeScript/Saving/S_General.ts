@@ -38,6 +38,18 @@ window["test"] = function(name, func) { saving[name] = func; };
 
 module VDFTests { // added to match C# indentation
 	module Saving_General {
+		// general
+		// ==========
+
+		test("NodePathToStringReturnsX", ()=> {
+			var path = new VDFNodePath(new List<VDFNodePathNode>("VDFNodePathNode"));
+			path.nodes.Add(new VDFNodePathNode(null, new VDFPropInfo("prop1", null, [])));
+			path.nodes.Add(new VDFNodePathNode(null, null, 1));
+			path.nodes.Add(new VDFNodePathNode(null, null, null, 2));
+			path.nodes.Add(new VDFNodePathNode(null, null, null, null, <any>"key1"));
+			path.toString().Should().Be("prop1/i:1/ki:2/k:key1");
+		});
+
 		// prop-inclusion by regex
 		// ==========
 
@@ -47,7 +59,9 @@ module VDFTests { // added to match C# indentation
 			_notMatching = Prop(this, "_notMatching", "bool").set = true;
 			matching = Prop(this, "matching", "bool").set = true;
 		}
-		test("D1_Map_PropWithNameMatchingIncludeRegex", ()=>{ VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}"); });
+		test("D1_Map_PropWithNameMatchingIncludeRegex", ()=> {
+			VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}");
+		});
 
 		class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {
 			_helper = TypeInfo(new VDFType("^[^_]")).set = this;
@@ -59,7 +73,9 @@ module VDFTests { // added to match C# indentation
 			matching = Prop(this, "matching", "bool").set = true;
 		}
 		D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
-		test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", ()=>{ VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}"); });
+		test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", ()=> {
+			VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}");
+		});
 
 		// serialize-related methods
 		// ==========
@@ -76,14 +92,18 @@ module VDFTests { // added to match C# indentation
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
 		//AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
-		test("D1_MapWithEmbeddedSerializeMethod_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}"); });
+		test("D1_MapWithEmbeddedSerializeMethod_Prop", ()=> {
+			VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}");
+		});
 
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class {
 			boolProp = Prop(this, "boolProp", "bool", new P()).set = true;
 			Serialize() { return; }
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
-		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}"); });
+		test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", ()=> {
+			VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}");
+		});
 
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent
 			{ child = Prop(this, "child", "D1_Map_MapThatCancelsItsSerialize_Class_Child", new P()).set = new D1_Map_MapThatCancelsItsSerialize_Class_Child(); }
@@ -91,7 +111,9 @@ module VDFTests { // added to match C# indentation
 			Serialize() { return VDF.CancelSerialize; }
 			constructor() { this.Serialize.AddTags(new VDFSerialize()); }
 		}
-		test("D1_Map_MapThatCancelsItsSerialize", ()=> { VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}"); });
+		test("D1_Map_MapThatCancelsItsSerialize", ()=> {
+			VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}");
+		});
 
 		// for JSON compatibility
 		// ==========

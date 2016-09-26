@@ -93,6 +93,17 @@ var VDFNodePathNode = (function () {
         this.map_key = map_key;
     }
     VDFNodePathNode.prototype.Clone = function () { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); };
+    // for debugging
+    VDFNodePathNode.prototype.toString = function () {
+        if (this.list_index != null)
+            return "i:" + this.list_index;
+        if (this.map_keyIndex != null)
+            return "ki:" + this.map_keyIndex;
+        if (this.map_key != null)
+            return "k:" + this.map_key;
+        //return "p:" + this.prop.name;
+        return this.prop.name;
+    };
     return VDFNodePathNode;
 }());
 var VDFNodePath = (function () {
@@ -136,6 +147,16 @@ var VDFNodePath = (function () {
         var newNodes = this.nodes.Select(function (a) { return a.Clone(); }, "VDFNodePathNode");
         newNodes.Add(new VDFNodePathNode(obj, prop));
         return new VDFNodePath(newNodes);
+    };
+    // for debugging
+    VDFNodePath.prototype.toString = function () {
+        var result = "";
+        var index = 0;
+        for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+            var node = _a[_i];
+            result += (index++ == 0 ? "" : "/") + node;
+        }
+        return result;
     };
     return VDFNodePath;
 }());

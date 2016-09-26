@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text;
 
 namespace VDFN {
 	public class VDFException : Exception {
@@ -88,6 +89,18 @@ namespace VDFN {
 		}
 
 		public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key); }
+
+		// for debugging
+		public override string ToString() {
+			if (list_index != null)
+				return "i:" + list_index;
+			if (map_keyIndex != null)
+				return "ki:" + map_keyIndex;
+			if (map_key != null)
+				return "k:" + map_key;
+			//return "p:" + prop.memberInfo.Name;
+			return prop.memberInfo.Name;
+		}
 	}
 	public class VDFNodePath {
 		public List<VDFNodePathNode> nodes;
@@ -117,6 +130,15 @@ namespace VDFN {
 			var newNodes = nodes.Select(a=>a.Clone()).ToList();
 			newNodes.Add(new VDFNodePathNode(obj, prop));
 			return new VDFNodePath(newNodes);
+		}
+
+		// for debugging
+		public override string ToString() {
+			var resultBuilder = new StringBuilder();
+			var index = 0;
+			foreach (var node in nodes)
+				resultBuilder.Append(index++ == 0 ? "" : "/").Append(node);
+			return resultBuilder.ToString();
 		}
 	}
 

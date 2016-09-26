@@ -7,6 +7,19 @@ using Xunit;
 
 namespace VDFTests {
 	public class Saving_General {
+		// general
+		// ==========
+
+		[Fact] void NodePathToStringReturnsX() {
+			var path = new VDFNodePath(new List<VDFNodePathNode>());
+			//path.nodes.Add(new VDFNodePathNode(null, new VDFPropInfo("prop1", null, null)));
+			path.nodes.Add(new VDFNodePathNode(null, null, 1));
+			path.nodes.Add(new VDFNodePathNode(null, null, null, 2));
+			path.nodes.Add(new VDFNodePathNode(null, null, null, null, "key1"));
+			//path.ToString().Should().Be("prop1/i:1/ki:2/k:key1");
+			path.ToString().Should().Be("i:1/ki:2/k:key1");
+		}
+
 		// prop-inclusion by regex
 		// ==========
 
@@ -21,7 +34,9 @@ namespace VDFTests {
 			public bool _notMatching = true;
 			public bool matching = true;
 		}
-		[Fact] void D1_Map_PropWithNameMatchingIncludeRegex() { VDF.Serialize<D1_Map_PropWithNameMatchingIncludeRegex_Class>(new D1_Map_PropWithNameMatchingIncludeRegex_Class()).Should().Be("{matching:true}"); }
+		[Fact] void D1_Map_PropWithNameMatchingIncludeRegex() {
+			VDF.Serialize<D1_Map_PropWithNameMatchingIncludeRegex_Class>(new D1_Map_PropWithNameMatchingIncludeRegex_Class()).Should().Be("{matching:true}");
+		}
 
 		[VDFType(propIncludeRegexL1: "^[^_]")] class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {
 		}
@@ -29,7 +44,9 @@ namespace VDFTests {
 			public bool _notMatching = true;
 			public bool matching = true;
 		}
-		[Fact] void D1_Map_PropWithNameMatchingBaseClassIncludeRegex() { VDF.Serialize<D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived>(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived()).Should().Be("{matching:true}"); }
+		[Fact] void D1_Map_PropWithNameMatchingBaseClassIncludeRegex() {
+			VDF.Serialize<D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived>(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived()).Should().Be("{matching:true}");
+		}
 
 		// serialize-related methods
 		// ==========
@@ -44,13 +61,17 @@ namespace VDFTests {
 				return result;
 			}
 		}
-		[Fact] void D1_MapWithEmbeddedSerializeMethod_Prop() { VDF.Serialize<D1_MapWithEmbeddedSerializeMethod_Prop_Class>(new D1_MapWithEmbeddedSerializeMethod_Prop_Class()).Should().Be("{included:true}"); }
+		[Fact] void D1_MapWithEmbeddedSerializeMethod_Prop() {
+			VDF.Serialize<D1_MapWithEmbeddedSerializeMethod_Prop_Class>(new D1_MapWithEmbeddedSerializeMethod_Prop_Class()).Should().Be("{included:true}");
+		}
 
 		class D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class {
 			[P] public bool boolProp = true;
 			[VDFSerialize] VDFNode Serialize() { return VDF.Undefined; }
 		}
-		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop() { VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}"); }
+		[Fact] void D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop() {
+			VDF.Serialize<D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class>(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class()).Should().Be("{boolProp:true}");
+		}
 
 		class D1_Map_MapThatCancelsItsSerialize_Class_Parent {
 			[P] public D1_Map_MapThatCancelsItsSerialize_Class_Child child = new D1_Map_MapThatCancelsItsSerialize_Class_Child();
@@ -58,7 +79,9 @@ namespace VDFTests {
 		class D1_Map_MapThatCancelsItsSerialize_Class_Child {
 			[VDFSerialize] VDFNode Serialize() { return VDF.CancelSerialize; }
 		}
-		[Fact] void D1_Map_MapThatCancelsItsSerialize() { VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}"); }
+		[Fact] void D1_Map_MapThatCancelsItsSerialize() {
+			VDF.Serialize<D1_Map_MapThatCancelsItsSerialize_Class_Parent>(new D1_Map_MapThatCancelsItsSerialize_Class_Parent()).Should().Be("{}");
+		}
 
 		// for JSON compatibility
 		// ==========

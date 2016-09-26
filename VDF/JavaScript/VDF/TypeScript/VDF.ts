@@ -110,6 +110,18 @@ class VDFNodePathNode {
 	}
 
 	Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
+
+	// for debugging
+	toString() {
+		if (this.list_index != null)
+			return "i:" + this.list_index;
+		if (this.map_keyIndex != null)
+			return "ki:" + this.map_keyIndex;
+		if (this.map_key != null)
+			return "k:" + this.map_key;
+		//return "p:" + this.prop.name;
+		return this.prop.name;
+	}
 }
 class VDFNodePath {
 	nodes: List<VDFNodePathNode>;
@@ -145,6 +157,15 @@ class VDFNodePath {
 		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
 		newNodes.Add(new VDFNodePathNode(obj, prop));
 		return new VDFNodePath(newNodes);
+	}
+
+	// for debugging
+	toString() {
+		var result = "";
+		var index = 0;
+		for (let node of this.nodes)
+			result += (index++ == 0 ? "" : "/") + node;
+		return result;
 	}
 }
 
