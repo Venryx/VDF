@@ -99,7 +99,7 @@ namespace VDFN {
 			var builder = new StringBuilder();
 
 			var metadata = metadata_override ?? this.metadata;
-			if (options.useMetadata && metadata != null)
+			if (options.useMetadata && metadata != null && metadata != "")
 				builder.Append(metadata).Append(">");
 
 			if (primitiveValue == null) {

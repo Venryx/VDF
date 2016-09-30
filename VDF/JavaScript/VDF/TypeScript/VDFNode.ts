@@ -55,7 +55,7 @@
 		var builder = new StringBuilder();
 
 		var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
-		if (options.useMetadata && metadata != null)
+		if (options.useMetadata && metadata != null && metadata != "")
 			builder.Append(metadata + ">");
 
 		if (this.primitiveValue == null) {
