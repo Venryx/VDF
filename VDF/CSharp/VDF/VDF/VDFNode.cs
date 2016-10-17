@@ -90,9 +90,9 @@ namespace VDFN {
 		public bool isMap; // can also be inferred from use of map-children collection
 		public bool childPopOut;
 		public string ToVDF(VDFSaveOptions options = null, int tabDepth = 0) { return ToVDF_InlinePart(options, tabDepth) + ToVDF_PoppedOutPart(options, tabDepth); }
-		//public Regex charsThatNeedEscaping_ifAnywhere_regex = new Regex("\"|'|\n|<<|>>"); // (well, anywhere in string)
-		public char[] charsThatNeedEscaping_ifAnywhere = {'"', '\'', '\n'}; // char-list instead of regex, for speed
-		public Regex charsThatNeedEscaping_ifNonQuoted_regex = new Regex(@"(^([\t^# ,0-9.\-+]|null|true|false))" + @"|{|}|\[|\]|:");
+		//static Regex charsThatNeedEscaping_ifAnywhere_regex = new Regex("\"|'|\n|<<|>>"); // (well, anywhere in string)
+		static char[] charsThatNeedEscaping_ifAnywhere = {'"', '\'', '\n'}; // char-list instead of regex, for speed
+		static Regex charsThatNeedEscaping_ifNonQuoted_regex = new Regex(@"(^([\t^# ,0-9.\-+]|null|true|false))" + @"|{|}|\[|\]|:");
 		public string ToVDF_InlinePart(VDFSaveOptions options = null, int tabDepth = 0, bool isKey = false) {
 			options = options ?? new VDFSaveOptions();
 
@@ -115,7 +115,7 @@ namespace VDFN {
 					|| unpaddedString.Contains("<<") || unpaddedString.Contains(">>");
 				//var needsEscaping = charsThatNeedEscaping_ifAnywhere_regex.IsMatch(unpaddedString);
 				if (isKey) // if key, we'll be trying to save without quotes, so be super escapy
-					needsEscaping = needsEscaping|| charsThatNeedEscaping_ifNonQuoted_regex.IsMatch(unpaddedString);
+					needsEscaping = needsEscaping || charsThatNeedEscaping_ifNonQuoted_regex.IsMatch(unpaddedString);
 				if (needsEscaping) {
 					var literalStartMarkerString = "<<";
 					var literalEndMarkerString = ">>";
