@@ -438,7 +438,8 @@ namespace VDFN {
 			tokens.Add(new VDFToken(VDFTokenType.None, -1, -1, "")); // maybe temp: add depth-0-ender helper token
 
 			var line_tabsReached = 0;
-			var tabDepth_popOutBlockEndWrapTokens = new Dictionary<int, List<VDFToken>>();
+			//var tabDepth_popOutBlockEndWrapTokens = new Dictionary<int, List<VDFToken>>();
+			var tabDepth_tokensToProcessAfterEnds = new Dictionary<int, List<VDFToken>>();
 			for (var i = 0; i < tokens.Count; i++) {
 				VDFToken lastToken = i - 1 >= 0 ? tokens[i - 1] : null;
 				VDFToken token = tokens[i];
@@ -451,27 +452,21 @@ namespace VDFN {
 						var enderTokenIndex = i + 1;
 						while (enderTokenIndex < tokens.Count - 1 && tokens[enderTokenIndex].type != VDFTokenType.LineBreak && (tokens[enderTokenIndex].type != VDFTokenType.PoppedOutChildGroupMarker || tokens[enderTokenIndex - 1].type == VDFTokenType.ListStartMarker || tokens[enderTokenIndex - 1].type == VDFTokenType.MapStartMarker))
 							enderTokenIndex++;
+						// the wrap-group consists of the on-same-line text after the popped-out-child-marker (eg the "]}" in "{children:[^]}")
 						var wrapGroupTabDepth = tokens[enderTokenIndex].type == VDFTokenType.PoppedOutChildGroupMarker ? line_tabsReached - 1 : line_tabsReached;
-						tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth] = tokens.GetRange(i + 1, enderTokenIndex - (i + 1));
-						tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][0].index = i + 1; // update index
+						tabDepth_tokensToProcessAfterEnds[wrapGroupTabDepth] = tokens.GetRange(i + 1, enderTokenIndex - (i + 1));
+						tabDepth_tokensToProcessAfterEnds[wrapGroupTabDepth][0].index = i + 1; // update index
 						i = enderTokenIndex - 1; // have next token processed be the ender-token (^^[...] or line-break)
 					}
 					else if (lastToken.type == VDFTokenType.Tab) {
+						// #make-sure: this is correct, after update above
 						var wrapGroupTabDepth = lastToken.type == VDFTokenType.Tab ? line_tabsReached - 1 : line_tabsReached;
-						tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth]);
-						//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][0]), tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count);
-						tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][0].index, tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count); // index was updated when set put together
-						/*foreach (VDFToken token2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth]) {
-							tokens.Remove(token2);
-							tokens.Insert(i - 1, token2);
-						}*/
-
-						// old; maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
-						//RefreshTokenPositionAndIndexProperties(tokens);
+						tokens.InsertRange(i, tabDepth_tokensToProcessAfterEnds[wrapGroupTabDepth]);
+						tokens.RemoveRange(tabDepth_tokensToProcessAfterEnds[wrapGroupTabDepth][0].index, tabDepth_tokensToProcessAfterEnds[wrapGroupTabDepth].Count); // index was updated when set put together
 
 						// have next token processed be the first pop-out-block-end-wrap-token
-						i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1;
-						tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
+						i -= tabDepth_tokensToProcessAfterEnds[wrapGroupTabDepth].Count + 1;
+						tabDepth_tokensToProcessAfterEnds.Remove(wrapGroupTabDepth);
 					}
 				}
 				else if (lastToken != null && (lastToken.type == VDFTokenType.LineBreak || lastToken.type == VDFTokenType.Tab || token.type == VDFTokenType.None)) {
@@ -479,22 +474,14 @@ namespace VDFN {
 						line_tabsReached = 0;
 
 					// if we have no popped-out content that we now need to wrap
-					if (tabDepth_popOutBlockEndWrapTokens.Count == 0) continue;
+					if (tabDepth_tokensToProcessAfterEnds.Count == 0) continue;
 
-					for (int tabDepth = tabDepth_popOutBlockEndWrapTokens.Max(a=>a.Key); tabDepth >= line_tabsReached; tabDepth--) {
-						if (!tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth)) continue;
-						tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens[tabDepth]);
-						//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[tabDepth][0]), tabDepth_popOutBlockEndWrapTokens[tabDepth].Count);
-						tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens[tabDepth][0].index, tabDepth_popOutBlockEndWrapTokens[tabDepth].Count); // index was updated when set put together
-						/*foreach (VDFToken token2 in tabDepth_popOutBlockEndWrapTokens[tabDepth]) {
-							tokens.Remove(token2);
-							tokens.Insert(i - 1, token2);
-						}*/
+					for (int tabDepth = tabDepth_tokensToProcessAfterEnds.Max(a=>a.Key); tabDepth >= line_tabsReached; tabDepth--) {
+						if (!tabDepth_tokensToProcessAfterEnds.ContainsKey(tabDepth)) continue;
+						tokens.InsertRange(i, tabDepth_tokensToProcessAfterEnds[tabDepth]);
+						tokens.RemoveRange(tabDepth_tokensToProcessAfterEnds[tabDepth][0].index, tabDepth_tokensToProcessAfterEnds[tabDepth].Count); // index was updated when set put together
 
-						// old; maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
-						//RefreshTokenPositionAndIndexProperties(tokens);
-
-						tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
+						tabDepth_tokensToProcessAfterEnds.Remove(tabDepth);
 					}
 				}
 			}
