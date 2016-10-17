@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 //using System.Drawing;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +24,17 @@ namespace VDFN {
 		public override string Message { get { return ""; } }
 		// return full-text as StackTrace, since prop's expected to be multi-line, and Unity can then modify it to match with 'real'/direct stack-trace text
 		public override string StackTrace { get { return ToString(); } }
+	}
+
+	public static class VDFGlobals {
+		public static void Log(string message) {
+			Console.WriteLine(message);
+		}
+		public static void Assert(bool condition, string message = null) {
+			if (condition) return;
+			Debug.Assert(false, message ?? "");
+			Debugger.Break();
+		}
 	}
 
 	public static class VDFClassExtensions {

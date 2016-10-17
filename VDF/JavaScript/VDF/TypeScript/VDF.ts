@@ -1,4 +1,15 @@
-﻿// init
+﻿// vdf globals
+// ==========
+
+var g = <any>window;
+g.Log = g.Log || console.log;
+g.Assert = g.Assert || ((condition, message)=> {
+	if (condition) return;
+	console.assert(false, message || "");
+	debugger;
+});
+
+// init
 // ==========
 
 interface Object {
@@ -79,15 +90,6 @@ Function.prototype._AddProperty("AddTags", function(...tags) {
 	}
 	return false;
 });*/
-
-var g = <any>window;
-g.Log = g.Log || console.log;
-g.Assert = g.Assert || ((condition, message)=> {
-	if (condition) return;
-	g.Log("Assert failed) " + message);
-	debugger;
-});
-var Log = g.Log, Assert = g.Assert;
 
 // classes
 // ==========
