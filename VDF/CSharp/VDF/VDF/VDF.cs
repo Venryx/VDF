@@ -226,8 +226,12 @@ namespace VDFN {
 			if (options.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
 				rootName = options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[] {'`'})[0];
 			var rootType = GetTypeByNameRoot(rootName, GetGenericParamsCountOfTypeName(typeName), options);
-			if (rootType == null)
-				throw new Exception("Could not find type \"" + rootName + "\"."); //throw new VDFException("Could not find type \"" + rootName + "\".");
+			if (rootType == null) {
+				if (options.loadUnknownTypesAsBasicTypes)
+					return null;
+				//throw new VDFException("Could not find type \"" + rootName + "\".");
+				throw new Exception("Could not find type \"" + rootName + "\".");
+			}
 			if (rootType.IsGenericType) {
 				var genericArgumentTypes = new List<Type>();
 				int depth = 0;
@@ -236,8 +240,11 @@ namespace VDFN {
 					char ch = typeName[i];
 					if (ch == ')')
 						depth--;
-					if ((depth == 0 && ch == ')') || (depth == 1 && ch == ' '))
-						genericArgumentTypes.Add(GetTypeByName(typeName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)), options)); // get generic-parameter type, by sending its parsed real-name back into this method
+					if ((depth == 0 && ch == ')') || (depth == 1 && ch == ' ')) {
+						// get generic-parameter type, by sending its parsed real-name back into this method
+						var genericArgType = GetTypeByName(typeName.Substring(lastStartBracketPos + 1, i - (lastStartBracketPos + 1)), options) ?? typeof(object);
+						genericArgumentTypes.Add(genericArgType);
+					}
 					if ((depth == 0 && ch == '(') || (depth == 1 && ch == ' '))
 						lastStartBracketPos = i;
 					if (ch == '(')

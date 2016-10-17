@@ -26,12 +26,11 @@
 		}
 	}
 
+	loadUnknownTypesAsBasicTypes: boolean;
+
 	// for JSON compatibility
 	allowStringKeys: boolean;
 	allowCommaSeparators: boolean;
-
-	// JS only
-	loadUnknownTypesAsBasicTypes: boolean;
 
 	ForJSON() { // helper function for JSON compatibility
 		this.allowStringKeys = true;

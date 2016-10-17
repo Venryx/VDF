@@ -5,10 +5,12 @@ using System.Linq;
 
 namespace VDFN {
 	public class VDFLoadOptions {
-		public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null) {
+		public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, bool loadUnknownTypesAsBasicTypes = false,
+				Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null) {
 			this.messages = message ?? new List<object>();
 			this.allowStringKeys = allowStringKeys;
 			this.allowCommaSeparators = allowCommaSeparators;
+			this.loadUnknownTypesAsBasicTypes = loadUnknownTypesAsBasicTypes;
 			this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
 			this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
 		}
@@ -28,6 +30,8 @@ namespace VDFN {
 				objPostDeserializeFuncs[obj].Add(func);
 			}
 		}
+
+		public bool loadUnknownTypesAsBasicTypes;
 
 		// for JSON compatibility
 		public bool allowStringKeys;
@@ -74,7 +78,7 @@ namespace VDFN {
 
 			var fromVDFTypeName = "object";
 			var firstNonMetadataToken = tokensAtDepth0.First(a=>a.type != VDFTokenType.Metadata);
-			if (tokensAtDepth0[0].type == VDFTokenType.Metadata)
+			if (tokensAtDepth0[0].type == VDFTokenType.Metadata && VDF.GetTypeByName(tokensAtDepth0[0].text, options) != null)
 				fromVDFTypeName = tokensAtDepth0[0].text;
 			else if (firstNonMetadataToken.type == VDFTokenType.Boolean)
 				fromVDFTypeName = "bool";
@@ -91,7 +95,8 @@ namespace VDFN {
 			Type type = declaredType;
 			if (fromVDFTypeName != null && fromVDFTypeName.Length > 0) {
 				var fromVDFType = VDF.GetTypeByName(fromVDFTypeName, options);
-				if (type == null || fromVDFType.IsDerivedFrom(type)) // if there is no declared type, or the from-vdf type is more specific than the declared type
+				// if there is no declared type, or the from-vdf type is more specific than the declared type
+				if (type == null || (fromVDFType != null && fromVDFType.IsDerivedFrom(type)))
 					type = fromVDFType;
 			}
 			// for keys, force load as string, since we're not at the use-importer stage

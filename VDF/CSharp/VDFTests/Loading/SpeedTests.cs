@@ -6618,7 +6618,7 @@ Map>{^}
 		runtimeModule:null
 ".Trim();
 			//for (var i = 0; i < 100; i++)
-			VDFLoader.ToVDFNode(vdf);
+			VDFLoader.ToVDFNode(vdf, new VDFLoadOptions(loadUnknownTypesAsBasicTypes: true));
 		}
 	}
 }
