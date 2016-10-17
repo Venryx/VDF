@@ -429,14 +429,13 @@ namespace VDFN {
 			// 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (one reason being, for JSON compatibility)
 			// 2: re-wrap popped-out-children with parent brackets/braces
 
-			//var tabDepth_popOutBlockEndWrapTokens = new Dictionary<int, List<VDFToken>>();
-			var tabDepth_tokenCollectionsToProcessAfterEnds = new Dictionary<int, TokenCollection>();
-			var tokenCollectionsToProcess = new List<TokenCollection> {
-				new TokenCollection(new List<VDFToken> {new VDFToken(VDFTokenType.None, -1, -1, "")}), // maybe temp: add depth-0-ender helper token
-				new TokenCollection(origTokens)
-			};
+			var groupDepth_tokenCollectionsToProcessAfterGroupEnds = new Dictionary<int, TokenCollection>();
+			var tokenCollectionsToProcess = new Stack<TokenCollection>();
+			// maybe temp: add depth-0-ender helper token
+			tokenCollectionsToProcess.Push(new TokenCollection(new List<VDFToken> {new VDFToken(VDFTokenType.None, -1, -1, "")}));
+			tokenCollectionsToProcess.Push(new TokenCollection(origTokens));
 			while (tokenCollectionsToProcess.Count > 0) {
-				var tokenCollection = tokenCollectionsToProcess.Last();
+				var tokenCollection = tokenCollectionsToProcess.Peek();
 				var tokens = tokenCollection.tokens;
 				var i = tokenCollection.currentTokenIndex;
 
@@ -463,13 +462,13 @@ namespace VDFN {
 						((lastToken?.type == VDFTokenType.LineBreak || lastToken?.type == VDFTokenType.Tab)
 						&& token.type != VDFTokenType.LineBreak && token.type != VDFTokenType.Tab)) {
 					// if there's popped-out content, check for any end-stuff that we need to now add (because the popped-out block ended)
-					if (tabDepth_tokenCollectionsToProcessAfterEnds.Count > 0) {
+					if (groupDepth_tokenCollectionsToProcessAfterGroupEnds.Count > 0) {
 						var tabDepthEnded = token.type == VDFTokenType.PoppedOutChildGroupMarker ? tokenCollection.line_tabsReached : tokenCollection.line_tabsReached + 1;
-						var deepestTokenCollectionToProcessAfterGroupEnd_depth = tabDepth_tokenCollectionsToProcessAfterEnds.Max(a=>a.Key);
+						var deepestTokenCollectionToProcessAfterGroupEnd_depth = groupDepth_tokenCollectionsToProcessAfterGroupEnds.Max(a=>a.Key);
 						if (deepestTokenCollectionToProcessAfterGroupEnd_depth >= tabDepthEnded) {
-							var deepestTokenCollectionToProcessAfterGroupEnd = tabDepth_tokenCollectionsToProcessAfterEnds[deepestTokenCollectionToProcessAfterGroupEnd_depth];
-							tokenCollectionsToProcess.Add(deepestTokenCollectionToProcessAfterGroupEnd);
-							tabDepth_tokenCollectionsToProcessAfterEnds.Remove(deepestTokenCollectionToProcessAfterGroupEnd_depth);
+							var deepestTokenCollectionToProcessAfterGroupEnd = groupDepth_tokenCollectionsToProcessAfterGroupEnds[deepestTokenCollectionToProcessAfterGroupEnd_depth];
+							tokenCollectionsToProcess.Push(deepestTokenCollectionToProcessAfterGroupEnd);
+							groupDepth_tokenCollectionsToProcessAfterGroupEnds.Remove(deepestTokenCollectionToProcessAfterGroupEnd_depth);
 
 							if (token.type == VDFTokenType.PoppedOutChildGroupMarker) // if token was group-marker, skip when we get back
 								tokenCollection.currentTokenIndex++;
@@ -488,22 +487,19 @@ namespace VDFN {
 						// the wrap-group consists of the on-same-line text after the popped-out-child-marker (eg the "]}" in "{children:[^]}")
 						var wrapGroupTabDepth = tokenCollection.line_tabsReached + 1;
 						var wrapGroupTokens = tokens.GetRange(i + 1, enderTokenIndex - (i + 1));
-						tabDepth_tokenCollectionsToProcessAfterEnds[wrapGroupTabDepth] = new TokenCollection(wrapGroupTokens);
-						tabDepth_tokenCollectionsToProcessAfterEnds[wrapGroupTabDepth].tokens[0].index = i + 1; // update index
+						groupDepth_tokenCollectionsToProcessAfterGroupEnds[wrapGroupTabDepth] = new TokenCollection(wrapGroupTokens);
+						groupDepth_tokenCollectionsToProcessAfterGroupEnds[wrapGroupTabDepth].tokens[0].index = i + 1; // update index
 						// skip processing the wrap-group-tokens (at this point)
 						i += wrapGroupTokens.Count;
 					}
 				}
 
-				if (addThisToken) {
-					if (token.type == VDFTokenType.ListEndMarker)
-						0.ToString();
+				if (addThisToken)
 					result.Add(token);
-				}
 
 				// if last token in this collection, remove collection (end its processing)
 				if (i == tokens.Count - 1)
-					tokenCollectionsToProcess.Remove(tokenCollection);
+					tokenCollectionsToProcess.Pop();
 				tokenCollection.currentTokenIndex = i + 1;
 			}
 

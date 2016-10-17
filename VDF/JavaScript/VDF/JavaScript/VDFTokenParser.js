@@ -369,4 +369,33 @@ var VDFTokenParser = (function () {
     VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
     return VDFTokenParser;
 }());
+var StackNode = (function () {
+    function StackNode(data) {
+        this.data = null;
+        this.previous = null;
+        this.data = data;
+        this.previous = null;
+    }
+    return StackNode;
+}());
+var Stack = (function () {
+    function Stack() {
+        this.top = null;
+    }
+    //size = 0;
+    Stack.prototype.Push = function (data) {
+        var node = new StackNode(data);
+        node.previous = this.top;
+        this.top = node;
+        //this.size += 1;
+        return this.top;
+    };
+    Stack.prototype.Pop = function () {
+        var temp = this.top;
+        this.top = this.top.previous;
+        //this.size -= 1;
+        return temp;
+    };
+    return Stack;
+}());
 //# sourceMappingURL=VDFTokenParser.js.map

@@ -403,3 +403,29 @@ class VDFTokenParser {
 		}
 	}
 }
+
+class StackNode {
+	constructor(data) {
+		this.data = data;
+		this.previous = null;
+	}
+	data = null;
+	previous = null;
+}
+class Stack {
+	top = null;
+	//size = 0;
+	Push(data) {
+		var node = new StackNode(data);
+		node.previous = this.top;
+		this.top = node;
+		//this.size += 1;
+		return this.top;
+	}
+	Pop() {
+		var temp = this.top;
+		this.top = this.top.previous;
+		//this.size -= 1;
+		return temp;
+	}
+}
