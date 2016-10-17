@@ -1,7 +1,5 @@
-﻿class VDFLoadOptions
-{
-	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false)
-	{
+﻿class VDFLoadOptions {
+	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false) {
 		this.messages = messages || [];
 		this.allowStringKeys = allowStringKeys;
 		this.allowCommaSeparators = allowCommaSeparators;
@@ -15,16 +13,13 @@
 	messages: any[];
 	objPostDeserializeFuncs_early = new Dictionary<object, List<Function>>("object", "List(Function)");
 	objPostDeserializeFuncs = new Dictionary<object, List<Function>>("object", "List(Function)");
-	AddObjPostDeserializeFunc(obj, func: Function, early = false)
-	{
-		if (early)
-		{
+	AddObjPostDeserializeFunc(obj, func: Function, early = false) {
+		if (early) {
 			if (!this.objPostDeserializeFuncs_early.ContainsKey(obj))
 				this.objPostDeserializeFuncs_early.Add(obj, new List<Function>("Function"));
 			this.objPostDeserializeFuncs_early.Get(obj).Add(func);
 		}
-		else
-		{
+		else {
 			if (!this.objPostDeserializeFuncs.ContainsKey(obj))
 				this.objPostDeserializeFuncs.Add(obj, new List<Function>("Function"));
 			this.objPostDeserializeFuncs.Get(obj).Add(func);
@@ -38,22 +33,19 @@
 	// JS only
 	loadUnknownTypesAsBasicTypes: boolean;
 
-	ForJSON() // helper function for JSON compatibility
-	{
+	ForJSON() { // helper function for JSON compatibility
 		this.allowStringKeys = true;
 		this.allowCommaSeparators = true;
 		return this;
 	}
 }
 
-class VDFLoader
-{
+class VDFLoader {
 	static ToVDFNode(text: string, options: VDFLoadOptions): VDFNode;
 	static ToVDFNode(text: string, declaredTypeName?: string, options?: VDFLoadOptions): VDFNode;
 	static ToVDFNode(text: List<VDFToken>, options: VDFLoadOptions): VDFNode;
 	static ToVDFNode(text: List<VDFToken>, declaredTypeName?: string, options?: VDFLoadOptions, firstTokenIndex?: number, enderTokenIndex?: number): VDFNode;
-	static ToVDFNode(tokens_orText: any, declaredTypeName_orOptions?: any, options?: VDFLoadOptions, firstTokenIndex = 0, enderTokenIndex = -1): VDFNode
-	{
+	static ToVDFNode(tokens_orText: any, declaredTypeName_orOptions?: any, options?: VDFLoadOptions, firstTokenIndex = 0, enderTokenIndex = -1): VDFNode {
 		if (declaredTypeName_orOptions instanceof VDFLoadOptions)
 			return VDFLoader.ToVDFNode(tokens_orText, null, declaredTypeName_orOptions);
 		if (typeof tokens_orText == "string")
@@ -72,8 +64,7 @@ class VDFLoader
 		var tokensAtDepth1 = new List<VDFToken>("VDFToken");
 		var i: number;
 		//for (var i in tokens.Indexes())
-		for (var i = firstTokenIndex; i < enderTokenIndex; i++)
-		{
+		for (var i = firstTokenIndex; i < enderTokenIndex; i++) {
 			var token = tokens[i];
 			if (token.type == VDFTokenType.ListEndMarker || token.type == VDFTokenType.MapEndMarker)
 				depth--;
@@ -101,8 +92,7 @@ class VDFLoader
 			fromVDFTypeName = "Dictionary(object object)"; //"object";
 
 		var typeName = declaredTypeName;
-		if (fromVDFTypeName != null && fromVDFTypeName.length > 0)
-		{
+		if (fromVDFTypeName != null && fromVDFTypeName.length > 0) {
 			// porting-note: this is only a limited implementation of CS functionality of making sure from-vdf-type is more specific than declared-type
 			if (typeName == null || ["object", "IList", "IDictionary"].Contains(typeName)) // if there is no declared type, or the from-metadata type is more specific than the declared type (i.e. declared type is most basic type 'object')
 				typeName = fromVDFTypeName;
@@ -132,19 +122,16 @@ class VDFLoader
 		// have in-vdf string type override declared type, since we're not at the use-importer stage
 		else if (typeName == "string" || firstNonMetadataToken.type == VDFTokenType.String)
 			node.primitiveValue = firstNonMetadataToken.text;
-		
+
 		// if list, parse items
 		//else if (firstNonMetadataToken.type == VDFTokenType.ListStartMarker)
-		else if (typeName.StartsWith("List("))
-		{
+		else if (typeName.StartsWith("List(")) {
 			node.isList = true;
-			for (var i = 0; i < tokensAtDepth1.Count; i++)
-			{
+			for (var i = 0; i < tokensAtDepth1.Count; i++) {
 				var token = tokensAtDepth1[i];
-				if (token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker)
-				{
+				if (token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker) {
 					var itemFirstToken = tokens[token.index];
-					var itemEnderToken = tokensAtDepth1.FirstOrDefault(a=>a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker);
+					var itemEnderToken = tokensAtDepth1.FirstOrDefault(a => a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenType.ListEndMarker && token.type != VDFTokenType.MapEndMarker);
 					//node.AddListChild(VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
 					node.AddListChild(VDFLoader.ToVDFNode(tokens, typeGenericArgs[0], options, itemFirstToken.index, itemEnderToken != null ? itemEnderToken.index : enderTokenIndex));
 					if (itemFirstToken.type == VDFTokenType.Metadata) // if item had metadata, skip an extra token (since it had two non-end tokens)
@@ -155,14 +142,11 @@ class VDFLoader
 
 		// if not primitive and not list (i.e. map/object/dictionary), parse pairs/properties
 		//else //if (firstNonMetadataToken.type == VDFTokenType.MapStartMarker)
-		else //if (typeName.StartsWith("Dictionary("))
-		{
+		else { //if (typeName.StartsWith("Dictionary("))
 			node.isMap = true;
-			for (var i = 0; i < tokensAtDepth1.Count; i++)
-			{
+			for (var i = 0; i < tokensAtDepth1.Count; i++) {
 				var token = tokensAtDepth1[i];
-				if (token.type == VDFTokenType.Key)
-				{
+				if (token.type == VDFTokenType.Key) {
 					var propNameFirstToken = i >= 1 && tokensAtDepth1[i - 1].type == VDFTokenType.Metadata ? tokensAtDepth1[i - 1] : tokensAtDepth1[i];
 					var propNameEnderToken = tokensAtDepth1[i + 1];
 					var propNameType = propNameFirstToken.type == VDFTokenType.Metadata ? "object" : "string";
@@ -190,8 +174,7 @@ class VDFLoader
 
 		return node;
 	}
-	/*static GetTokenRange_Tokens(tokens: List<VDFToken>, firstToken: VDFToken, enderToken: VDFToken): List<VDFToken>
-	{
+	/*static GetTokenRange_Tokens(tokens: List<VDFToken>, firstToken: VDFToken, enderToken: VDFToken): List<VDFToken> {
 		//return tokens.GetRange(firstToken.index, (enderToken != null ? enderToken.index : tokens.Count) - firstToken.index).Select(a=>new VDFToken(a.type, a.position - firstToken.position, a.index - firstToken.index, a.text)).ToList();
 
 		var result = new List<VDFToken>("VDFToken");

@@ -775,6 +775,8 @@ var Dictionary = (function () {
     };
     Dictionary.prototype.Remove = function (key) {
         var itemIndex = this.keys.indexOf(key);
+        if (itemIndex == -1)
+            return;
         this.keys.splice(itemIndex, 1);
         this.values.splice(itemIndex, 1);
         delete this[key];

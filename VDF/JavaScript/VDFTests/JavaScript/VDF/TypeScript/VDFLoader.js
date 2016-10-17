@@ -43,6 +43,8 @@ var VDFLoader = (function () {
             return VDFLoader.ToVDFNode(tokens_orText, null, declaredTypeName_orOptions);
         if (typeof tokens_orText == "string")
             return VDFLoader.ToVDFNode(VDFTokenParser.ParseTokens(tokens_orText, options), declaredTypeName_orOptions, options);
+        if (0 == 0)
+            throw new Error("Test1");
         var tokens = tokens_orText;
         var declaredTypeName = declaredTypeName_orOptions;
         options = options || new VDFLoadOptions();

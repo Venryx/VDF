@@ -640,8 +640,7 @@ class Dictionary<K, V> {
 	}
 
 	// properties
-	get Keys() // (note that this will return each key's toString() result (not the key itself, for non-string keys))
-	{
+	get Keys() { // (note that this will return each key's toString() result (not the key itself, for non-string keys))
 		var result = {};
 		for (var i = 0; i < this.keys.length; i++)
 			result[<any>this.keys[i]] = null;

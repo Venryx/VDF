@@ -180,8 +180,7 @@ var VDFPostDeserialize = (function () {
     }
     return VDFPostDeserialize;
 }());
-/*class VDFMethodInfo
-{
+/*class VDFMethodInfo {
     tags: any[];
     constructor(tags: any[]) { this.tags = tags; }
 }*/ 

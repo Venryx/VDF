@@ -176,7 +176,7 @@
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptOutFile />
     <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
-    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptNoEmitOnError>False</TypeScriptNoEmitOnError>
     <TypeScriptMapRoot />
     <TypeScriptSourceRoot />
   </PropertyGroup>

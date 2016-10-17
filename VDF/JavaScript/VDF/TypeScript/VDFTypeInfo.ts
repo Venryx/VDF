@@ -150,8 +150,7 @@ class VDFDeserialize {
 	constructor(fromParent = false) { this.fromParent = fromParent; }
 }
 class VDFPostDeserialize {}
-/*class VDFMethodInfo
-{
+/*class VDFMethodInfo {
 	tags: any[];
 	constructor(tags: any[]) { this.tags = tags; }
 }*/
