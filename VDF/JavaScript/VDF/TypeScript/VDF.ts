@@ -626,8 +626,8 @@ class Dictionary<K, V> {
 	realTypeName: string;
 	keyType: string;
 	valueType: string;
-	private keys: K[];
-	private values: V[];
+	keys: K[];
+	values: V[];
 	constructor(keyType?: string, valueType?: string, keyValuePairsObj?) {
 		//VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
 		this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";

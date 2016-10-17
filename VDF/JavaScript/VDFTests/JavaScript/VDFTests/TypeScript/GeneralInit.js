@@ -3,8 +3,20 @@
 Object.prototype._AddFunction_Inline = function Should() {
     var _this = this;
     return {
-        Be: function (value, message) { equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message); },
-        BeExactly: function (value, message) { strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message); }
+        Be: function (value, message) {
+            equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+        },
+        BeExactly: function (value, message) {
+            strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+        },
+        BeEquivalentTo: function (otherCollection, message) {
+            _this.length.Should().Be(otherCollection.length, "Our length " + _this.length + " does not match other length " + otherCollection.length + ".");
+            for (var i = 0; i < _this.length; i++) {
+                var item = _this[i];
+                var itemInOther = otherCollection[i];
+                item.Should().Be(itemInOther, message);
+            }
+        }
     };
 };
 String.prototype._AddFunction_Inline = function Fix() { return this.toString(); }; // filler function for C# method to allow for copying, with fewer manual changes

@@ -1,5 +1,13 @@
-// init
+// vdf globals
 // ==========
+var g = window;
+g.Log = g.Log || console.log;
+g.Assert = g.Assert || (function (condition, message) {
+    if (condition)
+        return;
+    console.assert(false, message || "");
+    debugger;
+});
 // the below lets you easily add non-enumerable properties
 Object.defineProperty(Object.prototype, "_AddProperty", {
     enumerable: false,
@@ -66,15 +74,6 @@ Function.prototype._AddProperty("AddTags", function () {
     }
     return false;
 });*/
-var g = window;
-g.Log = g.Log || console.log;
-g.Assert = g.Assert || (function (condition, message) {
-    if (condition)
-        return;
-    g.Log("Assert failed) " + message);
-    debugger;
-});
-var Log = g.Log, Assert = g.Assert;
 // classes
 // ==========
 var VDFNodePathNode = (function () {

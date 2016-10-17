@@ -60,8 +60,7 @@ var VDFTests;
             a[0].primitiveValue.Should().Be("Root string 1.");
             a[1].primitiveValue.Should().Be("Root string 2.");
         });
-        /*test("D0_List_ExplicitStartAndEndMarkers", ()=>
-        {
+        /*test("D0_List_ExplicitStartAndEndMarkers", ()=> {
             var a: VDFNode = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
             a[0].primitiveValue.Should().Be("Root string 1.");
             a[1].primitiveValue.Should().Be("Root string 2.");
@@ -236,18 +235,20 @@ of three lines in total.".Fix());
             a["names"].mapChildren.Count.Should().Be(0);
         });
         test("D1_ArrayPoppedOut", function () {
-            var a = VDFLoader.ToVDFNode("{names:[^]}\n\
-	'Dan'\n\
-	'Bob'");
+            var vdf = "{names:[^]}\n\t'Dan'\n\t'Bob'";
+            var tokens = VDFTokenParser.ParseTokens(vdf);
+            var tokenTypes = tokens.Select(function (b) { return VDFTokenType[b.type]; });
+            tokenTypes.Should().BeEquivalentTo(new List("VDFTokenType", VDFTokenType.MapStartMarker, VDFTokenType.Key, VDFTokenType.ListStartMarker, VDFTokenType.String, VDFTokenType.String, VDFTokenType.ListEndMarker, VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenType[a]; }));
+            var a = VDFLoader.ToVDFNode(vdf);
             a["names"][0].primitiveValue.Should().Be("Dan");
             a["names"][1].primitiveValue.Should().Be("Bob");
         });
         test("D1_ArraysPoppedOut", function () {
-            var a = VDFLoader.ToVDFNode("{names:[^] ages:[^]}\n\
-	'Dan'\n\
-	'Bob'\n\
-	^10\n\
-	20");
+            var vdf = "{names:[^] ages:[^]}\n\t'Dan'\n\t'Bob'\n\t^10\n\t20";
+            var tokens = VDFTokenParser.ParseTokens(vdf);
+            var tokenTypes = tokens.Select(function (b) { return VDFTokenType[b.type]; });
+            tokenTypes.Should().BeEquivalentTo(new List("VDFTokenType", VDFTokenType.MapStartMarker, VDFTokenType.Key, VDFTokenType.ListStartMarker, VDFTokenType.String, VDFTokenType.String, VDFTokenType.ListEndMarker, VDFTokenType.Key, VDFTokenType.ListStartMarker, VDFTokenType.Number, VDFTokenType.Number, VDFTokenType.ListEndMarker, VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenType[a]; }));
+            var a = VDFLoader.ToVDFNode(vdf);
             a["names"][0].primitiveValue.Should().Be("Dan");
             a["names"][1].primitiveValue.Should().Be("Bob");
             a["ages"][0].primitiveValue.Should().Be(10);

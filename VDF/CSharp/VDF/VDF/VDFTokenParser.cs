@@ -316,113 +316,6 @@ namespace VDFN {
 			return result;
 		}*/
 
-		/*static List<VDFToken> PostProcessTokens(List<VDFToken> tokens, VDFLoadOptions options) {
-			// pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (for JSON compatibility)
-			// ----------
-
-			if (options.allowStringKeys)
-				for (var i = 0; i < tokens.Count; i++)
-					if (tokens[i].type == VDFTokenType.String && i + 1 < tokens.Count && tokens[i + 1].type == VDFTokenType.KeyValueSeparator)
-						tokens[i].type = VDFTokenType.Key;
-
-			// pass 2: re-wrap popped-out-children with parent brackets/braces
-			// ----------
-
-			//var oldTokens = tokens.ToList();
-			var result = new List<VDFToken>(); //tokens.ToList();
-
-			tokens.Add(new VDFToken(VDFTokenType.None, -1, -1, "")); // maybe temp: add depth-0-ender helper token
-
-			var fakeInsertPoint = -1;
-			var fakeInsert = new List<VDFToken>();
-
-			var line_tabsReached = 0;
-			var tabDepth_popOutBlockEndWrapTokens = new Dictionary<int, List<VDFToken>>();
-			for (var i = 0; i < tokens.Count + fakeInsert.Count; i++) {
-				if (fakeInsertPoint != -1 && fakeInsert.Count < (i - fakeInsertPoint) + 1) {
-					fakeInsertPoint = -1;
-					i -= fakeInsert.Count;
-				}
-
-				VDFToken lastToken = fakeInsertPoint != -1 && fakeInsertPoint <= i - 1 ? fakeInsert[i - 1 - fakeInsertPoint] : (i - 1 >= 0 ? tokens[i - 1] : null);
-				VDFToken token = fakeInsertPoint != -1 && fakeInsertPoint <= i ? fakeInsert[i - fakeInsertPoint] : tokens[i];
-				if (token.type == VDFTokenType.Tab)
-					line_tabsReached++;
-				else if (token.type == VDFTokenType.LineBreak)
-					line_tabsReached = 0;
-				else if (token.type == VDFTokenType.PoppedOutChildGroupMarker) {
-					if (lastToken.type == VDFTokenType.ListStartMarker || lastToken.type == VDFTokenType.MapStartMarker) //lastToken.type != VDFTokenType.Tab) {
-						var enderTokenIndex = i + 1;
-						while (enderTokenIndex < tokens.Count - 1 && tokens[enderTokenIndex].type != VDFTokenType.LineBreak && (tokens[enderTokenIndex].type != VDFTokenType.PoppedOutChildGroupMarker || tokens[enderTokenIndex - 1].type == VDFTokenType.ListStartMarker || tokens[enderTokenIndex - 1].type == VDFTokenType.MapStartMarker))
-							enderTokenIndex++;
-						var wrapGroupTabDepth = tokens[enderTokenIndex].type == VDFTokenType.PoppedOutChildGroupMarker ? line_tabsReached - 1 : line_tabsReached;
-						tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth] = tokens.GetRange(i + 1, enderTokenIndex - (i + 1));
-						i = enderTokenIndex - 1; // have next token processed be the ender-token (^^[...] or line-break)
-					}
-					else if (lastToken.type == VDFTokenType.Tab) {
-						var wrapGroupTabDepth = lastToken.type == VDFTokenType.Tab ? line_tabsReached - 1 : line_tabsReached;
-						result.AddRange(tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth]);
-						/*foreach (VDFToken token2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth]) {
-							/*tokens.Remove(token2);
-							tokens.Insert(i - 1, token2);*#/
-							result.Add(token2);
-						}*#/
-						fakeInsertPoint = i;
-						fakeInsert = tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth];
-						i--; // reprocess current pos (since it now has fake-insert data)
-
-						//i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
-						tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
-					}
-				}
-				else if (lastToken != null && (lastToken.type == VDFTokenType.LineBreak || lastToken.type == VDFTokenType.Tab || token.type == VDFTokenType.None)) {
-					if (token.type == VDFTokenType.None) // if depth-0-ender helper token
-						line_tabsReached = 0;
-					if (tabDepth_popOutBlockEndWrapTokens.Count > 0)
-						for (int tabDepth = tabDepth_popOutBlockEndWrapTokens.Max(a=>a.Key); tabDepth >= line_tabsReached; tabDepth--)
-							if (tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth)) {
-								result.AddRange(tabDepth_popOutBlockEndWrapTokens[tabDepth]);
-								/*foreach (VDFToken token2 in tabDepth_popOutBlockEndWrapTokens[tabDepth]) {
-									/*tokens.Remove(token2);
-									tokens.Insert(i - 1, token2);*#/
-									result.Add(token2);
-								}*#/
-								fakeInsertPoint = i;
-								fakeInsert = tabDepth_popOutBlockEndWrapTokens[tabDepth];
-								i--; // reprocess current pos (since it now has fake-insert data)
-
-								tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
-							}
-				}
-
-				if (!tabDepth_popOutBlockEndWrapTokens.Values.Any(a=>a.Contains(token)) && !(token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.KeyValueSeparator || token.type == VDFTokenType.PoppedOutChildGroupMarker))
-					result.Add(token);
-			}
-
-			// maybe temp: remove depth-0-ender helper token
-			tokens.RemoveAt(tokens.Count - 1);
-			result.RemoveAt(result.Count - 1);
-
-			// pass 3: remove all now-useless tokens
-			// ----------
-
-			/*for (var i = tokens.Count - 1; i >= 0; i--)
-				if (tokens[i].type == VDFTokenType.Tab || tokens[i].type == VDFTokenType.LineBreak || tokens[i].type == VDFTokenType.MetadataEndMarker || tokens[i].type == VDFTokenType.KeyValueSeparator || tokens[i].type == VDFTokenType.PoppedOutChildGroupMarker)
-					tokens.RemoveAt(i);*#/
-
-			/*foreach(VDFToken token in oldTokens)
-				if (!(token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak || token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.KeyValueSeparator || token.type == VDFTokenType.PoppedOutChildGroupMarker))
-					tokens.Add(token);*#/
-
-			// pass 4: fix token position-and-index properties
-			// ----------
-
-			RefreshTokenPositionAndIndexProperties(result); //tokens);
-
-			//Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
-
-			return result;
-		}*/
 		static List<VDFToken> PostProcessTokens(List<VDFToken> origTokens, VDFLoadOptions options) {
 			var result = new List<VDFToken>();
 
@@ -464,7 +357,7 @@ namespace VDFN {
 					// if there's popped-out content, check for any end-stuff that we need to now add (because the popped-out block ended)
 					if (groupDepth_tokenCollectionsToProcessAfterGroupEnds.Count > 0) {
 						var tabDepthEnded = token.type == VDFTokenType.PoppedOutChildGroupMarker ? tokenCollection.line_tabsReached : tokenCollection.line_tabsReached + 1;
-						var deepestTokenCollectionToProcessAfterGroupEnd_depth = groupDepth_tokenCollectionsToProcessAfterGroupEnds.Max(a=>a.Key);
+						var deepestTokenCollectionToProcessAfterGroupEnd_depth = groupDepth_tokenCollectionsToProcessAfterGroupEnds.Keys.Last();
 						if (deepestTokenCollectionToProcessAfterGroupEnd_depth >= tabDepthEnded) {
 							var deepestTokenCollectionToProcessAfterGroupEnd = groupDepth_tokenCollectionsToProcessAfterGroupEnds[deepestTokenCollectionToProcessAfterGroupEnd_depth];
 							tokenCollectionsToProcess.Push(deepestTokenCollectionToProcessAfterGroupEnd);

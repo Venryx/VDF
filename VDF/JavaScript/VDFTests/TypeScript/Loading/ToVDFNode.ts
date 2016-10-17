@@ -6,89 +6,74 @@ module VDFTests { // added to match C# indentation
 		// to VDFNode
 		// ==========
 
-		test("D0_Comment", ()=>
-		{
+		test("D0_Comment", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode(
 "## comment\n\
 'Root string.'");
 			a.primitiveValue.Should().Be("Root string.");
 		});
-		test("D0_Comment2", ()=>
-		{
+		test("D0_Comment2", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("'Root string ends here.'## comment");
 			a.primitiveValue.Should().Be("Root string ends here.");
 		});
-		test("D0_Int", ()=>
-		{
+		test("D0_Int", () => {
 			var a = VDFLoader.ToVDFNode("1");
 			a.primitiveValue.Should().Be(1);
 		});
-		test("D0_IntNegative", ()=>
-		{
+		test("D0_IntNegative", () => {
 			var a = VDFLoader.ToVDFNode("-1");
 			a.primitiveValue.Should().Be(-1);
 		});
-		test("D0_PowerNotation", ()=>
-		{
+		test("D0_PowerNotation", () => {
 			VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000); //1 * Math.Pow(10, 3));
 			VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
 			VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000); //-(1 * Math.Pow(10, 3)));
 			VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
 		});
-		test("D0_Infinity", ()=>
-		{
+		test("D0_Infinity", () => {
 			VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(Infinity);
 			VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(-Infinity);
 		});
-		test("D0_String", ()=>
-		{
+		test("D0_String", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("'Root string.'");
 			a.primitiveValue.Should().Be("Root string.");
 		});
-		test("D0_StringWithSaveThenLoad", ()=>
-		{
+		test("D0_StringWithSaveThenLoad", () => {
 			var vdf = VDF.Serialize("Root string.");
 			vdf.Should().Be("\"Root string.\"");
 			var a = VDFLoader.ToVDFNode(vdf);
 			a.primitiveValue.Should().Be("Root string.");
 		});
-		test("D0_StringAsNull", ()=>
-		{
+		test("D0_StringAsNull", () => {
 			var a = VDF.Deserialize("null", "string");
 			ok(a == null);
 		});
-		test("D0_BaseValue_Literal", ()=>
-		{
+		test("D0_BaseValue_Literal", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
 			a.primitiveValue.Should().Be("\tBase-value string that {needs escaping}.");
 		});
-		test("D0_Metadata_Type", ()=>
-		{
+		test("D0_Metadata_Type", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("string>'Root string.'");
 			a.metadata.Should().Be("string");
 		});
-		test("D0_List", ()=>
-		{
+		test("D0_List", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("['Root string 1.' 'Root string 2.']", "List(object)");
 			a[0].primitiveValue.Should().Be("Root string 1.");
 			a[1].primitiveValue.Should().Be("Root string 2.");
 		});
-		/*test("D0_List_ExplicitStartAndEndMarkers", ()=>
-		{
+		/*test("D0_List_ExplicitStartAndEndMarkers", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode<List<object>>("{Root string 1.}|{Root string 2.}");
 			a[0].primitiveValue.Should().Be("Root string 1.");
 			a[1].primitiveValue.Should().Be("Root string 2.");
 		});*/
-		test("D0_List_Objects", ()=>
-		{
+		test("D0_List_Objects", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
 			a[0]["name"].primitiveValue.Should().Be("Dan");
 			a[0]["age"].primitiveValue.Should().Be(50);
 			a[1]["name"].primitiveValue.Should().Be("Bob");
 			a[1]["age"].primitiveValue.Should().Be(60);
 		});
-		test("D0_List_Literals", ()=>
-		{
+		test("D0_List_Literals", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode(
 "['first' '<<second\n\
 which is on two lines>>' '<<third\n\
@@ -110,31 +95,27 @@ three lines".Fix());
 			a[0].primitiveValue.Should().Be(null);
 			a[1].primitiveValue.Should().Be(null);
 		});*/
-		test("D0_EmptyList", ()=> { (<List<object>>VDF.Deserialize("[]")).Count.Should().Be(0); });
-		test("D0_ListMetadata", ()=>
-		{
+		test("D0_EmptyList", () => { (<List<object>>VDF.Deserialize("[]")).Count.Should().Be(0); });
+		test("D0_ListMetadata", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("List(int)>[1 2]");
 			a.metadata.Should().Be("List(int)");
 			ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
 			ok(a[1].metadata == null); //a[1].metadata.Should().Be(null);
 		});
-		test("D0_ListMetadata2", ()=>
-		{
+		test("D0_ListMetadata2", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
 			a.metadata.Should().Be("List(object)");
 			a[0].metadata.Should().Be("string");
 			a[1].metadata.Should().Be("string");
 		});
-		test("D0_EmptyMap", ()=> { (<Dictionary<object, object>>VDF.Deserialize("{}")).Count.Should().Be(0); });
-		test("D0_Map_ChildMetadata", ()=>
-		{
+		test("D0_EmptyMap", () => { (<Dictionary<object, object>>VDF.Deserialize("{}")).Count.Should().Be(0); });
+		test("D0_Map_ChildMetadata", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
 			a.metadata.Should().Be("Dictionary(object object)");
 			a["a"].metadata.Should().Be("string");
 			a["b"].metadata.Should().Be("string");
 		});
-		test("D0_MultilineString", ()=>
-		{
+		test("D0_MultilineString", () => {
 			var a: VDFNode = VDFLoader.ToVDFNode(
 "'<<This is a\n\
 multiline string\n\
@@ -280,23 +261,46 @@ of three lines in total.".Fix());
 			a["names"].listChildren.Count.Should().Be(0);
 			a["names"].mapChildren.Count.Should().Be(0);
 		});
-		test("D1_ArrayPoppedOut", ()=>
-		{
-			var a: VDFNode = VDFLoader.ToVDFNode(
-"{names:[^]}\n\
+		test("D1_ArrayPoppedOut", () => {
+			var vdf = 
+`{names:[^]}\n\
 	'Dan'\n\
-	'Bob'");
+	'Bob'`;
+			var tokens = VDFTokenParser.ParseTokens(vdf);
+			var tokenTypes = tokens.Select(b=>VDFTokenType[b.type]);
+			tokenTypes.Should().BeEquivalentTo(new List("VDFTokenType",
+				VDFTokenType.MapStartMarker,
+					VDFTokenType.Key, VDFTokenType.ListStartMarker,
+						VDFTokenType.String, VDFTokenType.String,
+					VDFTokenType.ListEndMarker,
+				VDFTokenType.MapEndMarker
+			).Select(a=>VDFTokenType[a]));
+
+			var a: VDFNode = VDFLoader.ToVDFNode(vdf);
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");
 		});
 		test("D1_ArraysPoppedOut", ()=> // each 'group' is actually just the value-data of one of the parent's properties
 		{
-			var a: VDFNode = VDFLoader.ToVDFNode(
-"{names:[^] ages:[^]}\n\
-	'Dan'\n\
-	'Bob'\n\
-	^10\n\
-	20");
+			var vdf = `{names:[^] ages:[^]}
+	'Dan'
+	'Bob'
+	^10
+	20`;
+			var tokens = VDFTokenParser.ParseTokens(vdf);
+			var tokenTypes = tokens.Select(b=>VDFTokenType[b.type]);
+			tokenTypes.Should().BeEquivalentTo(new List("VDFTokenType",
+				VDFTokenType.MapStartMarker,
+					VDFTokenType.Key, VDFTokenType.ListStartMarker,
+						VDFTokenType.String, VDFTokenType.String,
+					VDFTokenType.ListEndMarker,
+					VDFTokenType.Key, VDFTokenType.ListStartMarker,
+						VDFTokenType.Number, VDFTokenType.Number,
+					VDFTokenType.ListEndMarker,
+				VDFTokenType.MapEndMarker
+			).Select(a=>VDFTokenType[a]));
+
+			var a: VDFNode = VDFLoader.ToVDFNode(vdf);
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");
 			a["ages"][0].primitiveValue.Should().Be(10);

@@ -1,11 +1,30 @@
 ﻿// general init // note: this runs globally, so no need to duplicate in the Loading.ts file
 // ==========
 
-interface Object { Should(): { obj: any; Be(value, message?: string); } }
+interface Object {
+	Should(): {
+		obj: any;
+		Be(value, message?: string);
+		BeExactly(value, message?: string);
+		BeEquivalentTo(otherCollection: Array<object>, message?: string);
+	}
+}
 Object.prototype._AddFunction_Inline = function Should() {
 	return {
-		Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-		BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
+		Be: (value, message?: string)=> {
+			equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message);
+		},
+		BeExactly: (value, message?: string)=> {
+			strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message);
+		},
+		BeEquivalentTo: (otherCollection, message?: string) => {
+			this.length.Should().Be(otherCollection.length, `Our length ${this.length} does not match other length ${otherCollection.length}.`);
+			for (var i = 0; i < this.length; i++) {
+				var item = this[i];
+				var itemInOther = otherCollection[i];
+				item.Should().Be(itemInOther, message);
+			}
+		}
 	};
 };
 interface String { Fix(): string; }

@@ -254,13 +254,15 @@ of three lines in total.".Fix());
 	'Dan'
 	'Bob'";
 			var tokens = VDFTokenParser.ParseTokens(vdf);
-			tokens[0].type.Should().Be(VDFTokenType.MapStartMarker);
-			tokens[1].type.Should().Be(VDFTokenType.Key);
-			tokens[2].type.Should().Be(VDFTokenType.ListStartMarker);
-			tokens[3].type.Should().Be(VDFTokenType.String);
-			tokens[4].type.Should().Be(VDFTokenType.String);
-			tokens[5].type.Should().Be(VDFTokenType.ListEndMarker);
-			tokens[6].type.Should().Be(VDFTokenType.MapEndMarker);
+			var tokenTypes = tokens.Select(b=>b.type).ToList();
+			tokenTypes.ShouldBeEquivalentTo(new List<VDFTokenType> {
+				VDFTokenType.MapStartMarker,
+					VDFTokenType.Key, VDFTokenType.ListStartMarker,
+						VDFTokenType.String, VDFTokenType.String,
+					VDFTokenType.ListEndMarker,
+				VDFTokenType.MapEndMarker
+			}, options=>options.WithStrictOrdering());
+
 			VDFNode a = VDFLoader.ToVDFNode(vdf);
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");
@@ -283,6 +285,7 @@ of three lines in total.".Fix());
 					VDFTokenType.ListEndMarker,
 				VDFTokenType.MapEndMarker
 			}, options=>options.WithStrictOrdering());
+
 			VDFNode a = VDFLoader.ToVDFNode(vdf);
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");

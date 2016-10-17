@@ -286,7 +286,7 @@ class VDFTokenParser {
 		return result;
 	}*/
 
-	static PostProcessTokens(tokens: List<VDFToken>, options: VDFLoadOptions): List<VDFToken> {
+	/*static PostProcessTokens(tokens: List<VDFToken>, options: VDFLoadOptions): List<VDFToken> {
 		// pass 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (one reason being, for JSON compatibility)
 		// ----------
 		
@@ -323,16 +323,7 @@ class VDFTokenParser {
 				else if (lastToken.type == VDFTokenType.Tab) {
 					var wrapGroupTabDepth = lastToken.type == VDFTokenType.Tab ? line_tabsReached - 1 : line_tabsReached;
 					tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth));
-					//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][0]), tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count);
 					tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth)[0].index, tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count); // index was updated when set put together
-					/*for (var i2 in tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Indexes()) {
-						var token2 = tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth][i2];
-						tokens.Remove(token2);
-						tokens.Insert(i - 1, token2);
-					}*/
-
-					// old; maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
-					//VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
 
 					i -= tabDepth_popOutBlockEndWrapTokens.Get(wrapGroupTabDepth).Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
 					tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
@@ -352,13 +343,7 @@ class VDFTokenParser {
 				for (var tabDepth = maxTabDepth; tabDepth >= line_tabsReached; tabDepth--) {
 					if (!tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth)) continue;
 					tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens.Get(tabDepth));
-					//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[tabDepth][0]), tabDepth_popOutBlockEndWrapTokens[tabDepth].Count);
 					tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens.Get(tabDepth)[0].index, tabDepth_popOutBlockEndWrapTokens.Get(tabDepth).Count); // index was updated when set put together
-					/*for (var i2 in tabDepth_popOutBlockEndWrapTokens[tabDepth].Indexes()) {
-						var token2 = tabDepth_popOutBlockEndWrapTokens[tabDepth][i2];
-						tokens.Remove(token2);
-						tokens.Insert(i - 1, token2);
-					}*/
 
 					// old; maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
 					//VDFTokenParser.RefreshTokenPositionAndIndexProperties(tokens);
@@ -372,11 +357,7 @@ class VDFTokenParser {
 
 		// pass 3: remove all now-useless tokens
 		// ----------
-
-		/*for (var i = tokens.Count - 1; i >= 0; i--)
-			if (tokens[i].type == VDFTokenType.Tab || tokens[i].type == VDFTokenType.LineBreak || tokens[i].type == VDFTokenType.MetadataEndMarker || tokens[i].type == VDFTokenType.KeyValueSeparator || tokens[i].type == VDFTokenType.PoppedOutChildGroupMarker)
-				tokens.RemoveAt(i);*/
-
+		
 		var result = new List<VDFToken>(); //"VDFToken");
 		for (let i in tokens.Indexes()) {
 			let token = tokens[i];
@@ -392,6 +373,100 @@ class VDFTokenParser {
 		//Console.Write(String.Join(" ", tokens.Select(a=>a.text).ToArray())); // temp; for testing
 
 		return result;
+	}*/
+
+	static PostProcessTokens(origTokens: List<VDFToken>, options: VDFLoadOptions): List<VDFToken> {
+		var result = new List<VDFToken>(); //"VDFToken");
+
+		// 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (one reason being, for JSON compatibility)
+		// 2: re-wrap popped-out-children with parent brackets/braces
+
+		var groupDepth_tokenCollectionsToProcessAfterGroupEnds = new Dictionary<number, TokenCollection>("int", "List(VDFToken)");
+		var tokenCollectionsToProcess = new Stack<TokenCollection>();
+		// maybe temp: add depth-0-ender helper token
+		tokenCollectionsToProcess.Push(new TokenCollection(new List<VDFToken>("VDFToken", new VDFToken(VDFTokenType.None, -1, -1, ""))));
+		tokenCollectionsToProcess.Push(new TokenCollection(origTokens));
+		while (tokenCollectionsToProcess.count > 0) {
+			let tokenCollection = tokenCollectionsToProcess.Peek();
+			let tokens = tokenCollection.tokens;
+			let i = tokenCollection.currentTokenIndex;
+
+			let lastToken: VDFToken = i - 1 >= 0 ? tokens[i - 1] : null;
+			let token: VDFToken = tokens[i];
+			//var addThisToken = true;
+			let addThisToken = !(token.type == VDFTokenType.Tab || token.type == VDFTokenType.LineBreak
+				|| token.type == VDFTokenType.MetadataEndMarker || token.type == VDFTokenType.KeyValueSeparator
+				|| token.type == VDFTokenType.PoppedOutChildGroupMarker
+				|| token.type == VDFTokenType.None);
+
+			if (token.type == VDFTokenType.String && i + 1 < tokens.Count && tokens[i + 1].type == VDFTokenType.KeyValueSeparator && options.allowStringKeys) {
+				token.type = VDFTokenType.Key;
+			}
+
+			//var line_tabsReached_old = line_tabsReached;
+			if (token.type == VDFTokenType.Tab) {
+				tokenCollection.line_tabsReached++;
+			} else if (token.type == VDFTokenType.LineBreak) {
+				tokenCollection.line_tabsReached = 0;
+			}
+
+			if (token.type == VDFTokenType.None || 
+					((lastToken && (lastToken.type == VDFTokenType.LineBreak || lastToken.type == VDFTokenType.Tab))
+					&& token.type != VDFTokenType.LineBreak && token.type != VDFTokenType.Tab)) {
+				// if there's popped-out content, check for any end-stuff that we need to now add (because the popped-out block ended)
+				if (groupDepth_tokenCollectionsToProcessAfterGroupEnds.Count > 0) {
+					var tabDepthEnded = token.type == VDFTokenType.PoppedOutChildGroupMarker ? tokenCollection.line_tabsReached : tokenCollection.line_tabsReached + 1;
+					var deepestTokenCollectionToProcessAfterGroupEnd_depth = groupDepth_tokenCollectionsToProcessAfterGroupEnds
+						.keys[groupDepth_tokenCollectionsToProcessAfterGroupEnds.keys.length - 1];
+					if (deepestTokenCollectionToProcessAfterGroupEnd_depth >= tabDepthEnded) {
+						var deepestTokenCollectionToProcessAfterGroupEnd = groupDepth_tokenCollectionsToProcessAfterGroupEnds.Get(deepestTokenCollectionToProcessAfterGroupEnd_depth);
+						tokenCollectionsToProcess.Push(deepestTokenCollectionToProcessAfterGroupEnd);
+						groupDepth_tokenCollectionsToProcessAfterGroupEnds.Remove(deepestTokenCollectionToProcessAfterGroupEnd_depth);
+
+						if (token.type == VDFTokenType.PoppedOutChildGroupMarker) // if token was group-marker, skip when we get back
+							tokenCollection.currentTokenIndex++;
+						// we just added a collection-to-process, so go process that immediately (we'll get back to our collection later)
+						continue;
+					}
+				}
+			}
+
+			if (token.type == VDFTokenType.PoppedOutChildGroupMarker) {
+				addThisToken = false;
+				if (lastToken.type == VDFTokenType.ListStartMarker || lastToken.type == VDFTokenType.MapStartMarker) { //lastToken.type != VDFTokenType.Tab)
+					var enderTokenIndex = i + 1;
+					while (enderTokenIndex < tokens.Count && tokens[enderTokenIndex].type != VDFTokenType.LineBreak && (tokens[enderTokenIndex].type != VDFTokenType.PoppedOutChildGroupMarker || tokens[enderTokenIndex - 1].type == VDFTokenType.ListStartMarker || tokens[enderTokenIndex - 1].type == VDFTokenType.MapStartMarker))
+						enderTokenIndex++;
+					// the wrap-group consists of the on-same-line text after the popped-out-child-marker (eg the "]}" in "{children:[^]}")
+					var wrapGroupTabDepth = tokenCollection.line_tabsReached + 1;
+					var wrapGroupTokens = tokens.GetRange(i + 1, enderTokenIndex - (i + 1));
+					groupDepth_tokenCollectionsToProcessAfterGroupEnds.Set(wrapGroupTabDepth, new TokenCollection(wrapGroupTokens));
+					groupDepth_tokenCollectionsToProcessAfterGroupEnds.Get(wrapGroupTabDepth).tokens[0].index = i + 1; // update index
+					// skip processing the wrap-group-tokens (at this point)
+					i += wrapGroupTokens.Count;
+				}
+			}
+
+			if (addThisToken)
+				result.Add(token);
+
+			// if last token in this collection, remove collection (end its processing)
+			if (i == tokens.Count - 1)
+				tokenCollectionsToProcess.Pop();
+			tokenCollection.currentTokenIndex = i + 1;
+		}
+
+		// pass 4: fix token position-and-index properties
+		// ----------
+
+		VDFTokenParser.RefreshTokenPositionAndIndexProperties(result); //tokens);
+
+		// temp; for testing
+		/*Console.WriteLine(String.Join(" ", tokens.Select(a=>a.text).ToArray()));
+		Console.WriteLine("==========");
+		Console.WriteLine(String.Join(" ", result.Select(a=>a.text).ToArray()));*/
+
+		return result;
 	}
 	static RefreshTokenPositionAndIndexProperties(tokens: List<VDFToken>) {
 		var textProcessedLength = 0;
@@ -404,28 +479,39 @@ class VDFTokenParser {
 	}
 }
 
-class StackNode {
-	constructor(data) {
+class TokenCollection {
+	constructor(tokens: List<VDFToken>) { this.tokens = tokens; }
+	tokens: List<VDFToken>;
+	currentTokenIndex = 0;
+	line_tabsReached = 0;
+}
+
+class StackNode<T> {
+	constructor(data: T) {
 		this.data = data;
 		this.previous = null;
 	}
-	data = null;
-	previous = null;
+	data: T = null;
+	previous: StackNode<T> = null;
 }
-class Stack {
-	top = null;
-	//size = 0;
-	Push(data) {
-		var node = new StackNode(data);
+class Stack<T> {
+	top: StackNode<T> = null;
+	count = 0;
+	Push(data: T) {
+		Assert(data != null);
+		var node = new StackNode<T>(data);
 		node.previous = this.top;
 		this.top = node;
-		//this.size += 1;
+		this.count += 1;
 		return this.top;
 	}
+	Peek() {
+		return this.top.data;
+	}
 	Pop() {
-		var temp = this.top;
+		var result = this.top.data;
 		this.top = this.top.previous;
-		//this.size -= 1;
-		return temp;
+		this.count -= 1;
+		return result;
 	}
 }
