@@ -50,10 +50,18 @@ namespace VDFN {
 	}
 
 	public static class VDFLoader {
-		public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions options = null) { return ToVDFNode(text, typeof(T), options); }
-		public static VDFNode ToVDFNode(string text, VDFLoadOptions options) { return ToVDFNode(text, null, options); }
-		public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions options = null) { return ToVDFNode(VDFTokenParser.ParseTokens(text, options), declaredType, options); }
-		public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null, int firstTokenIndex = 0, int enderTokenIndex = -1) {
+		public static VDFNode ToVDFNode<T>(string text, VDFLoadOptions options = null) {
+			return ToVDFNode(text, typeof(T), options);
+		}
+		public static VDFNode ToVDFNode(string text, VDFLoadOptions options) {
+			return ToVDFNode(text, null, options);
+		}
+		public static VDFNode ToVDFNode(string text, Type declaredType = null, VDFLoadOptions options = null) {
+			var tokens = VDFTokenParser.ParseTokens(text, options);
+			return ToVDFNode(tokens, declaredType, options);
+		}
+		public static VDFNode ToVDFNode(List<VDFToken> tokens, Type declaredType = null, VDFLoadOptions options = null,
+				int firstTokenIndex = 0, int enderTokenIndex = -1) {
 			options = options ?? new VDFLoadOptions();
 			enderTokenIndex = enderTokenIndex != -1 ? enderTokenIndex : tokens.Count;
 

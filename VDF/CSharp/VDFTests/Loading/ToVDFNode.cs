@@ -250,21 +250,40 @@ of three lines in total.".Fix());
 			a["names"].mapChildren.Count.Should().Be(0);
 		}
 		[Fact] void D1_ArrayPoppedOut() {
-			VDFNode a = VDFLoader.ToVDFNode(
-@"{names:[^]}
+			var vdf = @"{names:[^]}
 	'Dan'
-	'Bob'");
+	'Bob'";
+			var tokens = VDFTokenParser.ParseTokens(vdf);
+			tokens[0].type.Should().Be(VDFTokenType.MapStartMarker);
+			tokens[1].type.Should().Be(VDFTokenType.Key);
+			tokens[2].type.Should().Be(VDFTokenType.ListStartMarker);
+			tokens[3].type.Should().Be(VDFTokenType.String);
+			tokens[4].type.Should().Be(VDFTokenType.String);
+			tokens[5].type.Should().Be(VDFTokenType.ListEndMarker);
+			tokens[6].type.Should().Be(VDFTokenType.MapEndMarker);
+			VDFNode a = VDFLoader.ToVDFNode(vdf);
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");
 		}
-		[Fact] void D1_ArraysPoppedOut() // each 'group' is actually just the value-data of one of the parent's properties
-		{
-			VDFNode a = VDFLoader.ToVDFNode(
-@"{names:[^] ages:[^]}
+		[Fact] void D1_ArraysPoppedOut() { // each 'group' is actually just the value-data of one of the parent's properties
+			var vdf = @"{names:[^] ages:[^]}
 	'Dan'
 	'Bob'
 	^10
-	20");
+	20";
+			var tokens = VDFTokenParser.ParseTokens(vdf);
+			var tokenTypes = tokens.Select(b=>b.type).ToList();
+			tokenTypes.ShouldBeEquivalentTo(new List<VDFTokenType> {
+				VDFTokenType.MapStartMarker,
+					VDFTokenType.Key, VDFTokenType.ListStartMarker,
+						VDFTokenType.String, VDFTokenType.String,
+					VDFTokenType.ListEndMarker,
+					VDFTokenType.Key, VDFTokenType.ListStartMarker,
+						VDFTokenType.Number, VDFTokenType.Number,
+					VDFTokenType.ListEndMarker,
+				VDFTokenType.MapEndMarker
+			}, options=>options.WithStrictOrdering());
+			VDFNode a = VDFLoader.ToVDFNode(vdf);
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");
 			a["ages"][0].primitiveValue.Should().Be(10);
