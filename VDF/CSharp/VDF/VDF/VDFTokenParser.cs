@@ -400,11 +400,11 @@ namespace VDFN {
 			// ----------
 
 			RefreshTokenPositionAndIndexProperties(result); //tokens);
-
-			// temp; for testing
-			/*Console.WriteLine(String.Join(" ", tokens.Select(a=>a.text).ToArray()));
-			Console.WriteLine("==========");
-			Console.WriteLine(String.Join(" ", result.Select(a=>a.text).ToArray()));*/
+			
+			// for testing
+			/*Log(string.Join(" ", result.Select(a=>a.text).ToArray()));
+			Log("==========");
+			Log(string.Join(" ", result.Select(a=>a.text).ToArray()));*/
 
 			return result;
 		}
