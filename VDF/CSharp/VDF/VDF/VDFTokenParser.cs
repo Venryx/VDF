@@ -465,33 +465,35 @@ namespace VDFN {
 							tokens.Insert(i - 1, token2);
 						}*/
 
-						// maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
-						RefreshTokenPositionAndIndexProperties(tokens);
+						// old; maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
+						//RefreshTokenPositionAndIndexProperties(tokens);
 
-						i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1; // have next token processed be the first pop-out-block-end-wrap-token
+						// have next token processed be the first pop-out-block-end-wrap-token
+						i -= tabDepth_popOutBlockEndWrapTokens[wrapGroupTabDepth].Count + 1;
 						tabDepth_popOutBlockEndWrapTokens.Remove(wrapGroupTabDepth);
 					}
 				}
 				else if (lastToken != null && (lastToken.type == VDFTokenType.LineBreak || lastToken.type == VDFTokenType.Tab || token.type == VDFTokenType.None)) {
 					if (token.type == VDFTokenType.None) // if depth-0-ender helper token
 						line_tabsReached = 0;
-					if (tabDepth_popOutBlockEndWrapTokens.Count > 0)
-						for (int tabDepth = tabDepth_popOutBlockEndWrapTokens.Max(a=>a.Key); tabDepth >= line_tabsReached; tabDepth--)
+					if (tabDepth_popOutBlockEndWrapTokens.Count > 0) {
+						for (int tabDepth = tabDepth_popOutBlockEndWrapTokens.Max(a=>a.Key); tabDepth >= line_tabsReached; tabDepth--) {
 							if (tabDepth_popOutBlockEndWrapTokens.ContainsKey(tabDepth)) {
 								tokens.InsertRange(i, tabDepth_popOutBlockEndWrapTokens[tabDepth]);
 								//tokens.RemoveRange(tokens.IndexOf(tabDepth_popOutBlockEndWrapTokens[tabDepth][0]), tabDepth_popOutBlockEndWrapTokens[tabDepth].Count);
 								tokens.RemoveRange(tabDepth_popOutBlockEndWrapTokens[tabDepth][0].index, tabDepth_popOutBlockEndWrapTokens[tabDepth].Count); // index was updated when set put together
-								/*foreach (VDFToken token2 in tabDepth_popOutBlockEndWrapTokens[tabDepth])
-								{
+								/*foreach (VDFToken token2 in tabDepth_popOutBlockEndWrapTokens[tabDepth]) {
 									tokens.Remove(token2);
 									tokens.Insert(i - 1, token2);
 								}*/
 
-								// maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
-								RefreshTokenPositionAndIndexProperties(tokens);
+								// old; maybe temp; fix for that tokens were not post-processed correctly for multiply-nested popped-out maps/lists
+								//RefreshTokenPositionAndIndexProperties(tokens);
 
 								tabDepth_popOutBlockEndWrapTokens.Remove(tabDepth);
 							}
+						}
+					}
 				}
 			}
 
