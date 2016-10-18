@@ -232,7 +232,7 @@ var VDF = (function () {
         if (allowGetFromCache === void 0) { allowGetFromCache = true; }
         if (type == null)
             return {};
-        if (type.classPropsCache == null || !allowGetFromCache) {
+        if (!type.hasOwnProperty("classPropsCache") || type.allowPropsCache === false || !allowGetFromCache) {
             var result = {};
             var currentType = type;
             while (currentType && currentType != Object) {
@@ -265,7 +265,9 @@ var VDF = (function () {
     VDF.GetObjectProps = function (obj) {
         if (obj == null)
             return {};
-        var result = VDF.GetClassProps(obj.constructor);
+        var result = {};
+        for (var propName in VDF.GetClassProps(obj.constructor))
+            result[propName] = null;
         for (var propName in obj)
             result[propName] = null;
         return result;

@@ -254,7 +254,7 @@ class VDF {
 
 	static GetClassProps(type, allowGetFromCache = true): any {
 		if (type == null) return {};
-		if (type.classPropsCache == null || !allowGetFromCache) {
+		if (!type.hasOwnProperty("classPropsCache") || type.allowPropsCache === false || !allowGetFromCache) {
 			var result = {};
 			var currentType = type;
 			while (currentType && currentType != Object) {
@@ -282,7 +282,9 @@ class VDF {
 	}
 	static GetObjectProps(obj): any {
 		if (obj == null) return {};
-		var result = VDF.GetClassProps(obj.constructor);
+		var result = {};
+		for (let propName in VDF.GetClassProps(obj.constructor))
+            result[propName] = null;
         for (let propName in obj)
             result[propName] = null;
         return result;
