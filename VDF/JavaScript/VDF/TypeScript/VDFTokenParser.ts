@@ -458,6 +458,7 @@ class VDFTokenParser {
 
 		// fix token position-and-index properties
 		VDFTokenParser.RefreshTokenPositionAndIndexProperties(result); //tokens);
+
 		// for testing
 		// ==========
 

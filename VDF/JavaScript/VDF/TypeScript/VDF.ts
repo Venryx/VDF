@@ -385,7 +385,8 @@ class StringBuilder implements Array<string> {
 		return this;
 	}
 	Clear() {
-		this.splice(0, this.length);
+		//this.splice(0, this.length);
+		this.length = 0;
 		this.Length = 0;
 	}
 	ToString(joinerString?) { return this.join(joinerString || ""); } // builds the string
