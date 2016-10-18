@@ -51,21 +51,23 @@ namespace VDFTests
 			V.DoNothing();
 		}*/
 
-		[Fact] void Load_Short()
+		[Fact] void Test1()
 		{
-			var a = VDFLoader.ToVDFNode(@"List(object)>[map:{^} structures:[{^} {^}]]
-	id:""fbebafd1-400f-4b69-bbca-c4c6add2e093""
-	plants:[^]
+			var vdf = @"
+{^}
+	types:[^]
+		{variables:[^] subscripts:[^] selectedMember:'/subscripts/i:1'}
+			{name:'our squad'}
+			^{^}
+				variables:[^]
+					{name:'enemy unit'}
+				name:'is done'
+	scripts:[^]
 		{^}
-			id:""d66d33c2-8e2d-4cdb-a601-6bc9d460e16e""
-			owner:null
-		{^}
-			id:""3ad4eda9-f3ec-4517-a6ff-10dff1f3e9fd""
-			owner:null
-	^range:0
-	pierceAttack:0
-	^range:0
-	pierceAttack:0");
+			name:'configuration'
+".Trim();
+			var tokens = VDFTokenParser.ParseTokens(vdf);
+			var node = VDFLoader.ToVDFNode(vdf, new VDFLoadOptions(loadUnknownTypesAsBasicTypes: true));
 			V.DoNothing();
 		}
 
