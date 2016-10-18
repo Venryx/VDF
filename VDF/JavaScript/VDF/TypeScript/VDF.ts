@@ -252,7 +252,7 @@ class VDF {
 	}
 	static GetTypeNameRoot(typeName) { return typeName != null && typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName; }
 
-	static GetClassProps(type, allowGetFromCache = false): any {
+	static GetClassProps(type, allowGetFromCache = true): any {
 		if (type == null) return {};
 		if (type.classPropsCache == null || !allowGetFromCache) {
 			var result = {};

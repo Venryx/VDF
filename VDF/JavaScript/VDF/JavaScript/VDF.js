@@ -229,7 +229,7 @@ var VDF = (function () {
     };
     VDF.GetTypeNameRoot = function (typeName) { return typeName != null && typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName; };
     VDF.GetClassProps = function (type, allowGetFromCache) {
-        if (allowGetFromCache === void 0) { allowGetFromCache = false; }
+        if (allowGetFromCache === void 0) { allowGetFromCache = true; }
         if (type == null)
             return {};
         if (type.classPropsCache == null || !allowGetFromCache) {
