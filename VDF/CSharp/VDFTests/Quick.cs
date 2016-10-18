@@ -68,6 +68,7 @@ namespace VDFTests
 ".Trim();
 			var tokens = VDFTokenParser.ParseTokens(vdf);
 			var node = VDFLoader.ToVDFNode(vdf, new VDFLoadOptions(loadUnknownTypesAsBasicTypes: true));
+			node["scripts"].listChildren.Count.Should().Be(1);
 			V.DoNothing();
 		}
 
