@@ -338,16 +338,19 @@ of three lines in total.".Fix());
 	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}".replace(/\r\n/g, "\n");
             var tokens = VDFTokenParser.ParseTokens(vdf1, null, true, false);
             // shift each within-string literal-end-marker token to after its containing-string's token
-            for (var i = 0; i < tokens.Count; i++)
+            for (var i = 0; i < tokens.Count; i++) {
                 if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String) {
                     var oldFirst = tokens[i];
                     tokens[i] = tokens[i + 1];
                     tokens[i + 1] = oldFirst;
                     i++;
                 }
+            }
             var vdf2 = "";
-            for (var i in tokens.Indexes())
-                vdf2 += tokens[i].text;
+            for (var _i = 0, tokens_1 = tokens; _i < tokens_1.length; _i++) {
+                var token = tokens_1[_i];
+                vdf2 += token.text;
+            }
             vdf1.Should().Be(vdf2);
         });
         test("D5_DeepNestedPoppedOutData", function () {

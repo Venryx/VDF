@@ -95,27 +95,27 @@ three lines".Fix());
 			a[0].primitiveValue.Should().Be(null);
 			a[1].primitiveValue.Should().Be(null);
 		});*/
-		test("D0_EmptyList", () => { (<List<object>>VDF.Deserialize("[]")).Count.Should().Be(0); });
-		test("D0_ListMetadata", () => {
+		test("D0_EmptyList", ()=> { (<List<object>>VDF.Deserialize("[]")).Count.Should().Be(0); });
+		test("D0_ListMetadata", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("List(int)>[1 2]");
 			a.metadata.Should().Be("List(int)");
 			ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
 			ok(a[1].metadata == null); //a[1].metadata.Should().Be(null);
 		});
-		test("D0_ListMetadata2", () => {
+		test("D0_ListMetadata2", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
 			a.metadata.Should().Be("List(object)");
 			a[0].metadata.Should().Be("string");
 			a[1].metadata.Should().Be("string");
 		});
-		test("D0_EmptyMap", () => { (<Dictionary<object, object>>VDF.Deserialize("{}")).Count.Should().Be(0); });
-		test("D0_Map_ChildMetadata", () => {
+		test("D0_EmptyMap", ()=> { (<Dictionary<object, object>>VDF.Deserialize("{}")).Count.Should().Be(0); });
+		test("D0_Map_ChildMetadata", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
 			a.metadata.Should().Be("Dictionary(object object)");
 			a["a"].metadata.Should().Be("string");
 			a["b"].metadata.Should().Be("string");
 		});
-		test("D0_MultilineString", () => {
+		test("D0_MultilineString", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode(
 "'<<This is a\n\
 multiline string\n\
@@ -126,26 +126,22 @@ multiline string\n\
 of three lines in total.".Fix());
 		});
 
-		test("D1_Map_Children", ()=>
-		{
+		test("D1_Map_Children", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
 			a["key1"].primitiveValue.Should().Be("Simple string.");
 			a["key2"].primitiveValue.Should().Be("false");
 			a["key3"]["age"].primitiveValue.Should().Be(50);
 		});
-		test("D1_Map_ChildrenThatAreRetrievedByKey", ()=>
-		{
+		test("D1_Map_ChildrenThatAreRetrievedByKey", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
 			a["key 1"].primitiveValue.Should().Be("value 1");
 			a["key 2"].primitiveValue.Should().Be("value 2");
 		});
-		test("D1_List_StringThatKeepsStringTypeFromVDFEvenWithObjectTypeFromCode", ()=>
-		{
+		test("D1_List_StringThatKeepsStringTypeFromVDFEvenWithObjectTypeFromCode", ()=> {
 			var a = VDF.Deserialize("['SimpleString']", "List(object)");
 			a[0].Should().Be("SimpleString");
 		});
-		test("D1_BaseValuesWithImplicitCasting", ()=>
-		{
+		test("D1_BaseValuesWithImplicitCasting", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{bool:false int:5 double:.5 string:'Prop value string.'}");
 			a["bool"].primitiveValue.Should().Be(false);
 			a["int"].primitiveValue.Should().Be(5);
@@ -158,38 +154,32 @@ of three lines in total.".Fix());
 			Assert.True(a["double"] == .5);
 			Assert.True(a["string"] == "Prop value string.");*/
 		});
-		test("D1_BaseValuesWithMarkedTypes", ()=>
-		{
+		test("D1_BaseValuesWithMarkedTypes", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
 			a["bool"].primitiveValue.Should().Be(false);
 			a["int"].primitiveValue.Should().Be(5);
 			a["double"].primitiveValue.Should().Be(.5);
 			a["string"].primitiveValue.Should().Be("Prop value string.");
 		});
-		test("D1_Literal", ()=>
-		{
+		test("D1_Literal", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{string:'<<<Prop value string that <<needs escaping>>.>>>'}");
 			a["string"].primitiveValue.Should().Be("Prop value string that <<needs escaping>>.");
 		});
-		test("D1_TroublesomeLiteral1", ()=>
-		{
+		test("D1_TroublesomeLiteral1", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{string:'<<<#<<Prop value string that <<needs escaping>>.>>#>>>'}");
 			a["string"].primitiveValue.Should().Be("<<Prop value string that <<needs escaping>>.>>");
 		});
-		test("D1_TroublesomeLiteral2", ()=>
-		{
+		test("D1_TroublesomeLiteral2", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{string:'<<<##Prop value string that <<needs escaping>>.##>>>'}");
 			a["string"].primitiveValue.Should().Be("#Prop value string that <<needs escaping>>.#");
 		});
-		test("D1_VDFWithVDFWithVDF", ()=>
-		{
+		test("D1_VDFWithVDFWithVDF", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
 			a["level1"].primitiveValue.Should().Be("{level2:'<<{level3:'Base string.'}>>'}");
 			VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
 			VDFLoader.ToVDFNode(VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue)["level3"].primitiveValue.Should().Be("Base string.");
 		});
-		test("D1_ArraysInArrays", ()=>
-		{
+		test("D1_ArraysInArrays", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
 			a[0][0].primitiveValue.Should().Be("1A");
 			a[0][1].primitiveValue.Should().Be("1B");
@@ -197,36 +187,31 @@ of three lines in total.".Fix());
 			a[1][1].primitiveValue.Should().Be("2B");
 			a[2].primitiveValue.Should().Be("3A");
 		});
-		test("D1_ArraysInArrays_SecondsNullAndEmpty", ()=>
-		{
+		test("D1_ArraysInArrays_SecondsNullAndEmpty", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
 			a[0][0].primitiveValue.Should().Be("1A");
 			ok(a[0][1].primitiveValue == null); //a[0][1].primitiveValue.Should().Be(null);
 			a[1][0].primitiveValue.Should().Be("2A");
 			a[1][1].primitiveValue.Should().Be("");
 		});
-		test("D1_StringAndArraysInArrays", ()=>
-		{
+		test("D1_StringAndArraysInArrays", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("['text' ['2A' null]]");
 			a[0].primitiveValue.Should().Be("text");
 			a[1][0].primitiveValue.Should().Be("2A");
 			ok(a[1][1].primitiveValue == null); //a[1][1].primitiveValue.Should().Be(null);
 		});
-		test("D1_Dictionary", ()=>
-		{
+		test("D1_Dictionary", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
 			a["key1"].primitiveValue.Should().Be("value1");
 			a["key2"].primitiveValue.Should().Be("value2");
 			a["key3"].primitiveValue.Should().Be("value3");
 			a["key4"].primitiveValue.Should().Be("value4");
 		});
-		test("D1_Map_KeyWithHash", ()=>
-		{
+		test("D1_Map_KeyWithHash", ()=> {
 			var a = VDFLoader.ToVDFNode("{#:'value1'}");
 			a["#"].primitiveValue.Should().Be("value1");
 		});
-		test("D1_Map_MixedTypeKeysWithMetadata", ()=>
-		{
+		test("D1_Map_MixedTypeKeysWithMetadata", ()=> {
 			var a = VDFLoader.ToVDFNode("{int>1:'value1' int>\"2\":'value2' 'key3':'value3' \"key4\":\"value4\"}");
 			var pairs = a.mapChildren.Pairs;
 			a["1"].primitiveValue.Should().Be("value1");
@@ -241,27 +226,24 @@ of three lines in total.".Fix());
 			bMap.Get("key3").Should().Be("value3");
 			bMap.Get("key4").Should().Be("value4");
 		});
-		test("D1_Dictionary_Complex", ()=>
-		{
+		test("D1_Dictionary_Complex", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
 			a["uiPrefs"]["toolOptions"].primitiveValue.Should().Be("{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}");
 			a["uiPrefs"]["liveTool"].primitiveValue.Should().Be("Select");
 		});
-		test("D1_Dictionary_TypesInferredFromGenerics", ()=>
-		{
+		test("D1_Dictionary_TypesInferredFromGenerics", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}");
 			a["vertexColors"]["9,4,2.5"].primitiveValue.Should().Be("Black");
 			a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
 			a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
 		});
 
-		test("D1_ArrayPoppedOut_NoItems", ()=>
-		{
+		test("D1_ArrayPoppedOut_NoItems", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode("{names:[^]}");
 			a["names"].listChildren.Count.Should().Be(0);
 			a["names"].mapChildren.Count.Should().Be(0);
 		});
-		test("D1_ArrayPoppedOut", () => {
+		test("D1_ArrayPoppedOut", ()=> {
 			var vdf = 
 `{names:[^]}\n\
 	'Dan'\n\
@@ -280,8 +262,7 @@ of three lines in total.".Fix());
 			a["names"][0].primitiveValue.Should().Be("Dan");
 			a["names"][1].primitiveValue.Should().Be("Bob");
 		});
-		test("D1_ArraysPoppedOut", ()=> // each 'group' is actually just the value-data of one of the parent's properties
-		{
+		test("D1_ArraysPoppedOut", ()=> { // each 'group' is actually just the value-data of one of the parent's properties
 			var vdf = `{names:[^] ages:[^]}
 	'Dan'
 	'Bob'
@@ -306,8 +287,7 @@ of three lines in total.".Fix());
 			a["ages"][0].primitiveValue.Should().Be(10);
 			a["ages"][1].primitiveValue.Should().Be(20);
 		});
-		test("D1_InferredDictionaryPoppedOut", ()=>
-		{
+		test("D1_InferredDictionaryPoppedOut", ()=> {
 			var a: VDFNode = VDFLoader.ToVDFNode(
 "{messages:{^} otherProperty:false}\n\
 	title1:'message1'\n\
@@ -317,8 +297,7 @@ of three lines in total.".Fix());
 			a["messages"]["title2"].primitiveValue.Should().Be("message2");
 			a["otherProperty"].primitiveValue.Should().Be(false);
 		});
-		test("D1_Map_PoppedOutMap", ()=>
-		{
+		test("D1_Map_PoppedOutMap", ()=> {
 /*
 Written as:
 
@@ -343,8 +322,7 @@ Parsed as:
 			a["otherProperty"].primitiveValue.Should().Be(false);
 		});
 
-		test("D1_Object_MultilineStringThenProperty", ()=>
-		{
+		test("D1_Object_MultilineStringThenProperty", ()=> {
 			var a = VDFLoader.ToVDFNode(
 "{text:'<<This is a\n\
 multiline string\n\
@@ -355,8 +333,7 @@ multiline string\n\
 of three lines in total.".Fix());
 			a["bool"].primitiveValue.Should().Be(true);
 		});
-		test("D1_Object_PoppedOutStringsThenMultilineString", ()=>
-		{
+		test("D1_Object_PoppedOutStringsThenMultilineString", ()=> {
 			var a = VDFLoader.ToVDFNode(
 "{childTexts:[^] text:'<<This is a\n\
 multiline string\n\
@@ -371,8 +348,7 @@ multiline string\n\
 of three lines in total.".Fix());
 		});
 
-		test("D2_List_Lists_PoppedOutObjects", ()=>
-		{
+		test("D2_List_Lists_PoppedOutObjects", ()=> {
 			var a = VDFLoader.ToVDFNode(
 "[[^] [^] [^]]\n\
 	{name:'Road'}\n\
@@ -380,8 +356,7 @@ of three lines in total.".Fix());
 	^{name:'SimpleHill'}"); //, new VDFLoadOptions({inferStringTypeForUnknownTypes: true}));
 			a.listChildren.Count.Should().Be(3);
 		});
-		test("D2_List_PoppedOutObjects_MultilineString", ()=>
-		{
+		test("D2_List_PoppedOutObjects_MultilineString", ()=> {
 			var a = VDFLoader.ToVDFNode(
 "[^]\n\
 	{id:1 multilineText:'<<line1\n\
@@ -392,8 +367,7 @@ of three lines in total.".Fix());
 			a.listChildren.Count.Should().Be(2);
 		});
 
-		test("D2_Object_PoppedOutObject_PoppedOutObject", ()=>
-		{
+		test("D2_Object_PoppedOutObject_PoppedOutObject", ()=> {
 			var a = VDFLoader.ToVDFNode(
 "{name:'L0' children:[^]}\n\
 	{name:'L1' children:[^]}\n\
@@ -402,8 +376,7 @@ of three lines in total.".Fix());
 			a["children"].listChildren[0]["children"].listChildren.Count.Should().Be(1);
 		});
 
-		test("D5_TokenTextPreservation", ()=>
-		{
+		test("D5_TokenTextPreservation", ()=> {
 			var vdf1 = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^] tasksScriptText:'<<Shoot at Enemy Vehicle\n\
 	Gun1 aim at EnemyVehicle_NonBroken\n\
 	Gun1 fire>>'}\n\
@@ -412,22 +385,21 @@ of three lines in total.".Fix());
 			var tokens = VDFTokenParser.ParseTokens(vdf1, null, true, false);
 
 			// shift each within-string literal-end-marker token to after its containing-string's token
-			for (let i = 0; i < tokens.Count; i++)
-				if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String)
-				{
+			for (let i = 0; i < tokens.Count; i++) {
+				if (tokens[i].type == VDFTokenType.LiteralEndMarker && tokens[i + 1].type == VDFTokenType.String) {
 					var oldFirst = tokens[i];
 					tokens[i] = tokens[i + 1];
 					tokens[i + 1] = oldFirst;
 					i++;
 				}
+			}
 
 			var vdf2 = "";
-			for (let i in tokens.Indexes())
-				vdf2 += tokens[i].text;
+			for (let token of tokens)
+				vdf2 += token.text;
 			vdf1.Should().Be(vdf2);
 		});
-		test("D5_DeepNestedPoppedOutData", ()=>
-		{
+		test("D5_DeepNestedPoppedOutData", ()=> {
 			var vdf =
 "{name:'Main' worlds:Dictionary(string object)>{Test1:{vObjectRoot:{name:'VObjectRoot' children:[^]}} Test2:{vObjectRoot:{name:'VObjectRoot' children:[^]}}}}\n\
 	{id:System.Guid>'025f28a5-a14b-446d-b324-2d274a476a63' name:'#Types' children:[]}\n\

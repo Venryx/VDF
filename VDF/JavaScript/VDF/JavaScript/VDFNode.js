@@ -121,8 +121,8 @@ var VDFNode = (function () {
                         builder.Append(poppedOutChildText);
                 }
             if (this.isList || this.listChildren.Count > 0)
-                for (var i in this.listChildren.Indexes()) {
-                    var item = this.listChildren[i];
+                for (var _i = 0, _a = this.listChildren; _i < _a.length; _i++) {
+                    var item = _a[_i];
                     builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(options, tabDepth + 1));
                     var poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth + 1);
                     if (poppedOutChildText.length > 0)
@@ -136,10 +136,13 @@ var VDFNode = (function () {
                 for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
                     if ((poppedOutChildText = pair.value.ToVDF_PoppedOutPart(options, tabDepth)).length)
                         poppedOutChildTexts.Add(poppedOutChildText);
-            if (this.isList || this.listChildren.Count > 0)
-                for (var i in this.listChildren.Indexes())
-                    if ((poppedOutChildText = this.listChildren[i].ToVDF_PoppedOutPart(options, tabDepth)).length)
+            if (this.isList || this.listChildren.Count > 0) {
+                for (var _b = 0, _c = this.listChildren; _b < _c.length; _b++) {
+                    var item = _c[_b];
+                    if ((poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth)).length)
                         poppedOutChildTexts.Add(poppedOutChildText);
+                }
+            }
             for (var i = 0; i < poppedOutChildTexts.Count; i++) {
                 poppedOutChildText = poppedOutChildTexts[i];
                 var insertPoint = 0;

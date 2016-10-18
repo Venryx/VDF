@@ -500,12 +500,12 @@ window["List"] = function List(itemType: string, ...items): void { // actual con
 	Object.defineProperty(s, "Count", {enumerable: false, get: function() { return this.length; }});
 
 	// new methods
-	s.Indexes = function () {
+	/*s.Indexes = function () {
 		var result = {};
 		for (var i = 0; i < this.length; i++)
 			result[i] = this[i];
 		return result;
-	};
+	};*/
 	s.Add = function (...items) { return this.push.apply(this, items); };
 	s.AddRange = function (items) {
 		for (var i = 0; i < items.length; i++)
@@ -517,21 +517,21 @@ window["List"] = function List(itemType: string, ...items): void { // actual con
 	s.RemoveAt = function(index) { this.splice(index, 1); };
 	s.RemoveRange = function(index, count) { return this.splice(index, count); };
 	s.Any = function(matchFunc) {
-		for (var i in this.Indexes())
-			if (matchFunc.call(this[i], this[i]))
+		for (let item of this)
+			if (matchFunc.call(item, item))
 				return true;
 		return false;
 	};
 	s.All = function(matchFunc) {
-		for (var i in this.Indexes())
-			if (!matchFunc.call(this[i], this[i]))
+		for (let item of this)
+			if (!matchFunc.call(item, item))
 				return false;
 		return true;
 	};
 	s.Select = function(selectFunc, itemType) {
 		var result = new List(itemType || "object");
-		for (var i in this.Indexes())
-			result.Add(selectFunc.call(this[i], this[i]));
+		for (let item of this)
+			result.Add(selectFunc.call(item, item));
 		return result;
 	};
 	s.First = function(matchFunc) {
@@ -542,9 +542,9 @@ window["List"] = function List(itemType: string, ...items): void { // actual con
 	};
 	s.FirstOrDefault = function(matchFunc) {
 		if (matchFunc) {
-			for (var i in this.Indexes())
-				if (matchFunc.call(this[i], this[i]))
-					return this[i];
+			for (let item of this)
+				if (matchFunc.call(item, item))
+					return item;
 			return null;
 		}
 		else
@@ -586,7 +586,7 @@ interface List<T> extends Array<T> { // class/instance declaration stuff
 	Count: number;
 
 	// new methods
-	Indexes(): any;
+	//Indexes(): any;
 	Add(...items): number;
 	AddRange(items: Array<T>): void;
 	Insert(index, item): void;

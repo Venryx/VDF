@@ -52,17 +52,15 @@ var VDFLoader = (function () {
         var depth = 0;
         var tokensAtDepth0 = new List("VDFToken");
         var tokensAtDepth1 = new List("VDFToken");
-        var i;
-        //for (var i in tokens.Indexes())
-        for (var i = firstTokenIndex; i < enderTokenIndex; i++) {
-            var token = tokens[i];
-            if (token.type == VDFTokenType.ListEndMarker || token.type == VDFTokenType.MapEndMarker)
+        for (var _i = 0, tokens_1 = tokens; _i < tokens_1.length; _i++) {
+            var token_1 = tokens_1[_i];
+            if (token_1.type == VDFTokenType.ListEndMarker || token_1.type == VDFTokenType.MapEndMarker)
                 depth--;
             if (depth == 0)
-                tokensAtDepth0.Add(token);
+                tokensAtDepth0.Add(token_1);
             if (depth == 1)
-                tokensAtDepth1.Add(token);
-            if (token.type == VDFTokenType.ListStartMarker || token.type == VDFTokenType.MapStartMarker)
+                tokensAtDepth1.Add(token_1);
+            if (token_1.type == VDFTokenType.ListStartMarker || token_1.type == VDFTokenType.MapStartMarker)
                 depth++;
         }
         var fromVDFTypeName = "object";

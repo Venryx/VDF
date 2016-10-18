@@ -133,8 +133,7 @@
 						builder.Append(poppedOutChildText);
 				}
 			if (this.isList || this.listChildren.Count > 0)
-				for (let i in this.listChildren.Indexes()) {
-					var item = this.listChildren[i];
+				for (let item of this.listChildren) {
 					builder.Append("\n" + childTabStr + item.ToVDF_InlinePart(options, tabDepth + 1));
 					let poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth + 1);
 					if (poppedOutChildText.length > 0)
@@ -148,10 +147,12 @@
 				for (let i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
 					if ((poppedOutChildText = pair.value.ToVDF_PoppedOutPart(options, tabDepth)).length)
 						poppedOutChildTexts.Add(poppedOutChildText);
-			if (this.isList || this.listChildren.Count > 0)
-				for (let i in this.listChildren.Indexes())
-					if ((poppedOutChildText = this.listChildren[i].ToVDF_PoppedOutPart(options, tabDepth)).length)
+			if (this.isList || this.listChildren.Count > 0) {
+				for (let item of this.listChildren) {
+					if ((poppedOutChildText = item.ToVDF_PoppedOutPart(options, tabDepth)).length)
 						poppedOutChildTexts.Add(poppedOutChildText);
+				}
+			}
 			for (let i = 0; i < poppedOutChildTexts.Count; i++) {
 				poppedOutChildText = poppedOutChildTexts[i];
 				var insertPoint = 0;

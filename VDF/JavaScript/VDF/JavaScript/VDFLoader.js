@@ -53,7 +53,6 @@ var VDFLoader = (function () {
         var tokensAtDepth0 = new List("VDFToken");
         var tokensAtDepth1 = new List("VDFToken");
         var i;
-        //for (var i in tokens.Indexes())
         for (var i = firstTokenIndex; i < enderTokenIndex; i++) {
             var token = tokens[i];
             if (token.type == VDFTokenType.ListEndMarker || token.type == VDFTokenType.MapEndMarker)
