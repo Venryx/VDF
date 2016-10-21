@@ -111,7 +111,7 @@ class VDFNodePathNode {
 		this.map_key = map_key;
 	}
 
-	Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
+	//Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
 
 	// for debugging
 	toString() {
@@ -128,38 +128,35 @@ class VDFNodePathNode {
 	}
 }
 class VDFNodePath {
-	nodes: List<VDFNodePathNode>;
-	constructor(nodes: List<VDFNodePathNode>);
+	nodes: VDFNodePathNode[];
+	constructor(nodes: VDFNodePathNode[]);
 	constructor(rootNode: VDFNodePathNode);
 	constructor(nodes_orRootNode) {
-		if (nodes_orRootNode instanceof Array)
-			this.nodes = List.apply(null, ["VDFNodePathNode"].concat(nodes_orRootNode));
-		else
-			this.nodes = new List<VDFNodePathNode>("VDFNodePathNode", nodes_orRootNode);
+		this.nodes = nodes_orRootNode instanceof Array ? nodes_orRootNode : [nodes_orRootNode];
 	}
 
-	get rootNode() { return this.nodes.First(); }
+	get rootNode() { return this.nodes[0]; }
 	get parentNode() { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; }
-	get currentNode() { return this.nodes.Last(); }
+	get currentNode() { return this.nodes[this.nodes.length - 1]; }
 
 	ExtendAsListItem(index: number, obj) {
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, null, index));
+		var newNodes = this.nodes.slice(0);
+		newNodes.push(new VDFNodePathNode(obj, null, index));
 		return new VDFNodePath(newNodes);
 	}
 	ExtendAsMapKey(keyIndex, obj) {
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, null, null, keyIndex));
+		var newNodes = this.nodes.slice(0);
+		newNodes.push(new VDFNodePathNode(obj, null, null, keyIndex));
 		return new VDFNodePath(newNodes);
 	}
 	ExtendAsMapItem(key, obj) {
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=> a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, null, null, null, key));
+		var newNodes = this.nodes.slice(0);
+		newNodes.push(new VDFNodePathNode(obj, null, null, null, key));
 		return new VDFNodePath(newNodes);
 	}
 	ExtendAsChild(prop: VDFPropInfo, obj) {
-		var newNodes = this.nodes.Select<VDFNodePathNode>(a=>a.Clone(), "VDFNodePathNode");
-		newNodes.Add(new VDFNodePathNode(obj, prop));
+		var newNodes = this.nodes.slice(0);
+		newNodes.push(new VDFNodePathNode(obj, prop));
 		return new VDFNodePath(newNodes);
 	}
 

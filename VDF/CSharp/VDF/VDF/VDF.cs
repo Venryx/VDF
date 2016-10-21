@@ -100,7 +100,7 @@ namespace VDFN {
 			this.map_key = map_key;
 		}
 
-		public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key); }
+		//public VDFNodePathNode Clone() { return new VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key); }
 
 		// for debugging
 		public override string ToString() {
@@ -122,27 +122,28 @@ namespace VDFN {
 		public VDFNodePath(List<VDFNodePathNode> nodes) { this.nodes = nodes; }
 		public VDFNodePath(VDFNodePathNode rootNode) { nodes = new List<VDFNodePathNode> {rootNode}; }
 
-		public VDFNodePathNode rootNode { get { return nodes.First(); } }
-		public VDFNodePathNode parentNode { get { return nodes.Count >= 2 ? nodes[nodes.Count - 2] : null; } }
-		public VDFNodePathNode currentNode { get { return nodes.Last(); } }
+		public VDFNodePathNode rootNode =>nodes.First();
+		public VDFNodePathNode parentNode =>nodes.Count >= 2 ? nodes[nodes.Count - 2] : null;
+		public VDFNodePathNode currentNode =>nodes.Last();
 
 		public VDFNodePath ExtendAsListItem(int index, object obj) {
-			var newNodes = nodes.Select(a=>a.Clone()).ToList();
+			//var newNodes = nodes.Select(a=>a.Clone()).ToList();
+			var newNodes = nodes.ToList();
 			newNodes.Add(new VDFNodePathNode(obj, list_index: index));
 			return new VDFNodePath(newNodes);
 		}
 		public VDFNodePath ExtendAsMapKey(int keyIndex, object obj) {
-			var newNodes = nodes.Select(a=>a.Clone()).ToList();
+			var newNodes = nodes.ToList();
 			newNodes.Add(new VDFNodePathNode(obj, map_keyIndex: keyIndex));
 			return new VDFNodePath(newNodes);
 		}
 		public VDFNodePath ExtendAsMapItem(object key, object obj) {
-			var newNodes = nodes.Select(a=>a.Clone()).ToList();
+			var newNodes = nodes.ToList();
 			newNodes.Add(new VDFNodePathNode(obj, map_key: key));
 			return new VDFNodePath(newNodes);
 		}
 		public VDFNodePath ExtendAsChild(VDFPropInfo prop, object obj) {
-			var newNodes = nodes.Select(a=>a.Clone()).ToList();
+			var newNodes = nodes.ToList();
 			newNodes.Add(new VDFNodePathNode(obj, prop));
 			return new VDFNodePath(newNodes);
 		}
