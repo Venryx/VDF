@@ -6,13 +6,13 @@ using System.Linq;
 namespace VDFN {
 	public class VDFLoadOptions {
 		public VDFLoadOptions(List<object> message = null, bool allowStringKeys = true, bool allowCommaSeparators = false, bool loadUnknownTypesAsBasicTypes = false,
-				Dictionary<string, string> namespaceAliasesByName = null, Dictionary<Type, string> typeAliasesByType = null) {
+				Dictionary<string, string> namespaceAliasesByName = null, Dictionary<string, Type> typeAliasesByName = null) {
 			this.messages = message ?? new List<object>();
 			this.allowStringKeys = allowStringKeys;
 			this.allowCommaSeparators = allowCommaSeparators;
 			this.loadUnknownTypesAsBasicTypes = loadUnknownTypesAsBasicTypes;
 			this.namespaceAliasesByName = namespaceAliasesByName ?? new Dictionary<string, string>();
-			this.typeAliasesByType = typeAliasesByType ?? new Dictionary<Type, string>();
+			this.typeAliasesByName = typeAliasesByName ?? new Dictionary<string, Type>();
 		}
 
 		public List<object> messages;
@@ -39,7 +39,7 @@ namespace VDFN {
 
 		// CS only
 		public Dictionary<string, string> namespaceAliasesByName;
-		public Dictionary<Type, string> typeAliasesByType;
+		public Dictionary<string, Type> typeAliasesByName;
 		//public List<string> extraSearchAssemblyNames; // maybe add this option later
 
 		public VDFLoadOptions ForJSON() { // helper function for JSON compatibility

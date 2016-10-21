@@ -203,8 +203,8 @@ namespace VDFN {
 			return result;
 		}
 		static Type GetTypeByNameRoot(string nameRoot, int genericsParams, VDFLoadOptions options) {
-			if (options.typeAliasesByType.Values.Contains(nameRoot))
-				return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
+			if (options.typeAliasesByName.ContainsKey(nameRoot))
+				return options.typeAliasesByName[nameRoot];
 			//if (builtInTypeAliasesByType.Values.Contains(nameRoot))
 			//	return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == nameRoot).Key;
 			if (builtInTypeAliasesByTypeName.ContainsKey(nameRoot))
@@ -227,16 +227,16 @@ namespace VDFN {
 		}
 		public static Type GetTypeByName(string typeName, VDFLoadOptions options = null) {
 			options = options ?? new VDFLoadOptions();
-			if (options.typeAliasesByType.Values.Contains(typeName))
-				return options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
+			if (options.typeAliasesByName.ContainsKey(typeName))
+				return options.typeAliasesByName[typeName];
 			//if (builtInTypeAliasesByType.Values.Contains(typeName))
 			//	return builtInTypeAliasesByType.FirstOrDefault(pair=>pair.Value == typeName).Key;
 			if (builtInTypeAliasesByTypeName.ContainsKey(typeName))
 				return builtInTypeAliasesByTypeName[typeName];
 
 			var rootName = typeName.Contains("(") ? typeName.Substring(0, typeName.IndexOf("(")) : typeName;
-			if (options.typeAliasesByType.Values.Contains(rootName)) // if value is actually an alias, replace it with the root-name
-				rootName = options.typeAliasesByType.FirstOrDefault(pair=>pair.Value == rootName).Key.FullName.Split(new[] {'`'})[0];
+			if (options.typeAliasesByName.ContainsKey(rootName)) // if value is actually an alias, replace it with the root-name
+				rootName = options.typeAliasesByName[rootName].FullName.Split('`')[0];
 			var rootType = GetTypeByNameRoot(rootName, GetGenericParamsCountOfTypeName(typeName), options);
 			if (rootType == null) {
 				if (options.loadUnknownTypesAsBasicTypes)

@@ -235,10 +235,9 @@ of three lines in total.".Fix());
 			a["uiPrefs"]["liveTool"].primitiveValue.Should().Be("Select");
 		}
 		[Fact] void D1_Dictionary_TypesInferredFromGenerics() {
-			VDFNode a = VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}", new VDFLoadOptions
-				(
-				typeAliasesByType: new Dictionary<Type, string> {{typeof(Color), "Color"}}
-				));
+			VDFNode a = VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}", new VDFLoadOptions(
+				typeAliasesByName: new Dictionary<string, Type> {{"Color", typeof(Color)}}
+			));
 			a["vertexColors"]["9,4,2.5"].primitiveValue.Should().Be("Black");
 			a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
 			a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
