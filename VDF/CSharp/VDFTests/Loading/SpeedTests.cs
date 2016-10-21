@@ -59,8 +59,8 @@ namespace VDFTests {
 				biomeSetType_custom_biome:'Savanna'
 				seed_randomize:false
 	selectedRegion:'@/regions/i:0'
-	lastCameraPos:'104.110542297363 -41.6764602661133 93.6785125732422'
-	lastCameraRot:'33.5 2.5596236241654E-07 10.50013256073'
+	lastCameraPos:'201.821136474609 -93.9375 138.161636352539'
+	lastCameraRot:'35.5000648498535 1.04871401163109E-06 12.0000658035278'
 	showRegionOverlay:false
 	playerCount_min:0
 	playerCount_max:6
@@ -127,6 +127,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'12 407 2'
@@ -149,6 +150,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'13 403 2.5'
@@ -161,6 +163,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'14 407 3'
@@ -168,6 +171,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'14 409 3'
@@ -175,6 +179,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'16 402 4'
@@ -202,6 +207,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'21 255 3.99992370605469'
@@ -229,6 +235,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'26 250 3.99990844726563'
@@ -261,6 +268,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'28 254 3.99996948242188'
@@ -283,6 +291,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'29 241 3.99992370605469'
@@ -295,6 +304,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'29 245 3.99991607666016'
@@ -302,6 +312,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'30 250 3.99996185302734'
@@ -374,6 +385,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'34 48 4'
@@ -386,6 +398,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'33 53 4'
@@ -393,6 +406,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'34 56 4'
@@ -405,6 +419,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'34 240 3.99990081787109'
@@ -432,6 +447,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'33 257 4'
@@ -439,6 +455,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'33 260 4'
@@ -456,6 +473,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'35 41 4'
@@ -478,6 +496,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'35 237 3.99996185302734'
@@ -495,6 +514,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'36 252 3.99998474121094'
@@ -522,6 +542,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'37 41 4'
@@ -534,6 +555,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'37 49 4'
@@ -566,6 +588,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'37 63 4'
@@ -603,6 +626,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'37 263 4'
@@ -635,6 +659,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'39 45 4'
@@ -672,6 +697,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'39 239 3.99111938476563'
@@ -694,6 +720,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'39 255 4'
@@ -736,6 +763,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'41 47 4'
@@ -743,6 +771,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'42 54 4'
@@ -760,6 +789,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'42 66 3.85173034667969'
@@ -792,6 +822,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'41 233 4'
@@ -809,6 +840,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'41 239 3.99227142333984'
@@ -821,6 +853,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'41 243 3.99558258056641'
@@ -838,6 +871,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'42 250 3.99836730957031'
@@ -880,6 +914,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'43 39 4'
@@ -932,6 +967,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'44 240 3.99275970458984'
@@ -949,6 +985,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'43 263 4'
@@ -966,6 +1003,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 39 4.20879364013672'
@@ -973,6 +1011,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 41 4.20937347412109'
@@ -1020,6 +1059,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 71 5.84939575195313'
@@ -1037,6 +1077,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 87 4.40133666992188'
@@ -1044,6 +1085,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 89 4.49819946289063'
@@ -1051,6 +1093,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 91 4.5694580078125'
@@ -1058,6 +1101,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'45 238 3.99510192871094'
@@ -1065,6 +1109,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'46 248 3.99839019775391'
@@ -1127,6 +1172,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'47 47 4.35408020019531'
@@ -1159,6 +1205,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'47 61 4.22352532202559'
@@ -1166,6 +1213,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'47 67 6.14738464355469'
@@ -1193,6 +1241,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'47 89 4.94866180419922'
@@ -1200,6 +1249,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'47 91 5.22205352783203'
@@ -1227,6 +1277,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'48 254 3.99941253662109'
@@ -1264,6 +1315,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'48 79 7.13672461469146'
@@ -1276,6 +1328,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'48 245 3.99730682373047'
@@ -1288,6 +1341,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'49 43 5.18751525878906'
@@ -1335,6 +1389,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'49 87 6.817580429812'
@@ -1342,6 +1397,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'49 89 5.46152876954768'
@@ -1374,6 +1430,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'49 265 4'
@@ -1391,6 +1448,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'50 53 4.347900390625'
@@ -1403,6 +1461,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'50 81 8.83076811475225'
@@ -1415,6 +1474,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'51 41 5.50032043457031'
@@ -1452,6 +1512,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'52 76 9.64667510986328'
@@ -1469,6 +1530,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'52 90 8.40490492338341'
@@ -1486,6 +1548,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'52 242 3.99565124511719'
@@ -1528,6 +1591,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'52 266 4'
@@ -1555,6 +1619,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'53 61 4.6299635774004'
@@ -1562,6 +1627,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'53 63 5.82186126708984'
@@ -1579,6 +1645,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'53 79 10.3942031860352'
@@ -1586,6 +1653,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'53 81 10.720703125'
@@ -1593,6 +1661,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'53 87 11.0617795972655'
@@ -1610,6 +1679,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'54 252 3.99781799316406'
@@ -1622,6 +1692,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'54 258 4'
@@ -1634,6 +1705,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'54 45 6.75762939453125'
@@ -1671,6 +1743,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'55 63 6.03386688232422'
@@ -1728,6 +1801,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'56 264 4'
@@ -1750,6 +1824,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'56 45 7.44325256347656'
@@ -1777,6 +1852,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'58 64 8.21481027631171'
@@ -1809,6 +1885,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'57 267 4'
@@ -1831,6 +1908,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'59 61 8.40587605441735'
@@ -1843,6 +1921,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'60 80 14.3252071876927'
@@ -1880,6 +1959,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'61 59 10.2148084673571'
@@ -1897,6 +1977,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'61 65 11.5140242509634'
@@ -1904,6 +1985,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'61 67 12.0617993193335'
@@ -1926,6 +2008,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'61 75 13.0613819275712'
@@ -1973,6 +2056,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'63 57 12.1720866502878'
@@ -1980,6 +2064,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'63 59 11.864337707829'
@@ -1992,6 +2077,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'63 63 12.4089788633513'
@@ -2004,6 +2090,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'63 67 13.8649299787774'
@@ -2036,6 +2123,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'63 343 4'
@@ -2048,6 +2136,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'64 352 4'
@@ -2080,6 +2169,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'65 339 4'
@@ -2092,6 +2182,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'66 344 4'
@@ -2109,6 +2200,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'66 356 4'
@@ -2176,6 +2268,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'71 355 4'
@@ -2223,6 +2316,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'75 343 4'
@@ -2305,6 +2399,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'79 361 4'
@@ -2352,6 +2447,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'84 352 4'
@@ -2384,6 +2480,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'85 359 4'
@@ -2391,6 +2488,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'86 366 4'
@@ -2463,6 +2561,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'90 482 4'
@@ -2480,6 +2579,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'89 489 4'
@@ -2512,6 +2612,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'91 365 4'
@@ -2519,6 +2620,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'91 367 4'
@@ -2546,6 +2648,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'93 357 4'
@@ -2558,6 +2661,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'93 363 4'
@@ -2565,6 +2669,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'94 366 4'
@@ -2577,6 +2682,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'94 476 4'
@@ -2594,6 +2700,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'93 489 4'
@@ -2601,6 +2708,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'94 492 4'
@@ -2618,6 +2726,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'94 359 4'
@@ -2640,6 +2749,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'95 361 4'
@@ -2647,6 +2757,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'96 486 4'
@@ -2659,6 +2770,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'95 495 2.5'
@@ -2681,6 +2793,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'96 363 4'
@@ -2693,6 +2806,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'96 489 4'
@@ -2700,6 +2814,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'96 499 0.5'
@@ -2742,6 +2857,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'98 497 1.5'
@@ -2769,6 +2885,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'99 489 4'
@@ -2786,6 +2903,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'100 497 1.5'
@@ -2793,6 +2911,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'101 213 4.86183929443359'
@@ -2860,6 +2979,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'103 215 4.86183929443359'
@@ -2877,6 +2997,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'104 476 4'
@@ -2889,6 +3010,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'104 482 4'
@@ -2936,6 +3058,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'106 494 3'
@@ -2988,6 +3111,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'108 473 4'
@@ -3010,6 +3134,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'109 495 2.5'
@@ -3022,6 +3147,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'112 474 4'
@@ -3054,6 +3180,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'112 496 2'
@@ -3066,6 +3193,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'115 481 4'
@@ -3073,6 +3201,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'116 484 4'
@@ -3085,6 +3214,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'115 489 4'
@@ -3207,6 +3337,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'128 294 4'
@@ -3219,6 +3350,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'127 311 4'
@@ -3261,6 +3393,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'129 311 4'
@@ -3323,6 +3456,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'134 104 36.4655306545217'
@@ -3350,6 +3484,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'133 301 4'
@@ -3377,6 +3512,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'135 101 35.3803557402091'
@@ -3444,6 +3580,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'138 90 38.2014541625977'
@@ -3471,6 +3608,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'137 101 34.5050277709961'
@@ -3488,6 +3626,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'138 108 34.066032409668'
@@ -3500,6 +3639,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'137 289 4'
@@ -3557,6 +3697,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'139 103 34.6257095336914'
@@ -3564,6 +3705,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'139 105 34.5495147705078'
@@ -3581,6 +3723,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'140 288 4'
@@ -3613,6 +3756,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'142 98 35.8976461203448'
@@ -3650,6 +3794,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'141 433 4'
@@ -3657,6 +3802,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'141 435 4'
@@ -3684,6 +3830,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'143 85 36.7133952465227'
@@ -3701,6 +3848,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'144 92 38.1998258742961'
@@ -3718,6 +3866,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'143 279 4'
@@ -3740,6 +3889,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'144 292 4'
@@ -3752,6 +3902,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'143 301 4'
@@ -3844,6 +3995,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'145 277 4'
@@ -3866,6 +4018,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'145 297 4'
@@ -3878,6 +4031,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'145 301 4'
@@ -3920,6 +4074,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'147 89 36.7214643625837'
@@ -3932,6 +4087,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'148 94 33.483107401998'
@@ -3979,6 +4135,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'148 284 4'
@@ -3996,6 +4153,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'147 297 4'
@@ -4003,6 +4161,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'147 299 4'
@@ -4010,6 +4169,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'147 301 4'
@@ -4092,6 +4252,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'150 274 4'
@@ -4124,6 +4285,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'150 440 4'
@@ -4136,6 +4298,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'151 43 8.37857031403969'
@@ -4188,6 +4351,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'151 293 4'
@@ -4205,6 +4369,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'152 277 4'
@@ -4222,6 +4387,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'152 297 4'
@@ -4329,6 +4495,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'155 93 28.5014559530353'
@@ -4346,6 +4513,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'155 271 4'
@@ -4353,6 +4521,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'155 283 4'
@@ -4390,6 +4559,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'157 35 4.75627899169922'
@@ -4432,6 +4602,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'157 269 4'
@@ -4469,6 +4640,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'158 289 4'
@@ -4476,6 +4648,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'160 34 4.34843444824219'
@@ -4548,6 +4721,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'161 279 4'
@@ -4595,6 +4769,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'164 274 4'
@@ -4612,6 +4787,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'170 350 4'
@@ -4629,6 +4805,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'170 358 4'
@@ -4671,6 +4848,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'174 362 4'
@@ -4688,6 +4866,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'175 358 4'
@@ -4705,6 +4884,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'177 343 4'
@@ -4712,6 +4892,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'178 346 4'
@@ -4729,6 +4910,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'178 354 4'
@@ -4746,6 +4928,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'178 362 4'
@@ -4768,6 +4951,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'179 359 4'
@@ -4800,6 +4984,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'182 346 4'
@@ -4847,6 +5032,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'183 337 4'
@@ -4874,6 +5060,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'184 360 4'
@@ -4886,6 +5073,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'184 339 4'
@@ -4903,6 +5091,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'186 142 8.07397921892633'
@@ -4940,6 +5129,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'185 347 4'
@@ -4972,6 +5162,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'186 340 4'
@@ -4984,6 +5175,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'187 139 8.08747794911636'
@@ -4996,6 +5188,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'187 347 4'
@@ -5008,6 +5201,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'187 351 4'
@@ -5025,6 +5219,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'187 359 4'
@@ -5037,6 +5232,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'188 364 4'
@@ -5119,6 +5315,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'189 349 4'
@@ -5131,6 +5328,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'190 358 4'
@@ -5173,6 +5371,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'192 138 7.40039825439453'
@@ -5215,6 +5414,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'191 347 4'
@@ -5222,6 +5422,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'191 349 4'
@@ -5239,6 +5440,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'192 362 4'
@@ -5276,6 +5478,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'193 333 4'
@@ -5283,6 +5486,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'193 335 4'
@@ -5310,6 +5514,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'194 356 4'
@@ -5322,6 +5527,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'193 475 4'
@@ -5329,6 +5535,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'193 477 4'
@@ -5341,6 +5548,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'194 482 4'
@@ -5358,6 +5566,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'193 491 4'
@@ -5365,6 +5574,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'193 493 3.5'
@@ -5402,6 +5612,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'195 333 4'
@@ -5409,6 +5620,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'196 342 4'
@@ -5451,6 +5663,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'195 491 4'
@@ -5468,6 +5681,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'196 339 4'
@@ -5475,6 +5689,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'196 359 4'
@@ -5492,6 +5707,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'198 348 4'
@@ -5509,6 +5725,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'198 356 4'
@@ -5531,6 +5748,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'197 485 4'
@@ -5543,6 +5761,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'197 489 4'
@@ -5620,6 +5839,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'200 359 4'
@@ -5627,6 +5847,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'200 499 0.5'
@@ -5644,6 +5865,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'201 479 4'
@@ -5666,6 +5888,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'202 496 2'
@@ -5683,6 +5906,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'202 499 0.5'
@@ -5695,6 +5919,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'204 472 4'
@@ -5722,6 +5947,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'203 483 4'
@@ -5749,6 +5975,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'205 477 4'
@@ -5771,6 +5998,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'205 487 4'
@@ -5778,6 +6006,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'205 493 3.5'
@@ -5785,6 +6014,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'205 495 2.5'
@@ -5802,6 +6032,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'207 473 4'
@@ -5809,6 +6040,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'207 475 4'
@@ -5816,6 +6048,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'207 478 4'
@@ -5838,6 +6071,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'207 489 4'
@@ -5910,6 +6144,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'209 494 3'
@@ -5922,6 +6157,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'210 499 0.5'
@@ -5939,6 +6175,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'211 493 3.5'
@@ -5986,6 +6223,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'213 486 4'
@@ -5998,6 +6236,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'213 493 3.5'
@@ -6005,6 +6244,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'214 485 4'
@@ -6012,6 +6252,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'215 105 4'
@@ -6019,6 +6260,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'216 482 4'
@@ -6051,6 +6293,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'217 97 4'
@@ -6058,6 +6301,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'217 99 4'
@@ -6080,6 +6324,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'218 109 4'
@@ -6087,6 +6332,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'219 97 4'
@@ -6104,6 +6350,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'220 99 4'
@@ -6111,6 +6358,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'220 109 4'
@@ -6123,6 +6371,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'221 101 4'
@@ -6155,6 +6404,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'223 107 4'
@@ -6162,6 +6412,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'224 109 4'
@@ -6174,6 +6425,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'225 95 4'
@@ -6191,6 +6443,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'225 105 4'
@@ -6223,6 +6476,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'227 93 4'
@@ -6230,6 +6484,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'227 95 4'
@@ -6242,6 +6497,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'227 105 4'
@@ -6279,6 +6535,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'229 105 4'
@@ -6291,6 +6548,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'229 111 4'
@@ -6318,6 +6576,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'231 89 4'
@@ -6325,6 +6584,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'231 91 4'
@@ -6332,6 +6592,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'231 97 4'
@@ -6339,6 +6600,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'232 106 4'
@@ -6356,6 +6618,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'232 101 4'
@@ -6363,6 +6626,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'232 103 4'
@@ -6375,6 +6639,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'234 90 4'
@@ -6387,6 +6652,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'234 96 4'
@@ -6399,6 +6665,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'233 241 3.94032287597656'
@@ -6431,6 +6698,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'236 106 4'
@@ -6498,6 +6766,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'238 238 3.9365234375'
@@ -6540,6 +6809,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'238 101 3.84587860107422'
@@ -6547,6 +6817,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'238 103 3.84164428710938'
@@ -6594,6 +6865,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'239 247 3.96394348144531'
@@ -6611,6 +6883,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'240 101 3.69598388671875'
@@ -6643,6 +6916,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'242 96 3.65562438964844'
@@ -6660,6 +6934,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'241 111 3.83007049560547'
@@ -6702,6 +6977,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'242 246 3.90373229980469'
@@ -6719,6 +6995,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'242 239 3.89619445800781'
@@ -6781,6 +7058,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'243 231 3.88771057128906'
@@ -6808,6 +7086,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'244 239 3.92230224609375'
@@ -6815,6 +7094,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'246 5 1.21038044114268'
@@ -6827,6 +7107,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'245 95 3.66494750976563'
@@ -6844,6 +7125,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'246 222 3.63578796386719'
@@ -6871,6 +7153,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'245 233 3.89797973632813'
@@ -6898,6 +7181,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'246 254 3.83017730712891'
@@ -6910,6 +7194,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'246 97 3.66747283935547'
@@ -6932,6 +7217,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'248 96 3.64994812011719'
@@ -6949,6 +7235,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'247 105 3.7843017578125'
@@ -6956,6 +7243,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'247 107 3.87592315673828'
@@ -6968,6 +7256,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'247 111 3.91880035400391'
@@ -6995,6 +7284,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'247 234 3.90522766113281'
@@ -7002,6 +7292,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'247 241 3.92378997802734'
@@ -7024,6 +7315,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'248 233 3.89616394042969'
@@ -7046,6 +7338,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'249 7 3.46678161621094'
@@ -7053,6 +7346,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'250 104 3.74380493164063'
@@ -7080,6 +7374,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'249 227 3.86013031005859'
@@ -7102,6 +7397,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'250 244 3.87159729003906'
@@ -7114,6 +7410,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'249 249 3.72422790527344'
@@ -7161,6 +7458,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'251 228 3.90361785888672'
@@ -7168,6 +7466,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'252 248 3.59909057617188'
@@ -7215,6 +7514,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'253 221 3.35238647460938'
@@ -7222,6 +7522,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'254 224 3.83403778076172'
@@ -7254,6 +7555,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'254 244 3.91579437255859'
@@ -7276,6 +7578,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'254 9 3.67041015625'
@@ -7308,6 +7611,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'255 231 3.97455596923828'
@@ -7315,6 +7619,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'256 236 4'
@@ -7332,6 +7637,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'256 252 4'
@@ -7364,6 +7670,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'259 5 0.84741121673882'
@@ -7381,6 +7688,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'257 211 4'
@@ -7398,6 +7706,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'257 217 4'
@@ -7435,6 +7744,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'257 249 4'
@@ -7457,6 +7767,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'258 241 4'
@@ -7464,6 +7775,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'258 257 4'
@@ -7491,6 +7803,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'259 215 4'
@@ -7508,6 +7821,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'259 221 4'
@@ -7525,6 +7839,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'259 237 4'
@@ -7567,6 +7882,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'261 223 4'
@@ -7579,6 +7895,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'261 231 4'
@@ -7586,6 +7903,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'261 233 4'
@@ -7633,6 +7951,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'262 241 4'
@@ -7690,6 +8009,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'264 241 4'
@@ -7737,6 +8057,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'265 261 4'
@@ -7759,6 +8080,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'266 259 4'
@@ -7766,6 +8088,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'268 9 1.11709594726563'
@@ -7778,6 +8101,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'268 252 4'
@@ -7795,6 +8119,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'267 263 4'
@@ -7802,6 +8127,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'268 242 4'
@@ -7849,6 +8175,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'271 251 4'
@@ -7871,6 +8198,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'272 262 4'
@@ -7878,6 +8206,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'273 12 2'
@@ -7885,6 +8214,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'276 9 0.5'
@@ -7902,6 +8232,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'279 9 0.5'
@@ -7919,6 +8250,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'284 9 0.5'
@@ -7981,6 +8313,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'321 197 4'
@@ -7998,6 +8331,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'321 203 4'
@@ -8030,6 +8364,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'323 205 4'
@@ -8047,6 +8382,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'325 195 4'
@@ -8079,6 +8415,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'327 207 4'
@@ -8096,6 +8433,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'330 194 4'
@@ -8108,6 +8446,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'329 199 4'
@@ -8140,6 +8479,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'331 197 4'
@@ -8147,6 +8487,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'331 199 4'
@@ -8209,6 +8550,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'333 208 4'
@@ -8221,6 +8563,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'333 212 4'
@@ -8238,6 +8581,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'335 193 4'
@@ -8245,6 +8589,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'335 195 4'
@@ -8277,6 +8622,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'337 190 4'
@@ -8299,6 +8645,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'337 195 4'
@@ -8321,6 +8668,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'337 210 4'
@@ -8368,6 +8716,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'339 195 4'
@@ -8390,6 +8739,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'340 208 4'
@@ -8407,6 +8757,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'340 342 4'
@@ -8419,6 +8770,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'340 191 4'
@@ -8436,6 +8788,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'341 11 1.5'
@@ -8448,6 +8801,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'342 188 4'
@@ -8470,6 +8824,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'341 201 4'
@@ -8512,6 +8867,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'343 9 0.5'
@@ -8524,6 +8880,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'344 200 4'
@@ -8551,6 +8908,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'344 344 4'
@@ -8568,6 +8926,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'345 11 1.5'
@@ -8585,6 +8944,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'345 195 4'
@@ -8642,6 +9002,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'347 9 0.5'
@@ -8664,6 +9025,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'348 196 4'
@@ -8681,6 +9043,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'347 327 4'
@@ -8688,6 +9051,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'347 329 4'
@@ -8700,6 +9064,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'347 333 4'
@@ -8792,6 +9157,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'352 9 0.5'
@@ -8839,6 +9205,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'353 313 4'
@@ -8856,6 +9223,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'354 326 4'
@@ -8868,6 +9236,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'354 336 4'
@@ -8960,6 +9329,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'358 326 4'
@@ -8992,6 +9362,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'357 499 0.5'
@@ -9014,6 +9385,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'360 316 4'
@@ -9026,6 +9398,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'360 332 4'
@@ -9103,6 +9476,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'363 327 4'
@@ -9125,6 +9499,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'362 499 0.5'
@@ -9147,6 +9522,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'363 321 4'
@@ -9159,6 +9535,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'363 489 4'
@@ -9186,6 +9563,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'365 11 1.5'
@@ -9253,6 +9631,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'365 489 4'
@@ -9270,6 +9649,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'367 498 1'
@@ -9297,6 +9677,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'367 155 4'
@@ -9314,6 +9695,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'367 487 4'
@@ -9321,6 +9703,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'367 489 4'
@@ -9368,6 +9751,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'369 153 4'
@@ -9410,6 +9794,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'369 259 4'
@@ -9427,6 +9812,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'370 249 4'
@@ -9434,6 +9820,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'370 489 4'
@@ -9441,6 +9828,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'371 498 1'
@@ -9478,6 +9866,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'371 251 4'
@@ -9540,6 +9929,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'374 162 4'
@@ -9567,6 +9957,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'373 253 4'
@@ -9579,6 +9970,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'373 495 2.5'
@@ -9631,6 +10023,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'376 252 4'
@@ -9653,6 +10046,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'375 491 4'
@@ -9665,6 +10059,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'375 496 2'
@@ -9687,6 +10082,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'377 141 4'
@@ -9704,6 +10100,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'378 148 4'
@@ -9721,6 +10118,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'378 160 4'
@@ -9738,6 +10136,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'377 243 4'
@@ -9750,6 +10149,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'378 256 4'
@@ -9777,6 +10177,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'378 247 4'
@@ -9799,6 +10200,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'380 142 4'
@@ -9871,6 +10273,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'380 497 1.5'
@@ -9878,6 +10281,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'380 499 0.5'
@@ -9885,6 +10289,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'382 13 2.5'
@@ -9897,6 +10302,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'381 149 4'
@@ -9939,6 +10345,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'381 263 4'
@@ -9976,6 +10383,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'383 143 4'
@@ -9988,6 +10396,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'383 149 4'
@@ -9995,6 +10404,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'383 151 4'
@@ -10047,6 +10457,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'384 11 1.5'
@@ -10059,6 +10470,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'384 247 4'
@@ -10071,6 +10483,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'386 9 0.5'
@@ -10118,6 +10531,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'386 258 4'
@@ -10185,6 +10599,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'387 251 4'
@@ -10192,6 +10607,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'388 254 4'
@@ -10239,6 +10655,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'389 267 4'
@@ -10286,6 +10703,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'391 247 4'
@@ -10313,6 +10731,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'391 263 4'
@@ -10410,6 +10829,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'394 9 0.5'
@@ -10422,6 +10842,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'395 245 4'
@@ -10434,6 +10855,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'395 253 4'
@@ -10461,6 +10883,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'395 271 4'
@@ -10468,6 +10891,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'395 273 4'
@@ -10500,6 +10924,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'396 277 4'
@@ -10557,6 +10982,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'398 276 4'
@@ -10599,6 +11025,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'400 266 4'
@@ -10671,6 +11098,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'401 277 4'
@@ -10688,6 +11116,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'401 291 4'
@@ -10735,6 +11164,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'405 265 4'
@@ -10762,6 +11192,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'403 281 4'
@@ -10769,6 +11200,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'404 284 4'
@@ -10791,6 +11223,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'405 15 3.5'
@@ -10843,6 +11276,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'406 281 4'
@@ -10905,6 +11339,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'408 281 4'
@@ -10922,6 +11357,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'409 279 4'
@@ -10959,6 +11395,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'412 14 3'
@@ -10981,6 +11418,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'412 281 4'
@@ -10988,6 +11426,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'414 9 0.5'
@@ -11015,6 +11454,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'414 281 4'
@@ -11027,6 +11467,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'415 289 4'
@@ -11039,6 +11480,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'417 282 4'
@@ -11076,6 +11518,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'421 99 4'
@@ -11118,6 +11561,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'423 97 4'
@@ -11130,6 +11574,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'423 111 4'
@@ -11142,6 +11587,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'424 356 4'
@@ -11159,6 +11605,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'425 95 4'
@@ -11176,6 +11623,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'426 104 4'
@@ -11213,6 +11661,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'427 93 4'
@@ -11225,6 +11674,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'428 112 4'
@@ -11297,6 +11747,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'429 343 4'
@@ -11359,6 +11810,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'432 342 4'
@@ -11381,6 +11833,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'432 358 4'
@@ -11398,6 +11851,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'433 107 4'
@@ -11405,6 +11859,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'433 109 4'
@@ -11417,6 +11872,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'433 337 4'
@@ -11454,6 +11910,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'435 102 4'
@@ -11466,6 +11923,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'434 347 4'
@@ -11508,6 +11966,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'436 344 4'
@@ -11545,6 +12004,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'438 86 4'
@@ -11557,6 +12017,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'437 99 4'
@@ -11569,6 +12030,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'437 111 4'
@@ -11586,6 +12048,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'438 240 4'
@@ -11598,6 +12061,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'437 341 4'
@@ -11605,6 +12069,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'437 361 4'
@@ -11627,6 +12092,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'438 103 4'
@@ -11634,6 +12100,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'438 339 4'
@@ -11641,6 +12108,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'438 347 4'
@@ -11658,6 +12126,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'439 93 4'
@@ -11740,6 +12209,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'439 361 4'
@@ -11757,6 +12227,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'440 347 4'
@@ -11764,6 +12235,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'441 85 4'
@@ -11771,6 +12243,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'441 87 4'
@@ -11798,6 +12271,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'442 108 4'
@@ -11820,6 +12294,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'441 237 4'
@@ -11862,6 +12337,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'442 362 4'
@@ -11879,6 +12355,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'441 369 4'
@@ -11886,6 +12363,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'443 373 4'
@@ -11898,6 +12376,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'442 347 4'
@@ -11905,6 +12384,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'443 85 4'
@@ -11912,6 +12392,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'443 87 4'
@@ -11929,6 +12410,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'443 93 4'
@@ -11956,6 +12438,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'443 235 4'
@@ -11978,6 +12461,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'443 337 4'
@@ -12035,6 +12519,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'445 85 4'
@@ -12062,6 +12547,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'445 100 4'
@@ -12084,6 +12570,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'445 231 4'
@@ -12166,6 +12653,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'448 86 4'
@@ -12178,6 +12666,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'448 92 4'
@@ -12200,6 +12689,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'447 103 4'
@@ -12207,6 +12697,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'447 229 4'
@@ -12229,6 +12720,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'448 244 4'
@@ -12251,6 +12743,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'447 359 4'
@@ -12273,6 +12766,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'448 342 4'
@@ -12280,6 +12774,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'449 221 4'
@@ -12312,6 +12807,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'449 345 4'
@@ -12344,6 +12840,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'449 375 4'
@@ -12351,6 +12848,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'449 377 4'
@@ -12358,6 +12856,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'449 379 4'
@@ -12375,6 +12874,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'452 222 4'
@@ -12427,6 +12927,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'452 358 4'
@@ -12464,6 +12965,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'451 379 4'
@@ -12511,6 +13013,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'453 361 4'
@@ -12533,6 +13036,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'453 381 4'
@@ -12605,6 +13109,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'456 370 4'
@@ -12647,6 +13152,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'457 236 4'
@@ -12669,6 +13175,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'458 356 4'
@@ -12686,6 +13193,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'458 367 4'
@@ -12703,6 +13211,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'459 233 4'
@@ -12730,6 +13239,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'459 359 4'
@@ -12737,6 +13247,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'459 361 4'
@@ -12834,6 +13345,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'462 368 4'
@@ -12876,6 +13388,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'464 235 4'
@@ -12953,6 +13466,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'471 53 4'
@@ -12970,6 +13484,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'471 301 4'
@@ -13007,6 +13522,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'474 60 4'
@@ -13034,6 +13550,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'473 299 4'
@@ -13126,6 +13643,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'477 293 4'
@@ -13158,6 +13676,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'479 53 4'
@@ -13185,6 +13704,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'479 295 4'
@@ -13227,6 +13747,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'481 49 4'
@@ -13319,6 +13840,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'483 57 4'
@@ -13336,6 +13858,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'483 63 4'
@@ -13368,6 +13891,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'483 313 4'
@@ -13390,6 +13914,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'484 305 4'
@@ -13477,6 +14002,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'487 45 4'
@@ -13489,6 +14015,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'487 53 4'
@@ -13496,6 +14023,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'487 55 4'
@@ -13503,6 +14031,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'487 57 4'
@@ -13555,6 +14084,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'488 297 4'
@@ -13562,6 +14092,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'489 29 4'
@@ -13579,6 +14110,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'489 45 4'
@@ -13611,6 +14143,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'489 59 4'
@@ -13618,6 +14151,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'489 181 4'
@@ -13630,6 +14164,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'489 185 4'
@@ -13647,6 +14182,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'489 191 4'
@@ -13654,6 +14190,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'490 294 4'
@@ -13696,6 +14233,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'491 42 4'
@@ -13748,6 +14286,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'491 57 4'
@@ -13830,6 +14369,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'492 39 4'
@@ -13917,6 +14457,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'493 181 3.5'
@@ -13959,6 +14500,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'494 304 3'
@@ -13976,6 +14518,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'494 316 3'
@@ -14023,6 +14566,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'494 311 3'
@@ -14050,6 +14594,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'495 53 2.5'
@@ -14062,6 +14607,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'495 61 2.5'
@@ -14079,6 +14625,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'495 179 2.5'
@@ -14141,6 +14688,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'497 46 1.5'
@@ -14168,6 +14716,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'497 23 1.5'
@@ -14210,6 +14759,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'497 63 1.5'
@@ -14227,6 +14777,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'497 169 1.5'
@@ -14244,6 +14795,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'497 177 1.5'
@@ -14261,6 +14813,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'497 183 1.5'
@@ -14308,6 +14861,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'499 38 0.5'
@@ -14355,6 +14909,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'499 49 0.5'
@@ -14382,6 +14937,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'499 169 0.5'
@@ -14419,6 +14975,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'499 293 0.5'
@@ -14436,6 +14993,7 @@ namespace VDFTests {
 			ownerRegion:'@/regions/i:1'
 			hasProduce:{^}
 				health:0
+			health:0
 		{^}
 			transform:{^}
 				position:'499 307 0.5'
@@ -14457,6 +15015,7 @@ namespace VDFTests {
 				position:'113 82 38.1060409545898'
 			type:'Habitat Center'
 			owner:'@/players/i:0'
+			health:0
 	units:[]
 	projectiles:[]
 	selectedObject:null

@@ -6,3 +6,11 @@ C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.Proper
 C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\VDF.csproj.GenerateResource.Cache
 C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.exe
 C:\Programming\Projects\Visual C#\VDF\VDF\VDF\obj\x86\Release\SystemMaker.pdb
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\bin\Release\VDF.dll.config
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\bin\Release\VDF.dll
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\bin\Release\VDF.pdb
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Release\VDF.csprojResolveAssemblyReference.cache
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Release\VDFN.Properties.Resources.resources
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Release\VDF.csproj.GenerateResource.Cache
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Release\VDF.dll
+C:\Root\Apps\Libraries\VDF\VDF\CSharp\VDF\obj\x86\Release\VDF.pdb
