@@ -1,15 +1,18 @@
-﻿// tests
+﻿import {List} from "../../../Source/TypeScript/VDF";
+import {P, T} from "../../../Source/TypeScript/VDFTypeInfo";
+import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScript/VDFSaver";
+// tests
 // ==========
 
 module VDFTests { // added to match C# indentation
 	module Saving_SpeedTests {
 		class SpeedTest1_Class {
-			Bool = Prop(this, "Bool", "bool", new P()).set = true;
-			Int = Prop(this, "Int", "int", new P()).set = 5;
-			Double = Prop(this, "Double", "double", new P()).set = .5;
-			String = Prop(this, "String", "string", new P()).set = "Prop value string.";
-			list = Prop(this, "list", "List(string)", new P()).set = new List<string>("string", "2A", "2B");
-			nestedList = Prop(this, "nestedList", "List(List(string))", new P()).set = new List<List<string>>("List(string)", new List<string>("string", "1A"));
+			@T("bool") @P() Bool = true;
+			@T("int") @P() Int = 5;
+			@T("double") @P() Double = .5;
+			@T("string") @P() String = "Prop value string.";
+			@T("List(string)") @P() list = new List<string>("string", "2A", "2B");
+			@T("List(List(string))") @P() nestedList = new List<List<string>>("List(string)", new List<string>("string", "1A"));
 		}
 		test("SpeedTest1", () => {
 			var a = VDFSaver.ToVDFNode(new SpeedTest1_Class(), new VDFSaveOptions({typeMarking: VDFTypeMarking.None}));

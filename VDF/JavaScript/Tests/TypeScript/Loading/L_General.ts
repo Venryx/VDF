@@ -1,4 +1,9 @@
-﻿/*class Loading {
+﻿import {VDFNode} from "../../../Source/TypeScript/VDFNode";
+import {VDFDeserialize, P, T} from "../../../Source/TypeScript/VDFTypeInfo";
+import {VDF, VDFNodePath} from "../../../Source/TypeScript/VDF";
+import {VDFLoader, VDFLoadOptions} from "../../../Source/TypeScript/VDFLoader";
+
+/*class Loading {
 	static initialized = false;
 	static Init() {
 		if (this.initialized)
@@ -41,21 +46,22 @@ module VDFTests { // added to match C# indentation
 		// ==========
 
 		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class {
-			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
+			@P() boolProp = false;
 			Deserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
 			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethod_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
 
 		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class {
-			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
+			@P() boolProp = false;
 			Deserialize(node: VDFNode) { return; }
 			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent {
-			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child", new P()).set = null;
+			@T("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child") @P()
+			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child {
 			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
@@ -64,21 +70,24 @@ module VDFTests { // added to match C# indentation
 		test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", ()=>{ ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent {
-			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = Prop(this, "child", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child", new P()).set = null;
+			@T("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child") @P()
+			child: D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child {
-			boolProp = Prop(this, "boolProp", "bool", new P()).set = false;
+			@T("bool") @P() boolProp = false;
 			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions) { return; }
 			constructor() { D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true)); }
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
 
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent {
-			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withoutTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new P()).set = null;
-			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = Prop(this, "withTag", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child", new P()).set = null; // doesn't actually have tag; just pretend it does
+			@T("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child") @P()
+			withoutTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = null;
+			@T("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child") @P()
+			withTag: D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = null; // doesn't actually have tag; just pretend it does
 		}
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child {
-			methodCalled = Prop(this, "methodCalled", "bool", new P()).set = false;
+			@T("bool") @P() methodCalled = false;
 			Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): void {
 				ok(path.parentNode.obj instanceof D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent);
 				if (path.currentNode.prop.name == "withTag")

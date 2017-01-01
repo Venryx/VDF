@@ -1,12 +1,20 @@
-﻿var {Log, Assert} = g;
-
-enum VDFTypeMarking {
+﻿import {VDFNode} from "./VDFNode";
+import {
+    VDFPostSerialize,
+    VDFPreSerialize,
+    VDFPropInfo,
+    VDFSerialize,
+    VDFSerializeProp,
+    VDFTypeInfo
+} from "./VDFTypeInfo";
+import {Dictionary, EnumValue, List, VDF, VDFNodePath, VDFNodePathNode} from "./VDF";
+export enum VDFTypeMarking {
 	None,
 	Internal,
 	External,
 	ExternalNoCollapse // maybe temp
 }
-class VDFSaveOptions {
+export class VDFSaveOptions {
 	constructor(initializerObj?: any, messages?: any[], typeMarking = VDFTypeMarking.Internal,
 		useMetadata = true, useChildPopOut = true, useStringKeys = false, useNumberTrimming = true, useCommaSeparators = false
 	) {
@@ -43,7 +51,7 @@ class VDFSaveOptions {
 	}
 }
 
-class VDFSaver {
+export class VDFSaver {
 	static ToVDFNode(obj: any, options?: VDFSaveOptions): VDFNode;
 	static ToVDFNode(obj: any, declaredTypeName?: string, options?: VDFSaveOptions, path?: VDFNodePath, declaredTypeFromParent?: boolean): VDFNode;
 	static ToVDFNode(obj: any, declaredTypeName_orOptions?: any, options = new VDFSaveOptions(), path?: VDFNodePath, declaredTypeInParentVDF?: boolean): VDFNode {
@@ -83,7 +91,7 @@ class VDFSaver {
 				result.primitiveValue = obj;
 			else if (EnumValue.IsEnum(typeName)) // helper exporter for enums (at bottom, TypeScript enums are numbers; but we can get the nice-name based on type info)
 				result.primitiveValue = new EnumValue(typeName, obj).toString();
-			else if (typeName && typeName.startsWith("List(")) {
+			else if (typeName && typeName.StartsWith("List(")) {
 				result.isList = true;
 				let objAsList = <List<any>>obj;
 				for (let i = 0; i < objAsList.length; i++) {
@@ -92,7 +100,7 @@ class VDFSaver {
 					result.AddListChild(itemNode);
 				}
 			}
-			else if (typeName && typeName.startsWith("Dictionary(")) {
+			else if (typeName && typeName.StartsWith("Dictionary(")) {
 				result.isMap = true;
 				let objAsDictionary = <Dictionary<any, any>>obj;
 				for (let i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {

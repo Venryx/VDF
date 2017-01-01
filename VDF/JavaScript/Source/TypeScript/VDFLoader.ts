@@ -1,4 +1,8 @@
-﻿class VDFLoadOptions {
+﻿import {Dictionary, List, VDF, object} from "./VDF";
+import {VDFNode} from "./VDFNode";
+import {VDFToken, VDFTokenParser, VDFTokenType} from "./VDFTokenParser";
+import {VDFTypeInfo} from "./VDFTypeInfo";
+export class VDFLoadOptions {
 	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false) {
 		this.messages = messages || [];
 		this.allowStringKeys = allowStringKeys;
@@ -39,7 +43,7 @@
 	}
 }
 
-class VDFLoader {
+export class VDFLoader {
 	static ToVDFNode(text: string, options: VDFLoadOptions): VDFNode;
 	static ToVDFNode(text: string, declaredTypeName?: string, options?: VDFLoadOptions): VDFNode;
 	static ToVDFNode(text: List<VDFToken>, options: VDFLoadOptions): VDFNode;

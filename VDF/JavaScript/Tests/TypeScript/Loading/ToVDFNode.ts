@@ -1,4 +1,8 @@
-﻿// tests
+﻿import {VDFNode} from "../../../Source/TypeScript/VDFNode";
+import {VDFLoader} from "../../../Source/TypeScript/VDFLoader";
+import {VDF, List, object, Dictionary} from "../../../Source/TypeScript/VDF";
+import {VDFTokenParser, VDFTokenType} from "../../../Source/TypeScript/VDFTokenParser";
+// tests
 // ==========
 
 module VDFTests { // added to match C# indentation

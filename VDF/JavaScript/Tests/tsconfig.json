@@ -2,6 +2,8 @@
 	"compilerOptions": {
 		"target": "es5",
 		"outDir": "./JavaScript",
+		"outFile": "./JavaScript_Bundle.js",
+		"module": "amd",
 		"rootDir": "../",
 		"sourceMap": true,
 		

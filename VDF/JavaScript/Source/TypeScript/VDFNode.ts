@@ -1,4 +1,8 @@
-﻿class VDFNode {
+﻿import {VDFSaveOptions} from "./VDFSaver";
+import {VDFLoadOptions} from "./VDFLoader";
+import {Dictionary, List, VDF, VDFNodePath, VDFNodePathNode, StringBuilder, EnumValue} from "./VDF";
+import {VDFDeserialize, VDFDeserializeProp, VDFPostDeserialize, VDFPreDeserialize, VDFTypeInfo} from "./VDFTypeInfo";
+export class VDFNode {
 	metadata: string;
 	metadata_override: string;
 	primitiveValue: any;

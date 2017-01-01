@@ -1,19 +1,41 @@
-﻿// vdf globals
+﻿import {VDFSaver, VDFSaveOptions} from "./VDFSaver";
+import {VDFLoadOptions, VDFLoader} from "./VDFLoader";
+import {
+    VDFDeserialize,
+    VDFDeserializeProp,
+    VDFPostDeserialize,
+    VDFPostSerialize,
+    VDFPreDeserialize,
+    VDFPreSerialize,
+    VDFProp,
+    VDFPropInfo,
+    VDFSerialize,
+    VDFSerializeProp,
+    VDFType,
+    VDFTypeInfo
+} from "./VDFTypeInfo";
+// vdf globals
 // ==========
 
-var g = <any>window;
-g.Log = g.Log || console.log;
-g.Assert = g.Assert || ((condition, message)=> {
+var g = window as any;
+export function Log(...args) {
+	if (g.Log)
+		return g.Log(...args);
+	return (console.log as any)(...args);
+}
+export function Assert(condition, message) {
 	if (condition) return;
 	console.assert(false, message || "");
 	debugger;
-});
+}
 
 // init
 // ==========
 
-interface Object {
-	_AddProperty(name: string, value): void;
+declare global {
+	interface Object {
+		_AddProperty(name: string, value): void;
+	}
 }
 // the below lets you easily add non-enumerable properties
 Object.defineProperty(Object.prototype, "_AddProperty", {
@@ -26,11 +48,13 @@ Object.defineProperty(Object.prototype, "_AddProperty", {
 	}
 });
 
-interface String {
-	Contains(str: string): boolean;
-	StartsWith(str: string): boolean;
-	EndsWith(str: string): boolean;
-	TrimStart(chars: Array<string>): string;
+declare global {
+	interface String {
+		Contains(str: string): boolean;
+		StartsWith(str: string): boolean;
+		EndsWith(str: string): boolean;
+		TrimStart(chars: Array<string>): string;
+	}
 }
 String.prototype._AddProperty("Contains", function(str) { return this.indexOf(str) != -1; });
 String.prototype._AddProperty("StartsWith", function(str) { return this.indexOf(str) == 0; });
@@ -42,18 +66,19 @@ String.prototype._AddProperty("TrimStart", function(chars: Array<string>) {
 	var result = "";
 	var doneTrimming = false;
 	for (var i = 0; i < this.length; i++)
-		if (!chars.Contains(this[i]) || doneTrimming)
-		{
+		if (!chars.Contains(this[i]) || doneTrimming) {
 			result += this[i];
 			doneTrimming = true;
 		}
 	return result;
 });
 
-interface Array<T> {
-	Contains(str: T): boolean;
-	Where(matchFunc: Function): T[];
-	First(matchFunc: Function): T;
+declare global {
+	interface Array<T> {
+		Contains(str: T): boolean;
+		Where(matchFunc: Function): T[];
+		First(matchFunc: Function): T;
+	}
 }
 if (!Array.prototype["Contains"])
 	Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(item) != -1; });
@@ -68,9 +93,11 @@ if (!Array.prototype["Where"])
 if (!Array.prototype["First"])
 	Array.prototype._AddProperty("First", function(matchFunc = (()=>true)) { return this.Where(matchFunc)[0]; });
 
-interface Function {
-	AddTags(...tags: any[]): string;
-	//IsDerivedFrom(baseType: Function): boolean;
+declare global {
+	interface Function {
+		AddTags(...tags: any[]): string;
+		//IsDerivedFrom(baseType: Function): boolean;
+	}
 }
 Function.prototype._AddProperty("AddTags", function(...tags) {
 	if (this.tags == null)
@@ -94,7 +121,7 @@ Function.prototype._AddProperty("AddTags", function(...tags) {
 // classes
 // ==========
 
-class VDFNodePathNode {
+export class VDFNodePathNode {
 	obj: any;
 
 	// if not root (i.e. a child/descendant)
@@ -127,7 +154,7 @@ class VDFNodePathNode {
 		return "";
 	}
 }
-class VDFNodePath {
+export class VDFNodePath {
 	nodes: VDFNodePathNode[];
 	constructor(nodes: VDFNodePathNode[]);
 	constructor(rootNode: VDFNodePathNode);
@@ -170,10 +197,10 @@ class VDFNodePath {
 	}
 }
 
-class VDF {
+export class VDF {
 	// for use with VDFSaveOptions
 	static AnyMember: string = "#AnyMember";
-	static AllMembers: Array<string> = ["#AnyMember"];
+	static AllMembers: string[] = ["#AnyMember"];
 
 	// for use with VDFType
 	static PropRegex_Any = ""; //"^.+$";
@@ -213,10 +240,18 @@ class VDF {
 		return false;
 	}
 
-	static GetIsTypePrimitive(typeName: string): boolean // (technically strings are not primitives in C#, but we consider them such)
-		{ return ["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "bool", "char", "string"].Contains(typeName); }
-	static GetIsTypeAnonymous(typeName: string): boolean { return typeName != null && typeName == "object"; }
-	static GetTypeNameOfObject(obj) {
+	// (technically strings are not primitives in C#, but we consider them such)
+	static GetIsTypePrimitive(typeName: string) {
+		return [
+			"byte", "sbyte", "short", "ushort",
+			"int", "uint", "long", "ulong", "float", "double", "decimal",
+			"bool", "char", "string"
+		].Contains(typeName);
+	}
+	static GetIsTypeAnonymous(typeName: string): boolean {
+		return typeName != null && typeName == "object";
+	}
+	static GetTypeNameOfObject(obj): string {
 		var rawType = typeof obj;
 		if (rawType == "object") { // if an object (i.e. a thing with real properties that could indicate a more specific type)
 			if (obj.realTypeName)
@@ -314,8 +349,7 @@ class VDF {
 // helper classes
 // ==================
 
-class VDFUtils
-{
+class VDFUtils {
 	/*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames) 	{
 		if (addSetters && !obj._hiddenFieldStore)
 			Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
@@ -349,7 +383,7 @@ class VDFUtils
 		}
 	}
 }
-class StringBuilder {
+export class StringBuilder {
 	constructor(startData?: string) {
 		if (startData)
 			this.Append(startData);
@@ -374,46 +408,6 @@ class StringBuilder {
 	ToString(joinerString?) { return this.parts.join(joinerString || ""); } // builds the string
 }
 
-// tags
-// ----------
-
-class PropDeclarationWrapper {
-	set set(value) {}
-}
-// maybe make-so: this is renamed PropInfo
-function Prop(typeOrObj, propName, propType_orFirstTag, ...tags) {
-	if (propType_orFirstTag != null && typeof propType_orFirstTag != "string")
-		return Prop.apply(this, [typeOrObj, propName, null, propType_orFirstTag].concat(tags));
-
-	var type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
-	var propType = propType_orFirstTag;
-
-	var typeInfo = VDFTypeInfo.Get(type);
-	if (typeInfo.props[propName] == null)
-		typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags);
-
-	return new PropDeclarationWrapper();
-};
-
-/*function MethodDeclarationWrapper(tags) { this.tags = tags; };
-MethodDeclarationWrapper.prototype._AddSetter_Inline = function set(method) { method.methodInfo = new VDFMethodInfo(this.tags); };
-function Method(...tags) { return new MethodDeclarationWrapper(tags); };*/
-
-function TypeDeclarationWrapper(tags) { this.tags = tags; };
-TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
-	var s = this;
-	type = type instanceof Function ? type : type.constructor;
-	var typeInfo = VDFTypeInfo.Get(type.name_fake || type.name);
-
-	var typeTag: any = {};
-	for (var i in s.tags)
-		if (s.tags[i] instanceof VDFType)
-			typeTag = s.tags[i];
-	typeInfo.tags = s.tags;
-	typeInfo.typeTag.AddDataOf(typeTag);
-};
-function TypeInfo(...tags) { return new TypeDeclarationWrapper(tags); };
-
 // VDF-usable data wrappers
 // ==========
 
@@ -421,9 +415,9 @@ function TypeInfo(...tags) { return new TypeDeclarationWrapper(tags); };
 // for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)
 //var object = Object;
 //object["typeInfo"] = new VDFTypeInfo(null, true);
-class object {} // just an alias for Object, to be consistent with C# version
+export class object {} // just an alias for Object, to be consistent with C# version
 
-class EnumValue {
+export class EnumValue {
 	realTypeName: string; // prop-name is special; used to identify 'true' or 'represented' type of object
 	//intValue: number;
 	stringValue: string;
@@ -440,67 +434,58 @@ class EnumValue {
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 
-window["List"] = function List(itemType: string, ...items) { // actual constructor
-	var s = Object.create(Array.prototype);
-	s = (Array.apply(s, items) || s);
-	s["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
-	//self.constructor = List; // makes "(new List()).constructor == List" be true
-	//Object.defineProperty(self, "constructor", {enumerable: false, value: List});
-	//self.realTypeName = "List(" + itemType + ")";
-	//Object.defineProperty(self, "realTypeName", {enumerable: false, value: "List(" + itemType + ")"});
-	//self.itemType = itemType;
-	Object.defineProperty(s, "itemType", {enumerable: false, value: itemType});
-	return s;
-};
-(()=> { // actual properties and methods
-	var s = List.prototype;
-	s["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
+export class List<T> extends Array<T> {
+	constructor(itemType?: string, ...items: T[]) {
+		super(...items);
+		this.itemType = itemType;
+	}
 
-	// new properties
-	Object.defineProperty(s, "Count", {enumerable: false, get: function() { return this.length; }});
+	itemType: string;
 
-	// new methods
+	get Count() { return this.length; }
+
 	/*s.Indexes = function () {
 		var result = {};
 		for (var i = 0; i < this.length; i++)
 			result[i] = this[i];
 		return result;
 	};*/
-	s.Add = function (...items) { return this.push.apply(this, items); };
-	s.AddRange = function (items) {
-		for (var i = 0; i < items.length; i++)
-			this.push(items[i]);
+	Add(...items) { return this.push.apply(this, items); };
+	AddRange(items) {
+		/*for (var i = 0; i < items.length; i++)
+			this.push(items[i]);*/
+		this.push(...items);
 	};
-	s.Insert = function(index, item) { return this.splice(index, 0, item); };
-	s.InsertRange = function(index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
-	s.Remove = function(item) { return this.RemoveAt(this.indexOf(item)) != null; };
-	s.RemoveAt = function(index) { return this.splice(index, 1)[0]; };
-	s.RemoveRange = function(index, count) { return this.splice(index, count); };
-	s.Any = function(matchFunc) {
+	Insert(index, item) { return this.splice(index, 0, item); };
+	InsertRange(index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
+	Remove(item) { return this.RemoveAt(this.indexOf(item)) != null; };
+	RemoveAt(index) { return this.splice(index, 1)[0]; };
+	RemoveRange(index, count) { return this.splice(index, count); };
+	Any(matchFunc) {
 		for (let item of this)
 			if (matchFunc.call(item, item))
 				return true;
 		return false;
 	};
-	s.All = function(matchFunc) {
+	All(matchFunc) {
 		for (let item of this)
 			if (!matchFunc.call(item, item))
 				return false;
 		return true;
 	};
-	s.Select = function(selectFunc, itemType) {
-		var result = new List(itemType || "object");
+	Select<T2>(selectFunc: (item: T)=>T2, itemType?) {
+		var result = new List<T2>(itemType || "object");
 		for (let item of this)
 			result.Add(selectFunc.call(item, item));
 		return result;
 	};
-	s.First = function(matchFunc) {
+	First(matchFunc) {
 		var result = this.FirstOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	};
-	s.FirstOrDefault = function(matchFunc) {
+	FirstOrDefault(matchFunc) {
 		if (matchFunc) {
 			for (let item of this)
 				if (matchFunc.call(item, item))
@@ -510,13 +495,13 @@ window["List"] = function List(itemType: string, ...items) { // actual construct
 		else
 			return this[0];
 	};
-	s.Last = function(matchFunc) {
+	Last(matchFunc?) {
 		var result = this.LastOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	};
-	s.LastOrDefault = function(matchFunc) {
+	LastOrDefault(matchFunc?) {
 		if (matchFunc) {
 			for (var i = this.length - 1; i >= 0; i--)
 				if (matchFunc.call(this[i], this[i]))
@@ -526,46 +511,17 @@ window["List"] = function List(itemType: string, ...items) { // actual construct
 		else
 			return this[this.length - 1];
 	};
-	s.GetRange = function(index, count) {
+	GetRange(index, count) {
 		var result = new List(this.itemType);
 		for (var i = index; i < index + count; i++)
 			result.Add(this[i]);
 		return result;
 	};
-	s.Contains = function(item) { return this.indexOf(item) != -1; };
-	VDFUtils.MakePropertiesHidden(s, true);
-})();
-declare var List: { // static/constructor declaration stuff
-	new <T>(itemType?: string, ...items: T[]): List<T>;
-	prototype: List<any>;
+	Contains(item) { return this.indexOf(item) != -1; };
 }
-interface List<T> extends Array<T> { // class/instance declaration stuff
-	// new properties
-	//realTypeName: string;
-	itemType: string;
-	Count: number;
+window["List"] = List;
 
-	// new methods
-	//Indexes(): any;
-	Add(...items: T[]): number;
-	AddRange(items: Array<T>): void;
-	Insert(index, item): void;
-	InsertRange(index: number, items: Array<T>): void;
-	Remove(item: T): boolean;
-	RemoveAt(index: number): T;
-	RemoveRange(index: number, count: number): void;
-	Any(matchFunc): boolean;
-	All(matchFunc): boolean;
-	Select<T>(selectFunc: Function, itemType?: string): List<T>;
-	First(matchFunc?): T;
-	FirstOrDefault(matchFunc?): T;
-	Last(matchFunc?): T;
-	LastOrDefault(matchFunc?): T;
-	GetRange(index: number, count: number): List<T>;
-	Contains(item: T): boolean;
-}
-
-class Dictionary<K, V> {
+export class Dictionary<K, V> {
 	realTypeName: string;
 	keyType: string;
 	valueType: string;
@@ -622,4 +578,5 @@ class Dictionary<K, V> {
 		delete (<any>this)[<any>key];
 	}
 }
+window["Dictionary"] = Dictionary;
 //VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);

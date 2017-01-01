@@ -1,4 +1,6 @@
-﻿class VDFType {
+﻿import {List, VDF} from "./VDF";
+
+export class VDFType {
 	propIncludeRegexL1: string;
 	popOutL1: boolean;
 	constructor(propIncludeRegexL1?: string, popOutL1?: boolean) {
@@ -13,7 +15,7 @@
 			this.popOutL1 = typeTag.popOutL1;
 	}
 }
-class VDFTypeInfo {
+export class VDFTypeInfo {
 	static Get(type_orTypeName: any): VDFTypeInfo {
 		//var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
 		var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
@@ -61,8 +63,16 @@ class VDFTypeInfo {
 		return this.props[propName];
 	}
 }
+export function TypeInfo(propIncludeRegexL1?: string, popOutL1?: boolean) {
+	var typeTag = new VDFType(propIncludeRegexL1, popOutL1);
+    return (target)=> {
+		var typeInfo = VDFTypeInfo.Get(target.name_fake || target.name);
+		typeInfo.tags = [typeTag];
+		typeInfo.typeTag.AddDataOf(typeTag);
+    };
+};
 
-class VDFProp {
+export class VDFProp {
 	includeL2: boolean;
 	popOutL2: boolean;
 	constructor(includeL2 = true, popOutL2?: boolean) {
@@ -70,45 +80,24 @@ class VDFProp {
 		this.popOutL2 = popOutL2;
 	}
 }
-class P extends VDFProp {
-	constructor(includeL2 = true, popOutL2?: boolean) {
-		super(includeL2, popOutL2);
-	}
-}
-class DefaultValue {
-	defaultValue;
-	constructor(defaultValue = D.DefaultDefault) {
-		this.defaultValue = defaultValue;
-	}
-}
-class D extends DefaultValue {
-	//static NoDefault = new object(); // i.e. the prop has no default, so whatever value it has is always saved [commented out, since: if you want no default, just don't add the D tag]
-	static DefaultDefault = new object(); // i.e. the default value for the type (not the prop) ['false' for a bool, etc.]
-	static NullOrEmpty = new object(); // i.e. null, or an empty string or collection
-	static Empty = new object(); // i.e. an empty string or collection
-
-	constructor(defaultValue = D.DefaultDefault) {
-		super(defaultValue);
-	}
-}
-class VDFPropInfo {
+export class VDFPropInfo {
 	name: string;
 	typeName: string;
-	tags: any[];
+	tags: List<any>;
 	propTag: VDFProp;
 	defaultValueTag: DefaultValue;
 	constructor(propName: string, propTypeName: string, tags: any[]) {
 		this.name = propName;
 		this.typeName = propTypeName;
-		this.tags = tags;
-		this.propTag = tags.First(a=>a instanceof VDFProp);
-		this.defaultValueTag = tags.First(a=>a instanceof DefaultValue);
+		this.tags = new List<any>("object", tags);
+		this.propTag = this.tags.First(a=>a instanceof VDFProp);
+		this.defaultValueTag = this.tags.First(a=>a instanceof DefaultValue);
 	}
 
 	AddTags(...tags) {
-		this.tags.push(...tags);
-		this.propTag = tags.First(a=>a instanceof VDFProp);
-		this.defaultValueTag = tags.First(a=>a instanceof DefaultValue);
+		this.tags.AddRange(tags);
+		this.propTag = this.tags.First(a=>a instanceof VDFProp);
+		this.defaultValueTag = this.tags.First(a=>a instanceof DefaultValue);
 	}
 
 	ShouldValueBeSaved(val: any) {
@@ -126,7 +115,7 @@ class VDFPropInfo {
 			return false;
 		if (this.defaultValueTag.defaultValue == D.NullOrEmpty || this.defaultValueTag.defaultValue == D.Empty) {
 			var typeName = VDF.GetTypeNameOfObject(val);
-			if (typeName && typeName.startsWith("List(") && val.length == 0) // if list, and empty
+			if (typeName && typeName.StartsWith("List(") && val.length == 0) // if list, and empty
 				return false;
 			if (typeName == "string" && !val.length) // if string, and empty
 				return false;
@@ -137,20 +126,99 @@ class VDFPropInfo {
 		return true;
 	}
 }
+export function T(typeOrTypeName: any) {
+    return (target, name)=> {
+        //target.prototype[name].AddTags(new VDFPostDeserialize());
+        //Prop(target, name, typeOrTypeName);
+        //target.p(name, typeOrTypeName);
+        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+        propInfo.typeName = typeOrTypeName instanceof Function ? typeOrTypeName.name : typeOrTypeName;
+    };
+};
+export function P(includeL2 = true, popOutL2?: boolean): PropertyDecorator {
+    return function(target, name) {
+        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name as string);
+        propInfo.AddTags(new VDFProp(includeL2, popOutL2));
+    };
+};
 
-class VDFSerializeProp {}
-class VDFDeserializeProp {}
+export class DefaultValue {
+	defaultValue;
+	constructor(defaultValue = D.DefaultDefault) {
+		this.defaultValue = defaultValue;
+	}
+}
 
-class VDFPreSerialize {}
-class VDFSerialize {}
-class VDFPostSerialize {}
-class VDFPreDeserialize {}
-class VDFDeserialize {
+interface DWrapper extends Function {
+	(defaultValue?): (target, name)=>void;
+	DefaultDefault; // i.e. the default value for the type (not the prop) ['false' for a bool, etc.]
+	NullOrEmpty; // i.e. null, or an empty string or collection
+	Empty; // i.e. an empty string or collection
+}
+export var D: DWrapper = function D(defaultValue?) {
+	return (target, name)=> {
+		var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+		propInfo.AddTags(new DefaultValue(defaultValue));
+	};
+} as any;
+D.DefaultDefault = {};
+D.NullOrEmpty = {};
+D.Empty = {};
+
+//export var D;
+/*export let D = ()=> {
+	let D_ = function(...args) {
+		return (target, name)=> {
+			var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+			propInfo.AddTags(new DefaultValue(...args));
+		};
+	};
+	// copy D.NullOrEmpty and such
+	for (var key in g.D)
+		D_[key] = g.D[key];
+	return D_;
+};*/
+
+export class VDFSerializeProp {}
+export function _VDFSerializeProp() {
+    return (target, name)=>target[name].AddTags(new VDFSerializeProp());
+};
+export class VDFDeserializeProp {}
+export function _VDFDeserializeProp() {
+    return (target, name)=>target[name].AddTags(new VDFDeserializeProp());
+};
+
+export class VDFPreSerialize {}
+export function _VDFPreSerialize() {
+    return (target, name)=>target[name].AddTags(new VDFPreSerialize());
+};
+export class VDFSerialize {}
+export function _VDFSerialize() {
+    return (target, name)=>target[name].AddTags(new VDFSerialize());
+};
+export class VDFPostSerialize {}
+export function _VDFPostSerialize() {
+    return (target, name)=>target[name].AddTags(new VDFPostSerialize());
+};
+
+export class VDFPreDeserialize {}
+export function _VDFPreDeserialize() {
+    return (target, name)=>target[name].AddTags(new VDFPreDeserialize());
+};
+export class VDFDeserialize {
 	fromParent: boolean;
 	constructor(fromParent = false) { this.fromParent = fromParent; }
 }
-class VDFPostDeserialize {}
-/*class VDFMethodInfo {
+export function _VDFDeserialize(fromParent = false) {
+    return (target, name)=>target[name].AddTags(new VDFDeserialize(fromParent));
+};
+export class VDFPostDeserialize {}
+export function _VDFPostDeserialize() {
+    return (target, name)=>target[name].AddTags(new VDFPostDeserialize());
+};
+
+
+/*export class VDFMethodInfo {
 	tags: any[];
 	constructor(tags: any[]) { this.tags = tags; }
 }*/

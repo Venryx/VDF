@@ -1,4 +1,6 @@
-﻿enum VDFTokenType {
+﻿import {VDFLoadOptions} from "./VDFLoader";
+import {Dictionary, List, StringBuilder} from "./VDF";
+export enum VDFTokenType {
 	//WiderMetadataEndMarker,
 	//MetadataBaseValue,
 	//LiteralStartMarker, // this is taken care of within the TokenParser class, so we don't need a passable-to-the-outside enum-value for it
@@ -39,7 +41,7 @@
 	MapStartMarker,
 	MapEndMarker
 }
-class VDFToken {
+export class VDFToken {
 	type: VDFTokenType;
 	position: number;
 	index: number;
@@ -51,7 +53,7 @@ class VDFToken {
 		this.text = text;
 	}
 }
-class VDFTokenParser {
+export class VDFTokenParser {
 	static charsAToZ: List<string> = <List<string>>List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
 	static chars0To9DotAndNegative: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
 	public static ParseTokens(text: string, options?: VDFLoadOptions, parseAllTokens = false, postProcessTokens = true): List<VDFToken> {
@@ -487,7 +489,7 @@ class VDFTokenParser {
 	}
 }
 
-class TokenSet {
+export class TokenSet {
 	constructor(tokens: List<VDFToken>, line_tabsReached: number = 0) {
 		this.tokens = tokens;
 		this.line_tabsReached = line_tabsReached;
