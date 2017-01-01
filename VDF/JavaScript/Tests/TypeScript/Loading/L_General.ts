@@ -1,7 +1,8 @@
 ﻿import {VDFNode} from "../../../Source/TypeScript/VDFNode";
-import {VDFDeserialize, P, T} from "../../../Source/TypeScript/VDFTypeInfo";
-import {VDF, VDFNodePath} from "../../../Source/TypeScript/VDF";
+import {VDFDeserialize, P, T, _VDFDeserialize} from "../../../Source/TypeScript/VDFTypeInfo";
+import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFLoader, VDFLoadOptions} from "../../../Source/TypeScript/VDFLoader";
+import {VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
 
 /*class Loading {
 	static initialized = false;
@@ -28,7 +29,7 @@ import {VDFLoader, VDFLoadOptions} from "../../../Source/TypeScript/VDFLoader";
 // ==========
 
 var loading = {};
-function Loading_RunTests() {
+export function Loading_RunTests() {
 	for (var name in loading)
 		test_old(name, loading[name]);
 }
@@ -36,6 +37,11 @@ function Loading_RunTests() {
 // the normal "test" function actually runs test
 // here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
 window["test"] = function(name, func) { loading[name] = func; };
+
+// make sure we import all the other saving tests from here (this file's the root)
+import "./SpeedTests";
+import "./ToObject";
+import "./ToVDFNode";
 
 // tests
 // ==========
@@ -47,15 +53,13 @@ module VDFTests { // added to match C# indentation
 
 		class D1_MapWithEmbeddedDeserializeMethod_Prop_Class {
 			@P() boolProp = false;
-			Deserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
-			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
+			@_VDFDeserialize() Deserialize(node: VDFNode): void { this.boolProp = node["boolProp"].primitiveValue; }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethod_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
 
 		class D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class {
 			@P() boolProp = false;
-			Deserialize(node: VDFNode) { return; }
-			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
+			@_VDFDeserialize() Deserialize(node: VDFNode) { return; }
 		}
 		test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
 
@@ -64,9 +68,8 @@ module VDFTests { // added to match C# indentation
 			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = null;
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child {
-			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
+			@_VDFDeserialize(true) static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
 		}
-		D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true));
 		test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", ()=>{ ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
 
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent {
@@ -75,8 +78,7 @@ module VDFTests { // added to match C# indentation
 		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child {
 			@T("bool") @P() boolProp = false;
-			static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions) { return; }
-			constructor() { D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFDeserialize(true)); }
+			@_VDFDeserialize(true) static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions) { return; }
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
 
@@ -88,12 +90,11 @@ module VDFTests { // added to match C# indentation
 		}
 		class D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child {
 			@T("bool") @P() methodCalled = false;
-			Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): void {
+			@_VDFDeserialize() Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): void {
 				ok(path.parentNode.obj instanceof D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent);
 				if (path.currentNode.prop.name == "withTag")
 					this.methodCalled = true;
 			}
-			constructor() { this.Deserialize.AddTags(new VDFDeserialize()); }
 		}
 		test("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag", ()=>{
 			var a = VDF.Deserialize("{withoutTag:{} withTag:{}}", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent");

@@ -1,7 +1,8 @@
-﻿import {VDF, VDFNodePath, Dictionary} from "../../../Source/TypeScript/VDF";
-import { VDFLoadOptions } from "../../../Source/TypeScript/VDFLoader";
-import {VDFDeserializeProp, P, _VDFPreDeserialize, T, _VDFPostDeserialize, _VDFDeserialize, TypeInfo} from "../../../Source/TypeScript/VDFTypeInfo";
+﻿import { VDFLoadOptions } from "../../../Source/TypeScript/VDFLoader";
+import {VDFDeserializeProp, P, _VDFPreDeserialize, T, _VDFPostDeserialize, _VDFDeserialize, TypeInfo, _VDFDeserializeProp} from "../../../Source/TypeScript/VDFTypeInfo";
 import { VDFNode } from "../../../Source/TypeScript/VDFNode";
+import {VDF} from "../../../Source/TypeScript/VDF";
+import {VDFNodePath, Dictionary} from "../../../Source/TypeScript/VDFExtras";
 // tests
 // ==========
 
@@ -22,10 +23,9 @@ module VDFTests { // added to match C# indentation
 		//test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
 
 		class D1_DeserializePropMethod_Class {
-			DeserializeProp(node: VDFNode, propPath: VDFNodePath, options: VDFLoadOptions) { return 1; }
+			@_VDFDeserializeProp() DeserializeProp(node: VDFNode, propPath: VDFNodePath, options: VDFLoadOptions) { return 1; }
 			@P() prop1 = 0;
 		}
-		D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFDeserializeProp());
 		test("D1_DeserializePropMethod", () => {
 			var a = VDF.Deserialize("{prop1:0}", "D1_DeserializePropMethod_Class");
 			a.prop1.Should().Be(1);

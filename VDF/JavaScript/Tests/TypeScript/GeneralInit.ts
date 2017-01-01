@@ -38,6 +38,7 @@ var test_old = test;
 // others
 // ==========
 
+//function ExportInternalClassesTo(hostObj, funcWithInternalClasses, evalFunc) {
 function ExportInternalClassesTo(hostObj, evalFunc) {
 	var funcWithInternalClasses = arguments.callee.caller;
 	var names = V.GetMatches(funcWithInternalClasses.toString(), /        var (\w+) = \(function \(\) {/g, 1);

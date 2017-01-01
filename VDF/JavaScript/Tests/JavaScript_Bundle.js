@@ -9,8 +9,636 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDF"], function (require, exports, VDFLoader_1, VDF_1) {
-    "use strict";
+define("Source/TypeScript/VDFTypeInfo", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFExtras"], function (require, exports, VDF_1, VDFExtras_1) {
+    var VDFType = (function () {
+        function VDFType(propIncludeRegexL1, popOutL1) {
+            this.propIncludeRegexL1 = propIncludeRegexL1;
+            this.popOutL1 = popOutL1;
+        }
+        VDFType.prototype.AddDataOf = function (typeTag) {
+            if (typeTag.propIncludeRegexL1 != null)
+                this.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
+            if (typeTag.popOutL1 != null)
+                this.popOutL1 = typeTag.popOutL1;
+        };
+        return VDFType;
+    }());
+    exports.VDFType = VDFType;
+    var VDFTypeInfo = (function () {
+        function VDFTypeInfo() {
+            this.props = {};
+            //chainProps_cache = {}; // all props
+            this.tags = new VDFExtras_1.List();
+        }
+        VDFTypeInfo.Get = function (type_orTypeName) {
+            //var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
+            var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
+            var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
+            if (VDF_1.VDF.GetIsTypeAnonymous(typeNameBase)) {
+                var result = new VDFTypeInfo();
+                result.typeTag = new VDFType(VDF_1.VDF.PropRegex_Any);
+                return result;
+            }
+            var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
+            /*if (typeBase == null)
+                throw new Error("Could not find constructor for type: " + typeNameBase);*/
+            if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
+                var result = new VDFTypeInfo();
+                result.typeTag = new VDFType();
+                var currentType = typeBase;
+                while (currentType != null) {
+                    var currentTypeInfo = currentType.typeInfo;
+                    // load type-tag from base-types
+                    var typeTag2 = (currentTypeInfo || {}).typeTag;
+                    for (var key in typeTag2)
+                        if (result.typeTag[key] == null)
+                            result.typeTag[key] = typeTag2[key];
+                    // load prop-info from base-types
+                    if (currentTypeInfo)
+                        for (var propName in currentTypeInfo.props)
+                            result.props[propName] = currentTypeInfo.props[propName];
+                    currentType = currentType.prototype && currentType.prototype.__proto__ && currentType.prototype.__proto__.constructor;
+                }
+                typeBase.typeInfo = result;
+            }
+            return typeBase && typeBase.typeInfo;
+        };
+        VDFTypeInfo.prototype.GetProp = function (propName) {
+            if (!(propName in this.props))
+                this.props[propName] = new VDFPropInfo(propName, null, []);
+            return this.props[propName];
+        };
+        return VDFTypeInfo;
+    }());
+    exports.VDFTypeInfo = VDFTypeInfo;
+    function TypeInfo(propIncludeRegexL1, popOutL1) {
+        var typeTag = new VDFType(propIncludeRegexL1, popOutL1);
+        return function (type) {
+            var name = type.name_fake || type.name;
+            // maybe temp; auto-hoist to global right now
+            /*if (window[name] == null)
+                window[name] = type;*/
+            //var typeInfo = VDFTypeInfo.Get(name);
+            var typeInfo = VDFTypeInfo.Get(type);
+            typeInfo.tags = new VDFExtras_1.List(null, typeTag);
+            typeInfo.typeTag.AddDataOf(typeTag);
+        };
+    }
+    exports.TypeInfo = TypeInfo;
+    ;
+    var VDFProp = (function () {
+        function VDFProp(includeL2, popOutL2) {
+            if (includeL2 === void 0) { includeL2 = true; }
+            this.includeL2 = includeL2;
+            this.popOutL2 = popOutL2;
+        }
+        return VDFProp;
+    }());
+    exports.VDFProp = VDFProp;
+    var VDFPropInfo = (function () {
+        function VDFPropInfo(propName, propTypeName, tags) {
+            this.tags = new VDFExtras_1.List();
+            this.name = propName;
+            this.typeName = propTypeName;
+            this.tags = new VDFExtras_1.List();
+            this.propTag = this.tags.FirstOrDefault(function (a) { return a instanceof VDFProp; });
+            this.defaultValueTag = this.tags.FirstOrDefault(function (a) { return a instanceof DefaultValue; });
+        }
+        VDFPropInfo.prototype.AddTags = function () {
+            var tags = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                tags[_i] = arguments[_i];
+            }
+            this.tags.AddRange(tags);
+            this.propTag = this.tags.FirstOrDefault(function (a) { return a instanceof VDFProp; });
+            this.defaultValueTag = this.tags.FirstOrDefault(function (a) { return a instanceof DefaultValue; });
+        };
+        VDFPropInfo.prototype.ShouldValueBeSaved = function (val) {
+            //if (this.defaultValueTag == null || this.defaultValueTag.defaultValue == D.NoDefault)
+            if (this.defaultValueTag == null)
+                return true;
+            if (this.defaultValueTag.defaultValue == exports.D.DefaultDefault) {
+                if (val == null)
+                    return false;
+                if (val === false || val === 0)
+                    return true;
+            }
+            if (this.defaultValueTag.defaultValue == exports.D.NullOrEmpty && val === null)
+                return false;
+            if (this.defaultValueTag.defaultValue == exports.D.NullOrEmpty || this.defaultValueTag.defaultValue == exports.D.Empty) {
+                var typeName = VDF_1.VDF.GetTypeNameOfObject(val);
+                if (typeName && typeName.StartsWith("List(") && val.length == 0)
+                    return false;
+                if (typeName == "string" && !val.length)
+                    return false;
+            }
+            if (val === this.defaultValueTag.defaultValue)
+                return false;
+            return true;
+        };
+        return VDFPropInfo;
+    }());
+    exports.VDFPropInfo = VDFPropInfo;
+    function T(typeOrTypeName) {
+        return function (target, name) {
+            //target.prototype[name].AddTags(new VDFPostDeserialize());
+            //Prop(target, name, typeOrTypeName);
+            //target.p(name, typeOrTypeName);
+            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+            propInfo.typeName = typeOrTypeName instanceof Function ? typeOrTypeName.name : typeOrTypeName;
+        };
+    }
+    exports.T = T;
+    ;
+    function P(includeL2, popOutL2) {
+        if (includeL2 === void 0) { includeL2 = true; }
+        return function (target, name) {
+            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+            propInfo.AddTags(new VDFProp(includeL2, popOutL2));
+        };
+    }
+    exports.P = P;
+    ;
+    var DefaultValue = (function () {
+        function DefaultValue(defaultValue) {
+            if (defaultValue === void 0) { defaultValue = exports.D.DefaultDefault; }
+            this.defaultValue = defaultValue;
+        }
+        return DefaultValue;
+    }());
+    exports.DefaultValue = DefaultValue;
+    exports.D = function D(defaultValue) {
+        return function (target, name) {
+            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+            propInfo.AddTags(new DefaultValue(defaultValue));
+        };
+    };
+    exports.D.DefaultDefault = {};
+    exports.D.NullOrEmpty = {};
+    exports.D.Empty = {};
+    //export var D;
+    /*export let D = ()=> {
+        let D_ = function(...args) {
+            return (target, name)=> {
+                var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+                propInfo.AddTags(new DefaultValue(...args));
+            };
+        };
+        // copy D.NullOrEmpty and such
+        for (var key in g.D)
+            D_[key] = g.D[key];
+        return D_;
+    };*/
+    var VDFSerializeProp = (function () {
+        function VDFSerializeProp() {
+        }
+        return VDFSerializeProp;
+    }());
+    exports.VDFSerializeProp = VDFSerializeProp;
+    function _VDFSerializeProp() {
+        return function (target, name) { return target[name].AddTags(new VDFSerializeProp()); };
+    }
+    exports._VDFSerializeProp = _VDFSerializeProp;
+    ;
+    var VDFDeserializeProp = (function () {
+        function VDFDeserializeProp() {
+        }
+        return VDFDeserializeProp;
+    }());
+    exports.VDFDeserializeProp = VDFDeserializeProp;
+    function _VDFDeserializeProp() {
+        return function (target, name) { return target[name].AddTags(new VDFDeserializeProp()); };
+    }
+    exports._VDFDeserializeProp = _VDFDeserializeProp;
+    ;
+    var VDFPreSerialize = (function () {
+        function VDFPreSerialize() {
+        }
+        return VDFPreSerialize;
+    }());
+    exports.VDFPreSerialize = VDFPreSerialize;
+    function _VDFPreSerialize() {
+        return function (target, name) { return target[name].AddTags(new VDFPreSerialize()); };
+    }
+    exports._VDFPreSerialize = _VDFPreSerialize;
+    ;
+    var VDFSerialize = (function () {
+        function VDFSerialize() {
+        }
+        return VDFSerialize;
+    }());
+    exports.VDFSerialize = VDFSerialize;
+    function _VDFSerialize() {
+        return function (target, name) { return target[name].AddTags(new VDFSerialize()); };
+    }
+    exports._VDFSerialize = _VDFSerialize;
+    ;
+    var VDFPostSerialize = (function () {
+        function VDFPostSerialize() {
+        }
+        return VDFPostSerialize;
+    }());
+    exports.VDFPostSerialize = VDFPostSerialize;
+    function _VDFPostSerialize() {
+        return function (target, name) { return target[name].AddTags(new VDFPostSerialize()); };
+    }
+    exports._VDFPostSerialize = _VDFPostSerialize;
+    ;
+    var VDFPreDeserialize = (function () {
+        function VDFPreDeserialize() {
+        }
+        return VDFPreDeserialize;
+    }());
+    exports.VDFPreDeserialize = VDFPreDeserialize;
+    function _VDFPreDeserialize() {
+        return function (target, name) { return target[name].AddTags(new VDFPreDeserialize()); };
+    }
+    exports._VDFPreDeserialize = _VDFPreDeserialize;
+    ;
+    var VDFDeserialize = (function () {
+        function VDFDeserialize(fromParent) {
+            if (fromParent === void 0) { fromParent = false; }
+            this.fromParent = fromParent;
+        }
+        return VDFDeserialize;
+    }());
+    exports.VDFDeserialize = VDFDeserialize;
+    function _VDFDeserialize(fromParent) {
+        if (fromParent === void 0) { fromParent = false; }
+        return function (target, name) { return target[name].AddTags(new VDFDeserialize(fromParent)); };
+    }
+    exports._VDFDeserialize = _VDFDeserialize;
+    ;
+    var VDFPostDeserialize = (function () {
+        function VDFPostDeserialize() {
+        }
+        return VDFPostDeserialize;
+    }());
+    exports.VDFPostDeserialize = VDFPostDeserialize;
+    function _VDFPostDeserialize() {
+        return function (target, name) { return target[name].AddTags(new VDFPostDeserialize()); };
+    }
+    exports._VDFPostDeserialize = _VDFPostDeserialize;
+    ;
+});
+/*export class VDFMethodInfo {
+    tags: any[];
+    constructor(tags: any[]) { this.tags = tags; }
+}*/ 
+define("Source/TypeScript/VDFExtras", ["require", "exports"], function (require, exports) {
+    // classes
+    // ==========
+    var VDFNodePathNode = (function () {
+        function VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key) {
+            if (obj === void 0) { obj = null; }
+            if (prop === void 0) { prop = null; }
+            if (list_index === void 0) { list_index = null; }
+            if (map_keyIndex === void 0) { map_keyIndex = null; }
+            if (map_key === void 0) { map_key = null; }
+            this.list_index = null;
+            this.map_keyIndex = null;
+            this.obj = obj;
+            this.prop = prop;
+            this.list_index = list_index;
+            this.map_keyIndex = map_keyIndex;
+            this.map_key = map_key;
+        }
+        //Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
+        // for debugging
+        VDFNodePathNode.prototype.toString = function () {
+            if (this.list_index != null)
+                return "i:" + this.list_index;
+            if (this.map_keyIndex != null)
+                return "ki:" + this.map_keyIndex;
+            if (this.map_key != null)
+                return "k:" + this.map_key;
+            if (this.prop != null)
+                //return "p:" + this.prop.name;
+                return this.prop.name;
+            return "";
+        };
+        return VDFNodePathNode;
+    }());
+    exports.VDFNodePathNode = VDFNodePathNode;
+    var VDFNodePath = (function () {
+        function VDFNodePath(nodes_orRootNode) {
+            this.nodes = nodes_orRootNode instanceof Array ? nodes_orRootNode : [nodes_orRootNode];
+        }
+        Object.defineProperty(VDFNodePath.prototype, "rootNode", {
+            get: function () { return this.nodes[0]; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(VDFNodePath.prototype, "parentNode", {
+            get: function () { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(VDFNodePath.prototype, "currentNode", {
+            get: function () { return this.nodes[this.nodes.length - 1]; },
+            enumerable: true,
+            configurable: true
+        });
+        VDFNodePath.prototype.ExtendAsListItem = function (index, obj) {
+            var newNodes = this.nodes.slice(0);
+            newNodes.push(new VDFNodePathNode(obj, null, index));
+            return new VDFNodePath(newNodes);
+        };
+        VDFNodePath.prototype.ExtendAsMapKey = function (keyIndex, obj) {
+            var newNodes = this.nodes.slice(0);
+            newNodes.push(new VDFNodePathNode(obj, null, null, keyIndex));
+            return new VDFNodePath(newNodes);
+        };
+        VDFNodePath.prototype.ExtendAsMapItem = function (key, obj) {
+            var newNodes = this.nodes.slice(0);
+            newNodes.push(new VDFNodePathNode(obj, null, null, null, key));
+            return new VDFNodePath(newNodes);
+        };
+        VDFNodePath.prototype.ExtendAsChild = function (prop, obj) {
+            var newNodes = this.nodes.slice(0);
+            newNodes.push(new VDFNodePathNode(obj, prop));
+            return new VDFNodePath(newNodes);
+        };
+        // for debugging
+        VDFNodePath.prototype.toString = function () {
+            var result = "";
+            var index = 0;
+            for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
+                var node = _a[_i];
+                result += (index++ == 0 ? "" : "/") + node;
+            }
+            return result;
+        };
+        return VDFNodePath;
+    }());
+    exports.VDFNodePath = VDFNodePath;
+    // helper classes
+    // ==================
+    var VDFUtils = (function () {
+        function VDFUtils() {
+        }
+        /*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames) 	{
+            if (addSetters && !obj._hiddenFieldStore)
+                Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
+            for (var i in fieldNames)
+                (()=>{
+                    var propName = fieldNames[i];
+                    var origValue = obj[propName];
+                    if (addSetters)
+                        Object.defineProperty(obj, propName, 					{
+                            enumerable: false,
+                            get: ()=>obj["_hiddenFieldStore"][propName],
+                            set: value=>obj["_hiddenFieldStore"][propName] = value
+                        });
+                    else
+                        Object.defineProperty(obj, propName, 					{
+                            enumerable: false,
+                            value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
+                        });
+                    obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
+                })();
+        }*/
+        VDFUtils.MakePropertiesHidden = function (obj, alsoMakeFunctionsHidden, addSetters) {
+            for (var propName in obj) {
+                var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
+                if (propDescriptor) {
+                    propDescriptor.enumerable = false;
+                    Object.defineProperty(obj, propName, propDescriptor);
+                }
+            }
+        };
+        return VDFUtils;
+    }());
+    var StringBuilder = (function () {
+        function StringBuilder(startData) {
+            this.parts = [];
+            this.length = 0;
+            if (startData)
+                this.Append(startData);
+        }
+        StringBuilder.prototype.Append = function (str) { this.parts.push(str); this.length += str.length; return this; }; // adds string str to the StringBuilder
+        StringBuilder.prototype.Insert = function (index, str) { this.parts.splice(index, 0, str); this.length += str.length; return this; }; // inserts string 'str' at 'index'
+        StringBuilder.prototype.Remove = function (index, count) {
+            var removedItems = this.parts.splice(index, count != null ? count : 1);
+            for (var i = 0; i < removedItems.length; i++)
+                this.length -= removedItems[i].length;
+            return this;
+        };
+        StringBuilder.prototype.Clear = function () {
+            //this.splice(0, this.length);
+            this.parts.length = 0;
+            this.length = 0;
+        };
+        StringBuilder.prototype.ToString = function (joinerString) { return this.parts.join(joinerString || ""); }; // builds the string
+        return StringBuilder;
+    }());
+    exports.StringBuilder = StringBuilder;
+    // VDF-usable data wrappers
+    // ==========
+    //class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
+    // for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)
+    //var object = Object;
+    //object["typeInfo"] = new VDFTypeInfo(null, true);
+    var object = (function () {
+        function object() {
+        }
+        return object;
+    }()); // just an alias for Object, to be consistent with C# version
+    exports.object = object;
+    var EnumValue = (function () {
+        function EnumValue(enumTypeName, intValue) {
+            this.realTypeName = enumTypeName;
+            //this.intValue = intValue;
+            this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
+        }
+        EnumValue.prototype.toString = function () { return this.stringValue; };
+        EnumValue.IsEnum = function (typeName) { return window[typeName] && window[typeName]["_IsEnum"] === 0; };
+        //static IsEnum(typeName: string): boolean { return window[typeName] && /}\)\((\w+) \|\| \(\w+ = {}\)\);/.test(window[typeName].toString()); }
+        EnumValue.GetEnumIntForStringValue = function (enumTypeName, stringValue) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); };
+        EnumValue.GetEnumStringForIntValue = function (enumTypeName, intValue) { return eval(enumTypeName + "[" + intValue + "]"); };
+        return EnumValue;
+    }());
+    exports.EnumValue = EnumValue;
+    var List = (function (_super) {
+        __extends(List, _super);
+        function List(itemType) {
+            var items = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                items[_i - 1] = arguments[_i];
+            }
+            var _this = 
+            //super(...items);
+            _super.call(this) || this;
+            _this.__proto__ = List.prototype;
+            _this.AddRange(items);
+            _this.itemType = itemType;
+            return _this;
+        }
+        Object.defineProperty(List.prototype, "Count", {
+            get: function () { return this.length; },
+            enumerable: true,
+            configurable: true
+        });
+        /*s.Indexes = function () {
+            var result = {};
+            for (var i = 0; i < this.length; i++)
+                result[i] = this[i];
+            return result;
+        }*/
+        List.prototype.Add = function () {
+            var items = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                items[_i] = arguments[_i];
+            }
+            return this.push.apply(this, items);
+        };
+        List.prototype.AddRange = function (items) {
+            /*for (var i = 0; i < items.length; i++)
+                this.push(items[i]);*/
+            this.push.apply(this, items);
+        };
+        List.prototype.Insert = function (index, item) { return this.splice(index, 0, item); };
+        List.prototype.InsertRange = function (index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
+        List.prototype.Remove = function (item) { return this.RemoveAt(this.indexOf(item)) != null; };
+        List.prototype.RemoveAt = function (index) { return this.splice(index, 1)[0]; };
+        List.prototype.RemoveRange = function (index, count) { return this.splice(index, count); };
+        List.prototype.Any = function (matchFunc) {
+            for (var _i = 0, _a = this; _i < _a.length; _i++) {
+                var item = _a[_i];
+                if (matchFunc.call(item, item))
+                    return true;
+            }
+            return false;
+        };
+        List.prototype.All = function (matchFunc) {
+            for (var _i = 0, _a = this; _i < _a.length; _i++) {
+                var item = _a[_i];
+                if (!matchFunc.call(item, item))
+                    return false;
+            }
+            return true;
+        };
+        List.prototype.Select = function (selectFunc, itemType) {
+            var result = new List(itemType || "object");
+            for (var _i = 0, _a = this; _i < _a.length; _i++) {
+                var item = _a[_i];
+                result.Add(selectFunc.call(item, item));
+            }
+            return result;
+        };
+        List.prototype.First = function (matchFunc) {
+            var result = this.FirstOrDefault(matchFunc);
+            if (result == null)
+                throw new Error("Matching item not found.");
+            return result;
+        };
+        List.prototype.FirstOrDefault = function (matchFunc) {
+            if (matchFunc) {
+                for (var _i = 0, _a = this; _i < _a.length; _i++) {
+                    var item = _a[_i];
+                    if (matchFunc.call(item, item))
+                        return item;
+                }
+                return null;
+            }
+            else
+                return this[0];
+        };
+        List.prototype.Last = function (matchFunc) {
+            var result = this.LastOrDefault(matchFunc);
+            if (result == null)
+                throw new Error("Matching item not found.");
+            return result;
+        };
+        List.prototype.LastOrDefault = function (matchFunc) {
+            if (matchFunc) {
+                for (var i = this.length - 1; i >= 0; i--)
+                    if (matchFunc.call(this[i], this[i]))
+                        return this[i];
+                return null;
+            }
+            else
+                return this[this.length - 1];
+        };
+        List.prototype.GetRange = function (index, count) {
+            var result = new List(this.itemType);
+            for (var i = index; i < index + count; i++)
+                result.Add(this[i]);
+            return result;
+        };
+        List.prototype.Contains = function (item) { return this.indexOf(item) != -1; };
+        return List;
+    }(Array));
+    exports.List = List;
+    window["List"] = List;
+    var Dictionary = (function () {
+        function Dictionary(keyType, valueType, keyValuePairsObj) {
+            //VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
+            this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
+            this.keyType = keyType;
+            this.valueType = valueType;
+            this.keys = [];
+            this.values = [];
+            if (keyValuePairsObj)
+                for (var key in keyValuePairsObj)
+                    this.Set(key, keyValuePairsObj[key]);
+        }
+        Object.defineProperty(Dictionary.prototype, "Keys", {
+            // properties
+            get: function () {
+                var result = {};
+                for (var i = 0; i < this.keys.length; i++)
+                    result[this.keys[i]] = null;
+                return result;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Dictionary.prototype, "Pairs", {
+            get: function () {
+                var result = [];
+                for (var i = 0; i < this.keys.length; i++)
+                    result.push({ index: i, key: this.keys[i], value: this.values[i] });
+                return result;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Dictionary.prototype, "Count", {
+            get: function () { return this.keys.length; },
+            enumerable: true,
+            configurable: true
+        });
+        // methods
+        Dictionary.prototype.ContainsKey = function (key) { return this.keys.indexOf(key) != -1; };
+        Dictionary.prototype.Get = function (key) { return this.values[this.keys.indexOf(key)]; };
+        Dictionary.prototype.Set = function (key, value) {
+            if (this.keys.indexOf(key) == -1)
+                this.keys.push(key);
+            this.values[this.keys.indexOf(key)] = value;
+            if (typeof key == "string")
+                this[key] = value; // make value accessible directly on Dictionary object
+        };
+        Dictionary.prototype.Add = function (key, value) {
+            if (this.keys.indexOf(key) != -1)
+                throw new Error("Dictionary already contains key '" + key + "'.");
+            this.Set(key, value);
+        };
+        Dictionary.prototype.Remove = function (key) {
+            var itemIndex = this.keys.indexOf(key);
+            if (itemIndex == -1)
+                return;
+            this.keys.splice(itemIndex, 1);
+            this.values.splice(itemIndex, 1);
+            delete this[key];
+        };
+        return Dictionary;
+    }());
+    exports.Dictionary = Dictionary;
+    window["Dictionary"] = Dictionary;
+});
+//VDFUtils.MakePropertiesHidden(Dictionary.prototype, true); 
+define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDFLoader"], function (require, exports, VDFExtras_2, VDFLoader_1) {
     var VDFTokenType;
     (function (VDFTokenType) {
         //WiderMetadataEndMarker,
@@ -67,9 +695,9 @@ define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeSc
             if (postProcessTokens === void 0) { postProcessTokens = true; }
             text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
             options = options || new VDFLoader_1.VDFLoadOptions();
-            var result = new VDF_1.List("VDFToken");
+            var result = new VDFExtras_2.List("VDFToken");
             var currentTokenFirstCharPos = 0;
-            var currentTokenTextBuilder = new VDF_1.StringBuilder();
+            var currentTokenTextBuilder = new VDFExtras_2.StringBuilder();
             var currentTokenType = VDFTokenType.None;
             var activeLiteralStartChars = null;
             var activeStringStartChar = null;
@@ -162,7 +790,7 @@ define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeSc
                             switch (ch) {
                                 case '#':
                                     if (nextChar == '#' && firstTokenChar) {
-                                        currentTokenTextBuilder = new VDF_1.StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
+                                        currentTokenTextBuilder = new VDFExtras_2.StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
                                         currentTokenType = VDFTokenType.InLineComment;
                                         i += currentTokenTextBuilder.length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
                                         nextChar = i < text.length - 1 ? text[i + 1] : specialEnderChar; // update after i-modification, since used for next loop's 'ch' value
@@ -368,13 +996,13 @@ define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeSc
             return result;
         }*/
         VDFTokenParser.PostProcessTokens = function (origTokens, options) {
-            var result = new VDF_1.List(); //"VDFToken");
+            var result = new VDFExtras_2.List(); //"VDFToken");
             // 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (one reason being, for JSON compatibility)
             // 2: re-wrap popped-out-children with parent brackets/braces
-            var groupDepth_tokenSetsToProcessAfterGroupEnds = new VDF_1.Dictionary("int", "List(VDFToken)");
+            var groupDepth_tokenSetsToProcessAfterGroupEnds = new VDFExtras_2.Dictionary("int", "List(VDFToken)");
             var tokenSetsToProcess = [];
             // maybe temp: add depth-0-ender helper token
-            tokenSetsToProcess.push(new TokenSet(new VDF_1.List("VDFToken", new VDFToken(VDFTokenType.None, -1, -1, ""))));
+            tokenSetsToProcess.push(new TokenSet(new VDFExtras_2.List("VDFToken", new VDFToken(VDFTokenType.None, -1, -1, ""))));
             tokenSetsToProcess.push(new TokenSet(origTokens));
             while (tokenSetsToProcess.length > 0) {
                 var tokenSet = tokenSetsToProcess[tokenSetsToProcess.length - 1];
@@ -465,8 +1093,8 @@ define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeSc
         };
         return VDFTokenParser;
     }());
-    VDFTokenParser.charsAToZ = VDF_1.List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-    VDFTokenParser.chars0To9DotAndNegative = VDF_1.List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
+    VDFTokenParser.charsAToZ = VDFExtras_2.List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
+    VDFTokenParser.chars0To9DotAndNegative = VDFExtras_2.List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
     exports.VDFTokenParser = VDFTokenParser;
     var TokenSet = (function () {
         function TokenSet(tokens, line_tabsReached) {
@@ -480,284 +1108,14 @@ define("Source/TypeScript/VDFTokenParser", ["require", "exports", "Source/TypeSc
     }());
     exports.TokenSet = TokenSet;
 });
-define("Source/TypeScript/VDFTypeInfo", ["require", "exports", "Source/TypeScript/VDF"], function (require, exports, VDF_2) {
-    "use strict";
-    var VDFType = (function () {
-        function VDFType(propIncludeRegexL1, popOutL1) {
-            this.propIncludeRegexL1 = propIncludeRegexL1;
-            this.popOutL1 = popOutL1;
-        }
-        VDFType.prototype.AddDataOf = function (typeTag) {
-            if (typeTag.propIncludeRegexL1 != null)
-                this.propIncludeRegexL1 = typeTag.propIncludeRegexL1;
-            if (typeTag.popOutL1 != null)
-                this.popOutL1 = typeTag.popOutL1;
-        };
-        return VDFType;
-    }());
-    exports.VDFType = VDFType;
-    var VDFTypeInfo = (function () {
-        function VDFTypeInfo() {
-            this.props = {};
-        }
-        VDFTypeInfo.Get = function (type_orTypeName) {
-            //var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
-            var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
-            var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
-            if (VDF_2.VDF.GetIsTypeAnonymous(typeNameBase)) {
-                var result = new VDFTypeInfo();
-                result.typeTag = new VDFType(VDF_2.VDF.PropRegex_Any);
-                return result;
-            }
-            var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
-            /*if (typeBase == null)
-                throw new Error("Could not find constructor for type: " + typeNameBase);*/
-            if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
-                var result = new VDFTypeInfo();
-                result.typeTag = new VDFType();
-                var currentType = typeBase;
-                while (currentType != null) {
-                    var currentTypeInfo = currentType.typeInfo;
-                    // load type-tag from base-types
-                    var typeTag2 = (currentTypeInfo || {}).typeTag;
-                    for (var key in typeTag2)
-                        if (result.typeTag[key] == null)
-                            result.typeTag[key] = typeTag2[key];
-                    // load prop-info from base-types
-                    if (currentTypeInfo)
-                        for (var propName in currentTypeInfo.props)
-                            result.props[propName] = currentTypeInfo.props[propName];
-                    currentType = currentType.prototype && currentType.prototype.__proto__ && currentType.prototype.__proto__.constructor;
-                }
-                typeBase.typeInfo = result;
-            }
-            return typeBase && typeBase.typeInfo;
-        };
-        VDFTypeInfo.prototype.GetProp = function (propName) {
-            if (!(propName in this.props))
-                this.props[propName] = new VDFPropInfo(propName, null, []);
-            return this.props[propName];
-        };
-        return VDFTypeInfo;
-    }());
-    exports.VDFTypeInfo = VDFTypeInfo;
-    function TypeInfo(propIncludeRegexL1, popOutL1) {
-        var typeTag = new VDFType(propIncludeRegexL1, popOutL1);
-        return function (target) {
-            var typeInfo = VDFTypeInfo.Get(target.name_fake || target.name);
-            typeInfo.tags = [typeTag];
-            typeInfo.typeTag.AddDataOf(typeTag);
-        };
-    }
-    exports.TypeInfo = TypeInfo;
-    ;
-    var VDFProp = (function () {
-        function VDFProp(includeL2, popOutL2) {
-            if (includeL2 === void 0) { includeL2 = true; }
-            this.includeL2 = includeL2;
-            this.popOutL2 = popOutL2;
-        }
-        return VDFProp;
-    }());
-    exports.VDFProp = VDFProp;
-    var VDFPropInfo = (function () {
-        function VDFPropInfo(propName, propTypeName, tags) {
-            this.name = propName;
-            this.typeName = propTypeName;
-            this.tags = new VDF_2.List("object", tags);
-            this.propTag = this.tags.First(function (a) { return a instanceof VDFProp; });
-            this.defaultValueTag = this.tags.First(function (a) { return a instanceof DefaultValue; });
-        }
-        VDFPropInfo.prototype.AddTags = function () {
-            var tags = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                tags[_i] = arguments[_i];
-            }
-            this.tags.AddRange(tags);
-            this.propTag = this.tags.First(function (a) { return a instanceof VDFProp; });
-            this.defaultValueTag = this.tags.First(function (a) { return a instanceof DefaultValue; });
-        };
-        VDFPropInfo.prototype.ShouldValueBeSaved = function (val) {
-            //if (this.defaultValueTag == null || this.defaultValueTag.defaultValue == D.NoDefault)
-            if (this.defaultValueTag == null)
-                return true;
-            if (this.defaultValueTag.defaultValue == exports.D.DefaultDefault) {
-                if (val == null)
-                    return false;
-                if (val === false || val === 0)
-                    return true;
-            }
-            if (this.defaultValueTag.defaultValue == exports.D.NullOrEmpty && val === null)
-                return false;
-            if (this.defaultValueTag.defaultValue == exports.D.NullOrEmpty || this.defaultValueTag.defaultValue == exports.D.Empty) {
-                var typeName = VDF_2.VDF.GetTypeNameOfObject(val);
-                if (typeName && typeName.StartsWith("List(") && val.length == 0)
-                    return false;
-                if (typeName == "string" && !val.length)
-                    return false;
-            }
-            if (val === this.defaultValueTag.defaultValue)
-                return false;
-            return true;
-        };
-        return VDFPropInfo;
-    }());
-    exports.VDFPropInfo = VDFPropInfo;
-    function T(typeOrTypeName) {
-        return function (target, name) {
-            //target.prototype[name].AddTags(new VDFPostDeserialize());
-            //Prop(target, name, typeOrTypeName);
-            //target.p(name, typeOrTypeName);
-            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-            propInfo.typeName = typeOrTypeName instanceof Function ? typeOrTypeName.name : typeOrTypeName;
-        };
-    }
-    exports.T = T;
-    ;
-    function P(includeL2, popOutL2) {
-        if (includeL2 === void 0) { includeL2 = true; }
-        return function (target, name) {
-            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-            propInfo.AddTags(new VDFProp(includeL2, popOutL2));
-        };
-    }
-    exports.P = P;
-    ;
-    var DefaultValue = (function () {
-        function DefaultValue(defaultValue) {
-            if (defaultValue === void 0) { defaultValue = exports.D.DefaultDefault; }
-            this.defaultValue = defaultValue;
-        }
-        return DefaultValue;
-    }());
-    exports.DefaultValue = DefaultValue;
-    exports.D = function D(defaultValue) {
-        return function (target, name) {
-            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-            propInfo.AddTags(new DefaultValue(defaultValue));
-        };
-    };
-    exports.D.DefaultDefault = {};
-    exports.D.NullOrEmpty = {};
-    exports.D.Empty = {};
-    //export var D;
-    /*export let D = ()=> {
-        let D_ = function(...args) {
-            return (target, name)=> {
-                var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-                propInfo.AddTags(new DefaultValue(...args));
-            };
-        };
-        // copy D.NullOrEmpty and such
-        for (var key in g.D)
-            D_[key] = g.D[key];
-        return D_;
-    };*/
-    var VDFSerializeProp = (function () {
-        function VDFSerializeProp() {
-        }
-        return VDFSerializeProp;
-    }());
-    exports.VDFSerializeProp = VDFSerializeProp;
-    function _VDFSerializeProp() {
-        return function (target, name) { return target[name].AddTags(new VDFSerializeProp()); };
-    }
-    exports._VDFSerializeProp = _VDFSerializeProp;
-    ;
-    var VDFDeserializeProp = (function () {
-        function VDFDeserializeProp() {
-        }
-        return VDFDeserializeProp;
-    }());
-    exports.VDFDeserializeProp = VDFDeserializeProp;
-    function _VDFDeserializeProp() {
-        return function (target, name) { return target[name].AddTags(new VDFDeserializeProp()); };
-    }
-    exports._VDFDeserializeProp = _VDFDeserializeProp;
-    ;
-    var VDFPreSerialize = (function () {
-        function VDFPreSerialize() {
-        }
-        return VDFPreSerialize;
-    }());
-    exports.VDFPreSerialize = VDFPreSerialize;
-    function _VDFPreSerialize() {
-        return function (target, name) { return target[name].AddTags(new VDFPreSerialize()); };
-    }
-    exports._VDFPreSerialize = _VDFPreSerialize;
-    ;
-    var VDFSerialize = (function () {
-        function VDFSerialize() {
-        }
-        return VDFSerialize;
-    }());
-    exports.VDFSerialize = VDFSerialize;
-    function _VDFSerialize() {
-        return function (target, name) { return target[name].AddTags(new VDFSerialize()); };
-    }
-    exports._VDFSerialize = _VDFSerialize;
-    ;
-    var VDFPostSerialize = (function () {
-        function VDFPostSerialize() {
-        }
-        return VDFPostSerialize;
-    }());
-    exports.VDFPostSerialize = VDFPostSerialize;
-    function _VDFPostSerialize() {
-        return function (target, name) { return target[name].AddTags(new VDFPostSerialize()); };
-    }
-    exports._VDFPostSerialize = _VDFPostSerialize;
-    ;
-    var VDFPreDeserialize = (function () {
-        function VDFPreDeserialize() {
-        }
-        return VDFPreDeserialize;
-    }());
-    exports.VDFPreDeserialize = VDFPreDeserialize;
-    function _VDFPreDeserialize() {
-        return function (target, name) { return target[name].AddTags(new VDFPreDeserialize()); };
-    }
-    exports._VDFPreDeserialize = _VDFPreDeserialize;
-    ;
-    var VDFDeserialize = (function () {
-        function VDFDeserialize(fromParent) {
-            if (fromParent === void 0) { fromParent = false; }
-            this.fromParent = fromParent;
-        }
-        return VDFDeserialize;
-    }());
-    exports.VDFDeserialize = VDFDeserialize;
-    function _VDFDeserialize(fromParent) {
-        if (fromParent === void 0) { fromParent = false; }
-        return function (target, name) { return target[name].AddTags(new VDFDeserialize(fromParent)); };
-    }
-    exports._VDFDeserialize = _VDFDeserialize;
-    ;
-    var VDFPostDeserialize = (function () {
-        function VDFPostDeserialize() {
-        }
-        return VDFPostDeserialize;
-    }());
-    exports.VDFPostDeserialize = VDFPostDeserialize;
-    function _VDFPostDeserialize() {
-        return function (target, name) { return target[name].AddTags(new VDFPostDeserialize()); };
-    }
-    exports._VDFPostDeserialize = _VDFPostDeserialize;
-    ;
-});
-/*export class VDFMethodInfo {
-    tags: any[];
-    constructor(tags: any[]) { this.tags = tags; }
-}*/ 
-define("Source/TypeScript/VDFLoader", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFTokenParser", "Source/TypeScript/VDFTypeInfo"], function (require, exports, VDF_3, VDFNode_1, VDFTokenParser_1, VDFTypeInfo_1) {
-    "use strict";
+define("Source/TypeScript/VDFLoader", ["require", "exports", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFTokenParser", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDF"], function (require, exports, VDFNode_1, VDFTokenParser_1, VDFTypeInfo_1, VDFExtras_3, VDF_2) {
     var VDFLoadOptions = (function () {
         function VDFLoadOptions(initializerObj, messages, allowStringKeys, allowCommaSeparators, loadUnknownTypesAsBasicTypes) {
             if (allowStringKeys === void 0) { allowStringKeys = true; }
             if (allowCommaSeparators === void 0) { allowCommaSeparators = false; }
             if (loadUnknownTypesAsBasicTypes === void 0) { loadUnknownTypesAsBasicTypes = false; }
-            this.objPostDeserializeFuncs_early = new VDF_3.Dictionary("object", "List(Function)");
-            this.objPostDeserializeFuncs = new VDF_3.Dictionary("object", "List(Function)");
+            this.objPostDeserializeFuncs_early = new VDFExtras_3.Dictionary("object", "List(Function)");
+            this.objPostDeserializeFuncs = new VDFExtras_3.Dictionary("object", "List(Function)");
             this.messages = messages || [];
             this.allowStringKeys = allowStringKeys;
             this.allowCommaSeparators = allowCommaSeparators;
@@ -770,12 +1128,12 @@ define("Source/TypeScript/VDFLoader", ["require", "exports", "Source/TypeScript/
             if (early === void 0) { early = false; }
             if (early) {
                 if (!this.objPostDeserializeFuncs_early.ContainsKey(obj))
-                    this.objPostDeserializeFuncs_early.Add(obj, new VDF_3.List("Function"));
+                    this.objPostDeserializeFuncs_early.Add(obj, new VDFExtras_3.List("Function"));
                 this.objPostDeserializeFuncs_early.Get(obj).Add(func);
             }
             else {
                 if (!this.objPostDeserializeFuncs.ContainsKey(obj))
-                    this.objPostDeserializeFuncs.Add(obj, new VDF_3.List("Function"));
+                    this.objPostDeserializeFuncs.Add(obj, new VDFExtras_3.List("Function"));
                 this.objPostDeserializeFuncs.Get(obj).Add(func);
             }
         };
@@ -804,8 +1162,8 @@ define("Source/TypeScript/VDFLoader", ["require", "exports", "Source/TypeScript/
             // figure out obj-type
             // ==========
             var depth = 0;
-            var tokensAtDepth0 = new VDF_3.List("VDFToken");
-            var tokensAtDepth1 = new VDF_3.List("VDFToken");
+            var tokensAtDepth0 = new VDFExtras_3.List("VDFToken");
+            var tokensAtDepth1 = new VDFExtras_3.List("VDFToken");
             var i;
             for (var i = firstTokenIndex; i < enderTokenIndex; i++) {
                 var token = tokens[i];
@@ -841,7 +1199,7 @@ define("Source/TypeScript/VDFLoader", ["require", "exports", "Source/TypeScript/
             // for keys, force load as string, since we're not at the use-importer stage
             if (firstNonMetadataToken.type == VDFTokenParser_1.VDFTokenType.Key)
                 typeName = "string";
-            var typeGenericArgs = VDF_3.VDF.GetGenericArgumentsOfType(typeName);
+            var typeGenericArgs = VDF_2.VDF.GetGenericArgumentsOfType(typeName);
             var typeInfo = VDFTypeInfo_1.VDFTypeInfo.Get(typeName);
             // create the object's VDFNode, and load in the data
             // ==========
@@ -904,12 +1262,11 @@ define("Source/TypeScript/VDFLoader", ["require", "exports", "Source/TypeScript/
     }());
     exports.VDFLoader = VDFLoader;
 });
-define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo"], function (require, exports, VDFSaver_1, VDFLoader_2, VDF_4, VDFTypeInfo_2) {
-    "use strict";
+define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDF", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDFTypeInfo"], function (require, exports, VDFExtras_4, VDF_3, VDFSaver_1, VDFLoader_2, VDFTypeInfo_2) {
     var VDFNode = (function () {
         function VDFNode(primitiveValue, metadata) {
-            this.listChildren = new VDF_4.List("VDFNode");
-            this.mapChildren = new VDF_4.Dictionary("VDFNode", "VDFNode"); // this also holds Dictionaries' keys/values
+            this.listChildren = new VDFExtras_4.List("VDFNode");
+            this.mapChildren = new VDFExtras_4.Dictionary("VDFNode", "VDFNode"); // this also holds Dictionaries' keys/values
             this.primitiveValue = primitiveValue;
             this.metadata = metadata;
         }
@@ -917,8 +1274,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
             this.listChildren[index] = value;
             this[index] = value;
         };
-        /*InsertListChild(index: number, value: any)
-        {
+        /*InsertListChild(index: number, value: any) {
             var oldItems = this.listChildren;
             for (var i = 0; i < oldItems.length; i++) // we need to first remove old values, so the slate is clean for manual re-adding/re-ordering
                 delete this[i];
@@ -952,7 +1308,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
             if (tabDepth === void 0) { tabDepth = 0; }
             if (isKey === void 0) { isKey = false; }
             options = options || new VDFSaver_1.VDFSaveOptions();
-            var builder = new VDF_4.StringBuilder();
+            var builder = new VDFExtras_4.StringBuilder();
             var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
             if (options.useMetadata && metadata != null && metadata != "")
                 builder.Append(metadata + ">");
@@ -980,7 +1336,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
                 else
                     builder.Append((isKey ? "" : "\"") + unpaddedString + (isKey ? "" : "\""));
             }
-            else if (VDF_4.VDF.GetIsTypePrimitive(VDF_4.VDF.GetTypeNameOfObject(this.primitiveValue)))
+            else if (VDF_3.VDF.GetIsTypePrimitive(VDF_3.VDF.GetTypeNameOfObject(this.primitiveValue)))
                 builder.Append(options.useNumberTrimming && this.primitiveValue.toString().StartsWith("0.") ? this.primitiveValue.toString().substr(1) : this.primitiveValue);
             else
                 builder.Append("\"" + this.primitiveValue + "\"");
@@ -1013,7 +1369,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
             if (options === void 0) { options = null; }
             if (tabDepth === void 0) { tabDepth = 0; }
             options = options || new VDFSaver_1.VDFSaveOptions();
-            var builder = new VDF_4.StringBuilder();
+            var builder = new VDFExtras_4.StringBuilder();
             // include popped-out-content of direct children (i.e. a single directly-under group)
             if (options.useChildPopOut && this.childPopOut) {
                 var childTabStr = "";
@@ -1038,7 +1394,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
                     }
             }
             else {
-                var poppedOutChildTexts = new VDF_4.List("string");
+                var poppedOutChildTexts = new VDFExtras_4.List("string");
                 var poppedOutChildText = void 0;
                 if (this.isMap || this.mapChildren.Count > 0)
                     for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
@@ -1064,8 +1420,8 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
         // loading
         // ==================
         VDFNode.CreateNewInstanceOfType = function (typeName) {
-            var typeNameRoot = VDF_4.VDF.GetTypeNameRoot(typeName);
-            var genericParameters = VDF_4.VDF.GetGenericArgumentsOfType(typeName);
+            var typeNameRoot = VDF_3.VDF.GetTypeNameRoot(typeName);
+            var genericParameters = VDF_3.VDF.GetGenericArgumentsOfType(typeName);
             /*if (typeNameRoot == "List")
                 return new List(genericParameters[0]);
             if (typeNameRoot == "Dictionary")
@@ -1083,10 +1439,10 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
             if (declaredTypeName_orOptions instanceof VDFLoader_2.VDFLoadOptions)
                 return this.ToObject(null, declaredTypeName_orOptions);
             var declaredTypeName = declaredTypeName_orOptions;
-            path = path || new VDF_4.VDFNodePath(new VDF_4.VDFNodePathNode());
+            path = path || new VDFExtras_4.VDFNodePath(new VDFExtras_4.VDFNodePathNode());
             var fromVDFTypeName = "object";
             var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
-            if (metadata != null && (window[VDF_4.VDF.GetTypeNameRoot(metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
+            if (metadata != null && (window[VDF_3.VDF.GetTypeNameRoot(metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
                 fromVDFTypeName = metadata;
             else if (typeof this.primitiveValue == "boolean")
                 fromVDFTypeName = "bool";
@@ -1100,16 +1456,16 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
                 else if (this.isMap || this.mapChildren.Count > 0)
                     fromVDFTypeName = "Dictionary(object object)"; //"object-anonymous"; //"object";
             var finalTypeName;
-            if (window[VDF_4.VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
+            if (window[VDF_3.VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
                 finalTypeName = declaredTypeName;
             // if there is no declared type, or the from-metadata type is more specific than the declared type
             // (for last condition/way: also assume from-vdf-type is derived, if declared-type name is one of these extra (not actually implemented in JS) types)
             //if (finalTypeName == null || (<Function><object>window[VDF.GetTypeNameRoot(fromVDFTypeName)] || (()=>{})).IsDerivedFrom(<Function><object>window[VDF.GetTypeNameRoot(finalTypeName)] || (()=>{})) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
-            if (finalTypeName == null || VDF_4.VDF.IsTypeXDerivedFromY(fromVDFTypeName, finalTypeName) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
+            if (finalTypeName == null || VDF_3.VDF.IsTypeXDerivedFromY(fromVDFTypeName, finalTypeName) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
                 finalTypeName = fromVDFTypeName;
             var result;
             var deserializedByCustomMethod = false;
-            var classProps = VDF_4.VDF.GetClassProps(window[finalTypeName]);
+            var classProps = VDF_3.VDF.GetClassProps(window[finalTypeName]);
             for (var propName in classProps)
                 if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_2.VDFDeserialize && a.fromParent; })) {
                     var deserializeResult = classProps[propName](this, path, options);
@@ -1121,9 +1477,9 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
                 }
             if (!deserializedByCustomMethod)
                 if (finalTypeName == "object") { } //result = null;
-                else if (VDF_4.EnumValue.IsEnum(finalTypeName))
-                    result = VDF_4.EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
-                else if (VDF_4.VDF.GetIsTypePrimitive(finalTypeName)) {
+                else if (VDFExtras_4.EnumValue.IsEnum(finalTypeName))
+                    result = VDFExtras_4.EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
+                else if (VDF_3.VDF.GetIsTypePrimitive(finalTypeName)) {
                     result = this.primitiveValue;
                     if (finalTypeName == "int")
                         result = parseInt(this.primitiveValue);
@@ -1141,15 +1497,15 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
         VDFNode.prototype.IntoObject = function (obj, options, path) {
             if (options === void 0) { options = null; }
             options = options || new VDFLoader_2.VDFLoadOptions();
-            path = path || new VDF_4.VDFNodePath(new VDF_4.VDFNodePathNode(obj));
-            var typeName = VDF_4.VDF.GetTypeNameOfObject(obj);
-            var typeGenericArgs = VDF_4.VDF.GetGenericArgumentsOfType(typeName);
+            path = path || new VDFExtras_4.VDFNodePath(new VDFExtras_4.VDFNodePathNode(obj));
+            var typeName = VDF_3.VDF.GetTypeNameOfObject(obj);
+            var typeGenericArgs = VDF_3.VDF.GetGenericArgumentsOfType(typeName);
             var typeInfo = VDFTypeInfo_2.VDFTypeInfo.Get(typeName);
-            for (var propName in VDF_4.VDF.GetObjectProps(obj))
+            for (var propName in VDF_3.VDF.GetObjectProps(obj))
                 if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_2.VDFPreDeserialize; }))
                     obj[propName](this, path, options);
             var deserializedByCustomMethod2 = false;
-            for (var propName in VDF_4.VDF.GetObjectProps(obj))
+            for (var propName in VDF_3.VDF.GetObjectProps(obj))
                 if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_2.VDFDeserialize && !a.fromParent; })) {
                     var deserializeResult = obj[propName](this, path, options);
                     if (deserializeResult !== undefined) {
@@ -1167,7 +1523,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
                 for (var _i = 0, _a = this.mapChildren.Pairs; _i < _a.length; _i++) {
                     var pair = _a[_i];
                     try {
-                        if (obj instanceof VDF_4.Dictionary) {
+                        if (obj instanceof VDFExtras_4.Dictionary) {
                             /*let key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
                             //obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null)));*/
                             var key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(pair.index, null));
@@ -1181,7 +1537,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
                             {*/
                             var childPath = path.ExtendAsChild(typeInfo.props[propName] || { name: propName }, null);
                             var value = void 0;
-                            for (var propName2 in VDF_4.VDF.GetObjectProps(obj))
+                            for (var propName2 in VDF_3.VDF.GetObjectProps(obj))
                                 if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFTypeInfo_2.VDFDeserializeProp; })) {
                                     var deserializeResult = obj[propName2](pair.value, childPath, options);
                                     if (deserializeResult !== undefined) {
@@ -1204,7 +1560,7 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
             if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
                 for (var i in options.objPostDeserializeFuncs_early.Get(obj))
                     options.objPostDeserializeFuncs_early.Get(obj)[i]();
-            for (var propName in VDF_4.VDF.GetObjectProps(obj))
+            for (var propName in VDF_3.VDF.GetObjectProps(obj))
                 if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_2.VDFPostDeserialize; }))
                     obj[propName](this, path, options);
             if (options.objPostDeserializeFuncs.ContainsKey(obj))
@@ -1217,10 +1573,11 @@ define("Source/TypeScript/VDFNode", ["require", "exports", "Source/TypeScript/VD
     VDFNode.charsThatNeedEscaping_ifNonQuoted_regex = /^([\t^# ,0-9.\-+]|null|true|false)|{|}|\[|\]|:/;
     exports.VDFNode = VDFNode;
     //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
-    VDF_4.VDF.CancelSerialize = new VDFNode();
+    setTimeout(function () {
+        VDF_3.VDF.CancelSerialize = new VDFNode();
+    }, 0);
 });
-define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF"], function (require, exports, VDFNode_2, VDFTypeInfo_3, VDF_5) {
-    "use strict";
+define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDF", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFTypeInfo"], function (require, exports, VDFExtras_5, VDF_4, VDFNode_2, VDFTypeInfo_3) {
     var VDFTypeMarking;
     (function (VDFTypeMarking) {
         VDFTypeMarking[VDFTypeMarking["None"] = 0] = "None";
@@ -1266,18 +1623,18 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
             if (declaredTypeName_orOptions instanceof VDFSaveOptions)
                 return VDFSaver.ToVDFNode(obj, null, declaredTypeName_orOptions);
             var declaredTypeName = declaredTypeName_orOptions;
-            path = path || new VDF_5.VDFNodePath(new VDF_5.VDFNodePathNode(obj));
-            var typeName = obj != null ? (VDF_5.EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF_5.VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
-            var typeGenericArgs = VDF_5.VDF.GetGenericArgumentsOfType(typeName);
+            path = path || new VDFExtras_5.VDFNodePath(new VDFExtras_5.VDFNodePathNode(obj));
+            var typeName = obj != null ? (VDFExtras_5.EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF_4.VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
+            var typeGenericArgs = VDF_4.VDF.GetGenericArgumentsOfType(typeName);
             var typeInfo = typeName ? VDFTypeInfo_3.VDFTypeInfo.Get(typeName) : new VDFTypeInfo_3.VDFTypeInfo();
-            for (var propName_1 in VDF_5.VDF.GetObjectProps(obj))
+            for (var propName_1 in VDF_4.VDF.GetObjectProps(obj))
                 if (obj[propName_1] instanceof Function && obj[propName_1].tags && obj[propName_1].tags.Any(function (a) { return a instanceof VDFTypeInfo_3.VDFPreSerialize; })) {
-                    if (obj[propName_1](path, options) == VDF_5.VDF.CancelSerialize)
-                        return VDF_5.VDF.CancelSerialize;
+                    if (obj[propName_1](path, options) == VDF_4.VDF.CancelSerialize)
+                        return VDF_4.VDF.CancelSerialize;
                 }
             var result;
             var serializedByCustomMethod = false;
-            for (var propName_2 in VDF_5.VDF.GetObjectProps(obj))
+            for (var propName_2 in VDF_4.VDF.GetObjectProps(obj))
                 if (obj[propName_2] instanceof Function && obj[propName_2].tags && obj[propName_2].tags.Any(function (a) { return a instanceof VDFTypeInfo_3.VDFSerialize; })) {
                     var serializeResult = obj[propName_2](path, options);
                     if (serializeResult !== undefined) {
@@ -1289,16 +1646,16 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
             if (!serializedByCustomMethod) {
                 result = new VDFNode_2.VDFNode();
                 if (obj == null) { } //result.primitiveValue = null;
-                else if (VDF_5.VDF.GetIsTypePrimitive(typeName))
+                else if (VDF_4.VDF.GetIsTypePrimitive(typeName))
                     result.primitiveValue = obj;
-                else if (VDF_5.EnumValue.IsEnum(typeName))
-                    result.primitiveValue = new VDF_5.EnumValue(typeName, obj).toString();
+                else if (VDFExtras_5.EnumValue.IsEnum(typeName))
+                    result.primitiveValue = new VDFExtras_5.EnumValue(typeName, obj).toString();
                 else if (typeName && typeName.StartsWith("List(")) {
                     result.isList = true;
                     var objAsList = obj;
                     for (var i = 0; i < objAsList.length; i++) {
                         var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
-                        if (itemNode == VDF_5.VDF.CancelSerialize)
+                        if (itemNode == VDF_4.VDF.CancelSerialize)
                             continue;
                         result.AddListChild(itemNode);
                     }
@@ -1312,7 +1669,7 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
                             //throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
                             keyNode = new VDFNode_2.VDFNode(pair.key.toString());
                         var valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
-                        if (valueNode == VDF_5.VDF.CancelSerialize)
+                        if (valueNode == VDF_4.VDF.CancelSerialize)
                             continue;
                         result.SetMapChild(keyNode, valueNode);
                     }
@@ -1338,7 +1695,7 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
                             var propNameNode = new VDFNode_2.VDFNode(propName_4);
                             var propValueNode = void 0;
                             var childPath = path.ExtendAsChild(propInfo, propValue);
-                            for (var propName2 in VDF_5.VDF.GetObjectProps(obj))
+                            for (var propName2 in VDF_4.VDF.GetObjectProps(obj))
                                 if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFTypeInfo_3.VDFSerializeProp; })) {
                                     var serializeResult = obj[propName2](childPath, options);
                                     if (serializeResult !== undefined) {
@@ -1348,7 +1705,7 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
                                 }
                             if (propValueNode === undefined)
                                 propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
-                            if (propValueNode == VDF_5.VDF.CancelSerialize)
+                            if (propValueNode == VDF_4.VDF.CancelSerialize)
                                 continue;
                             propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
                             result.SetMapChild(propNameNode, propValueNode);
@@ -1367,15 +1724,15 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
                     declaredTypeName = "Dictionary(object object)";
                 else
                     declaredTypeName = "object";
-            if (options.useMetadata && typeName != null && !VDF_5.VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == VDFTypeMarking.Internal && !VDF_5.VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName)
-                || (options.typeMarking == VDFTypeMarking.External && !VDF_5.VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF))
+            if (options.useMetadata && typeName != null && !VDF_4.VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == VDFTypeMarking.Internal && !VDF_4.VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName)
+                || (options.typeMarking == VDFTypeMarking.External && !VDF_4.VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF))
                 || options.typeMarking == VDFTypeMarking.ExternalNoCollapse))
                 result.metadata = typeName;
             if (result.metadata_override != null)
                 result.metadata = result.metadata_override;
             if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.popOutL1)
                 result.childPopOut = true;
-            for (var propName in VDF_5.VDF.GetObjectProps(obj))
+            for (var propName in VDF_4.VDF.GetObjectProps(obj))
                 if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_3.VDFPostSerialize; }))
                     obj[propName](result, path, options);
             return result;
@@ -1384,8 +1741,7 @@ define("Source/TypeScript/VDFSaver", ["require", "exports", "Source/TypeScript/V
     }());
     exports.VDFSaver = VDFSaver;
 });
-define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFLoader"], function (require, exports, VDFSaver_2, VDFLoader_3) {
-    "use strict";
+define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDFExtras"], function (require, exports, VDFSaver_2, VDFLoader_3, VDFExtras_6) {
     // vdf globals
     // ==========
     var g = window;
@@ -1437,11 +1793,11 @@ define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSav
     if (!Array.prototype["Where"])
         Array.prototype._AddProperty("Where", function (matchFunc) {
             if (matchFunc === void 0) { matchFunc = (function () { return true; }); }
-            var result = this instanceof List ? new List(this.itemType) : [];
+            var result = this instanceof VDFExtras_6.List ? new VDFExtras_6.List(this.itemType) : [];
             for (var _i = 0, _a = this; _i < _a.length; _i++) {
                 var item = _a[_i];
                 if (matchFunc.call(item, item))
-                    result[this instanceof List ? "Add" : "push"](item);
+                    result[this instanceof VDFExtras_6.List ? "Add" : "push"](item);
             }
             return result;
         });
@@ -1456,7 +1812,7 @@ define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSav
             tags[_i] = arguments[_i];
         }
         if (this.tags == null)
-            this.tags = new List("object");
+            this.tags = new VDFExtras_6.List("object");
         for (var i = 0; i < tags.length; i++)
             this.tags.push(tags[i]);
         return this;
@@ -1472,92 +1828,6 @@ define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSav
         }
         return false;
     });*/
-    // classes
-    // ==========
-    var VDFNodePathNode = (function () {
-        function VDFNodePathNode(obj, prop, list_index, map_keyIndex, map_key) {
-            if (obj === void 0) { obj = null; }
-            if (prop === void 0) { prop = null; }
-            if (list_index === void 0) { list_index = null; }
-            if (map_keyIndex === void 0) { map_keyIndex = null; }
-            if (map_key === void 0) { map_key = null; }
-            this.list_index = null;
-            this.map_keyIndex = null;
-            this.obj = obj;
-            this.prop = prop;
-            this.list_index = list_index;
-            this.map_keyIndex = map_keyIndex;
-            this.map_key = map_key;
-        }
-        //Clone(): VDFNodePathNode { return new VDFNodePathNode(this.obj, this.prop, this.list_index, this.map_keyIndex, this.map_key); }
-        // for debugging
-        VDFNodePathNode.prototype.toString = function () {
-            if (this.list_index != null)
-                return "i:" + this.list_index;
-            if (this.map_keyIndex != null)
-                return "ki:" + this.map_keyIndex;
-            if (this.map_key != null)
-                return "k:" + this.map_key;
-            if (this.prop != null)
-                //return "p:" + this.prop.name;
-                return this.prop.name;
-            return "";
-        };
-        return VDFNodePathNode;
-    }());
-    exports.VDFNodePathNode = VDFNodePathNode;
-    var VDFNodePath = (function () {
-        function VDFNodePath(nodes_orRootNode) {
-            this.nodes = nodes_orRootNode instanceof Array ? nodes_orRootNode : [nodes_orRootNode];
-        }
-        Object.defineProperty(VDFNodePath.prototype, "rootNode", {
-            get: function () { return this.nodes[0]; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(VDFNodePath.prototype, "parentNode", {
-            get: function () { return this.nodes.length >= 2 ? this.nodes[this.nodes.length - 2] : null; },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(VDFNodePath.prototype, "currentNode", {
-            get: function () { return this.nodes[this.nodes.length - 1]; },
-            enumerable: true,
-            configurable: true
-        });
-        VDFNodePath.prototype.ExtendAsListItem = function (index, obj) {
-            var newNodes = this.nodes.slice(0);
-            newNodes.push(new VDFNodePathNode(obj, null, index));
-            return new VDFNodePath(newNodes);
-        };
-        VDFNodePath.prototype.ExtendAsMapKey = function (keyIndex, obj) {
-            var newNodes = this.nodes.slice(0);
-            newNodes.push(new VDFNodePathNode(obj, null, null, keyIndex));
-            return new VDFNodePath(newNodes);
-        };
-        VDFNodePath.prototype.ExtendAsMapItem = function (key, obj) {
-            var newNodes = this.nodes.slice(0);
-            newNodes.push(new VDFNodePathNode(obj, null, null, null, key));
-            return new VDFNodePath(newNodes);
-        };
-        VDFNodePath.prototype.ExtendAsChild = function (prop, obj) {
-            var newNodes = this.nodes.slice(0);
-            newNodes.push(new VDFNodePathNode(obj, prop));
-            return new VDFNodePath(newNodes);
-        };
-        // for debugging
-        VDFNodePath.prototype.toString = function () {
-            var result = "";
-            var index = 0;
-            for (var _i = 0, _a = this.nodes; _i < _a.length; _i++) {
-                var node = _a[_i];
-                result += (index++ == 0 ? "" : "/") + node;
-            }
-            return result;
-        };
-        return VDFNodePath;
-    }());
-    exports.VDFNodePath = VDFNodePath;
     var VDF = (function () {
         function VDF() {
         }
@@ -1701,284 +1971,7 @@ define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSav
     // for use with VDFType
     VDF.PropRegex_Any = ""; //"^.+$";
     exports.VDF = VDF;
-    // helper classes
-    // ==================
-    var VDFUtils = (function () {
-        function VDFUtils() {
-        }
-        /*static SetUpHiddenFields(obj, addSetters?: boolean, ...fieldNames) 	{
-            if (addSetters && !obj._hiddenFieldStore)
-                Object.defineProperty(obj, "_hiddenFieldStore", {enumerable: false, value: {}});
-            for (var i in fieldNames)
-                (()=>{
-                    var propName = fieldNames[i];
-                    var origValue = obj[propName];
-                    if (addSetters)
-                        Object.defineProperty(obj, propName, 					{
-                            enumerable: false,
-                            get: ()=>obj["_hiddenFieldStore"][propName],
-                            set: value=>obj["_hiddenFieldStore"][propName] = value
-                        });
-                    else
-                        Object.defineProperty(obj, propName, 					{
-                            enumerable: false,
-                            value: origValue //get: ()=>obj["_hiddenFieldStore"][propName]
-                        });
-                    obj[propName] = origValue; // for 'hiding' a prop that was set beforehand
-                })();
-        }*/
-        VDFUtils.MakePropertiesHidden = function (obj, alsoMakeFunctionsHidden, addSetters) {
-            for (var propName in obj) {
-                var propDescriptor = Object.getOwnPropertyDescriptor(obj, propName);
-                if (propDescriptor) {
-                    propDescriptor.enumerable = false;
-                    Object.defineProperty(obj, propName, propDescriptor);
-                }
-            }
-        };
-        return VDFUtils;
-    }());
-    var StringBuilder = (function () {
-        function StringBuilder(startData) {
-            this.parts = [];
-            this.length = 0;
-            if (startData)
-                this.Append(startData);
-        }
-        StringBuilder.prototype.Append = function (str) { this.parts.push(str); this.length += str.length; return this; }; // adds string str to the StringBuilder
-        StringBuilder.prototype.Insert = function (index, str) { this.parts.splice(index, 0, str); this.length += str.length; return this; }; // inserts string 'str' at 'index'
-        StringBuilder.prototype.Remove = function (index, count) {
-            var removedItems = this.parts.splice(index, count != null ? count : 1);
-            for (var i = 0; i < removedItems.length; i++)
-                this.length -= removedItems[i].length;
-            return this;
-        };
-        StringBuilder.prototype.Clear = function () {
-            //this.splice(0, this.length);
-            this.parts.length = 0;
-            this.length = 0;
-        };
-        StringBuilder.prototype.ToString = function (joinerString) { return this.parts.join(joinerString || ""); }; // builds the string
-        return StringBuilder;
-    }());
-    exports.StringBuilder = StringBuilder;
-    // VDF-usable data wrappers
-    // ==========
-    //class object {} // for use with VDF.Deserialize, to deserialize to an anonymous object
-    // for anonymous objects (JS anonymous-objects are all just instances of Object, so we don't lose anything by attaching type-info to the shared constructor)
-    //var object = Object;
-    //object["typeInfo"] = new VDFTypeInfo(null, true);
-    var object = (function () {
-        function object() {
-        }
-        return object;
-    }()); // just an alias for Object, to be consistent with C# version
-    exports.object = object;
-    var EnumValue = (function () {
-        function EnumValue(enumTypeName, intValue) {
-            this.realTypeName = enumTypeName;
-            //this.intValue = intValue;
-            this.stringValue = EnumValue.GetEnumStringForIntValue(enumTypeName, intValue);
-        }
-        EnumValue.prototype.toString = function () { return this.stringValue; };
-        EnumValue.IsEnum = function (typeName) { return window[typeName] && window[typeName]["_IsEnum"] === 0; };
-        //static IsEnum(typeName: string): boolean { return window[typeName] && /}\)\((\w+) \|\| \(\w+ = {}\)\);/.test(window[typeName].toString()); }
-        EnumValue.GetEnumIntForStringValue = function (enumTypeName, stringValue) { return eval(enumTypeName + "[\"" + stringValue + "\"]"); };
-        EnumValue.GetEnumStringForIntValue = function (enumTypeName, intValue) { return eval(enumTypeName + "[" + intValue + "]"); };
-        return EnumValue;
-    }());
-    exports.EnumValue = EnumValue;
-    var List = (function (_super) {
-        __extends(List, _super);
-        function List(itemType) {
-            var items = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                items[_i - 1] = arguments[_i];
-            }
-            var _this = _super.apply(this, items) || this;
-            _this.itemType = itemType;
-            return _this;
-        }
-        Object.defineProperty(List.prototype, "Count", {
-            get: function () { return this.length; },
-            enumerable: true,
-            configurable: true
-        });
-        /*s.Indexes = function () {
-            var result = {};
-            for (var i = 0; i < this.length; i++)
-                result[i] = this[i];
-            return result;
-        };*/
-        List.prototype.Add = function () {
-            var items = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                items[_i] = arguments[_i];
-            }
-            return this.push.apply(this, items);
-        };
-        ;
-        List.prototype.AddRange = function (items) {
-            /*for (var i = 0; i < items.length; i++)
-                this.push(items[i]);*/
-            this.push.apply(this, items);
-        };
-        ;
-        List.prototype.Insert = function (index, item) { return this.splice(index, 0, item); };
-        ;
-        List.prototype.InsertRange = function (index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
-        ;
-        List.prototype.Remove = function (item) { return this.RemoveAt(this.indexOf(item)) != null; };
-        ;
-        List.prototype.RemoveAt = function (index) { return this.splice(index, 1)[0]; };
-        ;
-        List.prototype.RemoveRange = function (index, count) { return this.splice(index, count); };
-        ;
-        List.prototype.Any = function (matchFunc) {
-            for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                var item = _a[_i];
-                if (matchFunc.call(item, item))
-                    return true;
-            }
-            return false;
-        };
-        ;
-        List.prototype.All = function (matchFunc) {
-            for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                var item = _a[_i];
-                if (!matchFunc.call(item, item))
-                    return false;
-            }
-            return true;
-        };
-        ;
-        List.prototype.Select = function (selectFunc, itemType) {
-            var result = new List(itemType || "object");
-            for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                var item = _a[_i];
-                result.Add(selectFunc.call(item, item));
-            }
-            return result;
-        };
-        ;
-        List.prototype.First = function (matchFunc) {
-            var result = this.FirstOrDefault(matchFunc);
-            if (result == null)
-                throw new Error("Matching item not found.");
-            return result;
-        };
-        ;
-        List.prototype.FirstOrDefault = function (matchFunc) {
-            if (matchFunc) {
-                for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                    var item = _a[_i];
-                    if (matchFunc.call(item, item))
-                        return item;
-                }
-                return null;
-            }
-            else
-                return this[0];
-        };
-        ;
-        List.prototype.Last = function (matchFunc) {
-            var result = this.LastOrDefault(matchFunc);
-            if (result == null)
-                throw new Error("Matching item not found.");
-            return result;
-        };
-        ;
-        List.prototype.LastOrDefault = function (matchFunc) {
-            if (matchFunc) {
-                for (var i = this.length - 1; i >= 0; i--)
-                    if (matchFunc.call(this[i], this[i]))
-                        return this[i];
-                return null;
-            }
-            else
-                return this[this.length - 1];
-        };
-        ;
-        List.prototype.GetRange = function (index, count) {
-            var result = new List(this.itemType);
-            for (var i = index; i < index + count; i++)
-                result.Add(this[i]);
-            return result;
-        };
-        ;
-        List.prototype.Contains = function (item) { return this.indexOf(item) != -1; };
-        ;
-        return List;
-    }(Array));
-    exports.List = List;
-    window["List"] = List;
-    var Dictionary = (function () {
-        function Dictionary(keyType, valueType, keyValuePairsObj) {
-            //VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
-            this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
-            this.keyType = keyType;
-            this.valueType = valueType;
-            this.keys = [];
-            this.values = [];
-            if (keyValuePairsObj)
-                for (var key in keyValuePairsObj)
-                    this.Set(key, keyValuePairsObj[key]);
-        }
-        Object.defineProperty(Dictionary.prototype, "Keys", {
-            // properties
-            get: function () {
-                var result = {};
-                for (var i = 0; i < this.keys.length; i++)
-                    result[this.keys[i]] = null;
-                return result;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Dictionary.prototype, "Pairs", {
-            get: function () {
-                var result = [];
-                for (var i = 0; i < this.keys.length; i++)
-                    result.push({ index: i, key: this.keys[i], value: this.values[i] });
-                return result;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Dictionary.prototype, "Count", {
-            get: function () { return this.keys.length; },
-            enumerable: true,
-            configurable: true
-        });
-        // methods
-        Dictionary.prototype.ContainsKey = function (key) { return this.keys.indexOf(key) != -1; };
-        Dictionary.prototype.Get = function (key) { return this.values[this.keys.indexOf(key)]; };
-        Dictionary.prototype.Set = function (key, value) {
-            if (this.keys.indexOf(key) == -1)
-                this.keys.push(key);
-            this.values[this.keys.indexOf(key)] = value;
-            if (typeof key == "string")
-                this[key] = value; // make value accessible directly on Dictionary object
-        };
-        Dictionary.prototype.Add = function (key, value) {
-            if (this.keys.indexOf(key) != -1)
-                throw new Error("Dictionary already contains key '" + key + "'.");
-            this.Set(key, value);
-        };
-        Dictionary.prototype.Remove = function (key) {
-            var itemIndex = this.keys.indexOf(key);
-            if (itemIndex == -1)
-                return;
-            this.keys.splice(itemIndex, 1);
-            this.values.splice(itemIndex, 1);
-            delete this[key];
-        };
-        return Dictionary;
-    }());
-    exports.Dictionary = Dictionary;
-    window["Dictionary"] = Dictionary;
 });
-//VDFUtils.MakePropertiesHidden(Dictionary.prototype, true); 
 // general init // note: this runs globally, so no need to duplicate in the Loading.ts file
 // ==========
 Object.prototype._AddFunction_Inline = function Should() {
@@ -2007,6 +2000,7 @@ String.prototype._AddFunction_Inline = function Fix() { return this.toString(); 
 var test_old = test;
 // others
 // ==========
+//function ExportInternalClassesTo(hostObj, funcWithInternalClasses, evalFunc) {
 function ExportInternalClassesTo(hostObj, evalFunc) {
     var funcWithInternalClasses = arguments.callee.caller;
     var names = V.GetMatches(funcWithInternalClasses.toString(), /        var (\w+) = \(function \(\) {/g, 1);
@@ -2022,212 +2016,7 @@ function ExportInternalClassesTo(hostObj, evalFunc) {
         }
         catch (e) { }
 }
-define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFLoader"], function (require, exports, VDFTypeInfo_4, VDF_6, VDFLoader_4) {
-    "use strict";
-    /*class Loading {
-        static initialized = false;
-        static Init() {
-            if (this.initialized)
-                return;
-            this.initialized = true;
-            Object.prototype._AddFunction_Inline = function Should() {
-                return {
-                    Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-                    BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
-                };
-            };
-        }
-    
-        static RunTests() {
-            /*test("testName() {
-                ok(null == null);
-            });*#/
-        }
-    }*/
-    // init
-    // ==========
-    var loading = {};
-    function Loading_RunTests() {
-        for (var name in loading)
-            test_old(name, loading[name]);
-    }
-    // the normal "test" function actually runs test
-    // here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
-    window["test"] = function (name, func) { loading[name] = func; };
-    // tests
-    // ==========
-    var VDFTests;
-    (function (VDFTests) {
-        var Loading_General;
-        (function (Loading_General) {
-            // deserialize-related methods
-            // ==========
-            var D1_MapWithEmbeddedDeserializeMethod_Prop_Class = (function () {
-                function D1_MapWithEmbeddedDeserializeMethod_Prop_Class() {
-                    this.boolProp = false;
-                    this.Deserialize.AddTags(new VDFTypeInfo_4.VDFDeserialize());
-                }
-                D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype.Deserialize = function (node) { this.boolProp = node["boolProp"].primitiveValue; };
-                return D1_MapWithEmbeddedDeserializeMethod_Prop_Class;
-            }());
-            __decorate([
-                VDFTypeInfo_4.P()
-            ], D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype, "boolProp", void 0);
-            test("D1_MapWithEmbeddedDeserializeMethod_Prop", function () { VDF_6.VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
-            var D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class = (function () {
-                function D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class() {
-                    this.boolProp = false;
-                    this.Deserialize.AddTags(new VDFTypeInfo_4.VDFDeserialize());
-                }
-                D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) { return; };
-                return D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class;
-            }());
-            __decorate([
-                VDFTypeInfo_4.P()
-            ], D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype, "boolProp", void 0);
-            test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () { VDF_6.VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
-            var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
-                function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
-                    this.child = null;
-                }
-                return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent;
-            }());
-            __decorate([
-                VDFTypeInfo_4.T("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child"), VDFTypeInfo_4.P()
-            ], D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent.prototype, "child", void 0);
-            var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = (function () {
-                function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child() {
-                }
-                D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize = function (node, path, options) { return null; };
-                return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
-            }());
-            D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFTypeInfo_4.VDFDeserialize(true));
-            test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () { ok(VDF_6.VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
-            var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
-                function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {
-                    this.child = null;
-                }
-                return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent;
-            }());
-            __decorate([
-                VDFTypeInfo_4.T("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child"), VDFTypeInfo_4.P()
-            ], D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent.prototype, "child", void 0);
-            var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = (function () {
-                function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child() {
-                    this.boolProp = false;
-                    D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize.AddTags(new VDFTypeInfo_4.VDFDeserialize(true));
-                }
-                D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) { return; };
-                return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
-            }());
-            __decorate([
-                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
-            ], D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.prototype, "boolProp", void 0);
-            test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () { VDF_6.VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
-            var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent = (function () {
-                function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent() {
-                    this.withoutTag = null;
-                    this.withTag = null; // doesn't actually have tag; just pretend it does
-                }
-                return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent;
-            }());
-            __decorate([
-                VDFTypeInfo_4.T("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"), VDFTypeInfo_4.P()
-            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent.prototype, "withoutTag", void 0);
-            __decorate([
-                VDFTypeInfo_4.T("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"), VDFTypeInfo_4.P()
-            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent.prototype, "withTag", void 0);
-            var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = (function () {
-                function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child() {
-                    this.methodCalled = false;
-                    this.Deserialize.AddTags(new VDFTypeInfo_4.VDFDeserialize());
-                }
-                D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype.Deserialize = function (node, path, options) {
-                    ok(path.parentNode.obj instanceof D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent);
-                    if (path.currentNode.prop.name == "withTag")
-                        this.methodCalled = true;
-                };
-                return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child;
-            }());
-            __decorate([
-                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
-            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype, "methodCalled", void 0);
-            test("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag", function () {
-                var a = VDF_6.VDF.Deserialize("{withoutTag:{} withTag:{}}", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent");
-                a.withoutTag.methodCalled.Should().Be(false);
-                a.withTag.methodCalled.Should().Be(true);
-            });
-            // for JSON compatibility
-            // ==========
-            test("D1_Map_IntsWithStringKeys", function () {
-                var a = VDFLoader_4.VDFLoader.ToVDFNode("{\"key1\":0 \"key2\":1}", new VDFLoader_4.VDFLoadOptions({ allowStringKeys: true }));
-                a.mapChildren.Count.Should().Be(2);
-                a["key1"].primitiveValue.Should().Be(0);
-            });
-            test("D1_List_IntsWithCommaSeparators", function () {
-                var a = VDFLoader_4.VDFLoader.ToVDFNode("[0,1]", new VDFLoader_4.VDFLoadOptions({ allowCommaSeparators: true }));
-                a.listChildren.Count.Should().Be(2);
-                a[0].primitiveValue.Should().Be(0);
-            });
-            test("D3_List_NumbersWithScientificNotation", function () {
-                var a = VDFLoader_4.VDFLoader.ToVDFNode("[-7.45058e-09,0.1,-1.49012e-08]", new VDFLoader_4.VDFLoadOptions().ForJSON());
-                a[0].primitiveValue.Should().Be(-7.45058e-09);
-            });
-            // unique to JavaScript version
-            // ==========
-            var PretendGenericType = (function () {
-                function PretendGenericType() {
-                }
-                return PretendGenericType;
-            }());
-            test("Depth0_ObjectWithMetadataHavingGenericType", function () { return ok(VDF_6.VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType); });
-            test("Depth1_UnknownTypeWithFixOn_String", function () {
-                var a = VDF_6.VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoader_4.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
-                a["string"].Should().Be("Prop value string.");
-            });
-            test("Depth1_UnknownTypeWithFixOff_String", function () {
-                try {
-                    VDF_6.VDF.Deserialize("UnknownType>{string:'Prop value string.'}");
-                }
-                catch (ex) {
-                    ok(ex.message == "Could not find type \"UnknownType\".");
-                }
-            });
-            test("Depth1_Object_UnknownTypeWithFixOn", function () {
-                var a = VDF_6.VDF.Deserialize("{string:UnkownBaseType>'Prop value string.'}", new VDFLoader_4.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
-                a["string"].Should().Be("Prop value string.");
-            });
-            test("AsObject", function () {
-                var a = VDF_6.VDF.Deserialize("{bool:bool>false double:double>3.5}", "object");
-                a.bool.Should().Be(false);
-                a.double.Should().Be(3.5);
-            });
-            var AsObjectOfType_Class = (function () {
-                function AsObjectOfType_Class() {
-                }
-                return AsObjectOfType_Class;
-            }());
-            test("AsObjectOfType", function () {
-                var a = VDF_6.VDF.Deserialize("AsObjectOfType_Class>{}", "AsObjectOfType_Class");
-                ok(a instanceof AsObjectOfType_Class);
-            });
-            // quick tests
-            // ==========
-            test("QuickTest1", function () {
-                var a = VDF_6.VDF.Deserialize('{^}\n\
-	structures:[^]\n\
-		{typeVObject:string>"VObject>Flag" id:0}\n\
-		{typeVObject:string>"VObject>Flag" id:1}', "object");
-                a.structures[0].typeVObject.Should().Be("VObject>Flag");
-                a.structures[1].id.Should().Be(1);
-            });
-            // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
-        })(Loading_General || (Loading_General = {}));
-    })(VDFTests || (VDFTests = {}));
-});
-define("Tests/TypeScript/Loading/SpeedTests", ["require", "exports", "Source/TypeScript/VDFLoader"], function (require, exports, VDFLoader_5) {
-    "use strict";
+define("Tests/TypeScript/Loading/SpeedTests", ["require", "exports", "Source/TypeScript/VDFLoader"], function (require, exports, VDFLoader_4) {
     // tests
     // ==========
     var VDFTests;
@@ -2248,13 +2037,13 @@ define("Tests/TypeScript/Loading/SpeedTests", ["require", "exports", "Source/Typ
 	{id:'eea2623a-86d3-4368-b4e0-576956b3ef1d' typeName:'Wood' name:'BackBar' pivotPoint_unit:'-0.4375,0.4375,-0.8125' anchorNormal:'0,0,-1' scale:'1,0.25,0.25' controller:false}\n\
 	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1' typeName:'MachineGun' name:'Gun1' pivotPoint_unit:'0,0.625,0.875' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}\n\
 	{id:'e97f8ee1-320c-4aef-9343-3317accb015b' typeName:'Crate' name:'Crate' pivotPoint_unit:'0,0.625,0' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}";
-                VDFLoader_5.VDFLoader.ToVDFNode(vdf);
+                VDFLoader_4.VDFLoader.ToVDFNode(vdf);
                 ok(true);
             });
             test("D5_SpeedTester2", function () {
                 var vdf = "\n{^}\n\tplants:[^]\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 406 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 412 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 416 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 486 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 490 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 495 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 398 1\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 402 1\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 409 1\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 405 2\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 407 2\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 409 2\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 413 3\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"13 401 2.5\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"13 403 2.5\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 405 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 407 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 409 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"16 402 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"17 406 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"16 409 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"22 250 3.99980926513672\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"21 253 3.99976348876953\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"21 255 3.99992370605469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"23 253 3.99986267089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"23 255 3.99992370605469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 245 3.99985504150391\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 247 3.9998779296875\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"26 250 3.99990844726563\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 253 3.99990844726563\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 255 3.99996948242188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 259 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"27 245 3.99989318847656\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 254 3.99996948242188\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"27 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 260 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 247 3.99993133544922\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 241 3.99992370605469\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 243 3.99992370605469\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 245 3.99991607666016\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"30 250 3.99996185302734\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"30 247 3.99994659423828\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 241 3.99993896484375\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 243 3.99996185302734\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 245 3.99996185302734\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"32 254 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 263 4\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 41 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 43 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 45 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 48 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 51 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 53 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 56 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 237 3.99996185302734\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 240 3.99990081787109\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 243 3.99997711181641\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 246 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 249 3.99998474121094\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 251 3.99997711181641\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 257 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 260 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 268 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 259 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 41 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 44 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 53 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 237 3.99996185302734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 243 3.99998474121094\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 249 3.99999237060547\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 252 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 255 3.99999237060547\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 258 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 37 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 39 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 41 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 47 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 49 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 53 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 56 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 59 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 61 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 63 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 237 3.99703979492188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 239 3.99697113037109\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 241 3.99952697753906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 244 3.999267578125\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 248 3.99997711181641\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 261 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 270 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 38 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 41 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 43 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 45 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 47 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 50 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 54 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 60 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 63 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 237 3.99703979492188\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 239 3.99111938476563\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 241 3.99368286132813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 251 3.99996948242188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 253 3.99998474121094\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 255 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 257 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 261 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 263 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 34 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 42 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 45 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 47 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 54 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 57 3.86945343017578\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 63 3.92586517333984\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 66 3.85173034667969\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 70 4.72548675537109\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 73 4.41551971435547\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 76 4.83103942871094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 80 4.77939605712891\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 83 4.07389068603516\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 233 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 235 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 237 3.99819183349609\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 239 3.99227142333984\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 241 3.99039459228516\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 243 3.99558258056641\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 245 3.9984130859375\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 247 3.99912261962891\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 250 3.99836730957031\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 254 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 259 4\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 265 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 267 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 270 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 37 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 39 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 45 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 48 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 57 3.86945343017578\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 60 3.47781372070313\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 73 5.14100646972656\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 84 4.29557037353516\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 234 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 237 3.99819183349609\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 240 3.99275970458984\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 244 3.99708557128906\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 247 3.99815368652344\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 263 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 37 4.20879364013672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 39 4.20879364013672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 41 4.20937347412109\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 43 4.20937347412109\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 51 4.00287628173828\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 53 4.02330017089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 55 4.02330017089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 57 4.03544616699219\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 64 4.71137851017669\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 67 5.50337982177734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 69 5.83818817138672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 71 5.84939575195313\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 75 6.74217224121094\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 79 5.97611236572266\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 87 4.40133666992188\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 89 4.49819946289063\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 91 4.5694580078125\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 238 3.99510192871094\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 248 3.99839019775391\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 251 3.99759674072266\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 253 3.99757385253906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 255 3.99919128417969\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 269 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 272 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 45 4.32740020751953\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 81 6.16506958007813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 38 4.79120635986328\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 41 4.62696838378906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 43 4.62812805175781\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 47 4.35408020019531\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 49 4.23892974853516\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 51 4.00862884521484\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 53 4.029052734375\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 56 4.09320068359375\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 59 4.10633850097656\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 61 4.22352532202559\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 67 6.14738464355469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 70 6.89182281494141\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 83 6.20314788818359\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 85 5.54216003417969\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 87 4.85179901123047\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 89 4.94866180419922\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 91 5.22205352783203\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 234 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 238 3.99383544921875\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 242 3.99224853515625\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 251 3.99861907958984\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 254 3.99941253662109\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 259 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 262 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 265 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 268 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 45 4.74615478515625\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 79 7.13672461469146\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 81 7.1247786078701\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 245 3.99730682373047\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 41 5.18635559082031\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 43 5.18751525878906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 49 5.37989044189453\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 54 4.07085418701172\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 59 4.14813995361328\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 61 4.69170288500582\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 64 6.03464508056641\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 67 6.44294738769531\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 83 7.69938266204127\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 85 7.34394238179097\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 87 6.817580429812\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 89 5.46152876954768\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 91 5.73491668701172\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 248 3.99862670898438\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 251 3.99854278564453\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 259 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 265 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 271 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 45 5.45948791503906\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 53 4.347900390625\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 79 8.63121075076069\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 81 8.83076811475225\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 245 3.99758148193359\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 41 5.50032043457031\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 43 5.88870239257813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"53 57 4.19117736816406\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 62 5.19688668210223\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 67 6.39008331298828\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 70 7.31072152554988\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 73 7.81732625308945\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 76 9.64667510986328\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 84 10.9526667606263\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 87 9.21038396212089\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 90 8.40490492338341\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 237 3.99828338623047\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 239 3.99484252929688\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 242 3.99565124511719\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 251 3.99802398681641\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 253 3.99859619140625\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 255 3.99970245361328\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 257 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 261 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 263 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 270 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 45 6.16066741943359\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 53 4.94283294677734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n".trim();
                 //for (var i = 0; i < 100; i++)
-                VDFLoader_5.VDFLoader.ToVDFNode(vdf);
+                VDFLoader_4.VDFLoader.ToVDFNode(vdf);
                 ok(true);
             });
             // export all classes/enums to global scope
@@ -2262,8 +2051,7 @@ define("Tests/TypeScript/Loading/SpeedTests", ["require", "exports", "Source/Typ
         })(Loading_SpeedTests || (Loading_SpeedTests = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDFTypeInfo"], function (require, exports, VDF_7, VDFLoader_6, VDFTypeInfo_5) {
-    "use strict";
+define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFExtras"], function (require, exports, VDFLoader_5, VDFTypeInfo_4, VDF_5, VDFExtras_7) {
     // tests
     // ==========
     var VDFTests;
@@ -2273,14 +2061,14 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
             // to object
             // ==========
             test("D0_Null", function () {
-                ok(VDF_7.VDF.Deserialize("null") == null);
+                ok(VDF_5.VDF.Deserialize("null") == null);
                 //VDF.Deserialize("null").Should().Be(null);
             });
             //test("D0_Nothing() { VDF.Deserialize("").Should().Be(null); });
             //test("D0_Nothing_TypeSpecified() { VDF.Deserialize("string>").Should().Be(null); });
-            test("D0_EmptyString", function () { VDF_7.VDF.Deserialize("''").Should().Be(""); });
-            test("D0_Bool", function () { VDF_7.VDF.Deserialize("true", "bool").Should().Be(true); });
-            test("D0_Double", function () { VDF_7.VDF.Deserialize("1.5").Should().Be(1.5); });
+            test("D0_EmptyString", function () { VDF_5.VDF.Deserialize("''").Should().Be(""); });
+            test("D0_Bool", function () { VDF_5.VDF.Deserialize("true", "bool").Should().Be(true); });
+            test("D0_Double", function () { VDF_5.VDF.Deserialize("1.5").Should().Be(1.5); });
             //test("D0_Float", ()=> { VDF.Deserialize<float>("1.5").Should().Be(1.5f); });
             var D1_DeserializePropMethod_Class = (function () {
                 function D1_DeserializePropMethod_Class() {
@@ -2290,11 +2078,13 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return D1_DeserializePropMethod_Class;
             }());
             __decorate([
-                VDFTypeInfo_5.P()
+                VDFTypeInfo_4._VDFDeserializeProp()
+            ], D1_DeserializePropMethod_Class.prototype, "DeserializeProp", null);
+            __decorate([
+                VDFTypeInfo_4.P()
             ], D1_DeserializePropMethod_Class.prototype, "prop1", void 0);
-            D1_DeserializePropMethod_Class.prototype.DeserializeProp.AddTags(new VDFTypeInfo_5.VDFDeserializeProp());
             test("D1_DeserializePropMethod", function () {
-                var a = VDF_7.VDF.Deserialize("{prop1:0}", "D1_DeserializePropMethod_Class");
+                var a = VDF_5.VDF.Deserialize("{prop1:0}", "D1_DeserializePropMethod_Class");
                 a.prop1.Should().Be(1);
             });
             var TypeWithPreDeserializeMethod = (function () {
@@ -2305,13 +2095,13 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return TypeWithPreDeserializeMethod;
             }());
             __decorate([
-                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
             ], TypeWithPreDeserializeMethod.prototype, "flag", void 0);
             __decorate([
-                VDFTypeInfo_5._VDFPreDeserialize()
+                VDFTypeInfo_4._VDFPreDeserialize()
             ], TypeWithPreDeserializeMethod.prototype, "PreDeserialize", null);
             test("D1_PreDeserializeMethod", function () {
-                var a = VDF_7.VDF.Deserialize("{}", "TypeWithPreDeserializeMethod");
+                var a = VDF_5.VDF.Deserialize("{}", "TypeWithPreDeserializeMethod");
                 a.flag.Should().Be(true);
             });
             var TypeWithPostDeserializeMethod = (function () {
@@ -2322,13 +2112,13 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return TypeWithPostDeserializeMethod;
             }());
             __decorate([
-                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
             ], TypeWithPostDeserializeMethod.prototype, "flag", void 0);
             __decorate([
-                VDFTypeInfo_5._VDFPostDeserialize()
+                VDFTypeInfo_4._VDFPostDeserialize()
             ], TypeWithPostDeserializeMethod.prototype, "PostDeserialize", null);
             test("D1_PostDeserializeMethod", function () {
-                var a = VDF_7.VDF.Deserialize("{}", "TypeWithPostDeserializeMethod");
+                var a = VDF_5.VDF.Deserialize("{}", "TypeWithPostDeserializeMethod");
                 a.flag.Should().Be(true);
             });
             var ObjectWithPostDeserializeMethodRequiringCustomMessage_Class = (function () {
@@ -2342,12 +2132,12 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return ObjectWithPostDeserializeMethodRequiringCustomMessage_Class;
             }());
             __decorate([
-                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
             ], ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype, "flag", void 0);
             __decorate([
-                VDFTypeInfo_5._VDFPostDeserialize()
+                VDFTypeInfo_4._VDFPostDeserialize()
             ], ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype, "PostDeserialize", null);
-            test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () { VDF_7.VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoader_6.VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false); });
+            test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () { VDF_5.VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoader_5.VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false); });
             /*class ObjectWithPostDeserializeConstructor_Class {
                 static typeInfo = new VDFTypeInfo({
                     flag: new PInfo("bool")
@@ -2363,7 +2153,7 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return ObjectWithPostDeserializeOptionsFunc_Class_Parent;
             }());
             __decorate([
-                VDFTypeInfo_5.T("ObjectWithPostDeserializeOptionsFunc_Class_Child")
+                VDFTypeInfo_4.T("ObjectWithPostDeserializeOptionsFunc_Class_Child")
             ], ObjectWithPostDeserializeOptionsFunc_Class_Parent.prototype, "child", void 0);
             var ObjectWithPostDeserializeOptionsFunc_Class_Child = (function () {
                 function ObjectWithPostDeserializeOptionsFunc_Class_Child() {
@@ -2376,11 +2166,11 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
             }());
             ObjectWithPostDeserializeOptionsFunc_Class_Child.flag = false;
             __decorate([
-                VDFTypeInfo_5._VDFDeserialize(true)
+                VDFTypeInfo_4._VDFDeserialize(true)
             ], ObjectWithPostDeserializeOptionsFunc_Class_Child, "Deserialize", null);
             test("D1_ObjectWithPostDeserializeOptionsFunc", function () {
-                var options = new VDFLoader_6.VDFLoadOptions();
-                ok(VDF_7.VDF.Deserialize("{child:{}}", "ObjectWithPostDeserializeOptionsFunc_Class_Parent", options).child == null);
+                var options = new VDFLoader_5.VDFLoadOptions();
+                ok(VDF_5.VDF.Deserialize("{child:{}}", "ObjectWithPostDeserializeOptionsFunc_Class_Parent", options).child == null);
                 ObjectWithPostDeserializeOptionsFunc_Class_Child.flag.Should().Be(true);
             });
             var TypeInstantiatedManuallyThenFilled = (function () {
@@ -2390,17 +2180,17 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return TypeInstantiatedManuallyThenFilled;
             }());
             __decorate([
-                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
             ], TypeInstantiatedManuallyThenFilled.prototype, "flag", void 0);
             test("D1_InstantiateTypeManuallyThenFill", function () {
                 var a = new TypeInstantiatedManuallyThenFilled();
-                VDF_7.VDF.DeserializeInto("{flag:true}", a);
+                VDF_5.VDF.DeserializeInto("{flag:true}", a);
                 a.flag.Should().Be(true);
             });
             var D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = (function () {
                 function D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1() {
                     this._helper = this;
-                    this.messages = new VDF_7.Dictionary("string", "string", {
+                    this.messages = new VDFExtras_7.Dictionary("string", "string", {
                         title1: "message1",
                         title2: "message2"
                     });
@@ -2409,16 +2199,16 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 return D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1;
             }());
             __decorate([
-                VDFTypeInfo_5.T("Dictionary(string string)"), VDFTypeInfo_5.P()
+                VDFTypeInfo_4.T("Dictionary(string string)"), VDFTypeInfo_4.P()
             ], D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1.prototype, "messages", void 0);
             __decorate([
-                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+                VDFTypeInfo_4.T("bool"), VDFTypeInfo_4.P()
             ], D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1.prototype, "otherProperty", void 0);
             D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1 = __decorate([
-                VDFTypeInfo_5.TypeInfo(null, true)
+                VDFTypeInfo_4.TypeInfo(null, true)
             ], D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool_Class1);
             test("D1_Object_PoppedOutDictionaryPoppedOutThenPoppedOutBool", function () {
-                var a = VDF_7.VDF.Deserialize("{^}\n\
+                var a = VDF_5.VDF.Deserialize("{^}\n\
 	messages:{^}\n\
 		title1:'message1'\n\
 		title2:'message2'\n\
@@ -2433,8 +2223,7 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
         })(Loading_ToObject || (Loading_ToObject = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDF", "Source/TypeScript/VDFTokenParser"], function (require, exports, VDFLoader_7, VDF_8, VDFTokenParser_2) {
-    "use strict";
+define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDF", "Source/TypeScript/VDFTokenParser", "Source/TypeScript/VDFExtras"], function (require, exports, VDFLoader_6, VDF_6, VDFTokenParser_2, VDFExtras_8) {
     // tests
     // ==========
     var VDFTests;
@@ -2444,56 +2233,56 @@ define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/Type
             // to VDFNode
             // ==========
             test("D0_Comment", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("## comment\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("## comment\n\
 'Root string.'");
                 a.primitiveValue.Should().Be("Root string.");
             });
             test("D0_Comment2", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("'Root string ends here.'## comment");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("'Root string ends here.'## comment");
                 a.primitiveValue.Should().Be("Root string ends here.");
             });
             test("D0_Int", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("1");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("1");
                 a.primitiveValue.Should().Be(1);
             });
             test("D0_IntNegative", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("-1");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("-1");
                 a.primitiveValue.Should().Be(-1);
             });
             test("D0_PowerNotation", function () {
-                VDFLoader_7.VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000); //1 * Math.Pow(10, 3));
-                VDFLoader_7.VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
-                VDFLoader_7.VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000); //-(1 * Math.Pow(10, 3)));
-                VDFLoader_7.VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
+                VDFLoader_6.VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000); //1 * Math.Pow(10, 3));
+                VDFLoader_6.VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
+                VDFLoader_6.VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000); //-(1 * Math.Pow(10, 3)));
+                VDFLoader_6.VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
             });
             test("D0_Infinity", function () {
-                VDFLoader_7.VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(Infinity);
-                VDFLoader_7.VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(-Infinity);
+                VDFLoader_6.VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(Infinity);
+                VDFLoader_6.VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(-Infinity);
             });
             test("D0_String", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("'Root string.'");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("'Root string.'");
                 a.primitiveValue.Should().Be("Root string.");
             });
             test("D0_StringWithSaveThenLoad", function () {
-                var vdf = VDF_8.VDF.Serialize("Root string.");
+                var vdf = VDF_6.VDF.Serialize("Root string.");
                 vdf.Should().Be("\"Root string.\"");
-                var a = VDFLoader_7.VDFLoader.ToVDFNode(vdf);
+                var a = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
                 a.primitiveValue.Should().Be("Root string.");
             });
             test("D0_StringAsNull", function () {
-                var a = VDF_8.VDF.Deserialize("null", "string");
+                var a = VDF_6.VDF.Deserialize("null", "string");
                 ok(a == null);
             });
             test("D0_BaseValue_Literal", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
                 a.primitiveValue.Should().Be("\tBase-value string that {needs escaping}.");
             });
             test("D0_Metadata_Type", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("string>'Root string.'");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("string>'Root string.'");
                 a.metadata.Should().Be("string");
             });
             test("D0_List", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("['Root string 1.' 'Root string 2.']", "List(object)");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("['Root string 1.' 'Root string 2.']", "List(object)");
                 a[0].primitiveValue.Should().Be("Root string 1.");
                 a[1].primitiveValue.Should().Be("Root string 2.");
             });
@@ -2503,14 +2292,14 @@ define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/Type
                 a[1].primitiveValue.Should().Be("Root string 2.");
             });*/
             test("D0_List_Objects", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
                 a[0]["name"].primitiveValue.Should().Be("Dan");
                 a[0]["age"].primitiveValue.Should().Be(50);
                 a[1]["name"].primitiveValue.Should().Be("Bob");
                 a[1]["age"].primitiveValue.Should().Be(60);
             });
             test("D0_List_Literals", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("['first' '<<second\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("['first' '<<second\n\
 which is on two lines>>' '<<third\n\
 which is on\n\
 three lines>>']", "List(string)");
@@ -2528,28 +2317,28 @@ three lines".Fix());
                 a[0].primitiveValue.Should().Be(null);
                 a[1].primitiveValue.Should().Be(null);
             });*/
-            test("D0_EmptyList", function () { VDF_8.VDF.Deserialize("[]").Count.Should().Be(0); });
+            test("D0_EmptyList", function () { VDF_6.VDF.Deserialize("[]").Count.Should().Be(0); });
             test("D0_ListMetadata", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("List(int)>[1 2]");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("List(int)>[1 2]");
                 a.metadata.Should().Be("List(int)");
                 ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
                 ok(a[1].metadata == null); //a[1].metadata.Should().Be(null);
             });
             test("D0_ListMetadata2", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
                 a.metadata.Should().Be("List(object)");
                 a[0].metadata.Should().Be("string");
                 a[1].metadata.Should().Be("string");
             });
-            test("D0_EmptyMap", function () { VDF_8.VDF.Deserialize("{}").Count.Should().Be(0); });
+            test("D0_EmptyMap", function () { VDF_6.VDF.Deserialize("{}").Count.Should().Be(0); });
             test("D0_Map_ChildMetadata", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
                 a.metadata.Should().Be("Dictionary(object object)");
                 a["a"].metadata.Should().Be("string");
                 a["b"].metadata.Should().Be("string");
             });
             test("D0_MultilineString", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("'<<This is a\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("'<<This is a\n\
 multiline string\n\
 of three lines in total.>>'");
                 a.primitiveValue.Should().Be("This is a\n\
@@ -2557,22 +2346,22 @@ multiline string\n\
 of three lines in total.".Fix());
             });
             test("D1_Map_Children", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
                 a["key1"].primitiveValue.Should().Be("Simple string.");
                 a["key2"].primitiveValue.Should().Be("false");
                 a["key3"]["age"].primitiveValue.Should().Be(50);
             });
             test("D1_Map_ChildrenThatAreRetrievedByKey", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
                 a["key 1"].primitiveValue.Should().Be("value 1");
                 a["key 2"].primitiveValue.Should().Be("value 2");
             });
             test("D1_List_StringThatKeepsStringTypeFromVDFEvenWithObjectTypeFromCode", function () {
-                var a = VDF_8.VDF.Deserialize("['SimpleString']", "List(object)");
+                var a = VDF_6.VDF.Deserialize("['SimpleString']", "List(object)");
                 a[0].Should().Be("SimpleString");
             });
             test("D1_BaseValuesWithImplicitCasting", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{bool:false int:5 double:.5 string:'Prop value string.'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{bool:false int:5 double:.5 string:'Prop value string.'}");
                 a["bool"].primitiveValue.Should().Be(false);
                 a["int"].primitiveValue.Should().Be(5);
                 a["double"].primitiveValue.Should().Be(.5);
@@ -2584,32 +2373,32 @@ of three lines in total.".Fix());
                 Assert.True(a["string"] == "Prop value string.");*/
             });
             test("D1_BaseValuesWithMarkedTypes", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
                 a["bool"].primitiveValue.Should().Be(false);
                 a["int"].primitiveValue.Should().Be(5);
                 a["double"].primitiveValue.Should().Be(.5);
                 a["string"].primitiveValue.Should().Be("Prop value string.");
             });
             test("D1_Literal", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{string:'<<<Prop value string that <<needs escaping>>.>>>'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{string:'<<<Prop value string that <<needs escaping>>.>>>'}");
                 a["string"].primitiveValue.Should().Be("Prop value string that <<needs escaping>>.");
             });
             test("D1_TroublesomeLiteral1", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{string:'<<<#<<Prop value string that <<needs escaping>>.>>#>>>'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{string:'<<<#<<Prop value string that <<needs escaping>>.>>#>>>'}");
                 a["string"].primitiveValue.Should().Be("<<Prop value string that <<needs escaping>>.>>");
             });
             test("D1_TroublesomeLiteral2", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{string:'<<<##Prop value string that <<needs escaping>>.##>>>'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{string:'<<<##Prop value string that <<needs escaping>>.##>>>'}");
                 a["string"].primitiveValue.Should().Be("#Prop value string that <<needs escaping>>.#");
             });
             test("D1_VDFWithVDFWithVDF", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
                 a["level1"].primitiveValue.Should().Be("{level2:'<<{level3:'Base string.'}>>'}");
-                VDFLoader_7.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
-                VDFLoader_7.VDFLoader.ToVDFNode(VDFLoader_7.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue)["level3"].primitiveValue.Should().Be("Base string.");
+                VDFLoader_6.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
+                VDFLoader_6.VDFLoader.ToVDFNode(VDFLoader_6.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue)["level3"].primitiveValue.Should().Be("Base string.");
             });
             test("D1_ArraysInArrays", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
                 a[0][0].primitiveValue.Should().Be("1A");
                 a[0][1].primitiveValue.Should().Be("1B");
                 a[1][0].primitiveValue.Should().Be("2A");
@@ -2617,38 +2406,38 @@ of three lines in total.".Fix());
                 a[2].primitiveValue.Should().Be("3A");
             });
             test("D1_ArraysInArrays_SecondsNullAndEmpty", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
                 a[0][0].primitiveValue.Should().Be("1A");
                 ok(a[0][1].primitiveValue == null); //a[0][1].primitiveValue.Should().Be(null);
                 a[1][0].primitiveValue.Should().Be("2A");
                 a[1][1].primitiveValue.Should().Be("");
             });
             test("D1_StringAndArraysInArrays", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("['text' ['2A' null]]");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("['text' ['2A' null]]");
                 a[0].primitiveValue.Should().Be("text");
                 a[1][0].primitiveValue.Should().Be("2A");
                 ok(a[1][1].primitiveValue == null); //a[1][1].primitiveValue.Should().Be(null);
             });
             test("D1_Dictionary", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
                 a["key1"].primitiveValue.Should().Be("value1");
                 a["key2"].primitiveValue.Should().Be("value2");
                 a["key3"].primitiveValue.Should().Be("value3");
                 a["key4"].primitiveValue.Should().Be("value4");
             });
             test("D1_Map_KeyWithHash", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{#:'value1'}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{#:'value1'}");
                 a["#"].primitiveValue.Should().Be("value1");
             });
             test("D1_Map_MixedTypeKeysWithMetadata", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{int>1:'value1' int>\"2\":'value2' 'key3':'value3' \"key4\":\"value4\"}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{int>1:'value1' int>\"2\":'value2' 'key3':'value3' \"key4\":\"value4\"}");
                 var pairs = a.mapChildren.Pairs;
                 a["1"].primitiveValue.Should().Be("value1");
                 a["2"].primitiveValue.Should().Be("value2");
                 a["key3"].primitiveValue.Should().Be("value3");
                 a["key4"].primitiveValue.Should().Be("value4");
                 var b = a.ToObject();
-                ok(b instanceof VDF_8.Dictionary && b.keyType == "object" && b.valueType == "object");
+                ok(b instanceof VDFExtras_8.Dictionary && b.keyType == "object" && b.valueType == "object");
                 var bMap = b;
                 bMap.Get(1).Should().Be("value1");
                 bMap.Get(2).Should().Be("value2");
@@ -2656,18 +2445,18 @@ of three lines in total.".Fix());
                 bMap.Get("key4").Should().Be("value4");
             });
             test("D1_Dictionary_Complex", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
                 a["uiPrefs"]["toolOptions"].primitiveValue.Should().Be("{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}");
                 a["uiPrefs"]["liveTool"].primitiveValue.Should().Be("Select");
             });
             test("D1_Dictionary_TypesInferredFromGenerics", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}");
                 a["vertexColors"]["9,4,2.5"].primitiveValue.Should().Be("Black");
                 a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
                 a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
             });
             test("D1_ArrayPoppedOut_NoItems", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{names:[^]}");
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{names:[^]}");
                 a["names"].listChildren.Count.Should().Be(0);
                 a["names"].mapChildren.Count.Should().Be(0);
             });
@@ -2675,8 +2464,8 @@ of three lines in total.".Fix());
                 var vdf = "{names:[^]}\n\t'Dan'\n\t'Bob'";
                 var tokens = VDFTokenParser_2.VDFTokenParser.ParseTokens(vdf);
                 var tokenTypes = tokens.Select(function (b) { return VDFTokenParser_2.VDFTokenType[b.type]; });
-                tokenTypes.Should().BeEquivalentTo(new VDF_8.List("VDFTokenType", VDFTokenParser_2.VDFTokenType.MapStartMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenParser_2.VDFTokenType[a]; }));
-                var a = VDFLoader_7.VDFLoader.ToVDFNode(vdf);
+                tokenTypes.Should().BeEquivalentTo(new VDFExtras_8.List("VDFTokenType", VDFTokenParser_2.VDFTokenType.MapStartMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenParser_2.VDFTokenType[a]; }));
+                var a = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
                 a["names"][0].primitiveValue.Should().Be("Dan");
                 a["names"][1].primitiveValue.Should().Be("Bob");
             });
@@ -2684,15 +2473,15 @@ of three lines in total.".Fix());
                 var vdf = "{names:[^] ages:[^]}\n\t'Dan'\n\t'Bob'\n\t^10\n\t20";
                 var tokens = VDFTokenParser_2.VDFTokenParser.ParseTokens(vdf);
                 var tokenTypes = tokens.Select(function (b) { return VDFTokenParser_2.VDFTokenType[b.type]; });
-                tokenTypes.Should().BeEquivalentTo(new VDF_8.List("VDFTokenType", VDFTokenParser_2.VDFTokenType.MapStartMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.Number, VDFTokenParser_2.VDFTokenType.Number, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenParser_2.VDFTokenType[a]; }));
-                var a = VDFLoader_7.VDFLoader.ToVDFNode(vdf);
+                tokenTypes.Should().BeEquivalentTo(new VDFExtras_8.List("VDFTokenType", VDFTokenParser_2.VDFTokenType.MapStartMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.Number, VDFTokenParser_2.VDFTokenType.Number, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenParser_2.VDFTokenType[a]; }));
+                var a = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
                 a["names"][0].primitiveValue.Should().Be("Dan");
                 a["names"][1].primitiveValue.Should().Be("Bob");
                 a["ages"][0].primitiveValue.Should().Be(10);
                 a["ages"][1].primitiveValue.Should().Be(20);
             });
             test("D1_InferredDictionaryPoppedOut", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
 	title1:'message1'\n\
 	title2:'message2'");
                 a["messages"].mapChildren.Count.Should().Be(2);
@@ -2715,7 +2504,7 @@ of three lines in total.".Fix());
                     title2:"message2"
                 } otherProperty:false}
                  */
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
 	title1:'message1'\n\
 	title2:'message2'");
                 a["messages"].mapChildren.Count.Should().Be(2);
@@ -2724,7 +2513,7 @@ of three lines in total.".Fix());
                 a["otherProperty"].primitiveValue.Should().Be(false);
             });
             test("D1_Object_MultilineStringThenProperty", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{text:'<<This is a\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{text:'<<This is a\n\
 multiline string\n\
 of three lines in total.>>' bool:true}");
                 a["text"].primitiveValue.Should().Be("This is a\n\
@@ -2733,7 +2522,7 @@ of three lines in total.".Fix());
                 a["bool"].primitiveValue.Should().Be(true);
             });
             test("D1_Object_PoppedOutStringsThenMultilineString", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{childTexts:[^] text:'<<This is a\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{childTexts:[^] text:'<<This is a\n\
 multiline string\n\
 of three lines in total.>>'}\n\
 	'text1'\n\
@@ -2745,14 +2534,14 @@ multiline string\n\
 of three lines in total.".Fix());
             });
             test("D2_List_Lists_PoppedOutObjects", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
 	{name:'Road'}\n\
 	^{name:'RoadAndPath'}\n\
 	^{name:'SimpleHill'}"); //, new VDFLoadOptions({inferStringTypeForUnknownTypes: true}));
                 a.listChildren.Count.Should().Be(3);
             });
             test("D2_List_PoppedOutObjects_MultilineString", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[^]\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[^]\n\
 	{id:1 multilineText:'<<line1\n\
 	line2\n\
 	line3>>'}\n\
@@ -2761,7 +2550,7 @@ of three lines in total.".Fix());
                 a.listChildren.Count.Should().Be(2);
             });
             test("D2_Object_PoppedOutObject_PoppedOutObject", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{name:'L0' children:[^]}\n\
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{name:'L0' children:[^]}\n\
 	{name:'L1' children:[^]}\n\
 		{name:'L2'}");
                 a["children"].listChildren.Count.Should().Be(1);
@@ -2794,7 +2583,7 @@ of three lines in total.".Fix());
                 var vdf = "{name:'Main' worlds:Dictionary(string object)>{Test1:{vObjectRoot:{name:'VObjectRoot' children:[^]}} Test2:{vObjectRoot:{name:'VObjectRoot' children:[^]}}}}\n\
 	{id:System.Guid>'025f28a5-a14b-446d-b324-2d274a476a63' name:'#Types' children:[]}\n\
 	^{id:System.Guid>'08e84f18-aecf-4b80-9c3f-ae0697d9033a' name:'#Types' children:[]}";
-                var livePackNode = VDFLoader_7.VDFLoader.ToVDFNode(vdf);
+                var livePackNode = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
                 livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].primitiveValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
                 livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].primitiveValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
             });
@@ -2803,45 +2592,263 @@ of three lines in total.".Fix());
         })(Loading_ToVDFNode || (Loading_ToVDFNode = {}));
     })(VDFTests || (VDFTests = {}));
 });
+define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFLoader", "Tests/TypeScript/Loading/SpeedTests", "Tests/TypeScript/Loading/ToObject", "Tests/TypeScript/Loading/ToVDFNode"], function (require, exports, VDFTypeInfo_5, VDF_7, VDFLoader_7) {
+    /*class Loading {
+        static initialized = false;
+        static Init() {
+            if (this.initialized)
+                return;
+            this.initialized = true;
+            Object.prototype._AddFunction_Inline = function Should() {
+                return {
+                    Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
+                    BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
+                };
+            };
+        }
+    
+        static RunTests() {
+            /*test("testName() {
+                ok(null == null);
+            });*#/
+        }
+    }*/
+    // init
+    // ==========
+    var loading = {};
+    function Loading_RunTests() {
+        for (var name in loading)
+            test_old(name, loading[name]);
+    }
+    exports.Loading_RunTests = Loading_RunTests;
+    // the normal "test" function actually runs test
+    // here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
+    window["test"] = function (name, func) { loading[name] = func; };
+    // tests
+    // ==========
+    var VDFTests;
+    (function (VDFTests) {
+        var Loading_General;
+        (function (Loading_General) {
+            // deserialize-related methods
+            // ==========
+            var D1_MapWithEmbeddedDeserializeMethod_Prop_Class = (function () {
+                function D1_MapWithEmbeddedDeserializeMethod_Prop_Class() {
+                    this.boolProp = false;
+                }
+                D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype.Deserialize = function (node) { this.boolProp = node["boolProp"].primitiveValue; };
+                return D1_MapWithEmbeddedDeserializeMethod_Prop_Class;
+            }());
+            __decorate([
+                VDFTypeInfo_5.P()
+            ], D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype, "boolProp", void 0);
+            __decorate([
+                VDFTypeInfo_5._VDFDeserialize()
+            ], D1_MapWithEmbeddedDeserializeMethod_Prop_Class.prototype, "Deserialize", null);
+            test("D1_MapWithEmbeddedDeserializeMethod_Prop", function () { VDF_7.VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethod_Prop_Class").boolProp.Should().Be(true); });
+            var D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class = (function () {
+                function D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class() {
+                    this.boolProp = false;
+                }
+                D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype.Deserialize = function (node) { return; };
+                return D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class;
+            }());
+            __decorate([
+                VDFTypeInfo_5.P()
+            ], D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype, "boolProp", void 0);
+            __decorate([
+                VDFTypeInfo_5._VDFDeserialize()
+            ], D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype, "Deserialize", null);
+            test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () { VDF_7.VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
+            var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
+                function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
+                    this.child = null;
+                }
+                return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent;
+            }());
+            __decorate([
+                VDFTypeInfo_5.T("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child"), VDFTypeInfo_5.P()
+            ], D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent.prototype, "child", void 0);
+            var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = (function () {
+                function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child() {
+                }
+                D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child.Deserialize = function (node, path, options) { return null; };
+                return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child;
+            }());
+            __decorate([
+                VDFTypeInfo_5._VDFDeserialize(true)
+            ], D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child, "Deserialize", null);
+            test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () { ok(VDF_7.VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
+            var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
+                function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {
+                    this.child = null;
+                }
+                return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent;
+            }());
+            __decorate([
+                VDFTypeInfo_5.T("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child"), VDFTypeInfo_5.P()
+            ], D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent.prototype, "child", void 0);
+            var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child = (function () {
+                function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child() {
+                    this.boolProp = false;
+                }
+                D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.Deserialize = function (node, path, options) { return; };
+                return D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child;
+            }());
+            __decorate([
+                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+            ], D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child.prototype, "boolProp", void 0);
+            __decorate([
+                VDFTypeInfo_5._VDFDeserialize(true)
+            ], D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Child, "Deserialize", null);
+            test("D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop", function () { VDF_7.VDF.Deserialize("{child:{boolProp: true}}", "D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent").child.boolProp.Should().Be(true); });
+            var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent = (function () {
+                function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent() {
+                    this.withoutTag = null;
+                    this.withTag = null; // doesn't actually have tag; just pretend it does
+                }
+                return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent;
+            }());
+            __decorate([
+                VDFTypeInfo_5.T("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"), VDFTypeInfo_5.P()
+            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent.prototype, "withoutTag", void 0);
+            __decorate([
+                VDFTypeInfo_5.T("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child"), VDFTypeInfo_5.P()
+            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent.prototype, "withTag", void 0);
+            var D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child = (function () {
+                function D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child() {
+                    this.methodCalled = false;
+                }
+                D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype.Deserialize = function (node, path, options) {
+                    ok(path.parentNode.obj instanceof D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent);
+                    if (path.currentNode.prop.name == "withTag")
+                        this.methodCalled = true;
+                };
+                return D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child;
+            }());
+            __decorate([
+                VDFTypeInfo_5.T("bool"), VDFTypeInfo_5.P()
+            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype, "methodCalled", void 0);
+            __decorate([
+                VDFTypeInfo_5._VDFDeserialize()
+            ], D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Child.prototype, "Deserialize", null);
+            test("D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag", function () {
+                var a = VDF_7.VDF.Deserialize("{withoutTag:{} withTag:{}}", "D1_Map_PropReferencedByInClassDeserializeMethodThatIsOnlyCalledForParentPropWithTag_Class_Parent");
+                a.withoutTag.methodCalled.Should().Be(false);
+                a.withTag.methodCalled.Should().Be(true);
+            });
+            // for JSON compatibility
+            // ==========
+            test("D1_Map_IntsWithStringKeys", function () {
+                var a = VDFLoader_7.VDFLoader.ToVDFNode("{\"key1\":0 \"key2\":1}", new VDFLoader_7.VDFLoadOptions({ allowStringKeys: true }));
+                a.mapChildren.Count.Should().Be(2);
+                a["key1"].primitiveValue.Should().Be(0);
+            });
+            test("D1_List_IntsWithCommaSeparators", function () {
+                var a = VDFLoader_7.VDFLoader.ToVDFNode("[0,1]", new VDFLoader_7.VDFLoadOptions({ allowCommaSeparators: true }));
+                a.listChildren.Count.Should().Be(2);
+                a[0].primitiveValue.Should().Be(0);
+            });
+            test("D3_List_NumbersWithScientificNotation", function () {
+                var a = VDFLoader_7.VDFLoader.ToVDFNode("[-7.45058e-09,0.1,-1.49012e-08]", new VDFLoader_7.VDFLoadOptions().ForJSON());
+                a[0].primitiveValue.Should().Be(-7.45058e-09);
+            });
+            // unique to JavaScript version
+            // ==========
+            var PretendGenericType = (function () {
+                function PretendGenericType() {
+                }
+                return PretendGenericType;
+            }());
+            test("Depth0_ObjectWithMetadataHavingGenericType", function () { return ok(VDF_7.VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType); });
+            test("Depth1_UnknownTypeWithFixOn_String", function () {
+                var a = VDF_7.VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoader_7.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
+                a["string"].Should().Be("Prop value string.");
+            });
+            test("Depth1_UnknownTypeWithFixOff_String", function () {
+                try {
+                    VDF_7.VDF.Deserialize("UnknownType>{string:'Prop value string.'}");
+                }
+                catch (ex) {
+                    ok(ex.message == "Could not find type \"UnknownType\".");
+                }
+            });
+            test("Depth1_Object_UnknownTypeWithFixOn", function () {
+                var a = VDF_7.VDF.Deserialize("{string:UnkownBaseType>'Prop value string.'}", new VDFLoader_7.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
+                a["string"].Should().Be("Prop value string.");
+            });
+            test("AsObject", function () {
+                var a = VDF_7.VDF.Deserialize("{bool:bool>false double:double>3.5}", "object");
+                a.bool.Should().Be(false);
+                a.double.Should().Be(3.5);
+            });
+            var AsObjectOfType_Class = (function () {
+                function AsObjectOfType_Class() {
+                }
+                return AsObjectOfType_Class;
+            }());
+            test("AsObjectOfType", function () {
+                var a = VDF_7.VDF.Deserialize("AsObjectOfType_Class>{}", "AsObjectOfType_Class");
+                ok(a instanceof AsObjectOfType_Class);
+            });
+            // quick tests
+            // ==========
+            test("QuickTest1", function () {
+                var a = VDF_7.VDF.Deserialize('{^}\n\
+	structures:[^]\n\
+		{typeVObject:string>"VObject>Flag" id:0}\n\
+		{typeVObject:string>"VObject>Flag" id:1}', "object");
+                a.structures[0].typeVObject.Should().Be("VObject>Flag");
+                a.structures[1].id.Should().Be(1);
+            });
+            // export all classes/enums to global scope
+            ExportInternalClassesTo(window, function (str) { return eval(str); });
+        })(Loading_General || (Loading_General = {}));
+    })(VDFTests || (VDFTests = {}));
+});
 // Object: base
 // ==================
-// the below lets you do stuff like this: Array.prototype._AddFunction(function AddX(value) { this.push(value); }); [].AddX("newItem");
-Object.defineProperty(Object.prototype, "_AddItem", // note; these functions should by default add non-enumerable properties/items
-{
-    enumerable: false,
-    value: function (name, value, forceAdd) {
+if (Object._AddItem == null) {
+    // the below lets you do stuff like this: Array.prototype._AddFunction(function AddX(value) { this.push(value); }); [].AddX("newItem");
+    // note; these functions should by default add non-enumerable properties/items
+    Object.defineProperty(Object.prototype, "_AddItem", {
+        enumerable: false,
+        value: function (name, value, forceAdd) {
+            if (forceAdd === void 0) { forceAdd = true; }
+            if (this[name] && forceAdd)
+                delete this[name];
+            if (!this[name]) {
+                Object.defineProperty(this, name, {
+                    enumerable: false,
+                    value: value
+                });
+            }
+        }
+    });
+    Object.prototype._AddItem("_AddFunction", function (func, forceAdd) {
         if (forceAdd === void 0) { forceAdd = true; }
+        this._AddItem(func.name || func.toString().match(/^function\s*([^\s(]+)/)[1], func, forceAdd);
+    });
+    // the below lets you do stuff like this: Array.prototype._AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
+    Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd) {
+        if (forceAdd === void 0) { forceAdd = true; }
+        var name = (getter || setter).name || (getter || setter).toString().match(/^function\s*([^\s(]+)/)[1];
         if (this[name] && forceAdd)
             delete this[name];
-        if (!this[name])
-            Object.defineProperty(this, name, {
-                enumerable: false,
-                value: value
-            });
-    }
-});
-Object.prototype._AddItem("_AddFunction", function (func, forceAdd) {
-    if (forceAdd === void 0) { forceAdd = true; }
-    this._AddItem(func.name || func.toString().match(/^function\s*([^\s(]+)/)[1], func, forceAdd);
-});
-// the below lets you do stuff like this: Array.prototype._AddGetterSetter("AddX", null, function(value) { this.push(value); }); [].AddX = "newItem";
-Object.prototype._AddFunction(function _AddGetterSetter(getter, setter, forceAdd) {
-    if (forceAdd === void 0) { forceAdd = true; }
-    var name = (getter || setter).name || (getter || setter).toString().match(/^function\s*([^\s(]+)/)[1];
-    if (this[name] && forceAdd)
-        delete this[name];
-    if (!this[name])
-        if (getter && setter)
-            Object.defineProperty(this, name, { enumerable: false, get: getter, set: setter });
-        else if (getter)
-            Object.defineProperty(this, name, { enumerable: false, get: getter });
-        else
-            Object.defineProperty(this, name, { enumerable: false, set: setter });
-});
-// the below lets you do stuff like this: Array.prototype._AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
-Object.prototype._AddGetterSetter(null, function _AddFunction_Inline(func) { this._AddFunction(func, true); });
-Object.prototype._AddGetterSetter(null, function _AddGetter_Inline(func) { this._AddGetterSetter(func, null); });
-Object.prototype._AddGetterSetter(null, function _AddSetter_Inline(func) { this._AddGetterSetter(null, func); });
+        if (!this[name]) {
+            if (getter && setter)
+                Object.defineProperty(this, name, { enumerable: false, get: getter, set: setter });
+            else if (getter)
+                Object.defineProperty(this, name, { enumerable: false, get: getter });
+            else
+                Object.defineProperty(this, name, { enumerable: false, set: setter });
+        }
+    });
+    // the below lets you do stuff like this: Array.prototype._AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
+    Object.prototype._AddGetterSetter(null, function _AddFunction_Inline(func) { this._AddFunction(func, true); });
+    Object.prototype._AddGetterSetter(null, function _AddGetter_Inline(func) { this._AddGetterSetter(func, null); });
+    Object.prototype._AddGetterSetter(null, function _AddSetter_Inline(func) { this._AddGetterSetter(null, func); });
+}
 var V = new function () {
     var self = this;
     /*self.AddClosureFunctionsToX = function(newHolder, nameMatchStartStr = "")
@@ -2907,8 +2914,7 @@ var VDebug = (function () {
 VDebug.timerStart = 0;
 VDebug.sectionTotals = {};
 VDebug.waitTimerIDs = {};
-define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFNode"], function (require, exports, VDF_9, VDFTypeInfo_6, VDFSaver_3, VDFNode_3) {
-    "use strict";
+define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFExtras"], function (require, exports, VDF_8, VDFTypeInfo_6, VDFSaver_3, VDFNode_3, VDFExtras_9) {
     // tests
     // ==========
     var VDFTests;
@@ -2917,8 +2923,8 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
         (function (Saving_FromObject) {
             // from object
             // ==========
-            test("D0_Null", function () { VDF_9.VDF.Serialize(null).Should().Be("null"); });
-            test("D0_EmptyString", function () { VDF_9.VDF.Serialize("").Should().Be("\"\""); });
+            test("D0_Null", function () { VDF_8.VDF.Serialize(null).Should().Be("null"); });
+            test("D0_EmptyString", function () { VDF_8.VDF.Serialize("").Should().Be("\"\""); });
             var D1_IgnoreDefaultValues_Class = (function () {
                 function D1_IgnoreDefaultValues_Class() {
                     this.bool1 = null;
@@ -2952,13 +2958,13 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
                 VDFTypeInfo_6.TypeInfo("^(?!_)")
             ], D1_IgnoreDefaultValues_Class);
             test("D1_IgnoreDefaultValues", function () {
-                VDF_9.VDF.Serialize(new D1_IgnoreDefaultValues_Class(), "D1_IgnoreDefaultValues_Class").Should().Be("{bool3:true string3:\"value1\"}");
+                VDF_8.VDF.Serialize(new D1_IgnoreDefaultValues_Class(), "D1_IgnoreDefaultValues_Class").Should().Be("{bool3:true string3:\"value1\"}");
             });
             var D1_NullValues_Class = (function () {
                 function D1_NullValues_Class() {
                     this.obj = null;
                     this.strings = null;
-                    this.strings2 = new VDF_9.List("string");
+                    this.strings2 = new VDFExtras_9.List("string");
                 }
                 return D1_NullValues_Class;
             }());
@@ -2992,12 +2998,12 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             __decorate([
                 VDFTypeInfo_6.T("string"), VDFTypeInfo_6.P(true), VDFTypeInfo_6.D()
             ], TypeWithDefaultStringProp.prototype, "defaultString", void 0);
-            test("D1_IgnoreEmptyString", function () { VDF_9.VDF.Serialize(new TypeWithDefaultStringProp(), "TypeWithDefaultStringProp").Should().Be("{}"); });
+            test("D1_IgnoreEmptyString", function () { VDF_8.VDF.Serialize(new TypeWithDefaultStringProp(), "TypeWithDefaultStringProp").Should().Be("{}"); });
             var TypeWithNullProps = (function () {
                 function TypeWithNullProps() {
                     this.obj = null;
                     this.strings = null;
-                    this.strings2 = new VDF_9.List("string");
+                    this.strings2 = new VDFExtras_9.List("string");
                 }
                 return TypeWithNullProps;
             }());
@@ -3024,7 +3030,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             });
             var TypeWithList_PopOutItemData = (function () {
                 function TypeWithList_PopOutItemData() {
-                    this.list = new VDF_9.List("string", "A", "B");
+                    this.list = new VDFExtras_9.List("string", "A", "B");
                 }
                 return TypeWithList_PopOutItemData;
             }());
@@ -3038,18 +3044,18 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
 	\"B\"".replace(/\r/g, ""));
             });
             test("D1_ListItems_Null", function () {
-                var a = VDFSaver_3.VDFSaver.ToVDFNode(new VDF_9.List("string", null));
+                var a = VDFSaver_3.VDFSaver.ToVDFNode(new VDFExtras_9.List("string", null));
                 ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
                 ok(a[0].primitiveValue == null); //a[0].primitiveValue.Should().Be(null);
                 a.ToVDF().Should().Be("List(string)>[null]");
             });
             test("D1_SingleListItemWithAssemblyKnownTypeShouldStillSpecifySortOfType", function () {
-                var a = VDFSaver_3.VDFSaver.ToVDFNode(new VDF_9.List("string", "hi"), "List(string)");
+                var a = VDFSaver_3.VDFSaver.ToVDFNode(new VDFExtras_9.List("string", "hi"), "List(string)");
                 a.ToVDF().Should().Be("[\"hi\"]");
             });
-            test("D1_StringAndArraysInArray", function () { VDF_9.VDF.Serialize(new VDF_9.List("object", "text", new VDF_9.List("string", "a", "b"))).Should().Be("[\"text\" List(string)>[\"a\" \"b\"]]"); });
+            test("D1_StringAndArraysInArray", function () { VDF_8.VDF.Serialize(new VDFExtras_9.List("object", "text", new VDFExtras_9.List("string", "a", "b"))).Should().Be("[\"text\" List(string)>[\"a\" \"b\"]]"); });
             test("D1_DictionaryValues_Null", function () {
-                var dictionary = new VDF_9.Dictionary("string", "string");
+                var dictionary = new VDFExtras_9.Dictionary("string", "string");
                 dictionary.Add("key1", null);
                 var a = VDFSaver_3.VDFSaver.ToVDFNode(dictionary);
                 ok(a["key1"].metadata == null); //a["key1"].metadata.Should().Be(null);
@@ -3100,7 +3106,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
                 VDFTypeInfo_6.P()
             ], D1_SerializePropMethod_Class.prototype, "prop1", void 0);
             test("D1_SerializePropMethod", function () {
-                var a = VDF_9.VDF.Serialize(new D1_SerializePropMethod_Class(), "D1_SerializePropMethod_Class");
+                var a = VDF_8.VDF.Serialize(new D1_SerializePropMethod_Class(), "D1_SerializePropMethod_Class");
                 a.Should().Be("{prop1:1}");
             });
             var TypeWithPostSerializeCleanupMethod = (function () {
@@ -3127,8 +3133,8 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
                     this.Int = 5;
                     this.Double = .5;
                     this.String = "Prop value string.";
-                    this.list = new VDF_9.List("string", "2A", "2B");
-                    this.nestedList = new VDF_9.List("List(string)", new VDF_9.List("string", "1A"));
+                    this.list = new VDFExtras_9.List("string", "2A", "2B");
+                    this.nestedList = new VDFExtras_9.List("List(string)", new VDFExtras_9.List("string", "1A"));
                 }
                 return TypeWithMixOfProps;
             }());
@@ -3175,7 +3181,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             });
             var D1_Object_DictionaryPoppedOutThenBool_Class1 = (function () {
                 function D1_Object_DictionaryPoppedOutThenBool_Class1() {
-                    this.messages = new VDF_9.Dictionary("string", "string", { title1: "message1", title2: "message2" });
+                    this.messages = new VDFExtras_9.Dictionary("string", "string", { title1: "message1", title2: "message2" });
                     this.otherProperty = true;
                 }
                 return D1_Object_DictionaryPoppedOutThenBool_Class1;
@@ -3194,7 +3200,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             });
             var D1_Map_PoppedOutDictionary_PoppedOutPairs_Class = (function () {
                 function D1_Map_PoppedOutDictionary_PoppedOutPairs_Class() {
-                    this.messages = new VDF_9.Dictionary("string", "string", {
+                    this.messages = new VDFExtras_9.Dictionary("string", "string", {
                         title1: "message1",
                         title2: "message2"
                     });
@@ -3230,7 +3236,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             ], T1_Depth1.prototype, "level2", void 0);
             var T1_Depth2 = (function () {
                 function T1_Depth2() {
-                    this.messages = new VDF_9.List("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
+                    this.messages = new VDFExtras_9.List("string", "DeepString1_Line1\n\tDeepString1_Line2", "DeepString2");
                     this.otherProperty = true;
                 }
                 return T1_Depth2;
@@ -3272,7 +3278,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             ], Level2.prototype, "level3_second", void 0);
             var Level3 = (function () {
                 function Level3() {
-                    this.messages = new VDF_9.List("string", "DeepString1", "DeepString2");
+                    this.messages = new VDFExtras_9.List("string", "DeepString1", "DeepString2");
                 }
                 return Level3;
             }());
@@ -3289,7 +3295,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             });
             test("D3_Map_Map_Maps_ListsWithOneEmpty_PoppedOutStrings", function () {
                 var obj = new Level1();
-                obj.level2.level3_second.messages = new VDF_9.List("string");
+                obj.level2.level3_second.messages = new VDFExtras_9.List("string");
                 var a = VDFSaver_3.VDFSaver.ToVDFNode(obj, new VDFSaver_3.VDFSaveOptions({ typeMarking: VDFSaver_3.VDFTypeMarking.None }));
                 a.ToVDF().Should().Be("{level2:{level3_first:{messages:[^]} level3_second:{messages:[]}}}\n\
 	\"DeepString1\"\n\
@@ -3319,7 +3325,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             ], T4_Depth2.prototype, "level3_second", void 0);
             var T4_Depth3 = (function () {
                 function T4_Depth3() {
-                    this.level4s = new VDF_9.List("T4_Depth4", new T4_Depth4(), new T4_Depth4());
+                    this.level4s = new VDFExtras_9.List("T4_Depth4", new T4_Depth4(), new T4_Depth4());
                 }
                 return T4_Depth3;
             }());
@@ -3328,7 +3334,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
             ], T4_Depth3.prototype, "level4s", void 0);
             var T4_Depth4 = (function () {
                 function T4_Depth4() {
-                    this.messages = new VDF_9.List("string", "text1", "text2");
+                    this.messages = new VDFExtras_9.List("string", "text1", "text2");
                     this.otherProperty = false;
                 }
                 return T4_Depth4;
@@ -3372,7 +3378,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
                 VDFTypeInfo_6.TypeInfo(null, true)
             ], T5_Depth2);
             test("D4_List_Map_PoppedOutBools", function () {
-                var a = VDFSaver_3.VDFSaver.ToVDFNode(new VDF_9.List("T5_Depth2", new T5_Depth2()), new VDFSaver_3.VDFSaveOptions({ typeMarking: VDFSaver_3.VDFTypeMarking.External }));
+                var a = VDFSaver_3.VDFSaver.ToVDFNode(new VDFExtras_9.List("T5_Depth2", new T5_Depth2()), new VDFSaver_3.VDFSaveOptions({ typeMarking: VDFSaver_3.VDFTypeMarking.External }));
                 a.ToVDF().Should().Be("List(T5_Depth2)>[{^}]\n\
 	firstProperty:false\n\
 	otherProperty:false".replace(/\r/g, ""));
@@ -3382,8 +3388,7 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
         })(Saving_FromObject || (Saving_FromObject = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo"], function (require, exports, VDFNode_4, VDFSaver_4, VDF_10, VDFTypeInfo_7) {
-    "use strict";
+define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFExtras"], function (require, exports, VDFNode_4, VDFSaver_4, VDF_9, VDFTypeInfo_7, VDFExtras_10) {
     // tests
     // ==========
     var VDFTests;
@@ -3408,15 +3413,15 @@ define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/Typ
                 a.ToVDF().Should().Be("string>\"Root string.\"");
             });
             test("D0_MetadataTypeCollapsed", function () {
-                var a = VDFSaver_4.VDFSaver.ToVDFNode(new VDF_10.List("string"), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.External }));
+                var a = VDFSaver_4.VDFSaver.ToVDFNode(new VDFExtras_10.List("string"), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.External }));
                 a.ToVDF().Should().Be("List(string)>[]");
-                a = VDFSaver_4.VDFSaver.ToVDFNode(new VDF_10.List("List(string)", new VDF_10.List("string", "1A", "1B", "1C")), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.External }));
+                a = VDFSaver_4.VDFSaver.ToVDFNode(new VDFExtras_10.List("List(string)", new VDFExtras_10.List("string", "1A", "1B", "1C")), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.External }));
                 a.ToVDF().Should().Be("List(List(string))>[[\"1A\" \"1B\" \"1C\"]]"); // old: only lists with basic/not-having-own-generic-params generic-params, are able to be collapsed
             });
             test("D0_MetadataTypeNoCollapse", function () {
-                var a = VDFSaver_4.VDFSaver.ToVDFNode(new VDF_10.List("string"), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.ExternalNoCollapse }));
+                var a = VDFSaver_4.VDFSaver.ToVDFNode(new VDFExtras_10.List("string"), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.ExternalNoCollapse }));
                 a.ToVDF().Should().Be("List(string)>[]");
-                a = VDFSaver_4.VDFSaver.ToVDFNode(new VDF_10.List("List(string)", new VDF_10.List("string", "1A", "1B", "1C")), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.ExternalNoCollapse }));
+                a = VDFSaver_4.VDFSaver.ToVDFNode(new VDFExtras_10.List("List(string)", new VDFExtras_10.List("string", "1A", "1B", "1C")), new VDFSaver_4.VDFSaveOptions({ typeMarking: VDFSaver_4.VDFTypeMarking.ExternalNoCollapse }));
                 a.ToVDF().Should().Be("List(List(string))>[List(string)>[string>\"1A\" string>\"1B\" string>\"1C\"]]");
             });
             var Enum1;
@@ -3454,11 +3459,11 @@ define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/Typ
             });
             test("D0_EscapedStringIfNonQuoted", function () {
                 var options = new VDFSaver_4.VDFSaveOptions(null, null, VDFSaver_4.VDFTypeMarking.None);
-                VDF_10.VDF.Serialize(new VDF_10.Dictionary("string", "string", { "{": "val1" }), options).Should().Be("{<<{>>:\"val1\"}");
-                VDF_10.VDF.Serialize(new VDF_10.Dictionary("string", "string", { "^": "val1" }), options).Should().Be("{<<^>>:\"val1\"}");
-                VDF_10.VDF.Serialize(new VDF_10.Dictionary("string", "string", { "3": "val1" }), options).Should().Be("{<<3>>:\"val1\"}");
+                VDF_9.VDF.Serialize(new VDFExtras_10.Dictionary("string", "string", { "{": "val1" }), options).Should().Be("{<<{>>:\"val1\"}");
+                VDF_9.VDF.Serialize(new VDFExtras_10.Dictionary("string", "string", { "^": "val1" }), options).Should().Be("{<<^>>:\"val1\"}");
+                VDF_9.VDF.Serialize(new VDFExtras_10.Dictionary("string", "string", { "3": "val1" }), options).Should().Be("{<<3>>:\"val1\"}");
             });
-            test("D0_EmptyArray", function () { VDF_10.VDF.Serialize([]).Should().Be("[]"); });
+            test("D0_EmptyArray", function () { VDF_9.VDF.Serialize([]).Should().Be("[]"); });
             test("D1_ListInferredFromHavingItem_String", function () {
                 var a = new VDFNode_4.VDFNode();
                 a.SetListChild(0, new VDFNode_4.VDFNode("String item."));
@@ -3514,17 +3519,69 @@ define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/Typ
                 //VDFTypeInfo.AddDeserializeMethod_FromParent<Type>(node=>Type.GetType(node.primitiveValue.ToString()));
                 //var type_object = {Serialize: function() { return new VDFNode("System.Object", "Type"); }.AddTags(new VDFSerialize())}
                 var type_object = new TypeTest();
-                var map = new VDF_10.Dictionary("object", "object");
+                var map = new VDFExtras_10.Dictionary("object", "object");
                 map.Add(type_object, "hi there");
-                VDF_10.VDF.Serialize(map).Should().Be("{Type>Object:\"hi there\"}");
+                VDF_9.VDF.Serialize(map).Should().Be("{Type>Object:\"hi there\"}");
             });
             // export all classes/enums to global scope
             ExportInternalClassesTo(window, function (str) { return eval(str); });
         })(Saving_FromVDFNode || (Saving_FromVDFNode = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver"], function (require, exports, VDF_11, VDFTypeInfo_8, VDFNode_5, VDFSaver_5) {
-    "use strict";
+define("Tests/TypeScript/Saving/SpeedTests", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFExtras"], function (require, exports, VDFTypeInfo_8, VDFSaver_5, VDFExtras_11) {
+    // tests
+    // ==========
+    var VDFTests;
+    (function (VDFTests) {
+        var Saving_SpeedTests;
+        (function (Saving_SpeedTests) {
+            var SpeedTest1_Class = (function () {
+                function SpeedTest1_Class() {
+                    this.Bool = true;
+                    this.Int = 5;
+                    this.Double = .5;
+                    this.String = "Prop value string.";
+                    this.list = new VDFExtras_11.List("string", "2A", "2B");
+                    this.nestedList = new VDFExtras_11.List("List(string)", new VDFExtras_11.List("string", "1A"));
+                }
+                return SpeedTest1_Class;
+            }());
+            __decorate([
+                VDFTypeInfo_8.T("bool"), VDFTypeInfo_8.P()
+            ], SpeedTest1_Class.prototype, "Bool", void 0);
+            __decorate([
+                VDFTypeInfo_8.T("int"), VDFTypeInfo_8.P()
+            ], SpeedTest1_Class.prototype, "Int", void 0);
+            __decorate([
+                VDFTypeInfo_8.T("double"), VDFTypeInfo_8.P()
+            ], SpeedTest1_Class.prototype, "Double", void 0);
+            __decorate([
+                VDFTypeInfo_8.T("string"), VDFTypeInfo_8.P()
+            ], SpeedTest1_Class.prototype, "String", void 0);
+            __decorate([
+                VDFTypeInfo_8.T("List(string)"), VDFTypeInfo_8.P()
+            ], SpeedTest1_Class.prototype, "list", void 0);
+            __decorate([
+                VDFTypeInfo_8.T("List(List(string))"), VDFTypeInfo_8.P()
+            ], SpeedTest1_Class.prototype, "nestedList", void 0);
+            test("SpeedTest1", function () {
+                var a = VDFSaver_5.VDFSaver.ToVDFNode(new SpeedTest1_Class(), new VDFSaver_5.VDFSaveOptions({ typeMarking: VDFSaver_5.VDFTypeMarking.None }));
+                a["Bool"].primitiveValue.Should().Be(true);
+                a["Int"].primitiveValue.Should().Be(5);
+                a["Double"].primitiveValue.Should().Be(.5);
+                a["String"].primitiveValue.Should().Be("Prop value string.");
+                a["list"][0].primitiveValue.Should().Be("2A");
+                a["list"][1].primitiveValue.Should().Be("2B");
+                a["nestedList"][0][0].primitiveValue.Should().Be("1A");
+                //for (var i = 0; i < 10000; i++)
+                var vdf = a.ToVDF();
+            });
+            // export all classes/enums to global scope
+            ExportInternalClassesTo(window, function (str) { return eval(str); });
+        })(Saving_SpeedTests || (Saving_SpeedTests = {}));
+    })(VDFTests || (VDFTests = {}));
+});
+define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDF", "Tests/TypeScript/Saving/FromObject", "Tests/TypeScript/Saving/FromVDFNode", "Tests/TypeScript/Saving/SpeedTests"], function (require, exports, VDFTypeInfo_9, VDFNode_5, VDFSaver_6, VDFExtras_12, VDF_10) {
     /*class Saving {
         static initialized: boolean;
         static Init() 	{
@@ -3552,6 +3609,7 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
         for (var name in saving)
             test_old(name, saving[name]);
     }
+    exports.Saving_RunTests = Saving_RunTests;
     // the normal "test" function actually runs test
     // here we replace it with a function that merely "registers the test to be run later on" (when the Saving button is pressed)
     window["test"] = function (name, func) { saving[name] = func; };
@@ -3564,11 +3622,11 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
             // general
             // ==========
             test("NodePathToStringReturnsX", function () {
-                var path = new VDF_11.VDFNodePath(new VDF_11.List("VDFNodePathNode"));
-                path.nodes.push(new VDF_11.VDFNodePathNode(null, new VDFTypeInfo_8.VDFPropInfo("prop1", null, [])));
-                path.nodes.push(new VDF_11.VDFNodePathNode(null, null, 1));
-                path.nodes.push(new VDF_11.VDFNodePathNode(null, null, null, 2));
-                path.nodes.push(new VDF_11.VDFNodePathNode(null, null, null, null, "key1"));
+                var path = new VDFExtras_12.VDFNodePath(new VDFExtras_12.List("VDFNodePathNode"));
+                path.nodes.push(new VDFExtras_12.VDFNodePathNode(null, new VDFTypeInfo_9.VDFPropInfo("prop1", null, [])));
+                path.nodes.push(new VDFExtras_12.VDFNodePathNode(null, null, 1));
+                path.nodes.push(new VDFExtras_12.VDFNodePathNode(null, null, null, 2));
+                path.nodes.push(new VDFExtras_12.VDFNodePathNode(null, null, null, null, "key1"));
                 path.toString().Should().Be("prop1/i:1/ki:2/k:key1");
             });
             // prop-inclusion by regex
@@ -3581,16 +3639,16 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D1_Map_PropWithNameMatchingIncludeRegex_Class;
             }());
             __decorate([
-                VDFTypeInfo_8.T("bool")
+                VDFTypeInfo_9.T("bool")
             ], D1_Map_PropWithNameMatchingIncludeRegex_Class.prototype, "_notMatching", void 0);
             __decorate([
-                VDFTypeInfo_8.T("bool")
+                VDFTypeInfo_9.T("bool")
             ], D1_Map_PropWithNameMatchingIncludeRegex_Class.prototype, "matching", void 0);
             D1_Map_PropWithNameMatchingIncludeRegex_Class = __decorate([
-                VDFTypeInfo_8.TypeInfo("^[^_]")
+                VDFTypeInfo_9.TypeInfo("^[^_]")
             ], D1_Map_PropWithNameMatchingIncludeRegex_Class);
             test("D1_Map_PropWithNameMatchingIncludeRegex", function () {
-                VDF_11.VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}");
+                VDF_10.VDF.Serialize(new D1_Map_PropWithNameMatchingIncludeRegex_Class(), "D1_Map_PropWithNameMatchingIncludeRegex_Class").Should().Be("{matching:true}");
             });
             var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base = (function () {
                 function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base() {
@@ -3598,7 +3656,7 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base;
             }());
             D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base = __decorate([
-                VDFTypeInfo_8.TypeInfo("^[^_]")
+                VDFTypeInfo_9.TypeInfo("^[^_]")
             ], D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base);
             var D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived = (function () {
                 function D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived() {
@@ -3608,17 +3666,17 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived;
             }());
             __decorate([
-                VDFTypeInfo_8.T("bool")
+                VDFTypeInfo_9.T("bool")
             ], D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype, "_notMatching", void 0);
             __decorate([
-                VDFTypeInfo_8.T("bool")
+                VDFTypeInfo_9.T("bool")
             ], D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype, "matching", void 0);
             D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived = __decorate([
-                VDFTypeInfo_8.TypeInfo()
+                VDFTypeInfo_9.TypeInfo()
             ], D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived);
             D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
             test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", function () {
-                VDF_11.VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}");
+                VDF_10.VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}");
             });
             // serialize-related methods
             // ==========
@@ -3635,17 +3693,17 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D1_MapWithEmbeddedSerializeMethod_Prop_Class;
             }());
             __decorate([
-                VDFTypeInfo_8.T("bool")
+                VDFTypeInfo_9.T("bool")
             ], D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype, "notIncluded", void 0);
             __decorate([
-                VDFTypeInfo_8.T("bool")
+                VDFTypeInfo_9.T("bool")
             ], D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype, "included", void 0);
             __decorate([
-                VDFTypeInfo_8._VDFSerialize()
+                VDFTypeInfo_9._VDFSerialize()
             ], D1_MapWithEmbeddedSerializeMethod_Prop_Class.prototype, "Serialize", null);
             //AddAttributes().type = D1_MapWithEmbeddedSerializeMethod_Prop_Class;
             test("D1_MapWithEmbeddedSerializeMethod_Prop", function () {
-                VDF_11.VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}");
+                VDF_10.VDF.Serialize(new D1_MapWithEmbeddedSerializeMethod_Prop_Class(), "D1_MapWithEmbeddedSerializeMethod_Prop_Class").Should().Be("{included:true}");
             });
             var D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class = (function () {
                 function D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class() {
@@ -3655,13 +3713,13 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class;
             }());
             __decorate([
-                VDFTypeInfo_8.T("bool"), VDFTypeInfo_8.P()
+                VDFTypeInfo_9.T("bool"), VDFTypeInfo_9.P()
             ], D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype, "boolProp", void 0);
             __decorate([
-                VDFTypeInfo_8._VDFSerialize()
+                VDFTypeInfo_9._VDFSerialize()
             ], D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class.prototype, "Serialize", null);
             test("D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop", function () {
-                VDF_11.VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}");
+                VDF_10.VDF.Serialize(new D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class(), "D1_MapWithEmbeddedSerializeMethodThatTakesNoAction_Prop_Class").Should().Be("{boolProp:true}");
             });
             var D1_Map_MapThatCancelsItsSerialize_Class_Parent = (function () {
                 function D1_Map_MapThatCancelsItsSerialize_Class_Parent() {
@@ -3670,19 +3728,19 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D1_Map_MapThatCancelsItsSerialize_Class_Parent;
             }());
             __decorate([
-                VDFTypeInfo_8.T("D1_Map_MapThatCancelsItsSerialize_Class_Child"), VDFTypeInfo_8.P()
+                VDFTypeInfo_9.T("D1_Map_MapThatCancelsItsSerialize_Class_Child"), VDFTypeInfo_9.P()
             ], D1_Map_MapThatCancelsItsSerialize_Class_Parent.prototype, "child", void 0);
             var D1_Map_MapThatCancelsItsSerialize_Class_Child = (function () {
                 function D1_Map_MapThatCancelsItsSerialize_Class_Child() {
                 }
-                D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype.Serialize = function () { return VDF_11.VDF.CancelSerialize; };
+                D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype.Serialize = function () { return VDF_10.VDF.CancelSerialize; };
                 return D1_Map_MapThatCancelsItsSerialize_Class_Child;
             }());
             __decorate([
-                VDFTypeInfo_8._VDFSerialize()
+                VDFTypeInfo_9._VDFSerialize()
             ], D1_Map_MapThatCancelsItsSerialize_Class_Child.prototype, "Serialize", null);
             test("D1_Map_MapThatCancelsItsSerialize", function () {
-                VDF_11.VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}");
+                VDF_10.VDF.Serialize(new D1_Map_MapThatCancelsItsSerialize_Class_Parent(), "D1_Map_MapThatCancelsItsSerialize_Class_Parent").Should().Be("{}");
             });
             // for JSON compatibility
             // ==========
@@ -3692,97 +3750,43 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 return D0_MapWithMetadataDisabled_Class;
             }());
             test("D0_MapWithMetadataDisabled", function () {
-                var a = VDFSaver_5.VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaver_5.VDFSaveOptions({ useMetadata: false }));
+                var a = VDFSaver_6.VDFSaver.ToVDFNode(new D0_MapWithMetadataDisabled_Class(), new VDFSaver_6.VDFSaveOptions({ useMetadata: false }));
                 ok(a.metadata == null); //a.metadata.Should().Be(null);
             });
             var D0_Map_List_BoolsWithPopOutDisabled_Class = (function () {
                 function D0_Map_List_BoolsWithPopOutDisabled_Class() {
-                    this.ints = new VDF_11.List("int", 0, 1);
+                    this.ints = new VDFExtras_12.List("int", 0, 1);
                 }
                 return D0_Map_List_BoolsWithPopOutDisabled_Class;
             }());
             __decorate([
-                VDFTypeInfo_8.T("List(int)"), VDFTypeInfo_8.P()
+                VDFTypeInfo_9.T("List(int)"), VDFTypeInfo_9.P()
             ], D0_Map_List_BoolsWithPopOutDisabled_Class.prototype, "ints", void 0);
             test("D0_Map_List_BoolsWithPopOutDisabled", function () {
-                var a = VDFSaver_5.VDFSaver.ToVDFNode(new D0_Map_List_BoolsWithPopOutDisabled_Class(), "D0_Map_List_BoolsWithPopOutDisabled_Class", new VDFSaver_5.VDFSaveOptions({ useChildPopOut: false }));
+                var a = VDFSaver_6.VDFSaver.ToVDFNode(new D0_Map_List_BoolsWithPopOutDisabled_Class(), "D0_Map_List_BoolsWithPopOutDisabled_Class", new VDFSaver_6.VDFSaveOptions({ useChildPopOut: false }));
                 a.ToVDF().Should().Be("{ints:[0 1]}");
             });
             test("D1_Map_IntsWithStringKeys", function () {
-                var a = VDFSaver_5.VDFSaver.ToVDFNode(new VDF_11.Dictionary("object", "object", {
+                var a = VDFSaver_6.VDFSaver.ToVDFNode(new VDFExtras_12.Dictionary("object", "object", {
                     key1: 0,
                     key2: 1
-                }), new VDFSaver_5.VDFSaveOptions({ useStringKeys: true }));
-                a.ToVDF(new VDFSaver_5.VDFSaveOptions({ useStringKeys: true })).Should().Be("{\"key1\":0 \"key2\":1}");
+                }), new VDFSaver_6.VDFSaveOptions({ useStringKeys: true }));
+                a.ToVDF(new VDFSaver_6.VDFSaveOptions({ useStringKeys: true })).Should().Be("{\"key1\":0 \"key2\":1}");
             });
             test("D1_Map_DoublesWithNumberTrimmingDisabled", function () {
-                var a = VDFSaver_5.VDFSaver.ToVDFNode(new VDF_11.List("object", .1, 1.1), new VDFSaver_5.VDFSaveOptions({ useNumberTrimming: false }));
-                a.ToVDF(new VDFSaver_5.VDFSaveOptions({ useNumberTrimming: false })).Should().Be("[0.1 1.1]");
+                var a = VDFSaver_6.VDFSaver.ToVDFNode(new VDFExtras_12.List("object", .1, 1.1), new VDFSaver_6.VDFSaveOptions({ useNumberTrimming: false }));
+                a.ToVDF(new VDFSaver_6.VDFSaveOptions({ useNumberTrimming: false })).Should().Be("[0.1 1.1]");
             });
             test("D1_List_IntsWithCommaSeparators", function () {
-                var a = VDFSaver_5.VDFSaver.ToVDFNode(new VDF_11.List("object", 0, 1), new VDFSaver_5.VDFSaveOptions({ useCommaSeparators: true }));
+                var a = VDFSaver_6.VDFSaver.ToVDFNode(new VDFExtras_12.List("object", 0, 1), new VDFSaver_6.VDFSaveOptions({ useCommaSeparators: true }));
                 a.listChildren.Count.Should().Be(2);
-                a.ToVDF(new VDFSaver_5.VDFSaveOptions({ useCommaSeparators: true })).Should().Be("[0,1]");
+                a.ToVDF(new VDFSaver_6.VDFSaveOptions({ useCommaSeparators: true })).Should().Be("[0,1]");
             });
             // export all classes/enums to global scope
             ExportInternalClassesTo(window, function (str) { return eval(str); });
             // make sure we create one instance, so that the type-info attachment code can run
             (new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base()).toString();
         })(Saving_General || (Saving_General = {}));
-    })(VDFTests || (VDFTests = {}));
-});
-define("Tests/TypeScript/Saving/SpeedTests", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver"], function (require, exports, VDF_12, VDFTypeInfo_9, VDFSaver_6) {
-    "use strict";
-    // tests
-    // ==========
-    var VDFTests;
-    (function (VDFTests) {
-        var Saving_SpeedTests;
-        (function (Saving_SpeedTests) {
-            var SpeedTest1_Class = (function () {
-                function SpeedTest1_Class() {
-                    this.Bool = true;
-                    this.Int = 5;
-                    this.Double = .5;
-                    this.String = "Prop value string.";
-                    this.list = new VDF_12.List("string", "2A", "2B");
-                    this.nestedList = new VDF_12.List("List(string)", new VDF_12.List("string", "1A"));
-                }
-                return SpeedTest1_Class;
-            }());
-            __decorate([
-                VDFTypeInfo_9.T("bool"), VDFTypeInfo_9.P()
-            ], SpeedTest1_Class.prototype, "Bool", void 0);
-            __decorate([
-                VDFTypeInfo_9.T("int"), VDFTypeInfo_9.P()
-            ], SpeedTest1_Class.prototype, "Int", void 0);
-            __decorate([
-                VDFTypeInfo_9.T("double"), VDFTypeInfo_9.P()
-            ], SpeedTest1_Class.prototype, "Double", void 0);
-            __decorate([
-                VDFTypeInfo_9.T("string"), VDFTypeInfo_9.P()
-            ], SpeedTest1_Class.prototype, "String", void 0);
-            __decorate([
-                VDFTypeInfo_9.T("List(string)"), VDFTypeInfo_9.P()
-            ], SpeedTest1_Class.prototype, "list", void 0);
-            __decorate([
-                VDFTypeInfo_9.T("List(List(string))"), VDFTypeInfo_9.P()
-            ], SpeedTest1_Class.prototype, "nestedList", void 0);
-            test("SpeedTest1", function () {
-                var a = VDFSaver_6.VDFSaver.ToVDFNode(new SpeedTest1_Class(), new VDFSaver_6.VDFSaveOptions({ typeMarking: VDFSaver_6.VDFTypeMarking.None }));
-                a["Bool"].primitiveValue.Should().Be(true);
-                a["Int"].primitiveValue.Should().Be(5);
-                a["Double"].primitiveValue.Should().Be(.5);
-                a["String"].primitiveValue.Should().Be("Prop value string.");
-                a["list"][0].primitiveValue.Should().Be("2A");
-                a["list"][1].primitiveValue.Should().Be("2B");
-                a["nestedList"][0][0].primitiveValue.Should().Be("1A");
-                //for (var i = 0; i < 10000; i++)
-                var vdf = a.ToVDF();
-            });
-            // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
-        })(Saving_SpeedTests || (Saving_SpeedTests = {}));
     })(VDFTests || (VDFTests = {}));
 });
 //# sourceMappingURL=JavaScript_Bundle.js.map

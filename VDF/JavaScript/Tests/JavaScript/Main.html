@@ -13,32 +13,26 @@
     <script src="../../node_modules/requirejs/require.js"></script>
     <!-- <script src="../../Source/JavaScript_Bundle.js"></script> -->
 	<script src="../../Tests/JavaScript_Bundle.js"></script>
-    <script src="Tests/TypeScript/GeneralInit.js"></script>	
-    <script src="Tests/TypeScript/GeneralInit.js"></script>
-    <script src="Tests/TypeScript/Loading/L_General.js"></script>
-    <script src="Tests/TypeScript/Loading/ToVDFNode.js"></script>
-    <script src="Tests/TypeScript/Loading/ToObject.js"></script>
-    <script src="Tests/TypeScript/Loading/SpeedTests.js"></script>
-    <script src="Tests/TypeScript/Saving/S_General.js"></script>
-    <script src="Tests/TypeScript/Saving/FromVDFNode.js"></script>
-    <script src="Tests/TypeScript/Saving/FromObject.js"></script>
-    <script src="Tests/TypeScript/Saving/SpeedTests.js"></script>
     <script>
     $(function() {
 		// probably old: note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
         $("#runSavingTests").click(function() {
-        	var startTime = new Date().getTime();
-        	//Saving.Init();
-        	//Saving.RunTests();
-        	Saving_RunTests();
-        	$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
+			require(["Tests/TypeScript/Saving/S_General"], function(Saving_RunTests) {
+				var startTime = new Date().getTime();
+				//Saving.Init();
+				//Saving.RunTests();
+				Saving_RunTests.Saving_RunTests();
+				$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
+			});
         });
         $("#runLoadingTests").click(function() {
-        	var startTime = new Date().getTime();
-	        //Loading.Init();
-        	//Loading.RunTests();
-			Loading_RunTests();
-	        $("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
+			require(["Tests/TypeScript/Loading/L_General"], function(Loading_RunTests) {
+				var startTime = new Date().getTime();
+				//Loading.Init();
+				//Loading.RunTests();
+				Loading_RunTests.Loading_RunTests();
+				$("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
+			});
         });
     });
     </script>

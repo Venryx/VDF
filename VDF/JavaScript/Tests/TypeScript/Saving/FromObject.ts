@@ -1,4 +1,4 @@
-﻿import {VDF, List, Dictionary, object, VDFNodePath} from "../../../Source/TypeScript/VDF";
+﻿import {VDF} from "../../../Source/TypeScript/VDF";
 import {
     _VDFPostSerialize,
     _VDFPreSerialize,
@@ -10,6 +10,7 @@ import {
 } from "../../../Source/TypeScript/VDFTypeInfo";
 import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScript/VDFSaver";
 import {VDFNode} from "../../../Source/TypeScript/VDFNode";
+import {List, object, Dictionary, VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
 // tests
 // ==========
 

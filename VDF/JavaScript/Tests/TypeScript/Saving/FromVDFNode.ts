@@ -1,7 +1,8 @@
 ﻿import {VDFNode} from "../../../Source/TypeScript/VDFNode";
 import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScript/VDFSaver";
-import {List, Dictionary, VDF, object} from "../../../Source/TypeScript/VDF";
+import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFSerialize, _VDFSerialize} from "../../../Source/TypeScript/VDFTypeInfo";
+import {Dictionary, List, object} from "../../../Source/TypeScript/VDFExtras";
 // tests
 // ==========
 

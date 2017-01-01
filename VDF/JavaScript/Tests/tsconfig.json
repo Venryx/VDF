@@ -10,7 +10,8 @@
 		"moduleResolution": "node",
 		"watch": true,
 		"experimentalDecorators": true,
-		"baseUrl": "../"
+		"baseUrl": "../",
+		"noImplicitUseStrict": true // maybe temp; for eval-based module extract stuff
 	},
 	"include": [
         "../Source/**/*.ts",
