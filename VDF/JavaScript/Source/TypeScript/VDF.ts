@@ -85,10 +85,10 @@ if (!Array.prototype["Contains"])
 	Array.prototype._AddProperty("Contains", function(item) { return this.indexOf(item) != -1; });
 if (!Array.prototype["Where"])
 	Array.prototype._AddProperty("Where", function(matchFunc = (()=>true)) {
-		var result = this instanceof List ? new List(this.itemType) : [];
+		var result: any = this instanceof List ? new List(this.itemType) : [];
 		for (let item of this)
 			if (matchFunc.call(item, item)) // call, having the item be "this", as well as the first argument
-				result[this instanceof List ? "Add" : "push"](item);
+				result.push(item);
 		return result;
 	});
 if (!Array.prototype["First"])

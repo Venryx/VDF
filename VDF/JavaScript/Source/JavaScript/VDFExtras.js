@@ -227,6 +227,8 @@ System.register([], function (exports_1, context_1) {
                 List.prototype.RemoveAt = function (index) { return this.splice(index, 1)[0]; };
                 List.prototype.RemoveRange = function (index, count) { return this.splice(index, count); };
                 List.prototype.Any = function (matchFunc) {
+                    if (matchFunc == null)
+                        return this.length > 0;
                     for (var _i = 0, _a = this; _i < _a.length; _i++) {
                         var item = _a[_i];
                         if (matchFunc.call(item, item))

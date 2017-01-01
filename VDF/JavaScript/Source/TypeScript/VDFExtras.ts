@@ -196,13 +196,15 @@ export class List<T> extends Array<T> {
 	Remove(item) { return this.RemoveAt(this.indexOf(item)) != null; }
 	RemoveAt(index) { return this.splice(index, 1)[0]; }
 	RemoveRange(index, count) { return this.splice(index, count); }
-	Any(matchFunc) {
+	Any(matchFunc?: (item: T)=>boolean) {
+		if (matchFunc == null)
+			return this.length > 0;
 		for (let item of this)
 			if (matchFunc.call(item, item))
 				return true;
 		return false;
 	}
-	All(matchFunc) {
+	All(matchFunc: (item: T)=>boolean) {
 		for (let item of this)
 			if (!matchFunc.call(item, item))
 				return false;
@@ -214,13 +216,13 @@ export class List<T> extends Array<T> {
 			result.Add(selectFunc.call(item, item));
 		return result;
 	}
-	First(matchFunc) {
+	First(matchFunc?: (item: T)=>boolean) {
 		var result = this.FirstOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	}
-	FirstOrDefault(matchFunc) {
+	FirstOrDefault(matchFunc?: (item: T)=>boolean) {
 		if (matchFunc) {
 			for (let item of this)
 				if (matchFunc.call(item, item))
@@ -230,13 +232,13 @@ export class List<T> extends Array<T> {
 		else
 			return this[0];
 	}
-	Last(matchFunc?) {
+	Last(matchFunc?: (item: T)=>boolean) {
 		var result = this.LastOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	}
-	LastOrDefault(matchFunc?) {
+	LastOrDefault(matchFunc?: (item: T)=>boolean) {
 		if (matchFunc) {
 			for (var i = this.length - 1; i >= 0; i--)
 				if (matchFunc.call(this[i], this[i]))
