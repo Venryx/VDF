@@ -463,3 +463,4 @@ var TokenSet = (function () {
     }
     return TokenSet;
 }());
+//# sourceMappingURL=VDFTokenParser.js.map

@@ -184,3 +184,4 @@ var VDFPostDeserialize = (function () {
     tags: any[];
     constructor(tags: any[]) { this.tags = tags; }
 }*/ 
+//# sourceMappingURL=VDFTypeInfo.js.map

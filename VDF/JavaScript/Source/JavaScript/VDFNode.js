@@ -309,3 +309,4 @@ VDFNode.charsThatNeedEscaping_ifAnywhere_regex = /"|'|\n|\t|<<|>>/; // (well, an
 VDFNode.charsThatNeedEscaping_ifNonQuoted_regex = /^([\t^# ,0-9.\-+]|null|true|false)|{|}|\[|\]|:/;
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 VDF.CancelSerialize = new VDFNode();
+//# sourceMappingURL=VDFNode.js.map

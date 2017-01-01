@@ -1,0 +1,51 @@
+﻿<head>
+    <link rel="stylesheet" href="Packages/General/QUnit 1.14.0.css">
+	<script src="VDFTests/TypeScript/Packages/General/ClassExtensions.js"></script>
+    <script src="Packages/General/QUnit 1.14.0.js"></script>
+    <script src="Packages/JQuery/JQuery1.9.1.js"></script>
+    <script src="VDFTests/TypeScript/Packages/V/V.js"></script>
+	<script src="../../VDF/JavaScript/VDF.js"></script>
+	<script src="../../VDF/JavaScript/VDFTypeInfo.js"></script>
+	<script src="../../VDF/JavaScript/VDFNode.js"></script>
+    <script src="../../VDF/JavaScript/VDFLoader.js"></script>
+    <script src="../../VDF/JavaScript/VDFTokenParser.js"></script>
+    <script src="../../VDF/JavaScript/VDFSaver.js"></script>
+    <script src="VDFTests/TypeScript/GeneralInit.js"></script>
+    <script src="VDFTests/TypeScript/Loading/L_General.js"></script>
+    <script src="VDFTests/TypeScript/Loading/ToVDFNode.js"></script>
+    <script src="VDFTests/TypeScript/Loading/ToObject.js"></script>
+    <script src="VDFTests/TypeScript/Loading/SpeedTests.js"></script>
+    <script src="VDFTests/TypeScript/Saving/S_General.js"></script>
+    <script src="VDFTests/TypeScript/Saving/FromVDFNode.js"></script>
+    <script src="VDFTests/TypeScript/Saving/FromObject.js"></script>
+    <script src="VDFTests/TypeScript/Saving/SpeedTests.js"></script>
+    <script>
+    $(function() {
+		// probably old: note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
+        $("#runSavingTests").click(function() {
+        	var startTime = new Date().getTime();
+        	//Saving.Init();
+        	//Saving.RunTests();
+        	Saving_RunTests();
+        	$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
+        });
+        $("#runLoadingTests").click(function() {
+        	var startTime = new Date().getTime();
+	        //Loading.Init();
+        	//Loading.RunTests();
+			Loading_RunTests();
+	        $("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
+        });
+    });
+    </script>
+</head>
+<body>
+    <input id="runSavingTests" type="button" value="Run Saving Tests"/>
+	<input id="runLoadingTests" type="button" value="Run Loading Tests"/>
+	<div id="savingResults" style="display: inline-block; width: 200; font-size: 14;">Saving time (in ms): </div>
+	<div id="loadingResults" style="display: inline-block; width: 200; font-size: 14;">Loading time (in ms): </div>
+    <div>
+        <div id="qunit"></div>
+        <div id="qunit-fixture"></div>
+    </div>
+</body>

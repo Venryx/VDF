@@ -602,3 +602,4 @@ var Dictionary = (function () {
     return Dictionary;
 }());
 //VDFUtils.MakePropertiesHidden(Dictionary.prototype, true); 
+//# sourceMappingURL=VDF.js.map
