@@ -1,3 +1,6 @@
+"use strict";
+var VDFLoader_1 = require("./VDFLoader");
+var VDF_1 = require("./VDF");
 var VDFTokenType;
 (function (VDFTokenType) {
     //WiderMetadataEndMarker,
@@ -35,7 +38,7 @@ var VDFTokenType;
     VDFTokenType[VDFTokenType["ListEndMarker"] = 19] = "ListEndMarker";
     VDFTokenType[VDFTokenType["MapStartMarker"] = 20] = "MapStartMarker";
     VDFTokenType[VDFTokenType["MapEndMarker"] = 21] = "MapEndMarker";
-})(VDFTokenType || (VDFTokenType = {}));
+})(VDFTokenType = exports.VDFTokenType || (exports.VDFTokenType = {}));
 var VDFToken = (function () {
     function VDFToken(type, position, index, text) {
         this.type = type;
@@ -45,6 +48,7 @@ var VDFToken = (function () {
     }
     return VDFToken;
 }());
+exports.VDFToken = VDFToken;
 var VDFTokenParser = (function () {
     function VDFTokenParser() {
     }
@@ -52,10 +56,10 @@ var VDFTokenParser = (function () {
         if (parseAllTokens === void 0) { parseAllTokens = false; }
         if (postProcessTokens === void 0) { postProcessTokens = true; }
         text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
-        options = options || new VDFLoadOptions();
-        var result = new List("VDFToken");
+        options = options || new VDFLoader_1.VDFLoadOptions();
+        var result = new VDF_1.List("VDFToken");
         var currentTokenFirstCharPos = 0;
-        var currentTokenTextBuilder = new StringBuilder();
+        var currentTokenTextBuilder = new VDF_1.StringBuilder();
         var currentTokenType = VDFTokenType.None;
         var activeLiteralStartChars = null;
         var activeStringStartChar = null;
@@ -148,7 +152,7 @@ var VDFTokenParser = (function () {
                         switch (ch) {
                             case '#':
                                 if (nextChar == '#' && firstTokenChar) {
-                                    currentTokenTextBuilder = new StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
+                                    currentTokenTextBuilder = new VDF_1.StringBuilder(text.substr(i, (text.indexOf("\n", i + 1) != -1 ? text.indexOf("\n", i + 1) : text.length) - i));
                                     currentTokenType = VDFTokenType.InLineComment;
                                     i += currentTokenTextBuilder.length - 1; // have next char processed by the one right after comment (i.e. the line-break char)
                                     nextChar = i < text.length - 1 ? text[i + 1] : specialEnderChar; // update after i-modification, since used for next loop's 'ch' value
@@ -354,13 +358,13 @@ var VDFTokenParser = (function () {
         return result;
     }*/
     VDFTokenParser.PostProcessTokens = function (origTokens, options) {
-        var result = new List(); //"VDFToken");
+        var result = new VDF_1.List(); //"VDFToken");
         // 1: update strings-before-key-value-separator-tokens to be considered keys, if that's enabled (one reason being, for JSON compatibility)
         // 2: re-wrap popped-out-children with parent brackets/braces
-        var groupDepth_tokenSetsToProcessAfterGroupEnds = new Dictionary("int", "List(VDFToken)");
+        var groupDepth_tokenSetsToProcessAfterGroupEnds = new VDF_1.Dictionary("int", "List(VDFToken)");
         var tokenSetsToProcess = [];
         // maybe temp: add depth-0-ender helper token
-        tokenSetsToProcess.push(new TokenSet(new List("VDFToken", new VDFToken(VDFTokenType.None, -1, -1, ""))));
+        tokenSetsToProcess.push(new TokenSet(new VDF_1.List("VDFToken", new VDFToken(VDFTokenType.None, -1, -1, ""))));
         tokenSetsToProcess.push(new TokenSet(origTokens));
         while (tokenSetsToProcess.length > 0) {
             var tokenSet = tokenSetsToProcess[tokenSetsToProcess.length - 1];
@@ -451,8 +455,9 @@ var VDFTokenParser = (function () {
     };
     return VDFTokenParser;
 }());
-VDFTokenParser.charsAToZ = List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
+VDFTokenParser.charsAToZ = VDF_1.List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
+VDFTokenParser.chars0To9DotAndNegative = VDF_1.List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
+exports.VDFTokenParser = VDFTokenParser;
 var TokenSet = (function () {
     function TokenSet(tokens, line_tabsReached) {
         if (line_tabsReached === void 0) { line_tabsReached = 0; }
@@ -463,4 +468,5 @@ var TokenSet = (function () {
     }
     return TokenSet;
 }());
+exports.TokenSet = TokenSet;
 //# sourceMappingURL=VDFTokenParser.js.map

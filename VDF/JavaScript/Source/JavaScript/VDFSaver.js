@@ -1,11 +1,14 @@
-var Log = g.Log, Assert = g.Assert;
+"use strict";
+var VDFNode_1 = require("./VDFNode");
+var VDFTypeInfo_1 = require("./VDFTypeInfo");
+var VDF_1 = require("./VDF");
 var VDFTypeMarking;
 (function (VDFTypeMarking) {
     VDFTypeMarking[VDFTypeMarking["None"] = 0] = "None";
     VDFTypeMarking[VDFTypeMarking["Internal"] = 1] = "Internal";
     VDFTypeMarking[VDFTypeMarking["External"] = 2] = "External";
     VDFTypeMarking[VDFTypeMarking["ExternalNoCollapse"] = 3] = "ExternalNoCollapse"; // maybe temp
-})(VDFTypeMarking || (VDFTypeMarking = {}));
+})(VDFTypeMarking = exports.VDFTypeMarking || (exports.VDFTypeMarking = {}));
 var VDFSaveOptions = (function () {
     function VDFSaveOptions(initializerObj, messages, typeMarking, useMetadata, useChildPopOut, useStringKeys, useNumberTrimming, useCommaSeparators) {
         if (typeMarking === void 0) { typeMarking = VDFTypeMarking.Internal; }
@@ -35,6 +38,7 @@ var VDFSaveOptions = (function () {
     };
     return VDFSaveOptions;
 }());
+exports.VDFSaveOptions = VDFSaveOptions;
 var VDFSaver = (function () {
     function VDFSaver() {
     }
@@ -43,19 +47,19 @@ var VDFSaver = (function () {
         if (declaredTypeName_orOptions instanceof VDFSaveOptions)
             return VDFSaver.ToVDFNode(obj, null, declaredTypeName_orOptions);
         var declaredTypeName = declaredTypeName_orOptions;
-        path = path || new VDFNodePath(new VDFNodePathNode(obj));
-        var typeName = obj != null ? (EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
-        var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-        var typeInfo = typeName ? VDFTypeInfo.Get(typeName) : new VDFTypeInfo();
-        for (var propName_1 in VDF.GetObjectProps(obj))
-            if (obj[propName_1] instanceof Function && obj[propName_1].tags && obj[propName_1].tags.Any(function (a) { return a instanceof VDFPreSerialize; })) {
-                if (obj[propName_1](path, options) == VDF.CancelSerialize)
-                    return VDF.CancelSerialize;
+        path = path || new VDF_1.VDFNodePath(new VDF_1.VDFNodePathNode(obj));
+        var typeName = obj != null ? (VDF_1.EnumValue.IsEnum(declaredTypeName) ? declaredTypeName : VDF_1.VDF.GetTypeNameOfObject(obj)) : null; // at bottom, enums an integer; but consider it of a distinct type
+        var typeGenericArgs = VDF_1.VDF.GetGenericArgumentsOfType(typeName);
+        var typeInfo = typeName ? VDFTypeInfo_1.VDFTypeInfo.Get(typeName) : new VDFTypeInfo_1.VDFTypeInfo();
+        for (var propName_1 in VDF_1.VDF.GetObjectProps(obj))
+            if (obj[propName_1] instanceof Function && obj[propName_1].tags && obj[propName_1].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFPreSerialize; })) {
+                if (obj[propName_1](path, options) == VDF_1.VDF.CancelSerialize)
+                    return VDF_1.VDF.CancelSerialize;
             }
         var result;
         var serializedByCustomMethod = false;
-        for (var propName_2 in VDF.GetObjectProps(obj))
-            if (obj[propName_2] instanceof Function && obj[propName_2].tags && obj[propName_2].tags.Any(function (a) { return a instanceof VDFSerialize; })) {
+        for (var propName_2 in VDF_1.VDF.GetObjectProps(obj))
+            if (obj[propName_2] instanceof Function && obj[propName_2].tags && obj[propName_2].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFSerialize; })) {
                 var serializeResult = obj[propName_2](path, options);
                 if (serializeResult !== undefined) {
                     result = serializeResult;
@@ -64,32 +68,32 @@ var VDFSaver = (function () {
                 }
             }
         if (!serializedByCustomMethod) {
-            result = new VDFNode();
+            result = new VDFNode_1.VDFNode();
             if (obj == null) { } //result.primitiveValue = null;
-            else if (VDF.GetIsTypePrimitive(typeName))
+            else if (VDF_1.VDF.GetIsTypePrimitive(typeName))
                 result.primitiveValue = obj;
-            else if (EnumValue.IsEnum(typeName))
-                result.primitiveValue = new EnumValue(typeName, obj).toString();
-            else if (typeName && typeName.startsWith("List(")) {
+            else if (VDF_1.EnumValue.IsEnum(typeName))
+                result.primitiveValue = new VDF_1.EnumValue(typeName, obj).toString();
+            else if (typeName && typeName.StartsWith("List(")) {
                 result.isList = true;
                 var objAsList = obj;
                 for (var i = 0; i < objAsList.length; i++) {
                     var itemNode = VDFSaver.ToVDFNode(objAsList[i], typeGenericArgs[0], options, path.ExtendAsListItem(i, objAsList[i]), true);
-                    if (itemNode == VDF.CancelSerialize)
+                    if (itemNode == VDF_1.VDF.CancelSerialize)
                         continue;
                     result.AddListChild(itemNode);
                 }
             }
-            else if (typeName && typeName.startsWith("Dictionary(")) {
+            else if (typeName && typeName.StartsWith("Dictionary(")) {
                 result.isMap = true;
                 var objAsDictionary = obj;
                 for (var i = 0, pair = null, pairs = objAsDictionary.Pairs; i < pairs.length && (pair = pairs[i]); i++) {
                     var keyNode = VDFSaver.ToVDFNode(pair.key, typeGenericArgs[0], options, path.ExtendAsMapKey(i, pair.key), true); // stringify-attempt-1: use exporter
                     if (typeof keyNode.primitiveValue != "string")
                         //throw new Error("A map key object must either be a string or have an exporter that converts it into a string.");
-                        keyNode = new VDFNode(pair.key.toString());
+                        keyNode = new VDFNode_1.VDFNode(pair.key.toString());
                     var valueNode = VDFSaver.ToVDFNode(pair.value, typeGenericArgs[1], options, path.ExtendAsMapItem(pair.key, pair.value), true);
-                    if (valueNode == VDF.CancelSerialize)
+                    if (valueNode == VDF_1.VDF.CancelSerialize)
                         continue;
                     result.SetMapChild(keyNode, valueNode);
                 }
@@ -112,11 +116,11 @@ var VDFSaver = (function () {
                         var propValue = obj[propName_4];
                         if (propInfo && !propInfo.ShouldValueBeSaved(propValue))
                             continue;
-                        var propNameNode = new VDFNode(propName_4);
+                        var propNameNode = new VDFNode_1.VDFNode(propName_4);
                         var propValueNode = void 0;
                         var childPath = path.ExtendAsChild(propInfo, propValue);
-                        for (var propName2 in VDF.GetObjectProps(obj))
-                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFSerializeProp; })) {
+                        for (var propName2 in VDF_1.VDF.GetObjectProps(obj))
+                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFSerializeProp; })) {
                                 var serializeResult = obj[propName2](childPath, options);
                                 if (serializeResult !== undefined) {
                                     propValueNode = serializeResult;
@@ -125,7 +129,7 @@ var VDFSaver = (function () {
                             }
                         if (propValueNode === undefined)
                             propValueNode = VDFSaver.ToVDFNode(propValue, propInfo ? propInfo.typeName : null, options, childPath);
-                        if (propValueNode == VDF.CancelSerialize)
+                        if (propValueNode == VDF_1.VDF.CancelSerialize)
                             continue;
                         propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
                         result.SetMapChild(propNameNode, propValueNode);
@@ -144,19 +148,20 @@ var VDFSaver = (function () {
                 declaredTypeName = "Dictionary(object object)";
             else
                 declaredTypeName = "object";
-        if (options.useMetadata && typeName != null && !VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == VDFTypeMarking.Internal && !VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName)
-            || (options.typeMarking == VDFTypeMarking.External && !VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF))
+        if (options.useMetadata && typeName != null && !VDF_1.VDF.GetIsTypeAnonymous(typeName) && ((options.typeMarking == VDFTypeMarking.Internal && !VDF_1.VDF.GetIsTypePrimitive(typeName) && typeName != declaredTypeName)
+            || (options.typeMarking == VDFTypeMarking.External && !VDF_1.VDF.GetIsTypePrimitive(typeName) && (typeName != declaredTypeName || !declaredTypeInParentVDF))
             || options.typeMarking == VDFTypeMarking.ExternalNoCollapse))
             result.metadata = typeName;
         if (result.metadata_override != null)
             result.metadata = result.metadata_override;
         if (options.useChildPopOut && typeInfo && typeInfo.typeTag && typeInfo.typeTag.popOutL1)
             result.childPopOut = true;
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPostSerialize; }))
+        for (var propName in VDF_1.VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFPostSerialize; }))
                 obj[propName](result, path, options);
         return result;
     };
     return VDFSaver;
 }());
+exports.VDFSaver = VDFSaver;
 //# sourceMappingURL=VDFSaver.js.map

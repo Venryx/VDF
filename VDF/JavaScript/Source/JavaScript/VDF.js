@@ -1,13 +1,32 @@
+"use strict";
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
+var VDFSaver_1 = require("./VDFSaver");
+var VDFLoader_1 = require("./VDFLoader");
+var VDFTypeInfo_1 = require("./VDFTypeInfo");
 // vdf globals
 // ==========
 var g = window;
-g.Log = g.Log || console.log;
-g.Assert = g.Assert || (function (condition, message) {
+function Log() {
+    var args = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        args[_i] = arguments[_i];
+    }
+    if (g.Log)
+        return g.Log.apply(g, args);
+    return console.log.apply(console, args);
+}
+exports.Log = Log;
+function Assert(condition, message) {
     if (condition)
         return;
     console.assert(false, message || "");
     debugger;
-});
+}
+exports.Assert = Assert;
 // the below lets you easily add non-enumerable properties
 Object.defineProperty(Object.prototype, "_AddProperty", {
     enumerable: false,
@@ -107,6 +126,7 @@ var VDFNodePathNode = (function () {
     };
     return VDFNodePathNode;
 }());
+exports.VDFNodePathNode = VDFNodePathNode;
 var VDFNodePath = (function () {
     function VDFNodePath(nodes_orRootNode) {
         this.nodes = nodes_orRootNode instanceof Array ? nodes_orRootNode : [nodes_orRootNode];
@@ -158,6 +178,7 @@ var VDFNodePath = (function () {
     };
     return VDFNodePath;
 }());
+exports.VDFNodePath = VDFNodePath;
 var VDF = (function () {
     function VDF() {
     }
@@ -191,8 +212,17 @@ var VDF = (function () {
         }
         return false;
     };
-    VDF.GetIsTypePrimitive = function (typeName) { return ["byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "bool", "char", "string"].Contains(typeName); };
-    VDF.GetIsTypeAnonymous = function (typeName) { return typeName != null && typeName == "object"; };
+    // (technically strings are not primitives in C#, but we consider them such)
+    VDF.GetIsTypePrimitive = function (typeName) {
+        return [
+            "byte", "sbyte", "short", "ushort",
+            "int", "uint", "long", "ulong", "float", "double", "decimal",
+            "bool", "char", "string"
+        ].Contains(typeName);
+    };
+    VDF.GetIsTypeAnonymous = function (typeName) {
+        return typeName != null && typeName == "object";
+    };
     VDF.GetTypeNameOfObject = function (obj) {
         var rawType = typeof obj;
         if (rawType == "object") {
@@ -270,20 +300,20 @@ var VDF = (function () {
         return result;
     };
     VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {
-        if (declaredTypeName_orOptions instanceof VDFSaveOptions)
+        if (declaredTypeName_orOptions instanceof VDFSaver_1.VDFSaveOptions)
             return VDF.Serialize(obj, null, declaredTypeName_orOptions);
         var declaredTypeName = declaredTypeName_orOptions;
         var options = options_orNothing;
-        return VDFSaver.ToVDFNode(obj, declaredTypeName, options).ToVDF(options);
+        return VDFSaver_1.VDFSaver.ToVDFNode(obj, declaredTypeName, options).ToVDF(options);
     };
     VDF.Deserialize = function (vdf, declaredTypeName_orOptions, options_orNothing) {
-        if (declaredTypeName_orOptions instanceof VDFLoadOptions)
+        if (declaredTypeName_orOptions instanceof VDFLoader_1.VDFLoadOptions)
             return VDF.Deserialize(vdf, null, declaredTypeName_orOptions);
         var declaredTypeName = declaredTypeName_orOptions;
         var options = options_orNothing;
-        return VDFLoader.ToVDFNode(vdf, declaredTypeName, options).ToObject(declaredTypeName, options);
+        return VDFLoader_1.VDFLoader.ToVDFNode(vdf, declaredTypeName, options).ToObject(declaredTypeName, options);
     };
-    VDF.DeserializeInto = function (vdf, obj, options) { VDFLoader.ToVDFNode(vdf, VDF.GetTypeNameOfObject(obj), options).IntoObject(obj, options); };
+    VDF.DeserializeInto = function (vdf, obj, options) { VDFLoader_1.VDFLoader.ToVDFNode(vdf, VDF.GetTypeNameOfObject(obj), options).IntoObject(obj, options); };
     return VDF;
 }());
 // for use with VDFSaveOptions
@@ -291,6 +321,7 @@ VDF.AnyMember = "#AnyMember";
 VDF.AllMembers = ["#AnyMember"];
 // for use with VDFType
 VDF.PropRegex_Any = ""; //"^.+$";
+exports.VDF = VDF;
 // helper classes
 // ==================
 var VDFUtils = (function () {
@@ -351,6 +382,7 @@ var StringBuilder = (function () {
     StringBuilder.prototype.ToString = function (joinerString) { return this.parts.join(joinerString || ""); }; // builds the string
     return StringBuilder;
 }());
+exports.StringBuilder = StringBuilder;
 // tags
 // ----------
 var PropDeclarationWrapper = (function () {
@@ -373,9 +405,9 @@ function Prop(typeOrObj, propName, propType_orFirstTag) {
         return Prop.apply(this, [typeOrObj, propName, null, propType_orFirstTag].concat(tags));
     var type = typeOrObj instanceof Function ? typeOrObj : typeOrObj.constructor;
     var propType = propType_orFirstTag;
-    var typeInfo = VDFTypeInfo.Get(type);
+    var typeInfo = VDFTypeInfo_1.VDFTypeInfo.Get(type);
     if (typeInfo.props[propName] == null)
-        typeInfo.props[propName] = new VDFPropInfo(propName, propType, tags);
+        typeInfo.props[propName] = new VDFTypeInfo_1.VDFPropInfo(propName, propType, tags);
     return new PropDeclarationWrapper();
 }
 ;
@@ -387,10 +419,10 @@ function TypeDeclarationWrapper(tags) { this.tags = tags; }
 TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
     var s = this;
     type = type instanceof Function ? type : type.constructor;
-    var typeInfo = VDFTypeInfo.Get(type.name_fake || type.name);
+    var typeInfo = VDFTypeInfo_1.VDFTypeInfo.Get(type.name_fake || type.name);
     var typeTag = {};
     for (var i in s.tags)
-        if (s.tags[i] instanceof VDFType)
+        if (s.tags[i] instanceof VDFTypeInfo_1.VDFType)
             typeTag = s.tags[i];
     typeInfo.tags = s.tags;
     typeInfo.typeTag.AddDataOf(typeTag);
@@ -414,6 +446,7 @@ var object = (function () {
     }
     return object;
 }()); // just an alias for Object, to be consistent with C# version
+exports.object = object;
 var EnumValue = (function () {
     function EnumValue(enumTypeName, intValue) {
         this.realTypeName = enumTypeName;
@@ -427,51 +460,54 @@ var EnumValue = (function () {
     EnumValue.GetEnumStringForIntValue = function (enumTypeName, intValue) { return eval(enumTypeName + "[" + intValue + "]"); };
     return EnumValue;
 }());
-window["List"] = function List(itemType) {
-    var items = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        items[_i - 1] = arguments[_i];
+exports.EnumValue = EnumValue;
+var List = (function (_super) {
+    __extends(List, _super);
+    function List(itemType) {
+        var items = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            items[_i - 1] = arguments[_i];
+        }
+        var _this = _super.apply(this, items) || this;
+        _this.itemType = itemType;
+        return _this;
     }
-    var s = Object.create(Array.prototype);
-    s = (Array.apply(s, items) || s);
-    s["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
-    //self.constructor = List; // makes "(new List()).constructor == List" be true
-    //Object.defineProperty(self, "constructor", {enumerable: false, value: List});
-    //self.realTypeName = "List(" + itemType + ")";
-    //Object.defineProperty(self, "realTypeName", {enumerable: false, value: "List(" + itemType + ")"});
-    //self.itemType = itemType;
-    Object.defineProperty(s, "itemType", { enumerable: false, value: itemType });
-    return s;
-};
-(function () {
-    var s = List.prototype;
-    s["__proto__"] = Array.prototype; // makes "(new List()) instanceof Array" be true
-    // new properties
-    Object.defineProperty(s, "Count", { enumerable: false, get: function () { return this.length; } });
-    // new methods
+    Object.defineProperty(List.prototype, "Count", {
+        get: function () { return this.length; },
+        enumerable: true,
+        configurable: true
+    });
     /*s.Indexes = function () {
         var result = {};
         for (var i = 0; i < this.length; i++)
             result[i] = this[i];
         return result;
     };*/
-    s.Add = function () {
+    List.prototype.Add = function () {
         var items = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             items[_i] = arguments[_i];
         }
         return this.push.apply(this, items);
     };
-    s.AddRange = function (items) {
-        for (var i = 0; i < items.length; i++)
-            this.push(items[i]);
+    ;
+    List.prototype.AddRange = function (items) {
+        /*for (var i = 0; i < items.length; i++)
+            this.push(items[i]);*/
+        this.push.apply(this, items);
     };
-    s.Insert = function (index, item) { return this.splice(index, 0, item); };
-    s.InsertRange = function (index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
-    s.Remove = function (item) { return this.RemoveAt(this.indexOf(item)) != null; };
-    s.RemoveAt = function (index) { return this.splice(index, 1)[0]; };
-    s.RemoveRange = function (index, count) { return this.splice(index, count); };
-    s.Any = function (matchFunc) {
+    ;
+    List.prototype.Insert = function (index, item) { return this.splice(index, 0, item); };
+    ;
+    List.prototype.InsertRange = function (index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
+    ;
+    List.prototype.Remove = function (item) { return this.RemoveAt(this.indexOf(item)) != null; };
+    ;
+    List.prototype.RemoveAt = function (index) { return this.splice(index, 1)[0]; };
+    ;
+    List.prototype.RemoveRange = function (index, count) { return this.splice(index, count); };
+    ;
+    List.prototype.Any = function (matchFunc) {
         for (var _i = 0, _a = this; _i < _a.length; _i++) {
             var item = _a[_i];
             if (matchFunc.call(item, item))
@@ -479,7 +515,8 @@ window["List"] = function List(itemType) {
         }
         return false;
     };
-    s.All = function (matchFunc) {
+    ;
+    List.prototype.All = function (matchFunc) {
         for (var _i = 0, _a = this; _i < _a.length; _i++) {
             var item = _a[_i];
             if (!matchFunc.call(item, item))
@@ -487,7 +524,8 @@ window["List"] = function List(itemType) {
         }
         return true;
     };
-    s.Select = function (selectFunc, itemType) {
+    ;
+    List.prototype.Select = function (selectFunc, itemType) {
         var result = new List(itemType || "object");
         for (var _i = 0, _a = this; _i < _a.length; _i++) {
             var item = _a[_i];
@@ -495,13 +533,15 @@ window["List"] = function List(itemType) {
         }
         return result;
     };
-    s.First = function (matchFunc) {
+    ;
+    List.prototype.First = function (matchFunc) {
         var result = this.FirstOrDefault(matchFunc);
         if (result == null)
             throw new Error("Matching item not found.");
         return result;
     };
-    s.FirstOrDefault = function (matchFunc) {
+    ;
+    List.prototype.FirstOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var _i = 0, _a = this; _i < _a.length; _i++) {
                 var item = _a[_i];
@@ -513,13 +553,15 @@ window["List"] = function List(itemType) {
         else
             return this[0];
     };
-    s.Last = function (matchFunc) {
+    ;
+    List.prototype.Last = function (matchFunc) {
         var result = this.LastOrDefault(matchFunc);
         if (result == null)
             throw new Error("Matching item not found.");
         return result;
     };
-    s.LastOrDefault = function (matchFunc) {
+    ;
+    List.prototype.LastOrDefault = function (matchFunc) {
         if (matchFunc) {
             for (var i = this.length - 1; i >= 0; i--)
                 if (matchFunc.call(this[i], this[i]))
@@ -529,15 +571,20 @@ window["List"] = function List(itemType) {
         else
             return this[this.length - 1];
     };
-    s.GetRange = function (index, count) {
+    ;
+    List.prototype.GetRange = function (index, count) {
         var result = new List(this.itemType);
         for (var i = index; i < index + count; i++)
             result.Add(this[i]);
         return result;
     };
-    s.Contains = function (item) { return this.indexOf(item) != -1; };
-    VDFUtils.MakePropertiesHidden(s, true);
-})();
+    ;
+    List.prototype.Contains = function (item) { return this.indexOf(item) != -1; };
+    ;
+    return List;
+}(Array));
+exports.List = List;
+window["List"] = List;
 var Dictionary = (function () {
     function Dictionary(keyType, valueType, keyValuePairsObj) {
         //VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
@@ -601,5 +648,44 @@ var Dictionary = (function () {
     };
     return Dictionary;
 }());
-//VDFUtils.MakePropertiesHidden(Dictionary.prototype, true); 
+exports.Dictionary = Dictionary;
+window["Dictionary"] = Dictionary;
+//VDFUtils.MakePropertiesHidden(Dictionary.prototype, true);
+// tags
+// ==========
+function T(typeOrTypeName) {
+    return function (target, name) {
+        //target.prototype[name].AddTags(new VDFPostDeserialize());
+        //Prop(target, name, typeOrTypeName);
+        //target.p(name, typeOrTypeName);
+        var propInfo = VDFTypeInfo_1.VDFTypeInfo.Get(target.constructor).GetProp(name);
+        propInfo.typeName = typeOrTypeName instanceof Function ? typeOrTypeName.name : typeOrTypeName;
+    };
+}
+exports.T = T;
+;
+g.Extend({ T: T });
+function P(includeL2, popOutL2) {
+    if (includeL2 === void 0) { includeL2 = true; }
+    return function (target, name) {
+        var propInfo = VDFTypeInfo_1.VDFTypeInfo.Get(target.constructor).GetProp(name);
+        propInfo.AddTags(new VDFTypeInfo_1.VDFProp(includeL2, popOutL2));
+    };
+}
+exports.P = P;
+;
+g.Extend({ P: P });
+//export var D;
+/*export let D = ()=> {
+    let D_ = function(...args) {
+        return (target, name)=> {
+            var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+            propInfo.AddTags(new DefaultValue(...args));
+        };
+    };
+    // copy D.NullOrEmpty and such
+    for (var key in g.D)
+        D_[key] = g.D[key];
+    return D_;
+};*/ 
 //# sourceMappingURL=VDF.js.map

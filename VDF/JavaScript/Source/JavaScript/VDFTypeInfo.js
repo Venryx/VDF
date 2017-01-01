@@ -1,8 +1,10 @@
+"use strict";
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var VDF_1 = require("./VDF");
 var VDFType = (function () {
     function VDFType(propIncludeRegexL1, popOutL1) {
         this.propIncludeRegexL1 = propIncludeRegexL1;
@@ -16,6 +18,7 @@ var VDFType = (function () {
     };
     return VDFType;
 }());
+exports.VDFType = VDFType;
 var VDFTypeInfo = (function () {
     function VDFTypeInfo() {
         this.props = {};
@@ -24,9 +27,9 @@ var VDFTypeInfo = (function () {
         //var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
         var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
         var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
-        if (VDF.GetIsTypeAnonymous(typeNameBase)) {
+        if (VDF_1.VDF.GetIsTypeAnonymous(typeNameBase)) {
             var result = new VDFTypeInfo();
-            result.typeTag = new VDFType(VDF.PropRegex_Any);
+            result.typeTag = new VDFType(VDF_1.VDF.PropRegex_Any);
             return result;
         }
         var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
@@ -60,6 +63,7 @@ var VDFTypeInfo = (function () {
     };
     return VDFTypeInfo;
 }());
+exports.VDFTypeInfo = VDFTypeInfo;
 var VDFProp = (function () {
     function VDFProp(includeL2, popOutL2) {
         if (includeL2 === void 0) { includeL2 = true; }
@@ -68,6 +72,7 @@ var VDFProp = (function () {
     }
     return VDFProp;
 }());
+exports.VDFProp = VDFProp;
 var P = (function (_super) {
     __extends(P, _super);
     function P(includeL2, popOutL2) {
@@ -76,58 +81,56 @@ var P = (function (_super) {
     }
     return P;
 }(VDFProp));
+exports.P = P;
 var DefaultValue = (function () {
     function DefaultValue(defaultValue) {
-        if (defaultValue === void 0) { defaultValue = D.DefaultDefault; }
+        if (defaultValue === void 0) { defaultValue = exports.D.DefaultDefault; }
         this.defaultValue = defaultValue;
     }
     return DefaultValue;
 }());
-var D = (function (_super) {
-    __extends(D, _super);
-    function D(defaultValue) {
-        if (defaultValue === void 0) { defaultValue = D.DefaultDefault; }
-        return _super.call(this, defaultValue) || this;
-    }
-    return D;
-}(DefaultValue));
-//static NoDefault = new object(); // i.e. the prop has no default, so whatever value it has is always saved [commented out, since: if you want no default, just don't add the D tag]
-D.DefaultDefault = new object(); // i.e. the default value for the type (not the prop) ['false' for a bool, etc.]
-D.NullOrEmpty = new object(); // i.e. null, or an empty string or collection
-D.Empty = new object(); // i.e. an empty string or collection
+exports.DefaultValue = DefaultValue;
+exports.D = function D(defaultValue) {
+    return (function (target, name) {
+        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
+        propInfo.AddTags(new DefaultValue(defaultValue));
+    });
+};
+exports.D.DefaultDefault = {};
+exports.D.NullOrEmpty = {};
+exports.D.Empty = {};
 var VDFPropInfo = (function () {
     function VDFPropInfo(propName, propTypeName, tags) {
         this.name = propName;
         this.typeName = propTypeName;
-        this.tags = tags;
-        this.propTag = tags.First(function (a) { return a instanceof VDFProp; });
-        this.defaultValueTag = tags.First(function (a) { return a instanceof DefaultValue; });
+        this.tags = new VDF_1.List("object", tags);
+        this.propTag = this.tags.First(function (a) { return a instanceof VDFProp; });
+        this.defaultValueTag = this.tags.First(function (a) { return a instanceof DefaultValue; });
     }
     VDFPropInfo.prototype.AddTags = function () {
         var tags = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             tags[_i] = arguments[_i];
         }
-        (_a = this.tags).push.apply(_a, tags);
-        this.propTag = tags.First(function (a) { return a instanceof VDFProp; });
-        this.defaultValueTag = tags.First(function (a) { return a instanceof DefaultValue; });
-        var _a;
+        this.tags.AddRange(tags);
+        this.propTag = this.tags.First(function (a) { return a instanceof VDFProp; });
+        this.defaultValueTag = this.tags.First(function (a) { return a instanceof DefaultValue; });
     };
     VDFPropInfo.prototype.ShouldValueBeSaved = function (val) {
         //if (this.defaultValueTag == null || this.defaultValueTag.defaultValue == D.NoDefault)
         if (this.defaultValueTag == null)
             return true;
-        if (this.defaultValueTag.defaultValue == D.DefaultDefault) {
+        if (this.defaultValueTag.defaultValue == exports.D.DefaultDefault) {
             if (val == null)
                 return false;
             if (val === false || val === 0)
                 return true;
         }
-        if (this.defaultValueTag.defaultValue == D.NullOrEmpty && val === null)
+        if (this.defaultValueTag.defaultValue == exports.D.NullOrEmpty && val === null)
             return false;
-        if (this.defaultValueTag.defaultValue == D.NullOrEmpty || this.defaultValueTag.defaultValue == D.Empty) {
-            var typeName = VDF.GetTypeNameOfObject(val);
-            if (typeName && typeName.startsWith("List(") && val.length == 0)
+        if (this.defaultValueTag.defaultValue == exports.D.NullOrEmpty || this.defaultValueTag.defaultValue == exports.D.Empty) {
+            var typeName = VDF_1.VDF.GetTypeNameOfObject(val);
+            if (typeName && typeName.StartsWith("List(") && val.length == 0)
                 return false;
             if (typeName == "string" && !val.length)
                 return false;
@@ -138,36 +141,73 @@ var VDFPropInfo = (function () {
     };
     return VDFPropInfo;
 }());
+exports.VDFPropInfo = VDFPropInfo;
 var VDFSerializeProp = (function () {
     function VDFSerializeProp() {
     }
     return VDFSerializeProp;
 }());
+exports.VDFSerializeProp = VDFSerializeProp;
+function _VDFSerializeProp() {
+    return function (target, name) { return target[name].AddTags(new VDFSerializeProp()); };
+}
+exports._VDFSerializeProp = _VDFSerializeProp;
+;
 var VDFDeserializeProp = (function () {
     function VDFDeserializeProp() {
     }
     return VDFDeserializeProp;
 }());
+exports.VDFDeserializeProp = VDFDeserializeProp;
+function _VDFDeserializeProp() {
+    return function (target, name) { return target[name].AddTags(new VDFDeserializeProp()); };
+}
+exports._VDFDeserializeProp = _VDFDeserializeProp;
+;
 var VDFPreSerialize = (function () {
     function VDFPreSerialize() {
     }
     return VDFPreSerialize;
 }());
+exports.VDFPreSerialize = VDFPreSerialize;
+function _VDFPreSerialize() {
+    return function (target, name) { return target[name].AddTags(new VDFPreSerialize()); };
+}
+exports._VDFPreSerialize = _VDFPreSerialize;
+;
 var VDFSerialize = (function () {
     function VDFSerialize() {
     }
     return VDFSerialize;
 }());
+exports.VDFSerialize = VDFSerialize;
+function _VDFSerialize() {
+    return function (target, name) { return target[name].AddTags(new VDFSerialize()); };
+}
+exports._VDFSerialize = _VDFSerialize;
+;
 var VDFPostSerialize = (function () {
     function VDFPostSerialize() {
     }
     return VDFPostSerialize;
 }());
+exports.VDFPostSerialize = VDFPostSerialize;
+function _VDFPostSerialize() {
+    return function (target, name) { return target[name].AddTags(new VDFPostSerialize()); };
+}
+exports._VDFPostSerialize = _VDFPostSerialize;
+;
 var VDFPreDeserialize = (function () {
     function VDFPreDeserialize() {
     }
     return VDFPreDeserialize;
 }());
+exports.VDFPreDeserialize = VDFPreDeserialize;
+function _VDFPreDeserialize() {
+    return function (target, name) { return target[name].AddTags(new VDFPreDeserialize()); };
+}
+exports._VDFPreDeserialize = _VDFPreDeserialize;
+;
 var VDFDeserialize = (function () {
     function VDFDeserialize(fromParent) {
         if (fromParent === void 0) { fromParent = false; }
@@ -175,12 +215,25 @@ var VDFDeserialize = (function () {
     }
     return VDFDeserialize;
 }());
+exports.VDFDeserialize = VDFDeserialize;
+function _VDFDeserialize(fromParent) {
+    if (fromParent === void 0) { fromParent = false; }
+    return function (target, name) { return target[name].AddTags(new VDFDeserialize(fromParent)); };
+}
+exports._VDFDeserialize = _VDFDeserialize;
+;
 var VDFPostDeserialize = (function () {
     function VDFPostDeserialize() {
     }
     return VDFPostDeserialize;
 }());
-/*class VDFMethodInfo {
+exports.VDFPostDeserialize = VDFPostDeserialize;
+function _VDFPostDeserialize() {
+    return function (target, name) { return target[name].AddTags(new VDFPostDeserialize()); };
+}
+exports._VDFPostDeserialize = _VDFPostDeserialize;
+;
+/*export class VDFMethodInfo {
     tags: any[];
     constructor(tags: any[]) { this.tags = tags; }
 }*/ 

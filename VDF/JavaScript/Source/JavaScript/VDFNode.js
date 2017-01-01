@@ -1,7 +1,12 @@
+"use strict";
+var VDFSaver_1 = require("./VDFSaver");
+var VDFLoader_1 = require("./VDFLoader");
+var VDF_1 = require("./VDF");
+var VDFTypeInfo_1 = require("./VDFTypeInfo");
 var VDFNode = (function () {
     function VDFNode(primitiveValue, metadata) {
-        this.listChildren = new List("VDFNode");
-        this.mapChildren = new Dictionary("VDFNode", "VDFNode"); // this also holds Dictionaries' keys/values
+        this.listChildren = new VDF_1.List("VDFNode");
+        this.mapChildren = new VDF_1.Dictionary("VDFNode", "VDFNode"); // this also holds Dictionaries' keys/values
         this.primitiveValue = primitiveValue;
         this.metadata = metadata;
     }
@@ -43,8 +48,8 @@ var VDFNode = (function () {
         if (options === void 0) { options = null; }
         if (tabDepth === void 0) { tabDepth = 0; }
         if (isKey === void 0) { isKey = false; }
-        options = options || new VDFSaveOptions();
-        var builder = new StringBuilder();
+        options = options || new VDFSaver_1.VDFSaveOptions();
+        var builder = new VDF_1.StringBuilder();
         var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
         if (options.useMetadata && metadata != null && metadata != "")
             builder.Append(metadata + ">");
@@ -72,7 +77,7 @@ var VDFNode = (function () {
             else
                 builder.Append((isKey ? "" : "\"") + unpaddedString + (isKey ? "" : "\""));
         }
-        else if (VDF.GetIsTypePrimitive(VDF.GetTypeNameOfObject(this.primitiveValue)))
+        else if (VDF_1.VDF.GetIsTypePrimitive(VDF_1.VDF.GetTypeNameOfObject(this.primitiveValue)))
             builder.Append(options.useNumberTrimming && this.primitiveValue.toString().StartsWith("0.") ? this.primitiveValue.toString().substr(1) : this.primitiveValue);
         else
             builder.Append("\"" + this.primitiveValue + "\"");
@@ -104,8 +109,8 @@ var VDFNode = (function () {
     VDFNode.prototype.ToVDF_PoppedOutPart = function (options, tabDepth) {
         if (options === void 0) { options = null; }
         if (tabDepth === void 0) { tabDepth = 0; }
-        options = options || new VDFSaveOptions();
-        var builder = new StringBuilder();
+        options = options || new VDFSaver_1.VDFSaveOptions();
+        var builder = new VDF_1.StringBuilder();
         // include popped-out-content of direct children (i.e. a single directly-under group)
         if (options.useChildPopOut && this.childPopOut) {
             var childTabStr = "";
@@ -130,7 +135,7 @@ var VDFNode = (function () {
                 }
         }
         else {
-            var poppedOutChildTexts = new List("string");
+            var poppedOutChildTexts = new VDF_1.List("string");
             var poppedOutChildText = void 0;
             if (this.isMap || this.mapChildren.Count > 0)
                 for (var i = 0, pair = null, pairs = this.mapChildren.Pairs; i < pairs.length && (pair = pairs[i]); i++)
@@ -156,8 +161,8 @@ var VDFNode = (function () {
     // loading
     // ==================
     VDFNode.CreateNewInstanceOfType = function (typeName) {
-        var typeNameRoot = VDF.GetTypeNameRoot(typeName);
-        var genericParameters = VDF.GetGenericArgumentsOfType(typeName);
+        var typeNameRoot = VDF_1.VDF.GetTypeNameRoot(typeName);
+        var genericParameters = VDF_1.VDF.GetGenericArgumentsOfType(typeName);
         /*if (typeNameRoot == "List")
             return new List(genericParameters[0]);
         if (typeNameRoot == "Dictionary")
@@ -171,14 +176,14 @@ var VDFNode = (function () {
     };
     VDFNode.GetCompatibleTypeNameForNode = function (node) { return node.mapChildren.Count ? "object" : (node.listChildren.length ? "List(object)" : "string"); };
     VDFNode.prototype.ToObject = function (declaredTypeName_orOptions, options, path) {
-        if (options === void 0) { options = new VDFLoadOptions(); }
-        if (declaredTypeName_orOptions instanceof VDFLoadOptions)
+        if (options === void 0) { options = new VDFLoader_1.VDFLoadOptions(); }
+        if (declaredTypeName_orOptions instanceof VDFLoader_1.VDFLoadOptions)
             return this.ToObject(null, declaredTypeName_orOptions);
         var declaredTypeName = declaredTypeName_orOptions;
-        path = path || new VDFNodePath(new VDFNodePathNode());
+        path = path || new VDF_1.VDFNodePath(new VDF_1.VDFNodePathNode());
         var fromVDFTypeName = "object";
         var metadata = this.metadata_override != null ? this.metadata_override : this.metadata;
-        if (metadata != null && (window[VDF.GetTypeNameRoot(metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
+        if (metadata != null && (window[VDF_1.VDF.GetTypeNameRoot(metadata)] instanceof Function || !options.loadUnknownTypesAsBasicTypes))
             fromVDFTypeName = metadata;
         else if (typeof this.primitiveValue == "boolean")
             fromVDFTypeName = "bool";
@@ -192,18 +197,18 @@ var VDFNode = (function () {
             else if (this.isMap || this.mapChildren.Count > 0)
                 fromVDFTypeName = "Dictionary(object object)"; //"object-anonymous"; //"object";
         var finalTypeName;
-        if (window[VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
+        if (window[VDF_1.VDF.GetTypeNameRoot(declaredTypeName)] instanceof Function || !options.loadUnknownTypesAsBasicTypes)
             finalTypeName = declaredTypeName;
         // if there is no declared type, or the from-metadata type is more specific than the declared type
         // (for last condition/way: also assume from-vdf-type is derived, if declared-type name is one of these extra (not actually implemented in JS) types)
         //if (finalTypeName == null || (<Function><object>window[VDF.GetTypeNameRoot(fromVDFTypeName)] || (()=>{})).IsDerivedFrom(<Function><object>window[VDF.GetTypeNameRoot(finalTypeName)] || (()=>{})) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
-        if (finalTypeName == null || VDF.IsTypeXDerivedFromY(fromVDFTypeName, finalTypeName) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
+        if (finalTypeName == null || VDF_1.VDF.IsTypeXDerivedFromY(fromVDFTypeName, finalTypeName) || ["object", "IList", "IDictionary"].Contains(finalTypeName))
             finalTypeName = fromVDFTypeName;
         var result;
         var deserializedByCustomMethod = false;
-        var classProps = VDF.GetClassProps(window[finalTypeName]);
+        var classProps = VDF_1.VDF.GetClassProps(window[finalTypeName]);
         for (var propName in classProps)
-            if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) { return a instanceof VDFDeserialize && a.fromParent; })) {
+            if (classProps[propName] instanceof Function && classProps[propName].tags && classProps[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFDeserialize && a.fromParent; })) {
                 var deserializeResult = classProps[propName](this, path, options);
                 if (deserializeResult !== undefined) {
                     result = deserializeResult;
@@ -213,9 +218,9 @@ var VDFNode = (function () {
             }
         if (!deserializedByCustomMethod)
             if (finalTypeName == "object") { } //result = null;
-            else if (EnumValue.IsEnum(finalTypeName))
-                result = EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
-            else if (VDF.GetIsTypePrimitive(finalTypeName)) {
+            else if (VDF_1.EnumValue.IsEnum(finalTypeName))
+                result = VDF_1.EnumValue.GetEnumIntForStringValue(finalTypeName, this.primitiveValue);
+            else if (VDF_1.VDF.GetIsTypePrimitive(finalTypeName)) {
                 result = this.primitiveValue;
                 if (finalTypeName == "int")
                     result = parseInt(this.primitiveValue);
@@ -232,17 +237,17 @@ var VDFNode = (function () {
     };
     VDFNode.prototype.IntoObject = function (obj, options, path) {
         if (options === void 0) { options = null; }
-        options = options || new VDFLoadOptions();
-        path = path || new VDFNodePath(new VDFNodePathNode(obj));
-        var typeName = VDF.GetTypeNameOfObject(obj);
-        var typeGenericArgs = VDF.GetGenericArgumentsOfType(typeName);
-        var typeInfo = VDFTypeInfo.Get(typeName);
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPreDeserialize; }))
+        options = options || new VDFLoader_1.VDFLoadOptions();
+        path = path || new VDF_1.VDFNodePath(new VDF_1.VDFNodePathNode(obj));
+        var typeName = VDF_1.VDF.GetTypeNameOfObject(obj);
+        var typeGenericArgs = VDF_1.VDF.GetGenericArgumentsOfType(typeName);
+        var typeInfo = VDFTypeInfo_1.VDFTypeInfo.Get(typeName);
+        for (var propName in VDF_1.VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFPreDeserialize; }))
                 obj[propName](this, path, options);
         var deserializedByCustomMethod2 = false;
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFDeserialize && !a.fromParent; })) {
+        for (var propName in VDF_1.VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFDeserialize && !a.fromParent; })) {
                 var deserializeResult = obj[propName](this, path, options);
                 if (deserializeResult !== undefined) {
                     deserializedByCustomMethod2 = true;
@@ -259,7 +264,7 @@ var VDFNode = (function () {
             for (var _i = 0, _a = this.mapChildren.Pairs; _i < _a.length; _i++) {
                 var pair = _a[_i];
                 try {
-                    if (obj instanceof Dictionary) {
+                    if (obj instanceof VDF_1.Dictionary) {
                         /*let key = VDF.Deserialize("\"" + keyString + "\"", typeGenericArgs[0], options);
                         //obj.Add(key, this.mapChildren[keyString].ToObject(typeGenericArgs[1], options, path.ExtendAsMapItem(key, null)));*/
                         var key = pair.key.ToObject(typeGenericArgs[0], options, path.ExtendAsMapKey(pair.index, null));
@@ -273,8 +278,8 @@ var VDFNode = (function () {
                         {*/
                         var childPath = path.ExtendAsChild(typeInfo.props[propName] || { name: propName }, null);
                         var value = void 0;
-                        for (var propName2 in VDF.GetObjectProps(obj))
-                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFDeserializeProp; })) {
+                        for (var propName2 in VDF_1.VDF.GetObjectProps(obj))
+                            if (obj[propName2] instanceof Function && obj[propName2].tags && obj[propName2].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFDeserializeProp; })) {
                                 var deserializeResult = obj[propName2](pair.value, childPath, options);
                                 if (deserializeResult !== undefined) {
                                     value = deserializeResult;
@@ -296,8 +301,8 @@ var VDFNode = (function () {
         if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
             for (var i in options.objPostDeserializeFuncs_early.Get(obj))
                 options.objPostDeserializeFuncs_early.Get(obj)[i]();
-        for (var propName in VDF.GetObjectProps(obj))
-            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFPostDeserialize; }))
+        for (var propName in VDF_1.VDF.GetObjectProps(obj))
+            if (obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(function (a) { return a instanceof VDFTypeInfo_1.VDFPostDeserialize; }))
                 obj[propName](this, path, options);
         if (options.objPostDeserializeFuncs.ContainsKey(obj))
             for (var i in options.objPostDeserializeFuncs.Get(obj))
@@ -307,6 +312,7 @@ var VDFNode = (function () {
 }());
 VDFNode.charsThatNeedEscaping_ifAnywhere_regex = /"|'|\n|\t|<<|>>/; // (well, anywhere in string)
 VDFNode.charsThatNeedEscaping_ifNonQuoted_regex = /^([\t^# ,0-9.\-+]|null|true|false)|{|}|\[|\]|:/;
+exports.VDFNode = VDFNode;
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
-VDF.CancelSerialize = new VDFNode();
+VDF_1.VDF.CancelSerialize = new VDFNode();
 //# sourceMappingURL=VDFNode.js.map
