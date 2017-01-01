@@ -1,4 +1,5 @@
 System.register(["./VDFExtras", "./VDF", "./VDFSaver", "./VDFLoader", "./VDFTypeInfo"], function (exports_1, context_1) {
+    "use strict";
     var __moduleName = context_1 && context_1.id;
     var VDFExtras_1, VDF_1, VDFSaver_1, VDFLoader_1, VDFTypeInfo_1, VDFNode;
     return {

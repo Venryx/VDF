@@ -4,8 +4,8 @@
 		"outDir": "./JavaScript",
 		//"outFile": "./JavaScript_Bundle.js",
 		"module": "system",
-		"sourceMap": true,
-		"noImplicitUseStrict": true // maybe temp; for eval-based module extract stuff
+		"sourceMap": true
+		//"noImplicitUseStrict": true // maybe temp; for eval-based module extract stuff
 	},
 	"compileOnSave": true
 }

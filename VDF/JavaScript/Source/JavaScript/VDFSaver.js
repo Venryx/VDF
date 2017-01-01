@@ -1,4 +1,5 @@
 System.register(["./VDFExtras", "./VDF", "./VDFNode", "./VDFTypeInfo"], function (exports_1, context_1) {
+    "use strict";
     var __moduleName = context_1 && context_1.id;
     var VDFExtras_1, VDF_1, VDFNode_1, VDFTypeInfo_1, VDFTypeMarking, VDFSaveOptions, VDFSaver;
     return {
@@ -120,7 +121,7 @@ System.register(["./VDFExtras", "./VDF", "./VDFNode", "./VDFTypeInfo"], function
                                 if (!(propName_3 in obj))
                                     obj[propName_3] = null;
                             }
-                            for (var propName_4 in obj)
+                            for (var propName_4 in obj) {
                                 try {
                                     var propInfo = typeInfo.props[propName_4]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
                                     /*let include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
@@ -129,6 +130,9 @@ System.register(["./VDFExtras", "./VDF", "./VDFNode", "./VDFTypeInfo"], function
                                     if (!include)
                                         continue;
                                     var propValue = obj[propName_4];
+                                    // maybe temp; fix for ts derived-class constructors
+                                    if (propName_4 == "constructor" && propValue instanceof Function)
+                                        continue;
                                     if (propInfo && !propInfo.ShouldValueBeSaved(propValue))
                                         continue;
                                     var propNameNode = new VDFNode_1.VDFNode(propName_4);
@@ -149,11 +153,8 @@ System.register(["./VDFExtras", "./VDF", "./VDFNode", "./VDFTypeInfo"], function
                                     propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
                                     result.SetMapChild(propNameNode, propValueNode);
                                 }
-                                catch (ex) {
-                                    ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName_4 + "'.") + "\n";
-                                    throw ex;
-                                } /**/
                                 finally { }
+                            }
                         }
                     }
                     if (declaredTypeName == null)

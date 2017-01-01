@@ -1,4 +1,5 @@
 System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
+    "use strict";
     var __moduleName = context_1 && context_1.id;
     function TypeInfo(propIncludeRegexL1, popOutL1) {
         var typeTag = new VDFType(propIncludeRegexL1, popOutL1);
@@ -114,7 +115,7 @@ System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
                         var currentType = typeBase;
                         while (currentType != null) {
                             var currentTypeInfo = currentType.typeInfo;
-                            // load type-tag from base-types
+                            // inherit props from base-types' type-tags
                             var typeTag2 = (currentTypeInfo || {}).typeTag;
                             for (var key in typeTag2)
                                 if (result.typeTag[key] == null)
