@@ -477,7 +477,7 @@ class EnumValue {
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 
-window["List"] = function List(itemType: string, ...items): void { // actual constructor
+window["List"] = function List(itemType: string, ...items) { // actual constructor
 	var s = Object.create(Array.prototype);
 	s = (Array.apply(s, items) || s);
 	s["__proto__"] = List.prototype; // makes "(new List()) instanceof List" be true
@@ -510,8 +510,8 @@ window["List"] = function List(itemType: string, ...items): void { // actual con
 	};
 	s.Insert = function(index, item) { return this.splice(index, 0, item); };
 	s.InsertRange = function(index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
-	s.Remove = function(item) { this.RemoveAt(this.indexOf(item)); };
-	s.RemoveAt = function(index) { this.splice(index, 1); };
+	s.Remove = function(item) { return this.RemoveAt(this.indexOf(item)) != null; };
+	s.RemoveAt = function(index) { return this.splice(index, 1)[0]; };
 	s.RemoveRange = function(index, count) { return this.splice(index, count); };
 	s.Any = function(matchFunc) {
 		for (let item of this)
@@ -584,12 +584,12 @@ interface List<T> extends Array<T> { // class/instance declaration stuff
 
 	// new methods
 	//Indexes(): any;
-	Add(...items): number;
+	Add(...items: T[]): number;
 	AddRange(items: Array<T>): void;
 	Insert(index, item): void;
 	InsertRange(index: number, items: Array<T>): void;
-	Remove(item: T): void;
-	RemoveAt(index: number): void;
+	Remove(item: T): boolean;
+	RemoveAt(index: number): T;
 	RemoveRange(index: number, count: number): void;
 	Any(matchFunc): boolean;
 	All(matchFunc): boolean;

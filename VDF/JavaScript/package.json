@@ -1,0 +1,22 @@
+{
+  "name": "vdf-javascript",
+  "version": "1.0.0",
+  "description": "Like JSON, but with type metadata, indent-based children, and a rich tagging and override system.",
+  "main": "./VDF/JavaScript/VDF.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Venryx/VDF.git"
+  },
+  "author": "Venryx",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Venryx/VDF/issues"
+  },
+  "homepage": "https://github.com/Venryx/VDF#readme",
+  "devDependencies": {
+	  "typescript": "^2.1.4"
+  }
+}

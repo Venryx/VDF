@@ -159,4 +159,3 @@ var VDFSaver = (function () {
     };
     return VDFSaver;
 }());
-//# sourceMappingURL=VDFSaver.js.map

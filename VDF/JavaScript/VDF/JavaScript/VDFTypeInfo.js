@@ -72,7 +72,7 @@ var P = (function (_super) {
     __extends(P, _super);
     function P(includeL2, popOutL2) {
         if (includeL2 === void 0) { includeL2 = true; }
-        _super.call(this, includeL2, popOutL2);
+        return _super.call(this, includeL2, popOutL2) || this;
     }
     return P;
 }(VDFProp));
@@ -87,14 +87,14 @@ var D = (function (_super) {
     __extends(D, _super);
     function D(defaultValue) {
         if (defaultValue === void 0) { defaultValue = D.DefaultDefault; }
-        _super.call(this, defaultValue);
+        return _super.call(this, defaultValue) || this;
     }
-    //static NoDefault = new object(); // i.e. the prop has no default, so whatever value it has is always saved [commented out, since: if you want no default, just don't add the D tag]
-    D.DefaultDefault = new object(); // i.e. the default value for the type (not the prop) ['false' for a bool, etc.]
-    D.NullOrEmpty = new object(); // i.e. null, or an empty string or collection
-    D.Empty = new object(); // i.e. an empty string or collection
     return D;
 }(DefaultValue));
+//static NoDefault = new object(); // i.e. the prop has no default, so whatever value it has is always saved [commented out, since: if you want no default, just don't add the D tag]
+D.DefaultDefault = new object(); // i.e. the default value for the type (not the prop) ['false' for a bool, etc.]
+D.NullOrEmpty = new object(); // i.e. null, or an empty string or collection
+D.Empty = new object(); // i.e. an empty string or collection
 var VDFPropInfo = (function () {
     function VDFPropInfo(propName, propTypeName, tags) {
         this.name = propName;
@@ -106,7 +106,7 @@ var VDFPropInfo = (function () {
     VDFPropInfo.prototype.AddTags = function () {
         var tags = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            tags[_i - 0] = arguments[_i];
+            tags[_i] = arguments[_i];
         }
         (_a = this.tags).push.apply(_a, tags);
         this.propTag = tags.First(function (a) { return a instanceof VDFProp; });
@@ -184,4 +184,3 @@ var VDFPostDeserialize = (function () {
     tags: any[];
     constructor(tags: any[]) { this.tags = tags; }
 }*/ 
-//# sourceMappingURL=VDFTypeInfo.js.map

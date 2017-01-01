@@ -1,3 +1,7 @@
 {
-	"compileOnSave": true,
+	"compilerOptions": {
+		"target": "es5",
+		"outDir": "./JavaScript"
+	},
+	"compileOnSave": true
 }

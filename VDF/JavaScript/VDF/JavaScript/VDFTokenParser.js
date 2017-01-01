@@ -449,10 +449,10 @@ var VDFTokenParser = (function () {
             textProcessedLength += token.text.length;
         }
     };
-    VDFTokenParser.charsAToZ = List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-    VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
     return VDFTokenParser;
 }());
+VDFTokenParser.charsAToZ = List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
+VDFTokenParser.chars0To9DotAndNegative = List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
 var TokenSet = (function () {
     function TokenSet(tokens, line_tabsReached) {
         if (line_tabsReached === void 0) { line_tabsReached = 0; }
@@ -463,4 +463,3 @@ var TokenSet = (function () {
     }
     return TokenSet;
 }());
-//# sourceMappingURL=VDFTokenParser.js.map

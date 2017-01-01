@@ -55,7 +55,7 @@ if (!Array.prototype["First"])
 Function.prototype._AddProperty("AddTags", function () {
     var tags = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        tags[_i - 0] = arguments[_i];
+        tags[_i] = arguments[_i];
     }
     if (this.tags == null)
         this.tags = new List("object");
@@ -284,13 +284,13 @@ var VDF = (function () {
         return VDFLoader.ToVDFNode(vdf, declaredTypeName, options).ToObject(declaredTypeName, options);
     };
     VDF.DeserializeInto = function (vdf, obj, options) { VDFLoader.ToVDFNode(vdf, VDF.GetTypeNameOfObject(obj), options).IntoObject(obj, options); };
-    // for use with VDFSaveOptions
-    VDF.AnyMember = "#AnyMember";
-    VDF.AllMembers = ["#AnyMember"];
-    // for use with VDFType
-    VDF.PropRegex_Any = ""; //"^.+$";
     return VDF;
 }());
+// for use with VDFSaveOptions
+VDF.AnyMember = "#AnyMember";
+VDF.AllMembers = ["#AnyMember"];
+// for use with VDFType
+VDF.PropRegex_Any = ""; //"^.+$";
 // helper classes
 // ==================
 var VDFUtils = (function () {
@@ -351,147 +351,147 @@ var StringBuilder = (function () {
     StringBuilder.prototype.toString = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.toLocaleString = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.push = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.pop = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.concat = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.join = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.reverse = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.shift = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.slice = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.sort = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.splice = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.unshift = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.indexOf = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.lastIndexOf = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.every = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.some = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.forEach = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.map = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.filter = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.reduce = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.reduceRight = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
@@ -499,21 +499,21 @@ var StringBuilder = (function () {
     StringBuilder.prototype.Contains = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.Where = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
     StringBuilder.prototype.First = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i - 0] = arguments[_i];
+            args[_i] = arguments[_i];
         }
         return null;
     };
@@ -576,7 +576,7 @@ TypeDeclarationWrapper.prototype._AddSetter_Inline = function set(type) {
 function TypeInfo() {
     var tags = [];
     for (var _i = 0; _i < arguments.length; _i++) {
-        tags[_i - 0] = arguments[_i];
+        tags[_i] = arguments[_i];
     }
     return new TypeDeclarationWrapper(tags);
 }
@@ -636,7 +636,7 @@ window["List"] = function List(itemType) {
     s.Add = function () {
         var items = [];
         for (var _i = 0; _i < arguments.length; _i++) {
-            items[_i - 0] = arguments[_i];
+            items[_i] = arguments[_i];
         }
         return this.push.apply(this, items);
     };
@@ -646,8 +646,8 @@ window["List"] = function List(itemType) {
     };
     s.Insert = function (index, item) { return this.splice(index, 0, item); };
     s.InsertRange = function (index, items) { return this.splice.apply(this, [index, 0].concat(items)); };
-    s.Remove = function (item) { this.RemoveAt(this.indexOf(item)); };
-    s.RemoveAt = function (index) { this.splice(index, 1); };
+    s.Remove = function (item) { return this.RemoveAt(this.indexOf(item)) != null; };
+    s.RemoveAt = function (index) { return this.splice(index, 1)[0]; };
     s.RemoveRange = function (index, count) { return this.splice(index, count); };
     s.Any = function (matchFunc) {
         for (var _i = 0, _a = this; _i < _a.length; _i++) {
@@ -780,4 +780,3 @@ var Dictionary = (function () {
     return Dictionary;
 }());
 //VDFUtils.MakePropertiesHidden(Dictionary.prototype, true); 
-//# sourceMappingURL=VDF.js.map
