@@ -465,8 +465,8 @@ System.register(["./VDFExtras", "./VDFLoader"], function (exports_1, context_1) 
                 };
                 return VDFTokenParser;
             }());
-            VDFTokenParser.charsAToZ = VDFExtras_1.List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-            VDFTokenParser.chars0To9DotAndNegative = VDFExtras_1.List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
+            VDFTokenParser.charsAToZ = new (VDFExtras_1.List.bind.apply(VDFExtras_1.List, [void 0, null].concat(["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)))))();
+            VDFTokenParser.chars0To9DotAndNegative = new (VDFExtras_1.List.bind.apply(VDFExtras_1.List, [void 0, null].concat(["string"].concat("0123456789\.\-\+eE".match(/./g)))))();
             exports_1("VDFTokenParser", VDFTokenParser);
             TokenSet = (function () {
                 function TokenSet(tokens, line_tabsReached) {

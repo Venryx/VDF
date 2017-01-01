@@ -54,8 +54,8 @@ export class VDFToken {
 	}
 }
 export class VDFTokenParser {
-	static charsAToZ: List<string> = <List<string>>List.apply(null, ["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
-	static chars0To9DotAndNegative: List<string> = <List<string>>List.apply(null, ["string"].concat("0123456789\.\-\+eE".match(/./g)));
+	static charsAToZ: List<string> = new List<string>(null, ...["string"].concat("abcdefghijklmnopqrstuvwxyz".match(/./g)));
+	static chars0To9DotAndNegative: List<string> = new List<string>(null, ...["string"].concat("0123456789\.\-\+eE".match(/./g)));
 	public static ParseTokens(text: string, options?: VDFLoadOptions, parseAllTokens = false, postProcessTokens = true): List<VDFToken> {
 		text = (text || "").replace(/\r\n/g, "\n"); // maybe temp
 		options = options || new VDFLoadOptions();
