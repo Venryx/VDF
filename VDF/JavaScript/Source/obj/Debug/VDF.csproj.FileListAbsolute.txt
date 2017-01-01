@@ -1,0 +1,23 @@
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\bin\VDF.dll.config
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\bin\VDF.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\bin\VDF.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\Debug\VDF.csprojResolveAssemblyReference.cache
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\Debug\VDF.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\Debug\VDF.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\bin\VDF.dll.config
+C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\bin\VDF.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\bin\VDF.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.dll
+C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.pdb
+C:\Programming\Projects\Visual C#\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.csprojResolveAssemblyReference.cache
+C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\bin\VDF.dll.config
+C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\bin\VDF.dll
+C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\bin\VDF.pdb
+C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.dll
+C:\Root\Programs\@Projects\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.pdb
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDF\bin\VDF.dll.config
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDF\bin\VDF.dll
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDF\bin\VDF.pdb
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.csprojResolveAssemblyReference.cache
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.dll
+C:\Root\Apps\Libraries\VDF\VDF\JavaScript\VDF\obj\Debug\VDF.pdb

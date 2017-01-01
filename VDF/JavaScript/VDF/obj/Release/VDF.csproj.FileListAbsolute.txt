@@ -1,6 +1,0 @@
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\bin\VDF.dll.config
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\bin\VDF.dll
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\bin\VDF.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\Release\VDF.dll
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\Release\VDF.pdb
-C:\Programming\Projects\Visual C#\VDF\VDF\JS\VDF\obj\Release\VDF.csprojResolveAssemblyReference.cache
