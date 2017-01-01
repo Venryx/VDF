@@ -356,7 +356,7 @@ class StringBuilder {
 	}
 
 	parts = [];
-	length: number = 0;
+	length = 0;
 	
 	Append(str) { this.parts.push(str); this.length += str.length; return this; } // adds string str to the StringBuilder
 	Insert(index, str) { this.parts.splice(index, 0, str); this.length += str.length; return this; } // inserts string 'str' at 'index'

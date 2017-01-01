@@ -1,0 +1,38 @@
+﻿<head>
+    <link rel="stylesheet" href="Packages/General/QUnit 1.14.0.css">
+	<script src="Tests/TypeScript/Packages/General/ClassExtensions.js"></script>
+    <script src="Packages/General/QUnit 1.14.0.js"></script>
+    <script src="Packages/JQuery/JQuery1.9.1.js"></script>
+    <script src="Tests/TypeScript/Packages/V/V.js"></script>
+	<script src="../../Source/JavaScript/VDF.js"></script>
+	<script src="../../Source/JavaScript/VDFTypeInfo.js"></script>
+	<script src="../../Source/JavaScript/VDFNode.js"></script>
+	<script src="../../Source/JavaScript/VDFSaver.js"></script>
+	<script src="../../Source/JavaScript/VDFLoader.js"></script>
+	<script src="../../Source/JavaScript/VDFTokenParser.js"></script>
+    <script src="Tests/TypeScript/Saving.js"></script>
+	<script src="Tests/TypeScript/Loading.js"></script>
+    <script>
+    $(function() {
+        // (these basic transformers are for getting text 'close enough to json' to be parseable by JSON formatters, e.g. http://jsonformatter.curiousconcept.com)
+        $("#removeTypeMarkers").click(function() {
+            var text = $("#source").val();
+            var result = text.replace(/([a-zA-Z_()]|[a-zA-Z_()] [a-zA-Z_()])+>/g, "");
+            $("#result").val(result);
+        });
+        $("#replaceSpacesWithCommas").click(function() {
+            var text = $("#source").val();
+            var result = text.replace(/ /g, ",");
+            $("#result").val(result);
+        });
+    });
+    </script>
+</head>
+<body>
+    <input id="removeTypeMarkers" type="button" value="Remove type markers (basic regex)"/>
+    <input id="replaceSpacesWithCommas" type="button" value="Replace spaces with commas" />
+    <div>Source:</div>
+    <textarea id="source" style="width: 500px; height: 250px;"></textarea>
+    <div>Result:</div>
+    <textarea id="result" style="width: 500px; height: 250px;"></textarea>
+</body>

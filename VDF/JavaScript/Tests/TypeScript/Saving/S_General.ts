@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../VDF/TypeScript/VDFTypeInfo.ts" />
-/*class Saving {
+﻿/*class Saving {
 	static initialized: boolean;
 	static Init() 	{
 		if (this.initialized)
@@ -43,10 +42,10 @@ module VDFTests { // added to match C# indentation
 
 		test("NodePathToStringReturnsX", ()=> {
 			var path = new VDFNodePath(new List<VDFNodePathNode>("VDFNodePathNode"));
-			path.nodes.Add(new VDFNodePathNode(null, new VDFPropInfo("prop1", null, [])));
-			path.nodes.Add(new VDFNodePathNode(null, null, 1));
-			path.nodes.Add(new VDFNodePathNode(null, null, null, 2));
-			path.nodes.Add(new VDFNodePathNode(null, null, null, null, <any>"key1"));
+			path.nodes.push(new VDFNodePathNode(null, new VDFPropInfo("prop1", null, [])));
+			path.nodes.push(new VDFNodePathNode(null, null, 1));
+			path.nodes.push(new VDFNodePathNode(null, null, null, 2));
+			path.nodes.push(new VDFNodePathNode(null, null, null, null, <any>"key1"));
 			path.toString().Should().Be("prop1/i:1/ki:2/k:key1");
 		});
 

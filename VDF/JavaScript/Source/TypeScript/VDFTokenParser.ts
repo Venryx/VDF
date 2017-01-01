@@ -222,7 +222,7 @@ class VDFTokenParser {
 							case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':case '.':case '-':case '+':/*case 'e':*/case 'E':case 'y':
 								if (
 									( // if normal ("-12345" or "-123.45" or "-123e-45") number
-										VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder[0]) && currentTokenTextBuilder[0].toLowerCase() != "e" // if first-char is valid as start of number
+										VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.parts[0]) && currentTokenTextBuilder.parts[0].toLowerCase() != "e" // if first-char is valid as start of number
 										//&& VDFTokenParser.chars0To9DotAndNegative.Contains(ch) // and current-char is valid as part of number // no longer needed, since case ensures it
 										&& !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar) && nextChar != 'I' // and next-char is not valid as part of number
 										&& (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator)

@@ -1,12 +1,4 @@
-﻿/// <reference path="../../../../VDF/TypeScript/VDF.ts"/>
-/// <reference path="../../../../VDF/TypeScript/VDFLoader.ts"/>
-/// <reference path="../../../../VDF/TypeScript/VDFNode.ts"/>
-/// <reference path="../../../../VDF/TypeScript/VDFSaver.ts"/>
-/// <reference path="../../../../VDF/TypeScript/VDFTokenParser.ts"/>
-/// <reference path="../../../../VDF/TypeScript/VDFTypeInfo.ts"/>
-
-var V = new function()
-{
+﻿var V = new function() {
     var self = this;
 
 	/*self.AddClosureFunctionsToX = function(newHolder, nameMatchStartStr = "")

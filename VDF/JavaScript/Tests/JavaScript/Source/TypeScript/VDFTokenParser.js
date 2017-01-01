@@ -210,7 +210,7 @@ var VDFTokenParser = (function () {
                             case '+': /*case 'e':*/
                             case 'E':
                             case 'y':
-                                if ((VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.parts[0]) && currentTokenTextBuilder.parts[0].toLowerCase() != "e" // if first-char is valid as start of number
+                                if ((VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder[0]) && currentTokenTextBuilder[0].toLowerCase() != "e" // if first-char is valid as start of number
                                     && !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar) && nextChar != 'I' // and next-char is not valid as part of number
                                     && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
                                     || ((currentTokenTextBuilder.length == 8 && currentTokenTextBuilder.ToString() == "Infinity") || (currentTokenTextBuilder.length == 9 && currentTokenTextBuilder.ToString() == "-Infinity")))

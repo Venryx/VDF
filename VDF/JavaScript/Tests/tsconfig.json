@@ -1,7 +1,18 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"outDir": "./JavaScript"
+		"outDir": "./JavaScript",
+		"rootDir": "../",
+		"sourceMap": true,
+		
+		"moduleResolution": "node",
+		"watch": true,
+		"experimentalDecorators": true,
+		"baseUrl": "../"
 	},
+	"include": [
+        "../Source/**/*.ts",
+        "../Tests/**/*.ts"
+    ],
 	"compileOnSave": true
 }
