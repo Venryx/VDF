@@ -75,9 +75,9 @@ define("Source/TypeScript/VDFTypeInfo", ["require", "exports", "Source/TypeScrip
         var typeTag = new VDFType(propIncludeRegexL1, popOutL1);
         return function (type) {
             var name = type.name_fake || type.name;
-            // maybe temp; auto-hoist to global right now
-            /*if (window[name] == null)
-                window[name] = type;*/
+            // maybe temp; auto-hoist to global right here
+            if (window[name] == null)
+                window[name] = type;
             //var typeInfo = VDFTypeInfo.Get(name);
             var typeInfo = VDFTypeInfo.Get(type);
             typeInfo.tags = new VDFExtras_1.List(null, typeTag);
@@ -1974,84 +1974,76 @@ define("Source/TypeScript/VDF", ["require", "exports", "Source/TypeScript/VDFSav
 });
 // general init // note: this runs globally, so no need to duplicate in the Loading.ts file
 // ==========
-Object.prototype._AddFunction_Inline = function Should() {
-    var _this = this;
-    return {
-        Be: function (value, message) {
-            equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
-        },
-        BeExactly: function (value, message) {
-            strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
-        },
-        BeEquivalentTo: function (otherCollection, message) {
-            _this.length.Should().Be(otherCollection.length, "Our length " + _this.length + " does not match other length " + otherCollection.length + ".");
-            for (var i = 0; i < _this.length; i++) {
-                var item = _this[i];
-                var itemInOther = otherCollection[i];
-                item.Should().Be(itemInOther, message);
+define("Tests/TypeScript/GeneralInit", ["require", "exports"], function (require, exports) {
+    Object.prototype._AddFunction_Inline = function Should() {
+        var _this = this;
+        return {
+            Be: function (value, message) {
+                equal(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+            },
+            BeExactly: function (value, message) {
+                strictEqual(_this instanceof Number ? parseFloat(_this) : (_this instanceof String ? _this.toString() : _this), value, message);
+            },
+            BeEquivalentTo: function (otherCollection, message) {
+                _this.length.Should().Be(otherCollection.length, "Our length " + _this.length + " does not match other length " + otherCollection.length + ".");
+                for (var i = 0; i < _this.length; i++) {
+                    var item = _this[i];
+                    var itemInOther = otherCollection[i];
+                    item.Should().Be(itemInOther, message);
+                }
             }
-        }
+        };
     };
-};
-String.prototype._AddFunction_Inline = function Fix() { return this.toString(); }; // filler function for C# method to allow for copying, with fewer manual changes
-//interface Object { AddTest(testFunc: Function): void; }
-//Object.prototype._AddGetterSetter(null, function AddTest/*Inline*/(testFunc) { saving[testFunc.name] = testFunc; });
-//saving.AddTest = function testName() { ok(null == null); };
-var test_old = test;
-// others
-// ==========
-//function ExportInternalClassesTo(hostObj, funcWithInternalClasses, evalFunc) {
-function ExportInternalClassesTo(hostObj, evalFunc) {
-    var funcWithInternalClasses = arguments.callee.caller;
-    var names = V.GetMatches(funcWithInternalClasses.toString(), /        var (\w+) = \(function \(\) {/g, 1);
-    for (var i = 0; i < names.length; i++)
-        try {
-            hostObj[names[i]] = evalFunc(names[i]);
-        }
-        catch (e) { }
-    var enumNames = V.GetMatches(funcWithInternalClasses.toString(), /        }\)\((\w+) \|\| \(\w+ = {}\)\);/g, 1);
-    for (var i = 0; i < enumNames.length; i++)
-        try {
-            hostObj[enumNames[i]] = evalFunc(enumNames[i]);
-        }
-        catch (e) { }
-}
-define("Tests/TypeScript/Loading/SpeedTests", ["require", "exports", "Source/TypeScript/VDFLoader"], function (require, exports, VDFLoader_4) {
-    // tests
+    String.prototype._AddFunction_Inline = function Fix() { return this.toString(); }; // filler function for C# method to allow for copying, with fewer manual changes
+    //interface Object { AddTest(testFunc: Function): void; }
+    //Object.prototype._AddGetterSetter(null, function AddTest/*Inline*/(testFunc) { saving[testFunc.name] = testFunc; });
+    //saving.AddTest = function testName() { ok(null == null); };
+    var test_old = test;
+    // saving init
     // ==========
-    var VDFTests;
-    (function (VDFTests) {
-        var Loading_SpeedTests;
-        (function (Loading_SpeedTests) {
-            // run tests once ahead of time, so VDF-type-data is pre-loaded for profiled tests
-            /*loading["D3_SpeedTester"]();
-            loading["D5_SpeedTester2"]();*/
-            test("D3_SpeedTester", function () {
-                var vdf = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^]}\n\
-	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}\n\
-	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}\n\
-	{id:'52854b70-c200-478f-bcd2-c69a03cd808f' typeName:'Wheel' name:'FrontLeftWheel' pivotPoint_unit:'-0.5,0.5,0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
-	{id:'971e394c-b440-4fee-99fd-dceff732cd1e' typeName:'Wheel' name:'BackRightWheel' pivotPoint_unit:'0.5,0.5,-0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}\n\
-	{id:'77d30d72-9845-4b22-8e95-5ba6e29963b9' typeName:'Wheel' name:'FrontRightWheel' pivotPoint_unit:'0.5,0.5,0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}\n\
-	{id:'21ca2a80-6860-4de3-9894-b896ec77ef9e' typeName:'Wheel' name:'BackLeftWheel' pivotPoint_unit:'-0.5,0.5,-0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
-	{id:'eea2623a-86d3-4368-b4e0-576956b3ef1d' typeName:'Wood' name:'BackBar' pivotPoint_unit:'-0.4375,0.4375,-0.8125' anchorNormal:'0,0,-1' scale:'1,0.25,0.25' controller:false}\n\
-	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1' typeName:'MachineGun' name:'Gun1' pivotPoint_unit:'0,0.625,0.875' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}\n\
-	{id:'e97f8ee1-320c-4aef-9343-3317accb015b' typeName:'Crate' name:'Crate' pivotPoint_unit:'0,0.625,0' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}";
-                VDFLoader_4.VDFLoader.ToVDFNode(vdf);
-                ok(true);
-            });
-            test("D5_SpeedTester2", function () {
-                var vdf = "\n{^}\n\tplants:[^]\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 406 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 412 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 416 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 486 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 490 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 495 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 398 1\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 402 1\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 409 1\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 405 2\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 407 2\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 409 2\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 413 3\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"13 401 2.5\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"13 403 2.5\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 405 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 407 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 409 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"16 402 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"17 406 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"16 409 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"22 250 3.99980926513672\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"21 253 3.99976348876953\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"21 255 3.99992370605469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"23 253 3.99986267089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"23 255 3.99992370605469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 245 3.99985504150391\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 247 3.9998779296875\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"26 250 3.99990844726563\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 253 3.99990844726563\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 255 3.99996948242188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 259 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"27 245 3.99989318847656\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 254 3.99996948242188\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"27 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 260 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 247 3.99993133544922\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 241 3.99992370605469\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 243 3.99992370605469\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 245 3.99991607666016\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"30 250 3.99996185302734\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"30 247 3.99994659423828\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 241 3.99993896484375\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 243 3.99996185302734\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 245 3.99996185302734\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"32 254 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 263 4\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 41 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 43 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 45 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 48 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 51 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 53 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 56 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 237 3.99996185302734\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 240 3.99990081787109\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 243 3.99997711181641\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 246 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 249 3.99998474121094\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 251 3.99997711181641\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 257 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 260 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 268 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 259 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 41 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 44 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 53 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 237 3.99996185302734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 243 3.99998474121094\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 249 3.99999237060547\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 252 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 255 3.99999237060547\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 258 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 37 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 39 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 41 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 47 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 49 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 53 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 56 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 59 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 61 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 63 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 237 3.99703979492188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 239 3.99697113037109\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 241 3.99952697753906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 244 3.999267578125\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 248 3.99997711181641\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 261 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 270 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 38 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 41 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 43 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 45 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 47 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 50 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 54 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 60 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 63 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 237 3.99703979492188\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 239 3.99111938476563\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 241 3.99368286132813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 251 3.99996948242188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 253 3.99998474121094\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 255 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 257 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 261 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 263 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 34 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 42 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 45 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 47 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 54 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 57 3.86945343017578\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 63 3.92586517333984\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 66 3.85173034667969\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 70 4.72548675537109\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 73 4.41551971435547\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 76 4.83103942871094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 80 4.77939605712891\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 83 4.07389068603516\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 233 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 235 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 237 3.99819183349609\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 239 3.99227142333984\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 241 3.99039459228516\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 243 3.99558258056641\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 245 3.9984130859375\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 247 3.99912261962891\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 250 3.99836730957031\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 254 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 259 4\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 265 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 267 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 270 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 37 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 39 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 45 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 48 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 57 3.86945343017578\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 60 3.47781372070313\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 73 5.14100646972656\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 84 4.29557037353516\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 234 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 237 3.99819183349609\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 240 3.99275970458984\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 244 3.99708557128906\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 247 3.99815368652344\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 263 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 37 4.20879364013672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 39 4.20879364013672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 41 4.20937347412109\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 43 4.20937347412109\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 51 4.00287628173828\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 53 4.02330017089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 55 4.02330017089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 57 4.03544616699219\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 64 4.71137851017669\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 67 5.50337982177734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 69 5.83818817138672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 71 5.84939575195313\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 75 6.74217224121094\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 79 5.97611236572266\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 87 4.40133666992188\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 89 4.49819946289063\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 91 4.5694580078125\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 238 3.99510192871094\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 248 3.99839019775391\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 251 3.99759674072266\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 253 3.99757385253906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 255 3.99919128417969\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 269 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 272 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 45 4.32740020751953\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 81 6.16506958007813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 38 4.79120635986328\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 41 4.62696838378906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 43 4.62812805175781\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 47 4.35408020019531\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 49 4.23892974853516\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 51 4.00862884521484\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 53 4.029052734375\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 56 4.09320068359375\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 59 4.10633850097656\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 61 4.22352532202559\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 67 6.14738464355469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 70 6.89182281494141\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 83 6.20314788818359\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 85 5.54216003417969\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 87 4.85179901123047\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 89 4.94866180419922\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 91 5.22205352783203\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 234 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 238 3.99383544921875\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 242 3.99224853515625\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 251 3.99861907958984\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 254 3.99941253662109\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 259 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 262 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 265 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 268 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 45 4.74615478515625\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 79 7.13672461469146\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 81 7.1247786078701\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 245 3.99730682373047\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 41 5.18635559082031\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 43 5.18751525878906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 49 5.37989044189453\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 54 4.07085418701172\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 59 4.14813995361328\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 61 4.69170288500582\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 64 6.03464508056641\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 67 6.44294738769531\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 83 7.69938266204127\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 85 7.34394238179097\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 87 6.817580429812\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 89 5.46152876954768\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 91 5.73491668701172\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 248 3.99862670898438\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 251 3.99854278564453\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 259 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 265 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 271 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 45 5.45948791503906\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 53 4.347900390625\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 79 8.63121075076069\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 81 8.83076811475225\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 245 3.99758148193359\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 41 5.50032043457031\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 43 5.88870239257813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"53 57 4.19117736816406\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 62 5.19688668210223\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 67 6.39008331298828\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 70 7.31072152554988\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 73 7.81732625308945\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 76 9.64667510986328\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 84 10.9526667606263\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 87 9.21038396212089\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 90 8.40490492338341\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 237 3.99828338623047\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 239 3.99484252929688\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 242 3.99565124511719\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 251 3.99802398681641\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 253 3.99859619140625\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 255 3.99970245361328\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 257 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 261 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 263 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 270 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 45 6.16066741943359\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 53 4.94283294677734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n".trim();
-                //for (var i = 0; i < 100; i++)
-                VDFLoader_4.VDFLoader.ToVDFNode(vdf);
-                ok(true);
-            });
-            // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
-        })(Loading_SpeedTests || (Loading_SpeedTests = {}));
-    })(VDFTests || (VDFTests = {}));
+    var saving = {};
+    function Saving_RunTests() {
+        for (var name in saving)
+            test_old(name, saving[name]);
+    }
+    exports.Saving_RunTests = Saving_RunTests;
+    // the normal "test" function actually runs test
+    // here we replace it with a function that merely "registers the test to be run later on" (when the Saving button is pressed)
+    window["test"] = function (name, func) { saving[name] = func; };
+    window["test_custom"] = function (name, func) { saving[name] = func; };
+    //export function Test(name, func) { saving[name] = func; }
+    // loading init
+    // ==========
+    var loading = {};
+    function Loading_RunTests() {
+        for (var name in loading)
+            test_old(name, loading[name]);
+    }
+    exports.Loading_RunTests = Loading_RunTests;
+    // the normal "test" function actually runs test
+    // here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
+    window["test"] = function (name, func) { loading[name] = func; };
+    // others
+    // ==========
+    //function ExportInternalClassesTo(hostObj, funcWithInternalClasses, evalFunc) {
+    function ExportInternalClassesTo(hostObj, evalFunc) {
+        var funcWithInternalClasses = arguments.callee.caller;
+        var names = V.GetMatches(funcWithInternalClasses.toString(), /        var (\w+) = \(function \(\) {/g, 1);
+        for (var i = 0; i < names.length; i++)
+            try {
+                hostObj[names[i]] = evalFunc(names[i]);
+            }
+            catch (e) { }
+        var enumNames = V.GetMatches(funcWithInternalClasses.toString(), /        }\)\((\w+) \|\| \(\w+ = {}\)\);/g, 1);
+        for (var i = 0; i < enumNames.length; i++)
+            try {
+                hostObj[enumNames[i]] = evalFunc(enumNames[i]);
+            }
+            catch (e) { }
+    }
+    exports.ExportInternalClassesTo = ExportInternalClassesTo;
 });
-define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFExtras"], function (require, exports, VDFLoader_5, VDFTypeInfo_4, VDF_5, VDFExtras_7) {
+define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFExtras", "Tests/TypeScript/GeneralInit"], function (require, exports, VDFLoader_4, VDFTypeInfo_4, VDF_5, VDFExtras_7, GeneralInit_1) {
     // tests
     // ==========
     var VDFTests;
@@ -2137,7 +2129,7 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
             __decorate([
                 VDFTypeInfo_4._VDFPostDeserialize()
             ], ObjectWithPostDeserializeMethodRequiringCustomMessage_Class.prototype, "PostDeserialize", null);
-            test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () { VDF_5.VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoader_5.VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false); });
+            test("D0_ObjectWithPostDeserializeMethodRequiringCustomMessage", function () { VDF_5.VDF.Deserialize("{}", "ObjectWithPostDeserializeMethodRequiringCustomMessage_Class", new VDFLoader_4.VDFLoadOptions(null, ["WrongMessage"])).flag.Should().Be(false); });
             /*class ObjectWithPostDeserializeConstructor_Class {
                 static typeInfo = new VDFTypeInfo({
                     flag: new PInfo("bool")
@@ -2169,7 +2161,7 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 VDFTypeInfo_4._VDFDeserialize(true)
             ], ObjectWithPostDeserializeOptionsFunc_Class_Child, "Deserialize", null);
             test("D1_ObjectWithPostDeserializeOptionsFunc", function () {
-                var options = new VDFLoader_5.VDFLoadOptions();
+                var options = new VDFLoader_4.VDFLoadOptions();
                 ok(VDF_5.VDF.Deserialize("{child:{}}", "ObjectWithPostDeserializeOptionsFunc_Class_Parent", options).child == null);
                 ObjectWithPostDeserializeOptionsFunc_Class_Child.flag.Should().Be(true);
             });
@@ -2219,11 +2211,11 @@ define("Tests/TypeScript/Loading/ToObject", ["require", "exports", "Source/TypeS
                 a.otherProperty.Should().Be(true);
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_1.ExportInternalClassesTo(window, function (str) { return eval(str); });
         })(Loading_ToObject || (Loading_ToObject = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDF", "Source/TypeScript/VDFTokenParser", "Source/TypeScript/VDFExtras"], function (require, exports, VDFLoader_6, VDF_6, VDFTokenParser_2, VDFExtras_8) {
+define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/TypeScript/VDFLoader", "Source/TypeScript/VDF", "Source/TypeScript/VDFTokenParser", "Source/TypeScript/VDFExtras", "Tests/TypeScript/GeneralInit"], function (require, exports, VDFLoader_5, VDF_6, VDFTokenParser_2, VDFExtras_8, GeneralInit_2) {
     // tests
     // ==========
     var VDFTests;
@@ -2233,40 +2225,40 @@ define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/Type
             // to VDFNode
             // ==========
             test("D0_Comment", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("## comment\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("## comment\n\
 'Root string.'");
                 a.primitiveValue.Should().Be("Root string.");
             });
             test("D0_Comment2", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("'Root string ends here.'## comment");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("'Root string ends here.'## comment");
                 a.primitiveValue.Should().Be("Root string ends here.");
             });
             test("D0_Int", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("1");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("1");
                 a.primitiveValue.Should().Be(1);
             });
             test("D0_IntNegative", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("-1");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("-1");
                 a.primitiveValue.Should().Be(-1);
             });
             test("D0_PowerNotation", function () {
-                VDFLoader_6.VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000); //1 * Math.Pow(10, 3));
-                VDFLoader_6.VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
-                VDFLoader_6.VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000); //-(1 * Math.Pow(10, 3)));
-                VDFLoader_6.VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
+                VDFLoader_5.VDFLoader.ToVDFNode("1e3").primitiveValue.Should().Be(1000); //1 * Math.Pow(10, 3));
+                VDFLoader_5.VDFLoader.ToVDFNode("1e-3").primitiveValue.Should().Be(.001); //1 * Math.Pow(10, -3));
+                VDFLoader_5.VDFLoader.ToVDFNode("-1e3").primitiveValue.Should().Be(-1000); //-(1 * Math.Pow(10, 3)));
+                VDFLoader_5.VDFLoader.ToVDFNode("-1e-3").primitiveValue.Should().Be(-.001); //-(1 * Math.Pow(10, -3)));
             });
             test("D0_Infinity", function () {
-                VDFLoader_6.VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(Infinity);
-                VDFLoader_6.VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(-Infinity);
+                VDFLoader_5.VDFLoader.ToVDFNode("Infinity").primitiveValue.Should().Be(Infinity);
+                VDFLoader_5.VDFLoader.ToVDFNode("-Infinity").primitiveValue.Should().Be(-Infinity);
             });
             test("D0_String", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("'Root string.'");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("'Root string.'");
                 a.primitiveValue.Should().Be("Root string.");
             });
             test("D0_StringWithSaveThenLoad", function () {
                 var vdf = VDF_6.VDF.Serialize("Root string.");
                 vdf.Should().Be("\"Root string.\"");
-                var a = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
+                var a = VDFLoader_5.VDFLoader.ToVDFNode(vdf);
                 a.primitiveValue.Should().Be("Root string.");
             });
             test("D0_StringAsNull", function () {
@@ -2274,15 +2266,15 @@ define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/Type
                 ok(a == null);
             });
             test("D0_BaseValue_Literal", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("'<<\tBase-value string that {needs escaping}.>>'");
                 a.primitiveValue.Should().Be("\tBase-value string that {needs escaping}.");
             });
             test("D0_Metadata_Type", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("string>'Root string.'");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("string>'Root string.'");
                 a.metadata.Should().Be("string");
             });
             test("D0_List", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("['Root string 1.' 'Root string 2.']", "List(object)");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("['Root string 1.' 'Root string 2.']", "List(object)");
                 a[0].primitiveValue.Should().Be("Root string 1.");
                 a[1].primitiveValue.Should().Be("Root string 2.");
             });
@@ -2292,14 +2284,14 @@ define("Tests/TypeScript/Loading/ToVDFNode", ["require", "exports", "Source/Type
                 a[1].primitiveValue.Should().Be("Root string 2.");
             });*/
             test("D0_List_Objects", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("[{name:'Dan' age:50} {name:'Bob' age:60}]", "List(object)");
                 a[0]["name"].primitiveValue.Should().Be("Dan");
                 a[0]["age"].primitiveValue.Should().Be(50);
                 a[1]["name"].primitiveValue.Should().Be("Bob");
                 a[1]["age"].primitiveValue.Should().Be(60);
             });
             test("D0_List_Literals", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("['first' '<<second\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("['first' '<<second\n\
 which is on two lines>>' '<<third\n\
 which is on\n\
 three lines>>']", "List(string)");
@@ -2319,26 +2311,26 @@ three lines".Fix());
             });*/
             test("D0_EmptyList", function () { VDF_6.VDF.Deserialize("[]").Count.Should().Be(0); });
             test("D0_ListMetadata", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("List(int)>[1 2]");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("List(int)>[1 2]");
                 a.metadata.Should().Be("List(int)");
                 ok(a[0].metadata == null); //a[0].metadata.Should().Be(null);
                 ok(a[1].metadata == null); //a[1].metadata.Should().Be(null);
             });
             test("D0_ListMetadata2", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("List(object)>[string>\"1\" string>\"2\"]");
                 a.metadata.Should().Be("List(object)");
                 a[0].metadata.Should().Be("string");
                 a[1].metadata.Should().Be("string");
             });
             test("D0_EmptyMap", function () { VDF_6.VDF.Deserialize("{}").Count.Should().Be(0); });
             test("D0_Map_ChildMetadata", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("Dictionary(object object)>{a:string>\"1\" b:string>\"2\"}");
                 a.metadata.Should().Be("Dictionary(object object)");
                 a["a"].metadata.Should().Be("string");
                 a["b"].metadata.Should().Be("string");
             });
             test("D0_MultilineString", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("'<<This is a\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("'<<This is a\n\
 multiline string\n\
 of three lines in total.>>'");
                 a.primitiveValue.Should().Be("This is a\n\
@@ -2346,13 +2338,13 @@ multiline string\n\
 of three lines in total.".Fix());
             });
             test("D1_Map_Children", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
                 a["key1"].primitiveValue.Should().Be("Simple string.");
                 a["key2"].primitiveValue.Should().Be("false");
                 a["key3"]["age"].primitiveValue.Should().Be(50);
             });
             test("D1_Map_ChildrenThatAreRetrievedByKey", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{key 1:'value 1' key 2:'value 2'}");
                 a["key 1"].primitiveValue.Should().Be("value 1");
                 a["key 2"].primitiveValue.Should().Be("value 2");
             });
@@ -2361,7 +2353,7 @@ of three lines in total.".Fix());
                 a[0].Should().Be("SimpleString");
             });
             test("D1_BaseValuesWithImplicitCasting", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{bool:false int:5 double:.5 string:'Prop value string.'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{bool:false int:5 double:.5 string:'Prop value string.'}");
                 a["bool"].primitiveValue.Should().Be(false);
                 a["int"].primitiveValue.Should().Be(5);
                 a["double"].primitiveValue.Should().Be(.5);
@@ -2373,32 +2365,32 @@ of three lines in total.".Fix());
                 Assert.True(a["string"] == "Prop value string.");*/
             });
             test("D1_BaseValuesWithMarkedTypes", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{bool:bool>false int:int>5 double:double>.5 string:string>'Prop value string.'}");
                 a["bool"].primitiveValue.Should().Be(false);
                 a["int"].primitiveValue.Should().Be(5);
                 a["double"].primitiveValue.Should().Be(.5);
                 a["string"].primitiveValue.Should().Be("Prop value string.");
             });
             test("D1_Literal", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{string:'<<<Prop value string that <<needs escaping>>.>>>'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{string:'<<<Prop value string that <<needs escaping>>.>>>'}");
                 a["string"].primitiveValue.Should().Be("Prop value string that <<needs escaping>>.");
             });
             test("D1_TroublesomeLiteral1", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{string:'<<<#<<Prop value string that <<needs escaping>>.>>#>>>'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{string:'<<<#<<Prop value string that <<needs escaping>>.>>#>>>'}");
                 a["string"].primitiveValue.Should().Be("<<Prop value string that <<needs escaping>>.>>");
             });
             test("D1_TroublesomeLiteral2", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{string:'<<<##Prop value string that <<needs escaping>>.##>>>'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{string:'<<<##Prop value string that <<needs escaping>>.##>>>'}");
                 a["string"].primitiveValue.Should().Be("#Prop value string that <<needs escaping>>.#");
             });
             test("D1_VDFWithVDFWithVDF", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{level1:'<<<{level2:'<<{level3:'Base string.'}>>'}>>>'}");
                 a["level1"].primitiveValue.Should().Be("{level2:'<<{level3:'Base string.'}>>'}");
-                VDFLoader_6.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
-                VDFLoader_6.VDFLoader.ToVDFNode(VDFLoader_6.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue)["level3"].primitiveValue.Should().Be("Base string.");
+                VDFLoader_5.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue.Should().Be("{level3:'Base string.'}");
+                VDFLoader_5.VDFLoader.ToVDFNode(VDFLoader_5.VDFLoader.ToVDFNode(a["level1"].primitiveValue)["level2"].primitiveValue)["level3"].primitiveValue.Should().Be("Base string.");
             });
             test("D1_ArraysInArrays", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("[['1A' '1B'] ['2A' '2B'] '3A']");
                 a[0][0].primitiveValue.Should().Be("1A");
                 a[0][1].primitiveValue.Should().Be("1B");
                 a[1][0].primitiveValue.Should().Be("2A");
@@ -2406,31 +2398,31 @@ of three lines in total.".Fix());
                 a[2].primitiveValue.Should().Be("3A");
             });
             test("D1_ArraysInArrays_SecondsNullAndEmpty", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("[['1A' null] ['2A' '']]");
                 a[0][0].primitiveValue.Should().Be("1A");
                 ok(a[0][1].primitiveValue == null); //a[0][1].primitiveValue.Should().Be(null);
                 a[1][0].primitiveValue.Should().Be("2A");
                 a[1][1].primitiveValue.Should().Be("");
             });
             test("D1_StringAndArraysInArrays", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("['text' ['2A' null]]");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("['text' ['2A' null]]");
                 a[0].primitiveValue.Should().Be("text");
                 a[1][0].primitiveValue.Should().Be("2A");
                 ok(a[1][1].primitiveValue == null); //a[1][1].primitiveValue.Should().Be(null);
             });
             test("D1_Dictionary", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{key1:'value1' key2:'value2' 'key3':'value3' \"key4\":\"value4\"}");
                 a["key1"].primitiveValue.Should().Be("value1");
                 a["key2"].primitiveValue.Should().Be("value2");
                 a["key3"].primitiveValue.Should().Be("value3");
                 a["key4"].primitiveValue.Should().Be("value4");
             });
             test("D1_Map_KeyWithHash", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{#:'value1'}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{#:'value1'}");
                 a["#"].primitiveValue.Should().Be("value1");
             });
             test("D1_Map_MixedTypeKeysWithMetadata", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{int>1:'value1' int>\"2\":'value2' 'key3':'value3' \"key4\":\"value4\"}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{int>1:'value1' int>\"2\":'value2' 'key3':'value3' \"key4\":\"value4\"}");
                 var pairs = a.mapChildren.Pairs;
                 a["1"].primitiveValue.Should().Be("value1");
                 a["2"].primitiveValue.Should().Be("value2");
@@ -2445,18 +2437,18 @@ of three lines in total.".Fix());
                 bMap.Get("key4").Should().Be("value4");
             });
             test("D1_Dictionary_Complex", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{uiPrefs:{toolOptions:'<<{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}>>' liveTool:'Select'}}");
                 a["uiPrefs"]["toolOptions"].primitiveValue.Should().Be("{Select:{} TerrainShape:{showPreview:true continuousMode:true strength:.3 size:7} TerrainTexture:{textureName:null size:7}}");
                 a["uiPrefs"]["liveTool"].primitiveValue.Should().Be("Select");
             });
             test("D1_Dictionary_TypesInferredFromGenerics", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{vertexColors:Dictionary(string Color)>{9,4,2.5:'Black' 1,8,9.5435:'Gray' 25,15,5:'White'}}");
                 a["vertexColors"]["9,4,2.5"].primitiveValue.Should().Be("Black");
                 a["vertexColors"]["1,8,9.5435"].primitiveValue.Should().Be("Gray");
                 a["vertexColors"]["25,15,5"].primitiveValue.Should().Be("White");
             });
             test("D1_ArrayPoppedOut_NoItems", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{names:[^]}");
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{names:[^]}");
                 a["names"].listChildren.Count.Should().Be(0);
                 a["names"].mapChildren.Count.Should().Be(0);
             });
@@ -2465,7 +2457,7 @@ of three lines in total.".Fix());
                 var tokens = VDFTokenParser_2.VDFTokenParser.ParseTokens(vdf);
                 var tokenTypes = tokens.Select(function (b) { return VDFTokenParser_2.VDFTokenType[b.type]; });
                 tokenTypes.Should().BeEquivalentTo(new VDFExtras_8.List("VDFTokenType", VDFTokenParser_2.VDFTokenType.MapStartMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenParser_2.VDFTokenType[a]; }));
-                var a = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
+                var a = VDFLoader_5.VDFLoader.ToVDFNode(vdf);
                 a["names"][0].primitiveValue.Should().Be("Dan");
                 a["names"][1].primitiveValue.Should().Be("Bob");
             });
@@ -2474,14 +2466,14 @@ of three lines in total.".Fix());
                 var tokens = VDFTokenParser_2.VDFTokenParser.ParseTokens(vdf);
                 var tokenTypes = tokens.Select(function (b) { return VDFTokenParser_2.VDFTokenType[b.type]; });
                 tokenTypes.Should().BeEquivalentTo(new VDFExtras_8.List("VDFTokenType", VDFTokenParser_2.VDFTokenType.MapStartMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.String, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.Key, VDFTokenParser_2.VDFTokenType.ListStartMarker, VDFTokenParser_2.VDFTokenType.Number, VDFTokenParser_2.VDFTokenType.Number, VDFTokenParser_2.VDFTokenType.ListEndMarker, VDFTokenParser_2.VDFTokenType.MapEndMarker).Select(function (a) { return VDFTokenParser_2.VDFTokenType[a]; }));
-                var a = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
+                var a = VDFLoader_5.VDFLoader.ToVDFNode(vdf);
                 a["names"][0].primitiveValue.Should().Be("Dan");
                 a["names"][1].primitiveValue.Should().Be("Bob");
                 a["ages"][0].primitiveValue.Should().Be(10);
                 a["ages"][1].primitiveValue.Should().Be(20);
             });
             test("D1_InferredDictionaryPoppedOut", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
 	title1:'message1'\n\
 	title2:'message2'");
                 a["messages"].mapChildren.Count.Should().Be(2);
@@ -2504,7 +2496,7 @@ of three lines in total.".Fix());
                     title2:"message2"
                 } otherProperty:false}
                  */
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{messages:{^} otherProperty:false}\n\
 	title1:'message1'\n\
 	title2:'message2'");
                 a["messages"].mapChildren.Count.Should().Be(2);
@@ -2513,7 +2505,7 @@ of three lines in total.".Fix());
                 a["otherProperty"].primitiveValue.Should().Be(false);
             });
             test("D1_Object_MultilineStringThenProperty", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{text:'<<This is a\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{text:'<<This is a\n\
 multiline string\n\
 of three lines in total.>>' bool:true}");
                 a["text"].primitiveValue.Should().Be("This is a\n\
@@ -2522,7 +2514,7 @@ of three lines in total.".Fix());
                 a["bool"].primitiveValue.Should().Be(true);
             });
             test("D1_Object_PoppedOutStringsThenMultilineString", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{childTexts:[^] text:'<<This is a\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{childTexts:[^] text:'<<This is a\n\
 multiline string\n\
 of three lines in total.>>'}\n\
 	'text1'\n\
@@ -2534,14 +2526,14 @@ multiline string\n\
 of three lines in total.".Fix());
             });
             test("D2_List_Lists_PoppedOutObjects", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("[[^] [^] [^]]\n\
 	{name:'Road'}\n\
 	^{name:'RoadAndPath'}\n\
 	^{name:'SimpleHill'}"); //, new VDFLoadOptions({inferStringTypeForUnknownTypes: true}));
                 a.listChildren.Count.Should().Be(3);
             });
             test("D2_List_PoppedOutObjects_MultilineString", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("[^]\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("[^]\n\
 	{id:1 multilineText:'<<line1\n\
 	line2\n\
 	line3>>'}\n\
@@ -2550,7 +2542,7 @@ of three lines in total.".Fix());
                 a.listChildren.Count.Should().Be(2);
             });
             test("D2_Object_PoppedOutObject_PoppedOutObject", function () {
-                var a = VDFLoader_6.VDFLoader.ToVDFNode("{name:'L0' children:[^]}\n\
+                var a = VDFLoader_5.VDFLoader.ToVDFNode("{name:'L0' children:[^]}\n\
 	{name:'L1' children:[^]}\n\
 		{name:'L2'}");
                 a["children"].listChildren.Count.Should().Be(1);
@@ -2583,47 +2575,17 @@ of three lines in total.".Fix());
                 var vdf = "{name:'Main' worlds:Dictionary(string object)>{Test1:{vObjectRoot:{name:'VObjectRoot' children:[^]}} Test2:{vObjectRoot:{name:'VObjectRoot' children:[^]}}}}\n\
 	{id:System.Guid>'025f28a5-a14b-446d-b324-2d274a476a63' name:'#Types' children:[]}\n\
 	^{id:System.Guid>'08e84f18-aecf-4b80-9c3f-ae0697d9033a' name:'#Types' children:[]}";
-                var livePackNode = VDFLoader_6.VDFLoader.ToVDFNode(vdf);
+                var livePackNode = VDFLoader_5.VDFLoader.ToVDFNode(vdf);
                 livePackNode["worlds"]["Test1"]["vObjectRoot"]["children"][0]["id"].primitiveValue.Should().Be("025f28a5-a14b-446d-b324-2d274a476a63");
                 livePackNode["worlds"]["Test2"]["vObjectRoot"]["children"][0]["id"].primitiveValue.Should().Be("08e84f18-aecf-4b80-9c3f-ae0697d9033a");
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_2.ExportInternalClassesTo(window, function (str) { return eval(str); });
         })(Loading_ToVDFNode || (Loading_ToVDFNode = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFLoader", "Tests/TypeScript/Loading/SpeedTests", "Tests/TypeScript/Loading/ToObject", "Tests/TypeScript/Loading/ToVDFNode"], function (require, exports, VDFTypeInfo_5, VDF_7, VDFLoader_7) {
-    /*class Loading {
-        static initialized = false;
-        static Init() {
-            if (this.initialized)
-                return;
-            this.initialized = true;
-            Object.prototype._AddFunction_Inline = function Should() {
-                return {
-                    Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-                    BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
-                };
-            };
-        }
-    
-        static RunTests() {
-            /*test("testName() {
-                ok(null == null);
-            });*#/
-        }
-    }*/
-    // init
-    // ==========
-    var loading = {};
-    function Loading_RunTests() {
-        for (var name in loading)
-            test_old(name, loading[name]);
-    }
-    exports.Loading_RunTests = Loading_RunTests;
-    // the normal "test" function actually runs test
-    // here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
-    window["test"] = function (name, func) { loading[name] = func; };
+define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDF", "Source/TypeScript/VDFLoader", "Tests/TypeScript/GeneralInit", "Tests/TypeScript/GeneralInit", "Tests/TypeScript/Loading/ToObject", "Tests/TypeScript/Loading/ToVDFNode", "./Loading/SpeedTests"], function (require, exports, VDFTypeInfo_5, VDF_7, VDFLoader_6, GeneralInit_3, GeneralInit_4) {
+    exports.Loading_RunTests = GeneralInit_4.Loading_RunTests;
     // tests
     // ==========
     var VDFTests;
@@ -2740,17 +2702,17 @@ define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/Type
             // for JSON compatibility
             // ==========
             test("D1_Map_IntsWithStringKeys", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("{\"key1\":0 \"key2\":1}", new VDFLoader_7.VDFLoadOptions({ allowStringKeys: true }));
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("{\"key1\":0 \"key2\":1}", new VDFLoader_6.VDFLoadOptions({ allowStringKeys: true }));
                 a.mapChildren.Count.Should().Be(2);
                 a["key1"].primitiveValue.Should().Be(0);
             });
             test("D1_List_IntsWithCommaSeparators", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[0,1]", new VDFLoader_7.VDFLoadOptions({ allowCommaSeparators: true }));
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[0,1]", new VDFLoader_6.VDFLoadOptions({ allowCommaSeparators: true }));
                 a.listChildren.Count.Should().Be(2);
                 a[0].primitiveValue.Should().Be(0);
             });
             test("D3_List_NumbersWithScientificNotation", function () {
-                var a = VDFLoader_7.VDFLoader.ToVDFNode("[-7.45058e-09,0.1,-1.49012e-08]", new VDFLoader_7.VDFLoadOptions().ForJSON());
+                var a = VDFLoader_6.VDFLoader.ToVDFNode("[-7.45058e-09,0.1,-1.49012e-08]", new VDFLoader_6.VDFLoadOptions().ForJSON());
                 a[0].primitiveValue.Should().Be(-7.45058e-09);
             });
             // unique to JavaScript version
@@ -2762,7 +2724,7 @@ define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/Type
             }());
             test("Depth0_ObjectWithMetadataHavingGenericType", function () { return ok(VDF_7.VDF.Deserialize("PretendGenericType(object)>{}") instanceof PretendGenericType); });
             test("Depth1_UnknownTypeWithFixOn_String", function () {
-                var a = VDF_7.VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoader_7.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
+                var a = VDF_7.VDF.Deserialize("UnknownType>{string:'Prop value string.'}", new VDFLoader_6.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
                 a["string"].Should().Be("Prop value string.");
             });
             test("Depth1_UnknownTypeWithFixOff_String", function () {
@@ -2774,7 +2736,7 @@ define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/Type
                 }
             });
             test("Depth1_Object_UnknownTypeWithFixOn", function () {
-                var a = VDF_7.VDF.Deserialize("{string:UnkownBaseType>'Prop value string.'}", new VDFLoader_7.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
+                var a = VDF_7.VDF.Deserialize("{string:UnkownBaseType>'Prop value string.'}", new VDFLoader_6.VDFLoadOptions({ loadUnknownTypesAsBasicTypes: true }));
                 a["string"].Should().Be("Prop value string.");
             });
             test("AsObject", function () {
@@ -2802,8 +2764,43 @@ define("Tests/TypeScript/Loading/L_General", ["require", "exports", "Source/Type
                 a.structures[1].id.Should().Be(1);
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_3.ExportInternalClassesTo(window, function (str) { return eval(str); });
         })(Loading_General || (Loading_General = {}));
+    })(VDFTests || (VDFTests = {}));
+});
+define("Tests/TypeScript/Loading/SpeedTests", ["require", "exports", "Source/TypeScript/VDFLoader", "Tests/TypeScript/GeneralInit"], function (require, exports, VDFLoader_7, GeneralInit_5) {
+    // tests
+    // ==========
+    var VDFTests;
+    (function (VDFTests) {
+        var Loading_SpeedTests;
+        (function (Loading_SpeedTests) {
+            // run tests once ahead of time, so VDF-type-data is pre-loaded for profiled tests
+            /*loading["D3_SpeedTester"]();
+            loading["D5_SpeedTester2"]();*/
+            test("D3_SpeedTester", function () {
+                var vdf = "{id:'595880cd-13cd-4578-9ef1-bd3175ac72bb' visible:true parts:[^]}\n\
+	{id:'ba991aaf-447a-4a03-ade8-f4a11b4ea966' typeName:'Wood' name:'Body' pivotPoint_unit:'-0.1875,0.4375,-0.6875' anchorNormal:'0,1,0' scale:'0.5,0.25,1.5' controller:true}\n\
+	{id:'743f64f2-8ece-4dd3-bdf5-bbb6378ffce5' typeName:'Wood' name:'FrontBar' pivotPoint_unit:'-0.4375,0.5625,0.8125' anchorNormal:'0,0,1' scale:'1,0.25,0.25' controller:false}\n\
+	{id:'52854b70-c200-478f-bcd2-c69a03cd808f' typeName:'Wheel' name:'FrontLeftWheel' pivotPoint_unit:'-0.5,0.5,0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'971e394c-b440-4fee-99fd-dceff732cd1e' typeName:'Wheel' name:'BackRightWheel' pivotPoint_unit:'0.5,0.5,-0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'77d30d72-9845-4b22-8e95-5ba6e29963b9' typeName:'Wheel' name:'FrontRightWheel' pivotPoint_unit:'0.5,0.5,0.875' anchorNormal:'1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'21ca2a80-6860-4de3-9894-b896ec77ef9e' typeName:'Wheel' name:'BackLeftWheel' pivotPoint_unit:'-0.5,0.5,-0.875' anchorNormal:'-1,0,0' scale:'1,1,1' controller:false}\n\
+	{id:'eea2623a-86d3-4368-b4e0-576956b3ef1d' typeName:'Wood' name:'BackBar' pivotPoint_unit:'-0.4375,0.4375,-0.8125' anchorNormal:'0,0,-1' scale:'1,0.25,0.25' controller:false}\n\
+	{id:'f1edc5a1-d544-4993-bdad-11167704a1e1' typeName:'MachineGun' name:'Gun1' pivotPoint_unit:'0,0.625,0.875' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}\n\
+	{id:'e97f8ee1-320c-4aef-9343-3317accb015b' typeName:'Crate' name:'Crate' pivotPoint_unit:'0,0.625,0' anchorNormal:'0,1,0' scale:'0.5,0.5,0.5' controller:false}";
+                VDFLoader_7.VDFLoader.ToVDFNode(vdf);
+                ok(true);
+            });
+            test("D5_SpeedTester2", function () {
+                var vdf = "\n{^}\n\tplants:[^]\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 406 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 412 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 416 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 486 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 490 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"9 495 0.5\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 398 1\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 402 1\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"10 409 1\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 405 2\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 407 2\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"12 409 2\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 413 3\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"13 401 2.5\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"13 403 2.5\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 405 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 407 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"14 409 3\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"16 402 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"17 406 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"16 409 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"22 250 3.99980926513672\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"21 253 3.99976348876953\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"21 255 3.99992370605469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"23 253 3.99986267089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"23 255 3.99992370605469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 245 3.99985504150391\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 247 3.9998779296875\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"26 250 3.99990844726563\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 253 3.99990844726563\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 255 3.99996948242188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"25 259 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"27 245 3.99989318847656\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 254 3.99996948242188\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"27 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 260 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"28 247 3.99993133544922\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 241 3.99992370605469\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 243 3.99992370605469\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 245 3.99991607666016\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"30 250 3.99996185302734\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"29 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"30 247 3.99994659423828\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 241 3.99993896484375\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 243 3.99996185302734\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 245 3.99996185302734\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"32 254 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"31 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 263 4\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 41 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 43 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 45 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 48 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 51 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 53 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 56 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 237 3.99996185302734\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 240 3.99990081787109\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 243 3.99997711181641\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 246 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 249 3.99998474121094\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 251 3.99997711181641\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 257 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"33 260 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 268 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"34 259 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 41 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 44 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 53 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 237 3.99996185302734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 243 3.99998474121094\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 249 3.99999237060547\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 252 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"35 255 3.99999237060547\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"36 258 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 37 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 39 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 41 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 47 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 49 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 53 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 56 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 59 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 61 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 63 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 237 3.99703979492188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 239 3.99697113037109\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 241 3.99952697753906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 244 3.999267578125\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 248 3.99997711181641\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 261 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"37 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"38 270 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 38 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 41 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 43 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 45 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 47 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 50 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 54 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"40 60 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 63 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 237 3.99703979492188\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 239 3.99111938476563\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 241 3.99368286132813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 251 3.99996948242188\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 253 3.99998474121094\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 255 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 257 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 261 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"39 263 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 34 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 42 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 45 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 47 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 54 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 57 3.86945343017578\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 63 3.92586517333984\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 66 3.85173034667969\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 70 4.72548675537109\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 73 4.41551971435547\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 76 4.83103942871094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 80 4.77939605712891\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 83 4.07389068603516\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 233 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 235 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 237 3.99819183349609\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 239 3.99227142333984\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 241 3.99039459228516\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 243 3.99558258056641\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 245 3.9984130859375\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 247 3.99912261962891\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 250 3.99836730957031\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 254 3.99998474121094\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 259 4\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 265 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"41 267 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"42 270 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 37 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 39 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 45 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 48 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 51 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 57 3.86945343017578\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 60 3.47781372070313\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 73 5.14100646972656\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 84 4.29557037353516\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 234 4\"\n\t\t\ttype:\"Broadleaf_2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 237 3.99819183349609\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 240 3.99275970458984\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 244 3.99708557128906\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 247 3.99815368652344\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"43 263 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"44 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 37 4.20879364013672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 39 4.20879364013672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 41 4.20937347412109\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 43 4.20937347412109\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 51 4.00287628173828\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 53 4.02330017089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 55 4.02330017089844\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 57 4.03544616699219\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 64 4.71137851017669\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 67 5.50337982177734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 69 5.83818817138672\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 71 5.84939575195313\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 75 6.74217224121094\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 79 5.97611236572266\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 87 4.40133666992188\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 89 4.49819946289063\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 91 4.5694580078125\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 238 3.99510192871094\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 248 3.99839019775391\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 251 3.99759674072266\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 253 3.99757385253906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 255 3.99919128417969\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 263 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"45 269 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 272 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 45 4.32740020751953\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"46 81 6.16506958007813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 38 4.79120635986328\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 41 4.62696838378906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 43 4.62812805175781\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 47 4.35408020019531\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 49 4.23892974853516\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 51 4.00862884521484\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 53 4.029052734375\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 56 4.09320068359375\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 59 4.10633850097656\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 61 4.22352532202559\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 67 6.14738464355469\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 70 6.89182281494141\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 83 6.20314788818359\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 85 5.54216003417969\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 87 4.85179901123047\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 89 4.94866180419922\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 91 5.22205352783203\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 234 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 238 3.99383544921875\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 242 3.99224853515625\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 251 3.99861907958984\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 254 3.99941253662109\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 259 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 262 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"47 265 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 268 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 45 4.74615478515625\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 79 7.13672461469146\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 81 7.1247786078701\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"48 245 3.99730682373047\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 41 5.18635559082031\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 43 5.18751525878906\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 49 5.37989044189453\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 54 4.07085418701172\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 59 4.14813995361328\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 61 4.69170288500582\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 64 6.03464508056641\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 67 6.44294738769531\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 83 7.69938266204127\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 85 7.34394238179097\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 87 6.817580429812\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 89 5.46152876954768\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 91 5.73491668701172\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 248 3.99862670898438\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 251 3.99854278564453\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 257 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 259 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 265 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"49 271 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 45 5.45948791503906\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 53 4.347900390625\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 79 8.63121075076069\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 81 8.83076811475225\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"50 245 3.99758148193359\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 41 5.50032043457031\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 43 5.88870239257813\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"53 57 4.19117736816406\"\n\t\t\ttype:\"Broadleaf_1\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 62 5.19688668210223\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 67 6.39008331298828\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 70 7.31072152554988\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 73 7.81732625308945\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 76 9.64667510986328\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 84 10.9526667606263\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 87 9.21038396212089\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 90 8.40490492338341\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 237 3.99828338623047\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 239 3.99484252929688\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 242 3.99565124511719\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 251 3.99802398681641\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 253 3.99859619140625\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 255 3.99970245361328\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 257 4\"\n\t\t\ttype:\"Bush2\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 259 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 261 4\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"51 263 4\"\n\t\t\ttype:\"BerryBush16\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t\thasProduce:{^}\n\t\t\t\thealth:0\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 266 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 270 4\"\n\t\t\ttype:\"Palm\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 45 6.16066741943359\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n\t\t{^}\n\t\t\ttransform:{^}\n\t\t\t\tposition:\"52 53 4.94283294677734\"\n\t\t\ttype:\"Banana Tree\"\n\t\t\townerRegion:\"@/regions/i:1\"\n".trim();
+                //for (var i = 0; i < 100; i++)
+                VDFLoader_7.VDFLoader.ToVDFNode(vdf);
+                ok(true);
+            });
+            // export all classes/enums to global scope
+            GeneralInit_5.ExportInternalClassesTo(window, function (str) { return eval(str); });
+        })(Loading_SpeedTests || (Loading_SpeedTests = {}));
     })(VDFTests || (VDFTests = {}));
 });
 // Object: base
@@ -2914,7 +2911,7 @@ var VDebug = (function () {
 VDebug.timerStart = 0;
 VDebug.sectionTotals = {};
 VDebug.waitTimerIDs = {};
-define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFExtras"], function (require, exports, VDF_8, VDFTypeInfo_6, VDFSaver_3, VDFNode_3, VDFExtras_9) {
+define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFExtras", "Tests/TypeScript/GeneralInit"], function (require, exports, VDF_8, VDFTypeInfo_6, VDFSaver_3, VDFNode_3, VDFExtras_9, GeneralInit_6) {
     // tests
     // ==========
     var VDFTests;
@@ -3384,11 +3381,13 @@ define("Tests/TypeScript/Saving/FromObject", ["require", "exports", "Source/Type
 	otherProperty:false".replace(/\r/g, ""));
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_6.ExportInternalClassesTo(window, function (str) { return eval(str); });
+            /*var names = V.GetMatches(arguments.callee.toString(), /        var (\w+) = \(function \(\) {/g, 1);
+            debugger;*/
         })(Saving_FromObject || (Saving_FromObject = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFExtras"], function (require, exports, VDFNode_4, VDFSaver_4, VDF_9, VDFTypeInfo_7, VDFExtras_10) {
+define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDF", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFExtras", "Tests/TypeScript/GeneralInit"], function (require, exports, VDFNode_4, VDFSaver_4, VDF_9, VDFTypeInfo_7, VDFExtras_10, GeneralInit_7) {
     // tests
     // ==========
     var VDFTests;
@@ -3524,11 +3523,11 @@ define("Tests/TypeScript/Saving/FromVDFNode", ["require", "exports", "Source/Typ
                 VDF_9.VDF.Serialize(map).Should().Be("{Type>Object:\"hi there\"}");
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_7.ExportInternalClassesTo(window, function (str) { return eval(str); });
         })(Saving_FromVDFNode || (Saving_FromVDFNode = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Saving/SpeedTests", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFExtras"], function (require, exports, VDFTypeInfo_8, VDFSaver_5, VDFExtras_11) {
+define("Tests/TypeScript/Saving/SpeedTests", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFExtras", "Tests/TypeScript/GeneralInit"], function (require, exports, VDFTypeInfo_8, VDFSaver_5, VDFExtras_11, GeneralInit_8) {
     // tests
     // ==========
     var VDFTests;
@@ -3577,42 +3576,12 @@ define("Tests/TypeScript/Saving/SpeedTests", ["require", "exports", "Source/Type
                 var vdf = a.ToVDF();
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_8.ExportInternalClassesTo(window, function (str) { return eval(str); });
         })(Saving_SpeedTests || (Saving_SpeedTests = {}));
     })(VDFTests || (VDFTests = {}));
 });
-define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDF", "Tests/TypeScript/Saving/FromObject", "Tests/TypeScript/Saving/FromVDFNode", "Tests/TypeScript/Saving/SpeedTests"], function (require, exports, VDFTypeInfo_9, VDFNode_5, VDFSaver_6, VDFExtras_12, VDF_10) {
-    /*class Saving {
-        static initialized: boolean;
-        static Init() 	{
-            if (this.initialized)
-                return;
-            this.initialized = true;
-            Object.prototype._AddFunction_Inline = function Should() 		{
-                return {
-                    Be: (value, message?: string) => { equal(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); },
-                    BeExactly: (value, message?: string) => { strictEqual(this instanceof Number ? parseFloat(this) : (this instanceof String ? this.toString() : this), value, message); }
-                };
-            };
-        }
-    
-        static RunTests() {
-            /*test("testName() {
-                ok(null == null);
-            });*#/
-        }
-    }*/
-    // init
-    // ==========
-    var saving = {};
-    function Saving_RunTests() {
-        for (var name in saving)
-            test_old(name, saving[name]);
-    }
-    exports.Saving_RunTests = Saving_RunTests;
-    // the normal "test" function actually runs test
-    // here we replace it with a function that merely "registers the test to be run later on" (when the Saving button is pressed)
-    window["test"] = function (name, func) { saving[name] = func; };
+define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeScript/VDFTypeInfo", "Source/TypeScript/VDFNode", "Source/TypeScript/VDFSaver", "Source/TypeScript/VDFExtras", "Source/TypeScript/VDF", "Tests/TypeScript/GeneralInit", "Tests/TypeScript/GeneralInit", "Tests/TypeScript/Saving/FromObject", "Tests/TypeScript/Saving/FromVDFNode", "Tests/TypeScript/Saving/SpeedTests"], function (require, exports, VDFTypeInfo_9, VDFNode_5, VDFSaver_6, VDFExtras_12, VDF_10, GeneralInit_9, GeneralInit_10) {
+    exports.Saving_RunTests = GeneralInit_10.Saving_RunTests;
     // tests
     // ==========
     var VDFTests;
@@ -3783,7 +3752,7 @@ define("Tests/TypeScript/Saving/S_General", ["require", "exports", "Source/TypeS
                 a.ToVDF(new VDFSaver_6.VDFSaveOptions({ useCommaSeparators: true })).Should().Be("[0,1]");
             });
             // export all classes/enums to global scope
-            ExportInternalClassesTo(window, function (str) { return eval(str); });
+            GeneralInit_9.ExportInternalClassesTo(window, function (str) { return eval(str); });
             // make sure we create one instance, so that the type-info attachment code can run
             (new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base()).toString();
         })(Saving_General || (Saving_General = {}));

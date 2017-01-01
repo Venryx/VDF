@@ -11,6 +11,8 @@ import {
 import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScript/VDFSaver";
 import {VDFNode} from "../../../Source/TypeScript/VDFNode";
 import {List, object, Dictionary, VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
+import {ExportInternalClassesTo} from "../GeneralInit";
+
 // tests
 // ==========
 
@@ -284,6 +286,9 @@ module VDFTests { // added to match C# indentation
 		});
 
 		// export all classes/enums to global scope
-		ExportInternalClassesTo(window, str => eval(str));
+		ExportInternalClassesTo(window, str=>eval(str));
+
+		/*var names = V.GetMatches(arguments.callee.toString(), /        var (\w+) = \(function \(\) {/g, 1);
+		debugger;*/
 	}
 }

@@ -3,6 +3,7 @@ import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScri
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFSerialize, _VDFSerialize} from "../../../Source/TypeScript/VDFTypeInfo";
 import {Dictionary, List, object} from "../../../Source/TypeScript/VDFExtras";
+import {ExportInternalClassesTo} from "../GeneralInit";
 // tests
 // ==========
 

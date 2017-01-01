@@ -3,6 +3,7 @@ import {VDFDeserializeProp, P, _VDFPreDeserialize, T, _VDFPostDeserialize, _VDFD
 import { VDFNode } from "../../../Source/TypeScript/VDFNode";
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFNodePath, Dictionary} from "../../../Source/TypeScript/VDFExtras";
+import {ExportInternalClassesTo} from "../GeneralInit";
 // tests
 // ==========
 

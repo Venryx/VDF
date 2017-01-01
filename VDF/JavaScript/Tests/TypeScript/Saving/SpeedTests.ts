@@ -1,6 +1,7 @@
 ﻿import {P, T} from "../../../Source/TypeScript/VDFTypeInfo";
 import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScript/VDFSaver";
 import {List} from "../../../Source/TypeScript/VDFExtras";
+import {ExportInternalClassesTo} from "../GeneralInit";
 
 // tests
 // ==========

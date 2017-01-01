@@ -3,6 +3,7 @@ import {VDFNode} from "../../../Source/TypeScript/VDFNode";
 import {VDFSaver, VDFSaveOptions} from "../../../Source/TypeScript/VDFSaver";
 import {VDFNodePathNode, VDFNodePath, List, Dictionary, object} from "../../../Source/TypeScript/VDFExtras";
 import {VDF} from "../../../Source/TypeScript/VDF";
+import {ExportInternalClassesTo, Saving_RunTests} from "../GeneralInit";
 
 /*class Saving {
 	static initialized: boolean;
@@ -25,23 +26,12 @@ import {VDF} from "../../../Source/TypeScript/VDF";
 	}
 }*/
 
-// init
-// ==========
-
-var saving = {};
-export function Saving_RunTests() {
-	for (var name in saving)
-		test_old(name, saving[name]);
-}
-
-// the normal "test" function actually runs test
-// here we replace it with a function that merely "registers the test to be run later on" (when the Saving button is pressed)
-window["test"] = function(name, func) { saving[name] = func; };
-
 // make sure we import all the other saving tests from here (this file's the root)
 import "./FromObject";
 import "./FromVDFNode";
 import "./SpeedTests";
+
+export {Saving_RunTests} from "../GeneralInit";
 
 // tests
 // ==========

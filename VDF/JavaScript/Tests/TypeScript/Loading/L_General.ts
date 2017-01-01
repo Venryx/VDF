@@ -3,6 +3,7 @@ import {VDFDeserialize, P, T, _VDFDeserialize} from "../../../Source/TypeScript/
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFLoader, VDFLoadOptions} from "../../../Source/TypeScript/VDFLoader";
 import {VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
+import {ExportInternalClassesTo, Loading_RunTests} from "../GeneralInit";
 
 /*class Loading {
 	static initialized = false;
@@ -25,23 +26,12 @@ import {VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
 	}
 }*/
 
-// init
-// ==========
-
-var loading = {};
-export function Loading_RunTests() {
-	for (var name in loading)
-		test_old(name, loading[name]);
-}
-
-// the normal "test" function actually runs test
-// here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
-window["test"] = function(name, func) { loading[name] = func; };
-
-// make sure we import all the other saving tests from here (this file's the root)
-import "./SpeedTests";
+// make sure we import all the other loading tests from here (this file's the root)
 import "./ToObject";
 import "./ToVDFNode";
+import "./Loading/SpeedTests";
+
+export {Loading_RunTests} from "../GeneralInit";
 
 // tests
 // ==========

@@ -3,6 +3,7 @@ import {VDFLoader} from "../../../Source/TypeScript/VDFLoader";
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFTokenParser, VDFTokenType} from "../../../Source/TypeScript/VDFTokenParser";
 import {Dictionary, List, object} from "../../../Source/TypeScript/VDFExtras";
+import {ExportInternalClassesTo} from "../GeneralInit";
 // tests
 // ==========
 

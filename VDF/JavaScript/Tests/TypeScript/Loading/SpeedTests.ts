@@ -1,4 +1,5 @@
 ﻿import {VDFLoader} from "../../../Source/TypeScript/VDFLoader";
+import {ExportInternalClassesTo} from "../GeneralInit";
 // tests
 // ==========
 
