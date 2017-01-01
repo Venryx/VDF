@@ -1,4 +1,6 @@
-﻿import {VDFNode} from "./VDFNode";
+﻿import {Dictionary, EnumValue, List, VDFNodePath, VDFNodePathNode} from "./VDFExtras";
+import {VDF} from "./VDF";
+import {VDFNode} from "./VDFNode";
 import {
     VDFPostSerialize,
     VDFPreSerialize,
@@ -7,7 +9,6 @@ import {
     VDFSerializeProp,
     VDFTypeInfo
 } from "./VDFTypeInfo";
-import {Dictionary, EnumValue, List, VDF, VDFNodePath, VDFNodePathNode} from "./VDF";
 export enum VDFTypeMarking {
 	None,
 	Internal,
@@ -122,7 +123,7 @@ export class VDFSaver {
 						obj[propName] = null;
 				}
 
-				for (let propName in obj)
+				for (let propName in obj) {
 					try {
 						let propInfo: VDFPropInfo = typeInfo.props[propName]; // || new VDFPropInfo("object"); // if prop-info not specified, consider its declared-type to be 'object'
 						/*let include = typeInfo.typeTag != null && typeInfo.typeTag.propIncludeRegexL1 != null ? new RegExp(typeInfo.typeTag.propIncludeRegexL1).test(propName) : false;
@@ -133,6 +134,8 @@ export class VDFSaver {
 						if (!include) continue;
 
 						let propValue = obj[propName];
+						// maybe temp; fix for ts derived-class constructors
+						if (propName == "constructor" && propValue instanceof Function) continue;
 						if (propInfo && !propInfo.ShouldValueBeSaved(propValue)) continue;
 
 						let propNameNode = new VDFNode(propName);
@@ -154,7 +157,8 @@ export class VDFSaver {
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.SetMapChild(propNameNode, propValueNode);
 					}
-					catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }/**/finally{}
+					/*catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }/**/finally{}
+				}
 			}
 		}
 

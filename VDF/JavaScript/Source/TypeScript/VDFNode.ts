@@ -1,7 +1,9 @@
-﻿import {VDFSaveOptions} from "./VDFSaver";
+﻿import {Dictionary, EnumValue, List, StringBuilder, VDFNodePath, VDFNodePathNode} from "./VDFExtras";
+import {VDF} from "./VDF";
+import {VDFSaveOptions} from "./VDFSaver";
 import {VDFLoadOptions} from "./VDFLoader";
-import {Dictionary, List, VDF, VDFNodePath, VDFNodePathNode, StringBuilder, EnumValue} from "./VDF";
 import {VDFDeserialize, VDFDeserializeProp, VDFPostDeserialize, VDFPreDeserialize, VDFTypeInfo} from "./VDFTypeInfo";
+
 export class VDFNode {
 	metadata: string;
 	metadata_override: string;
@@ -18,8 +20,7 @@ export class VDFNode {
 		this.listChildren[index] = value;
 		this[index] = value;
 	}
-	/*InsertListChild(index: number, value: any)
-	{
+	/*InsertListChild(index: number, value: any) {
 		var oldItems = this.listChildren;
 		for (var i = 0; i < oldItems.length; i++) // we need to first remove old values, so the slate is clean for manual re-adding/re-ordering
 			delete this[i];
@@ -319,18 +320,20 @@ export class VDFNode {
 		}
 
 		if (options.objPostDeserializeFuncs_early.ContainsKey(obj))
-			for (let i in options.objPostDeserializeFuncs_early.Get(obj))
-				options.objPostDeserializeFuncs_early.Get(obj)[i]();
+			for (let func of options.objPostDeserializeFuncs_early.Get(obj))
+				func();
 
 		for (let propName in VDF.GetObjectProps(obj))
 			if(obj[propName] instanceof Function && obj[propName].tags && obj[propName].tags.Any(a=>a instanceof VDFPostDeserialize))
 				obj[propName](this, path, options);
 
 		if (options.objPostDeserializeFuncs.ContainsKey(obj))
-			for (let i in options.objPostDeserializeFuncs.Get(obj))
-				options.objPostDeserializeFuncs.Get(obj)[i]();
+			for (let func of options.objPostDeserializeFuncs.Get(obj))
+				func();
 	}
 }
 //VDFUtils.MakePropertiesHidden(VDFNode.prototype, true);
 
-VDF.CancelSerialize = new VDFNode();
+setTimeout(()=> {
+	VDF.CancelSerialize = new VDFNode();
+}, 0);

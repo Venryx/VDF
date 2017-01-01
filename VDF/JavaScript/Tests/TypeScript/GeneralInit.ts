@@ -37,36 +37,6 @@ String.prototype._AddFunction_Inline = function Fix() { return this.toString(); 
 //Object.prototype._AddGetterSetter(null, function AddTest/*Inline*/(testFunc) { saving[testFunc.name] = testFunc; });
 //saving.AddTest = function testName() { ok(null == null); };
 
-var test_old = test;
-
-// saving init
-// ==========
-
-var saving = {};
-export function Saving_RunTests() {
-	for (var name in saving)
-		test_old(name, saving[name]);
-}
-
-// the normal "test" function actually runs test
-// here we replace it with a function that merely "registers the test to be run later on" (when the Saving button is pressed)
-window["test"] = function(name, func) { saving[name] = func; };
-window["test_custom"] = function(name, func) { saving[name] = func; };
-//export function Test(name, func) { saving[name] = func; }
-
-// loading init
-// ==========
-
-var loading = {};
-export function Loading_RunTests() {
-	for (var name in loading)
-		test_old(name, loading[name]);
-}
-
-// the normal "test" function actually runs test
-// here we replace it with a function that merely "registers the test to be run later on" (when the Loading button is pressed)
-window["test"] = function(name, func) { loading[name] = func; };
-
 // others
 // ==========
 

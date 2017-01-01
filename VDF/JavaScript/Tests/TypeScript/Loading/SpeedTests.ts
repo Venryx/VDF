@@ -1,5 +1,9 @@
 ﻿import {VDFLoader} from "../../../Source/TypeScript/VDFLoader";
 import {ExportInternalClassesTo} from "../GeneralInit";
+
+export var tests = [];
+function test(name, func) { tests.push({name, func}); }
+
 // tests
 // ==========
 

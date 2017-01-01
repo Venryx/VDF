@@ -3,6 +3,9 @@ import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScri
 import {List} from "../../../Source/TypeScript/VDFExtras";
 import {ExportInternalClassesTo} from "../GeneralInit";
 
+export var tests = [];
+function test(name, func) { tests.push({name, func}); }
+
 // tests
 // ==========
 

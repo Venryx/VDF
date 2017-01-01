@@ -1,5 +1,5 @@
-﻿import {VDFLoadOptions} from "./VDFLoader";
-import {Dictionary, List, StringBuilder} from "./VDF";
+﻿import {Dictionary, List, StringBuilder} from "./VDFExtras";
+import {VDFLoadOptions} from "./VDFLoader";
 export enum VDFTokenType {
 	//WiderMetadataEndMarker,
 	//MetadataBaseValue,

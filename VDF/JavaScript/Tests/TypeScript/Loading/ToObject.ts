@@ -4,6 +4,10 @@ import { VDFNode } from "../../../Source/TypeScript/VDFNode";
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFNodePath, Dictionary} from "../../../Source/TypeScript/VDFExtras";
 import {ExportInternalClassesTo} from "../GeneralInit";
+
+export var tests = [];
+function test(name, func) { tests.push({name, func}); }
+
 // tests
 // ==========
 

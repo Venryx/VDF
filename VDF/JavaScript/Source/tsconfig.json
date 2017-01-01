@@ -2,9 +2,10 @@
 	"compilerOptions": {
 		"target": "es5",
 		"outDir": "./JavaScript",
-		"outFile": "./JavaScript_Bundle.js",
-		"module": "amd",
-		"sourceMap": true
+		//"outFile": "./JavaScript_Bundle.js",
+		"module": "system",
+		"sourceMap": true,
+		"noImplicitUseStrict": true // maybe temp; for eval-based module extract stuff
 	},
 	"compileOnSave": true
 }

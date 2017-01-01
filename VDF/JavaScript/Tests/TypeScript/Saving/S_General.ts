@@ -3,7 +3,7 @@ import {VDFNode} from "../../../Source/TypeScript/VDFNode";
 import {VDFSaver, VDFSaveOptions} from "../../../Source/TypeScript/VDFSaver";
 import {VDFNodePathNode, VDFNodePath, List, Dictionary, object} from "../../../Source/TypeScript/VDFExtras";
 import {VDF} from "../../../Source/TypeScript/VDF";
-import {ExportInternalClassesTo, Saving_RunTests} from "../GeneralInit";
+import {ExportInternalClassesTo} from "../GeneralInit";
 
 /*class Saving {
 	static initialized: boolean;
@@ -27,11 +27,12 @@ import {ExportInternalClassesTo, Saving_RunTests} from "../GeneralInit";
 }*/
 
 // make sure we import all the other saving tests from here (this file's the root)
-import "./FromObject";
-import "./FromVDFNode";
-import "./SpeedTests";
+import {tests as tests1} from "./FromObject";
+import {tests as tests2} from "./FromVDFNode";
+import {tests as tests3} from "./SpeedTests";
 
-export {Saving_RunTests} from "../GeneralInit";
+export var tests = tests1.concat(tests2).concat(tests3);
+function test(name, func) { tests.push({name, func}); }
 
 // tests
 // ==========
@@ -62,11 +63,10 @@ module VDFTests { // added to match C# indentation
 		});
 
 		@TypeInfo("^[^_]") class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {}
-		@TypeInfo() class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived {
+		@TypeInfo() class D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived extends D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base {
 			@T("bool") _notMatching = true;
 			@T("bool") matching = true;
 		}
-		D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived.prototype["__proto__"] = D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Base.prototype;
 		test("D1_Map_PropWithNameMatchingBaseClassIncludeRegex", ()=> {
 			VDF.Serialize(new D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived(), "D1_Map_PropWithNameMatchingBaseClassIncludeRegex_Class_Derived").Should().Be("{matching:true}");
 		});

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Venryx/VDF#readme",
   "devDependencies": {
     "requirejs": "^2.3.2",
+    "systemjs": "^0.19.41",
     "typescript": "^2.1.4"
   }
 }

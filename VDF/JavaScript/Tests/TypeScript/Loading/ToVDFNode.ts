@@ -4,6 +4,10 @@ import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFTokenParser, VDFTokenType} from "../../../Source/TypeScript/VDFTokenParser";
 import {Dictionary, List, object} from "../../../Source/TypeScript/VDFExtras";
 import {ExportInternalClassesTo} from "../GeneralInit";
+
+export var tests = [];
+function test(name, func) { tests.push({name, func}); }
+
 // tests
 // ==========
 

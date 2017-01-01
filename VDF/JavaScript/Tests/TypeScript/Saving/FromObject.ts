@@ -1,17 +1,13 @@
 ﻿import {VDF} from "../../../Source/TypeScript/VDF";
-import {
-    _VDFPostSerialize,
-    _VDFPreSerialize,
-    _VDFSerializeProp,
-    D,
-    P,
-    T,
-    TypeInfo
-} from "../../../Source/TypeScript/VDFTypeInfo";
+import {_VDFPostSerialize, _VDFPreSerialize, _VDFSerializeProp,
+    D, P, T, TypeInfo} from "../../../Source/TypeScript/VDFTypeInfo";
 import {VDFSaver, VDFSaveOptions, VDFTypeMarking} from "../../../Source/TypeScript/VDFSaver";
 import {VDFNode} from "../../../Source/TypeScript/VDFNode";
 import {List, object, Dictionary, VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
 import {ExportInternalClassesTo} from "../GeneralInit";
+
+export var tests = [];
+function test(name, func) { tests.push({name, func}); }
 
 // tests
 // ==========
@@ -146,7 +142,7 @@ module VDFTests { // added to match C# indentation
 			@T("int") @P() Int = 5;
 			@T("double") @P() Double = .5;
 			@T("string") @P() String = "Prop value string.";
-			@T("List(string") @P() list = new List<string>("string", "2A", "2B");
+			@T("List(string)") @P() list = new List<string>("string", "2A", "2B");
 			@T("List(List(string))") @P() nestedList = new List<List<string>>("List(string)", new List<string>("string", "1A"));
 		}
 		test("D1_TypeProperties_MarkForNone", () => {

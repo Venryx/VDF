@@ -1,7 +1,8 @@
-﻿import {Dictionary, List, VDF, object} from "./VDF";
-import {VDFNode} from "./VDFNode";
+﻿import {VDFNode} from "./VDFNode";
 import {VDFToken, VDFTokenParser, VDFTokenType} from "./VDFTokenParser";
 import {VDFTypeInfo} from "./VDFTypeInfo";
+import {Dictionary, object, List} from "./VDFExtras";
+import {VDF} from "./VDF";
 export class VDFLoadOptions {
 	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false) {
 		this.messages = messages || [];

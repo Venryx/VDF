@@ -3,7 +3,7 @@ import {VDFDeserialize, P, T, _VDFDeserialize} from "../../../Source/TypeScript/
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {VDFLoader, VDFLoadOptions} from "../../../Source/TypeScript/VDFLoader";
 import {VDFNodePath} from "../../../Source/TypeScript/VDFExtras";
-import {ExportInternalClassesTo, Loading_RunTests} from "../GeneralInit";
+import {ExportInternalClassesTo} from "../GeneralInit";
 
 /*class Loading {
 	static initialized = false;
@@ -26,12 +26,13 @@ import {ExportInternalClassesTo, Loading_RunTests} from "../GeneralInit";
 	}
 }*/
 
-// make sure we import all the other loading tests from here (this file's the root)
-import "./ToObject";
-import "./ToVDFNode";
-import "./Loading/SpeedTests";
+// make sure we import all the other saving tests from here (this file's the root)
+import {tests as tests1} from "./SpeedTests";
+import {tests as tests2} from "./ToObject";
+import {tests as tests3} from "./ToVDFNode";
 
-export {Loading_RunTests} from "../GeneralInit";
+export var tests = tests1.concat(tests2).concat(tests3);
+function test(name, func) { tests.push({name, func}); }
 
 // tests
 // ==========

@@ -10,31 +10,44 @@
     <script src="../../Source/JavaScript/VDFLoader.js"></script>
     <script src="../../Source/JavaScript/VDFTokenParser.js"></script>
     <script src="../../Source/JavaScript/VDFSaver.js"></script> -->
-    <script src="../../node_modules/requirejs/require.js"></script>
+    <!-- <script src="../../node_modules/requirejs/require.js"></script> -->
+    <script src="../../node_modules/systemjs/dist/system.js"></script>
     <!-- <script src="../../Source/JavaScript_Bundle.js"></script> -->
 	<script src="../../Tests/JavaScript_Bundle.js"></script>
     <script>
-    $(function() {
-		// probably old: note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
-        $("#runSavingTests").click(function() {
-			require(["Tests/TypeScript/Saving/S_General"], function(Saving_RunTests) {
-				var startTime = new Date().getTime();
-				//Saving.Init();
-				//Saving.RunTests();
-				Saving_RunTests.Saving_RunTests();
-				$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
+	// set our baseURL reference path
+	SystemJS.config({
+		baseURL: "."
+	});
+	System.defaultJSExtensions = true;
+
+	var Saving_RunTests = SystemJS.import("Tests/TypeScript/Saving/S_General");
+	var Loading_RunTests = SystemJS.import("Tests/TypeScript/Loading/L_General");
+	Saving_RunTests.then(sVal=> {
+		Loading_RunTests.then(lVal=> {
+			$(function() {
+				// probably old: note; this page is basically obsolete, now that the move-js-output-files-to-javascript-folder option is disabled, and unit-tests can be run directly in VS
+				$("#runSavingTests").click(function() {
+					var startTime = new Date().getTime();
+					//Saving.Init();
+					//Saving.RunTests();
+					//sVal.Saving_RunTests();
+					for (let {name, func} of sVal.tests)
+						test(name, func);
+					$("#savingResults").html("Saving time (in ms): " + (new Date().getTime() - startTime));
+				});
+				$("#runLoadingTests").click(function() {
+					var startTime = new Date().getTime();
+					//Loading.Init();
+					//Loading.RunTests();
+					//lVal.Loading_RunTests();
+					for (let {name, func} of lVal.tests)
+						test(name, func);
+					$("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
+				});
 			});
-        });
-        $("#runLoadingTests").click(function() {
-			require(["Tests/TypeScript/Loading/L_General"], function(Loading_RunTests) {
-				var startTime = new Date().getTime();
-				//Loading.Init();
-				//Loading.RunTests();
-				Loading_RunTests.Loading_RunTests();
-				$("#loadingResults").html("Loading time (in ms): " + (new Date().getTime() - startTime));
-			});
-        });
-    });
+		});
+	});
     </script>
 </head>
 <body>
