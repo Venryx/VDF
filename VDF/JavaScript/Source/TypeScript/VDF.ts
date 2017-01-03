@@ -76,9 +76,9 @@ String.prototype._AddProperty("TrimStart", function(chars: Array<string>) {
 
 declare global {
 	interface Array<T> {
-		Contains(str: T): boolean;
-		Where(matchFunc: Function): T[];
-		First(matchFunc: Function): T;
+		Contains(obj: T): boolean;
+		Where(matchFunc: (item: T)=>boolean): T[];
+		First(matchFunc: (item: T)=>boolean): T;
 	}
 }
 if (!Array.prototype["Contains"])
