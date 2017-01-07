@@ -185,7 +185,7 @@ export class List<T> extends Array<T> {
 		if (typeof args[0] == "string") var [itemType, ...items] = args;
 		else if (args[0] instanceof Function) var [itemTypeGetterFunc, ...items] = args;
 		// third case can be when calling .slice on a List; it internally calls this constructor, passing a number for the first arg
-		else var items = [];
+		else return;
 		
 		this.AddRange(items);
 		if (itemType)
@@ -244,38 +244,28 @@ export class List<T> extends Array<T> {
 			result.Add(selectFunc.call(item, item, index));
 		return result;
 	}
-	First(matchFunc?: (item: T, index: number)=>boolean) {
-		var result = this.FirstOrDefault(matchFunc);
-		if (result == null)
-			throw new Error("Matching item not found.");
-		return result;
-	}
-	FirstOrDefault(matchFunc?: (item: T, index: number)=>boolean) {
+	First(matchFunc?: (item: T, index: number)=>boolean, requireMatch?: boolean) {
 		if (matchFunc) {
 			for (let [index, item] of this.Entries) {
 				if (matchFunc.call(item, item, index))
 					return item;
 			}
+			if (requireMatch)
+				throw new Error("Matching item not found.");
 			return null;
-		}
-		else
+		} else
 			return this[0];
 	}
-	Last(matchFunc?: (item: T, index: number)=>boolean) {
-		var result = this.LastOrDefault(matchFunc);
-		if (result == null)
-			throw new Error("Matching item not found.");
-		return result;
-	}
-	LastOrDefault(matchFunc?: (item: T, index: number)=>boolean) {
+	Last(matchFunc?: (item: T, index: number)=>boolean, requireMatch?: boolean) {
 		if (matchFunc) {
 			for (var i = this.length - 1; i >= 0; i--) {
 				if (matchFunc.call(this[i], this[i], i))
 					return this[i];
 			}
+			if (requireMatch)
+				throw new Error("Matching item not found.");
 			return null;
-		}
-		else
+		} else
 			return this[this.length - 1];
 	}
 	GetRange(index, count) {

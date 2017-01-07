@@ -169,8 +169,8 @@ System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
                     this.name = propName;
                     this.typeName = propTypeName;
                     this.tags = new VDFExtras_1.List();
-                    this.propTag = this.tags.FirstOrDefault(function (a) { return a instanceof VDFProp; });
-                    this.defaultValueTag = this.tags.FirstOrDefault(function (a) { return a instanceof DefaultValue; });
+                    this.propTag = this.tags.First(function (a) { return a instanceof VDFProp; });
+                    this.defaultValueTag = this.tags.First(function (a) { return a instanceof DefaultValue; });
                 }
                 VDFPropInfo.prototype.AddTags = function () {
                     var tags = [];
@@ -178,8 +178,8 @@ System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
                         tags[_i] = arguments[_i];
                     }
                     this.tags.AddRange(tags);
-                    this.propTag = this.tags.FirstOrDefault(function (a) { return a instanceof VDFProp; });
-                    this.defaultValueTag = this.tags.FirstOrDefault(function (a) { return a instanceof DefaultValue; });
+                    this.propTag = this.tags.First(function (a) { return a instanceof VDFProp; });
+                    this.defaultValueTag = this.tags.First(function (a) { return a instanceof DefaultValue; });
                 };
                 VDFPropInfo.prototype.ShouldValueBeSaved = function (val) {
                     //if (this.defaultValueTag == null || this.defaultValueTag.defaultValue == D.NoDefault)

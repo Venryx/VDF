@@ -88,7 +88,7 @@ System.register(["./VDFNode", "./VDFTokenParser", "./VDFTypeInfo", "./VDFExtras"
                             depth++;
                     }
                     var fromVDFTypeName = "object";
-                    var firstNonMetadataToken = tokensAtDepth0.First(function (a) { return a.type != VDFTokenParser_1.VDFTokenType.Metadata; });
+                    var firstNonMetadataToken = tokensAtDepth0.First(function (a) { return a.type != VDFTokenParser_1.VDFTokenType.Metadata; }, true);
                     if (tokensAtDepth0[0].type == VDFTokenParser_1.VDFTokenType.Metadata)
                         fromVDFTypeName = tokensAtDepth0[0].text;
                     else if (firstNonMetadataToken.type == VDFTokenParser_1.VDFTokenType.Boolean)
@@ -133,7 +133,7 @@ System.register(["./VDFNode", "./VDFTokenParser", "./VDFTypeInfo", "./VDFExtras"
                             var token = tokensAtDepth1[i];
                             if (token.type != VDFTokenParser_1.VDFTokenType.ListEndMarker && token.type != VDFTokenParser_1.VDFTokenType.MapEndMarker) {
                                 var itemFirstToken = tokens[token.index];
-                                var itemEnderToken = tokensAtDepth1.FirstOrDefault(function (a) { return a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenParser_1.VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenParser_1.VDFTokenType.ListEndMarker && token.type != VDFTokenParser_1.VDFTokenType.MapEndMarker; });
+                                var itemEnderToken = tokensAtDepth1.First(function (a) { return a.index > itemFirstToken.index + (itemFirstToken.type == VDFTokenParser_1.VDFTokenType.Metadata ? 1 : 0) && token.type != VDFTokenParser_1.VDFTokenType.ListEndMarker && token.type != VDFTokenParser_1.VDFTokenType.MapEndMarker; });
                                 //node.AddListChild(VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, itemFirstToken, itemEnderToken), typeGenericArgs[0], options));
                                 node.AddListChild(VDFLoader.ToVDFNode(tokens, typeGenericArgs[0], options, itemFirstToken.index, itemEnderToken != null ? itemEnderToken.index : enderTokenIndex));
                                 if (itemFirstToken.type == VDFTokenParser_1.VDFTokenType.Metadata)
@@ -160,7 +160,7 @@ System.register(["./VDFNode", "./VDFTokenParser", "./VDFTypeInfo", "./VDFExtras"
                                     //propValueTypeName = typeInfo && typeInfo.props[propName] ? typeInfo.props[propName].typeName : null;
                                     propValueType = typeof propNameNode.primitiveValue == "string" && typeInfo && typeInfo.props[propNameNode.primitiveValue] ? typeInfo.props[propNameNode.primitiveValue].typeName : null;
                                 var propValueFirstToken = tokensAtDepth1[i + 1];
-                                var propValueEnderToken = tokensAtDepth1.FirstOrDefault(function (a) { return a.index > propValueFirstToken.index && a.type == VDFTokenParser_1.VDFTokenType.Key; });
+                                var propValueEnderToken = tokensAtDepth1.First(function (a) { return a.index > propValueFirstToken.index && a.type == VDFTokenParser_1.VDFTokenType.Key; });
                                 //var propValueNode = VDFLoader.ToVDFNode(VDFLoader.GetTokenRange_Tokens(tokens, propValueFirstToken, propValueEnderToken), propValueTypeName, options);
                                 var propValueNode = VDFLoader.ToVDFNode(tokens, propValueType, options, propValueFirstToken.index, propValueEnderToken != null ? propValueEnderToken.index : enderTokenIndex);
                                 node.SetMapChild(propNameNode, propValueNode);

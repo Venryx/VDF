@@ -203,7 +203,7 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     else if (args[0] instanceof Function)
                         var itemTypeGetterFunc = args[0], items = args.slice(1);
                     else
-                        var items = [];
+                        return _this;
                     _this.AddRange(items);
                     if (itemType)
                         _this.itemType = itemType;
@@ -276,36 +276,28 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     }
                     return result;
                 };
-                List.prototype.First = function (matchFunc) {
-                    var result = this.FirstOrDefault(matchFunc);
-                    if (result == null)
-                        throw new Error("Matching item not found.");
-                    return result;
-                };
-                List.prototype.FirstOrDefault = function (matchFunc) {
+                List.prototype.First = function (matchFunc, requireMatch) {
                     if (matchFunc) {
                         for (var _i = 0, _a = this.Entries; _i < _a.length; _i++) {
                             var _b = _a[_i], index = _b[0], item = _b[1];
                             if (matchFunc.call(item, item, index))
                                 return item;
                         }
+                        if (requireMatch)
+                            throw new Error("Matching item not found.");
                         return null;
                     }
                     else
                         return this[0];
                 };
-                List.prototype.Last = function (matchFunc) {
-                    var result = this.LastOrDefault(matchFunc);
-                    if (result == null)
-                        throw new Error("Matching item not found.");
-                    return result;
-                };
-                List.prototype.LastOrDefault = function (matchFunc) {
+                List.prototype.Last = function (matchFunc, requireMatch) {
                     if (matchFunc) {
                         for (var i = this.length - 1; i >= 0; i--) {
                             if (matchFunc.call(this[i], this[i], i))
                                 return this[i];
                         }
+                        if (requireMatch)
+                            throw new Error("Matching item not found.");
                         return null;
                     }
                     else
