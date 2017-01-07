@@ -78,6 +78,7 @@ System.register(["./VDFExtras", "./VDFLoader"], function (exports_1, context_1) 
                     var addNextCharToTokenText = true;
                     var specialEnderChar = '№';
                     text += specialEnderChar; // add special ender-char, so don't need to use Nullable for nextChar var
+                    debugger;
                     var ch;
                     var nextChar = text[0];
                     for (var i = 0; i < text.length - 1; i++) {
@@ -225,10 +226,15 @@ System.register(["./VDFExtras", "./VDFLoader"], function (exports_1, context_1) 
                                         case '+': /*case 'e':*/
                                         case 'E':
                                         case 'y':
-                                            if ((VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.parts[0]) && currentTokenTextBuilder.parts[0].toLowerCase() != "e" // if first-char is valid as start of number
-                                                && !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar) && nextChar != 'I' // and next-char is not valid as part of number
-                                                && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator))
-                                                || ((currentTokenTextBuilder.length == 8 && currentTokenTextBuilder.ToString() == "Infinity") || (currentTokenTextBuilder.length == 9 && currentTokenTextBuilder.ToString() == "-Infinity")))
+                                            // if normal ("-12345" or "-123.45" or "-123e-45") number
+                                            var normalNumber = (
+                                            // if first-char is valid as start of number
+                                            VDFTokenParser.chars0To9DotAndNegative.Contains(currentTokenTextBuilder.parts[0]) && currentTokenTextBuilder.parts[0].toLowerCase() != "e"
+                                                && !VDFTokenParser.chars0To9DotAndNegative.Contains(nextChar) && nextChar != 'I'
+                                                && (lastScopeIncreaseChar == "[" || result.Count == 0 || result.Last().type == VDFTokenType.Metadata || result.Last().type == VDFTokenType.KeyValueSeparator));
+                                            if (normalNumber
+                                                || (currentTokenTextBuilder.length == 8 && currentTokenTextBuilder.ToString() == "Infinity")
+                                                || (currentTokenTextBuilder.length == 9 && currentTokenTextBuilder.ToString() == "-Infinity"))
                                                 currentTokenType = VDFTokenType.Number;
                                             break;
                                         case '[':

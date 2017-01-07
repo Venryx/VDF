@@ -180,9 +180,12 @@ export class List<T> extends Array<T> {
 		//super(...items);
 		super();
 		(this as any).__proto__ = List.prototype;
+		//Object.setPrototypeOf(this, List.prototype);
 
 		if (typeof args[0] == "string") var [itemType, ...items] = args;
-		else var [itemTypeGetterFunc, ...items] = args;
+		else if (args[0] instanceof Function) var [itemTypeGetterFunc, ...items] = args;
+		// third case is when calling .slice on a List; it internally calls this constructor, passing a number for the first arg
+		else var items = [];
 		
 		this.AddRange(items);
 		if (itemType)

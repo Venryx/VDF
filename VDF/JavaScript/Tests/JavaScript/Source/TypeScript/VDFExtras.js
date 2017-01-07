@@ -197,10 +197,13 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     //super(...items);
                     _super.call(this) || this;
                     _this.__proto__ = List.prototype;
+                    //Object.setPrototypeOf(this, List.prototype);
                     if (typeof args[0] == "string")
                         var itemType = args[0], items = args.slice(1);
-                    else
+                    else if (args[0] instanceof Function)
                         var itemTypeGetterFunc = args[0], items = args.slice(1);
+                    else
+                        var items = [];
                     _this.AddRange(items);
                     if (itemType)
                         _this.itemType = itemType;
