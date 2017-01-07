@@ -73,11 +73,6 @@ System.register(["./VDFSaver", "./VDFLoader", "./VDFExtras"], function (exports_
                     }
                     return result;
                 });
-            if (!Array.prototype["First"])
-                Array.prototype._AddProperty("First", function (matchFunc) {
-                    if (matchFunc === void 0) { matchFunc = (function () { return true; }); }
-                    return this.Where(matchFunc)[0];
-                });
             Function.prototype._AddProperty("AddTags", function () {
                 var tags = [];
                 for (var _i = 0; _i < arguments.length; _i++) {

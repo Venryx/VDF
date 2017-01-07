@@ -276,32 +276,42 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     }
                     return result;
                 };
-                List.prototype.First = function (matchFunc, requireMatch) {
+                List.prototype.First = function (matchFunc) {
+                    var result = this.FirstOrX(matchFunc);
+                    if (result == null)
+                        throw new Error("Matching item not found.");
+                    return result;
+                };
+                List.prototype.FirstOrX = function (matchFunc, x) {
+                    if (x === void 0) { x = null; }
                     if (matchFunc) {
                         for (var _i = 0, _a = this.Entries; _i < _a.length; _i++) {
                             var _b = _a[_i], index = _b[0], item = _b[1];
                             if (matchFunc.call(item, item, index))
                                 return item;
                         }
-                        if (requireMatch)
-                            throw new Error("Matching item not found.");
-                        return null;
                     }
-                    else
+                    else if (this.length > 0)
                         return this[0];
+                    return x;
                 };
-                List.prototype.Last = function (matchFunc, requireMatch) {
+                List.prototype.Last = function (matchFunc) {
+                    var result = this.LastOrX(matchFunc);
+                    if (result == null)
+                        throw new Error("Matching item not found.");
+                    return result;
+                };
+                List.prototype.LastOrX = function (matchFunc, x) {
+                    if (x === void 0) { x = null; }
                     if (matchFunc) {
                         for (var i = this.length - 1; i >= 0; i--) {
                             if (matchFunc.call(this[i], this[i], i))
                                 return this[i];
                         }
-                        if (requireMatch)
-                            throw new Error("Matching item not found.");
-                        return null;
                     }
-                    else
+                    else if (this.length > 0)
                         return this[this.length - 1];
+                    return x;
                 };
                 List.prototype.GetRange = function (index, count) {
                     var result = new List(this.itemType);

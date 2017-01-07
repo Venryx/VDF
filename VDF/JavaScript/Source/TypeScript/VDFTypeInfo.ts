@@ -97,14 +97,14 @@ export class VDFPropInfo {
 		this.name = propName;
 		this.typeName = propTypeName;
 		this.tags = new List<any>();
-		this.propTag = this.tags.First(a=>a instanceof VDFProp);
-		this.defaultValueTag = this.tags.First(a=>a instanceof DefaultValue);
+		this.propTag = this.tags.FirstOrX(a=>a instanceof VDFProp);
+		this.defaultValueTag = this.tags.FirstOrX(a=>a instanceof DefaultValue);
 	}
 
 	AddTags(...tags) {
 		this.tags.AddRange(tags);
-		this.propTag = this.tags.First(a=>a instanceof VDFProp);
-		this.defaultValueTag = this.tags.First(a=>a instanceof DefaultValue);
+		this.propTag = this.tags.FirstOrX(a=>a instanceof VDFProp);
+		this.defaultValueTag = this.tags.FirstOrX(a=>a instanceof DefaultValue);
 	}
 
 	ShouldValueBeSaved(val: any) {

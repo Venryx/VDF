@@ -77,8 +77,8 @@ String.prototype._AddProperty("TrimStart", function(chars: Array<string>) {
 declare global {
 	interface Array<T> {
 		Contains(obj: T): boolean;
-		Where(matchFunc: (item: T)=>boolean): T[];
-		First(matchFunc: (item: T)=>boolean): T;
+		Where(matchFunc: (item: T, index: number)=>boolean): T[];
+		//First(matchFunc: (item: T, index: number)=>boolean, requireMatch: boolean): T;
 	}
 }
 if (!Array.prototype["Contains"])
@@ -91,8 +91,19 @@ if (!Array.prototype["Where"])
 				result.push(item);
 		return result;
 	});
-if (!Array.prototype["First"])
-	Array.prototype._AddProperty("First", function(matchFunc = (()=>true)) { return this.Where(matchFunc)[0]; });
+/*if (!Array.prototype["First"]) {
+	Array.prototype._AddProperty("First", function(matchFunc = (()=>true), requireMatch?) {
+		if (matchFunc) {
+			for (let [index, item] of this.Entries) {
+				if (matchFunc.call(item, item, index))
+					return item;
+			}
+		} else if (this.length > 0)
+			return this[0];
+		if (requireMatch)
+			throw new Error("Matching item not found.");
+	});
+}*/
 
 declare global {
 	interface Function {

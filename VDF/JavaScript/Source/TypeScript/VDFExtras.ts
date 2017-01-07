@@ -244,29 +244,37 @@ export class List<T> extends Array<T> {
 			result.Add(selectFunc.call(item, item, index));
 		return result;
 	}
-	First(matchFunc?: (item: T, index: number)=>boolean, requireMatch?: boolean) {
+	First(matchFunc?: (item: T, index: number)=>boolean) {
+		var result = this.FirstOrX(matchFunc);
+		if (result == null)
+			throw new Error("Matching item not found.");
+		return result;
+	}
+	FirstOrX(matchFunc?: (item: T, index: number)=>boolean, x = null) {
 		if (matchFunc) {
 			for (let [index, item] of this.Entries) {
 				if (matchFunc.call(item, item, index))
 					return item;
 			}
-			if (requireMatch)
-				throw new Error("Matching item not found.");
-			return null;
-		} else
+		} else if (this.length > 0)
 			return this[0];
+		return x;
 	}
-	Last(matchFunc?: (item: T, index: number)=>boolean, requireMatch?: boolean) {
+	Last(matchFunc?: (item: T, index: number)=>boolean) {
+		var result = this.LastOrX(matchFunc);
+		if (result == null)
+			throw new Error("Matching item not found.");
+		return result;
+	}
+	LastOrX(matchFunc?: (item: T, index: number)=>boolean, x = null) {
 		if (matchFunc) {
 			for (var i = this.length - 1; i >= 0; i--) {
 				if (matchFunc.call(this[i], this[i], i))
 					return this[i];
 			}
-			if (requireMatch)
-				throw new Error("Matching item not found.");
-			return null;
-		} else
+		} else if (this.length > 0)
 			return this[this.length - 1];
+		return x;
 	}
 	GetRange(index, count) {
 		var result = new List(this.itemType);
