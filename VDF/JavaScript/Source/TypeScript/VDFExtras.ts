@@ -184,7 +184,7 @@ export class List<T> extends Array<T> {
 
 		if (typeof args[0] == "string") var [itemType, ...items] = args;
 		else if (args[0] instanceof Function) var [itemTypeGetterFunc, ...items] = args;
-		// third case is when calling .slice on a List; it internally calls this constructor, passing a number for the first arg
+		// third case can be when calling .slice on a List; it internally calls this constructor, passing a number for the first arg
 		else var items = [];
 		
 		this.AddRange(items);

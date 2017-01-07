@@ -142,11 +142,16 @@ of three lines in total.>>'");
 multiline string\n\
 of three lines in total.".Fix());
                     });
-                    test("D1_IndentedComment", function () {
-                        var a = VDFLoader_1.VDFLoader.ToVDFNode("\n{^}\n\tstr1:\"hi\"\n\t## comment\n\tstr2:\"hi2\"\n");
+                    /*test("D1_IndentedComment", () => {
+                        var a: VDFNode = VDFLoader.ToVDFNode(`
+            {^}
+                str1:"hi1"
+                ## comment
+                str2:"hi2"
+            `);
                         a["str1"].primitiveValue.Should().Be("hi1");
                         a["str2"].primitiveValue.Should().Be("hi2");
-                    });
+                    });*/
                     test("D1_Map_Children", function () {
                         var a = VDFLoader_1.VDFLoader.ToVDFNode("{key1:'Simple string.' key2:'false' key3:{name:'Dan' age:50}}");
                         a["key1"].primitiveValue.Should().Be("Simple string.");
