@@ -73,8 +73,6 @@ export class VDFTokenParser {
 		var specialEnderChar = '№';
 		text += specialEnderChar; // add special ender-char, so don't need to use Nullable for nextChar var
 
-		debugger;
-
 		var ch;
 		var nextChar = text[0];
 		for (var i = 0; i < text.length - 1; i++) {

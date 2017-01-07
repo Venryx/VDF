@@ -77,7 +77,6 @@ System.register(["./VDFExtras", "./VDFLoader"], function (exports_1, context_1) 
                     var addNextCharToTokenText = true;
                     var specialEnderChar = '№';
                     text += specialEnderChar; // add special ender-char, so don't need to use Nullable for nextChar var
-                    debugger;
                     var ch;
                     var nextChar = text[0];
                     for (var i = 0; i < text.length - 1; i++) {
