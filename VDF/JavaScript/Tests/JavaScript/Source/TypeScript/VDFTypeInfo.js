@@ -27,18 +27,15 @@ System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
             if (typeof args[0] == "string") {
                 propInfo.typeName = args[0];
             }
+            else if (args[0].name) {
+                var type = args[0];
+                propInfo.typeName = type.name;
+            }
             else {
+                //propInfo.typeName = func.toString().match(/return (\w+?);/)[1];
                 var func = args[0];
-                if (func.name) {
-                    var type = func;
-                    propInfo.typeName = type.name;
-                }
-                else {
-                    //propInfo.typeName = func.toString().match(/return (\w+?);/)[1];
-                    var type = func();
-                    propInfo.typeName = type.name;
-                    ;
-                }
+                var typeOrName = func();
+                propInfo.typeName = typeof typeOrName == "string" ? typeOrName : typeOrName.name;
             }
         };
     }
@@ -210,7 +207,6 @@ System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
                 return VDFPropInfo;
             }());
             exports_1("VDFPropInfo", VDFPropInfo);
-            ;
             ;
             DefaultValue = (function () {
                 function DefaultValue(defaultValue) {

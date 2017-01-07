@@ -1,4 +1,5 @@
-import {VDFPropInfo} from "./VDFTypeInfo";
+import {VDF} from "./VDF";
+import {T, VDFPropInfo} from "./VDFTypeInfo";
 // classes
 // ==========
 
@@ -167,8 +168,14 @@ export class EnumValue {
 }
 
 export class List<T> extends Array<T> {
+	/** usage: @T(_=>List.G(_=>ItemType)) prop1; */
+	/*static G<T>(itemTypeGetterFunc: (_?)=>new()=>T): string {
+		var type = itemTypeGetterFunc() as any;
+		return `List(${type.name})`;
+	}*/
+
 	constructor(itemType?: string, ...items: T[]);
-	constructor(itemTypeGetterFunc: ()=>new()=>T, ...items: T[]);
+	constructor(itemTypeGetterFunc: (_?)=>new()=>T, ...items: T[]);
 	constructor(...args) {
 		//super(...items);
 		super();
@@ -181,7 +188,7 @@ export class List<T> extends Array<T> {
 		if (itemType)
 			this.itemType = itemType;
 		else if (itemTypeGetterFunc)
-			this.itemType = itemTypeGetterFunc().name;
+			this.itemType = VDF.ConvertObjectTypeNameToVDFTypeName(itemTypeGetterFunc().name);
 	}
 
 	itemType: string;
@@ -268,15 +275,24 @@ export class List<T> extends Array<T> {
 window["List"] = List;
 
 export class Dictionary<K, V> {
+	/** usage: @T(_=>Dictionary.G(_=>KeyType, _=>ValueType)) prop1; */
+	/*static G<K, V>(keyTypeGetterFunc: (_?)=>new()=>K, valueTypeGetterFunc: (_?)=>new()=>V): string {
+		var keyType = keyTypeGetterFunc() as any;
+		var valueType = valueTypeGetterFunc() as any;
+		return `Dictionary(${keyType.name} ${valueType.name})`;
+	}*/
+
 	constructor(keyType?: string, valueType?: string, keyValuePairsObj?);
-	constructor(keyTypeGetterFunc?: ()=>new()=>K, valueType?: string, keyValuePairsObj?);
+	constructor(keyTypeGetterFunc?: (_?)=>new()=>K, valueType?: string, keyValuePairsObj?);
 	constructor(keyType?: string, valueTypeGetterFunc?: ()=>new()=>V, keyValuePairsObj?);
-	constructor(keyTypeGetterFunc?: ()=>new()=>K, valueTypeGetterFunc?: ()=>new()=>V, keyValuePairsObj?);
+	constructor(keyTypeGetterFunc?: (_?)=>new()=>K, valueTypeGetterFunc?: (_?)=>new()=>V, keyValuePairsObj?);
 	constructor(...args) {
 		var [keyTypeOrGetterFunc, valueTypeOrGetterFunc, keyValuePairsObj] = args;
 
-		var keyType: string = keyTypeOrGetterFunc instanceof Function ? keyTypeOrGetterFunc().name : keyTypeOrGetterFunc;
-		var valueType: string = valueTypeOrGetterFunc instanceof Function ? valueTypeOrGetterFunc().name : valueTypeOrGetterFunc;
+		var keyType: string = keyTypeOrGetterFunc instanceof Function
+			? VDF.ConvertObjectTypeNameToVDFTypeName(keyTypeOrGetterFunc().name) : keyTypeOrGetterFunc;
+		var valueType: string = valueTypeOrGetterFunc instanceof Function
+			? VDF.ConvertObjectTypeNameToVDFTypeName(valueTypeOrGetterFunc().name) : valueTypeOrGetterFunc;
 
 		//VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
 		this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";

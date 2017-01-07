@@ -133,30 +133,29 @@ export class VDFPropInfo {
 		return true;
 	}
 }
-export function T(type: Function);
+export function T(type: new()=>any);
 export function T(typeName: string);
-export function T(typeGetterFunc: ()=>Function);
+export function T(typeGetterFunc: (_?)=>new()=>any);
+export function T(typeNameGetterFunc: (_?)=>string);
 export function T(...args) {
     return (target, name)=> {
         //target.prototype[name].AddTags(new VDFPostDeserialize());
         //Prop(target, name, typeOrTypeName);
         //target.p(name, typeOrTypeName);
         var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-        if (typeof args[0] == "string") {
+		if (typeof args[0] == "string") { // if type-name
 			propInfo.typeName = args[0];
-		} else {
-			var func = args[0] as Function;
-			if ((func as any).name) {
-				let type = func;
-				propInfo.typeName = (type as any).name;
-			} else {
-				//propInfo.typeName = func.toString().match(/return (\w+?);/)[1];
-				let type = func();
-				propInfo.typeName = type.name;;
-			}
+		} else if (args[0].name) { // if type/constructor
+			let type = args[0];
+			propInfo.typeName = type.name;
+		} else { // if type/type-name getter-func
+			//propInfo.typeName = func.toString().match(/return (\w+?);/)[1];
+			let func = args[0];
+			let typeOrName = func();
+			propInfo.typeName = typeof typeOrName == "string" ? typeOrName : typeOrName.name;
 		}
     };
-};
+}
 export function P(includeL2 = true, popOutL2?: boolean): PropertyDecorator {
     return function(target, name) {
         var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name as string);

@@ -173,6 +173,19 @@ export class VDF {
 	static GetIsTypeAnonymous(typeName: string): boolean {
 		return typeName != null && typeName == "object";
 	}
+	static ConvertObjectTypeNameToVDFTypeName(objectTypeName: string) {
+		if (objectTypeName == "Boolean")
+			return "bool";
+		if (objectTypeName == "Number")
+			return "double";
+		if (objectTypeName == "String")
+			return "string";
+		if (objectTypeName == "Object") // if anonymous-object
+			return "object";
+		if (objectTypeName == "Array")
+			return "List(object)";
+		return objectTypeName;
+	}
 	static GetTypeNameOfObject(obj): string {
 		var rawType = typeof obj;
 		if (rawType == "object") { // if an object (i.e. a thing with real properties that could indicate a more specific type)
@@ -180,18 +193,10 @@ export class VDF {
 				return obj.realTypeName;
 			if (obj.itemType)
 				return "List(" + obj.itemType + ")";
-			var nativeTypeName = obj.constructor.name_fake || obj.constructor.name || null;
-			if (nativeTypeName == "Boolean")
-				return "bool";
-			if (nativeTypeName == "Number")
+			var objectTypeName = obj.constructor.name_fake || obj.constructor.name || null;
+			if (objectTypeName == "Number")
 				return obj.toString().Contains(".") ? "double" : "int";
-			if (nativeTypeName == "String")
-				return "string";
-			if (nativeTypeName == "Object") // if anonymous-object
-				return "object";
-			if (nativeTypeName == "Array")
-				return "List(object)";
-			return nativeTypeName;
+			return VDF.ConvertObjectTypeNameToVDFTypeName(objectTypeName);
 		}
 		if (rawType == "boolean")
 			return "bool";

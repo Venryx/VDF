@@ -1,13 +1,17 @@
-System.register([], function (exports_1, context_1) {
+System.register(["./VDF"], function (exports_1, context_1) {
     var __extends = (this && this.__extends) || function (d, b) {
         for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
     var __moduleName = context_1 && context_1.id;
-    var VDFNodePathNode, VDFNodePath, VDFUtils, StringBuilder, object, EnumValue, List, Dictionary, a;
+    var VDF_1, VDFNodePathNode, VDFNodePath, VDFUtils, StringBuilder, object, EnumValue, List, Dictionary, a;
     return {
-        setters: [],
+        setters: [
+            function (VDF_1_1) {
+                VDF_1 = VDF_1_1;
+            }
+        ],
         execute: function () {
             // classes
             // ==========
@@ -201,7 +205,7 @@ System.register([], function (exports_1, context_1) {
                     if (itemType)
                         _this.itemType = itemType;
                     else if (itemTypeGetterFunc)
-                        _this.itemType = itemTypeGetterFunc().name;
+                        _this.itemType = VDF_1.VDF.ConvertObjectTypeNameToVDFTypeName(itemTypeGetterFunc().name);
                     return _this;
                 }
                 Object.defineProperty(List.prototype, "Count", {
@@ -310,8 +314,10 @@ System.register([], function (exports_1, context_1) {
                         args[_i] = arguments[_i];
                     }
                     var keyTypeOrGetterFunc = args[0], valueTypeOrGetterFunc = args[1], keyValuePairsObj = args[2];
-                    var keyType = keyTypeOrGetterFunc instanceof Function ? keyTypeOrGetterFunc().name : keyTypeOrGetterFunc;
-                    var valueType = valueTypeOrGetterFunc instanceof Function ? valueTypeOrGetterFunc().name : valueTypeOrGetterFunc;
+                    var keyType = keyTypeOrGetterFunc instanceof Function
+                        ? VDF_1.VDF.ConvertObjectTypeNameToVDFTypeName(keyTypeOrGetterFunc().name) : keyTypeOrGetterFunc;
+                    var valueType = valueTypeOrGetterFunc instanceof Function
+                        ? VDF_1.VDF.ConvertObjectTypeNameToVDFTypeName(valueTypeOrGetterFunc().name) : valueTypeOrGetterFunc;
                     //VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
                     this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
                     this.keyType = keyType;
