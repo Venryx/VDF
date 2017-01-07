@@ -212,17 +212,21 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     return _this;
                 }
                 Object.defineProperty(List.prototype, "Count", {
+                    // properties
                     get: function () { return this.length; },
                     enumerable: true,
                     configurable: true
                 });
-                // polyfills
-                List.prototype.entries = function () {
-                    var entries = [];
-                    for (var i = 0; i < this.length; i++)
-                        entries.push([i, this[i]]);
-                    return entries;
-                };
+                Object.defineProperty(List.prototype, "Entries", {
+                    get: function () {
+                        var entries = [];
+                        for (var i = 0; i < this.length; i++)
+                            entries.push([i, this[i]]);
+                        return entries;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
                 /*s.Indexes = function () {
                     var result = {};
                     for (var i = 0; i < this.length; i++)
@@ -249,7 +253,7 @@ System.register(["./VDF"], function (exports_1, context_1) {
                 List.prototype.Any = function (matchFunc) {
                     if (matchFunc == null)
                         return this.length > 0;
-                    for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                    for (var _i = 0, _a = this.Entries; _i < _a.length; _i++) {
                         var _b = _a[_i], index = _b[0], item = _b[1];
                         if (matchFunc.call(item, item, index))
                             return true;
@@ -257,7 +261,7 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     return false;
                 };
                 List.prototype.All = function (matchFunc) {
-                    for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                    for (var _i = 0, _a = this.Entries; _i < _a.length; _i++) {
                         var _b = _a[_i], index = _b[0], item = _b[1];
                         if (!matchFunc.call(item, item, index))
                             return false;
@@ -266,7 +270,7 @@ System.register(["./VDF"], function (exports_1, context_1) {
                 };
                 List.prototype.Select = function (selectFunc, itemType) {
                     var result = new List(itemType || "object");
-                    for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                    for (var _i = 0, _a = this.Entries; _i < _a.length; _i++) {
                         var _b = _a[_i], index = _b[0], item = _b[1];
                         result.Add(selectFunc.call(item, item, index));
                     }
@@ -280,7 +284,7 @@ System.register(["./VDF"], function (exports_1, context_1) {
                 };
                 List.prototype.FirstOrDefault = function (matchFunc) {
                     if (matchFunc) {
-                        for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                        for (var _i = 0, _a = this.Entries; _i < _a.length; _i++) {
                             var _b = _a[_i], index = _b[0], item = _b[1];
                             if (matchFunc.call(item, item, index))
                                 return item;

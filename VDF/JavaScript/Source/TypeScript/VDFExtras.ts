@@ -196,10 +196,9 @@ export class List<T> extends Array<T> {
 
 	itemType: string;
 
+	// properties
 	get Count() { return this.length; }
-
-	// polyfills
-	entries() {
+	get Entries() {
 		var entries = [];
 		for (var i = 0; i < this.length; i++)
 			entries.push([i, this[i]]);
@@ -226,14 +225,14 @@ export class List<T> extends Array<T> {
 	Any(matchFunc?: (item: T, index: number)=>boolean) {
 		if (matchFunc == null)
 			return this.length > 0;
-		for (let [index, item] of this.entries()) {
+		for (let [index, item] of this.Entries) {
 			if (matchFunc.call(item, item, index))
 				return true;
 		}
 		return false;
 	}
 	All(matchFunc: (item: T, index: number)=>boolean) {
-		for (let [index, item] of this.entries()) {
+		for (let [index, item] of this.Entries) {
 			if (!matchFunc.call(item, item, index))
 				return false;
 		}
@@ -241,7 +240,7 @@ export class List<T> extends Array<T> {
 	}
 	Select<T2>(selectFunc: (item: T, index: number)=>T2, itemType?) {
 		var result = new List<T2>(itemType || "object");
-		for (let [index, item] of this.entries())
+		for (let [index, item] of this.Entries)
 			result.Add(selectFunc.call(item, item, index));
 		return result;
 	}
@@ -253,7 +252,7 @@ export class List<T> extends Array<T> {
 	}
 	FirstOrDefault(matchFunc?: (item: T, index: number)=>boolean) {
 		if (matchFunc) {
-			for (let [index, item] of this.entries()) {
+			for (let [index, item] of this.Entries) {
 				if (matchFunc.call(item, item, index))
 					return item;
 			}
@@ -335,7 +334,7 @@ export class Dictionary<K, V> {
 		return result;
 	}*/
 	get Pairs() {
-		var result = [];
+		var result = [] as {index: number, key: K, value: V}[];
 		for (var i = 0; i < this.keys.length; i++)
 			result.push({index: i, key: this.keys[i], value: this.values[i]});
 		return result;
