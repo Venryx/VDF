@@ -69,7 +69,7 @@ System.register(["./VDFSaver", "./VDFLoader", "./VDFExtras"], function (exports_
                     for (var _i = 0, _a = this; _i < _a.length; _i++) {
                         var item = _a[_i];
                         if (matchFunc.call(item, item))
-                            result[this instanceof VDFExtras_1.List ? "Add" : "push"](item);
+                            result.push(item);
                     }
                     return result;
                 });

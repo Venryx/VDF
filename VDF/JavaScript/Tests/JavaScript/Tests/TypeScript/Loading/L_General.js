@@ -69,15 +69,6 @@ System.register(["../../../Source/TypeScript/VDFTypeInfo", "../../../Source/Type
                         VDFTypeInfo_1._VDFDeserialize()
                     ], D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class.prototype, "Deserialize", null);
                     test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", function () { VDF_1.VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
-                    var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
-                        function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
-                            this.child = null;
-                        }
-                        return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent;
-                    }());
-                    __decorate([
-                        VDFTypeInfo_1.T("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child"), VDFTypeInfo_1.P()
-                    ], D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent.prototype, "child", void 0);
                     var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = (function () {
                         function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child() {
                         }
@@ -87,6 +78,15 @@ System.register(["../../../Source/TypeScript/VDFTypeInfo", "../../../Source/Type
                     __decorate([
                         VDFTypeInfo_1._VDFDeserialize(true)
                     ], D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child, "Deserialize", null);
+                    var D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent = (function () {
+                        function D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent() {
+                            this.child = null;
+                        }
+                        return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent;
+                    }());
+                    __decorate([
+                        VDFTypeInfo_1.T(function () { return D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child; }), VDFTypeInfo_1.P()
+                    ], D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent.prototype, "child", void 0);
                     test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", function () { ok(VDF_1.VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
                     var D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent = (function () {
                         function D1_MapWithEmbeddedDeserializeFromParentMethodThatTakesNoAction_Prop_Class_Parent() {

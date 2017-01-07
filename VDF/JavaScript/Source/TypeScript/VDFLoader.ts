@@ -3,6 +3,7 @@ import {VDFToken, VDFTokenParser, VDFTokenType} from "./VDFTokenParser";
 import {VDFTypeInfo} from "./VDFTypeInfo";
 import {Dictionary, object, List} from "./VDFExtras";
 import {VDF} from "./VDF";
+
 export class VDFLoadOptions {
 	constructor(initializerObj?: any, messages?: any[], allowStringKeys = true, allowCommaSeparators = false, loadUnknownTypesAsBasicTypes = false) {
 		this.messages = messages || [];

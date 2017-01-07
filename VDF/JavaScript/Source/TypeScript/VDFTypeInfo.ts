@@ -133,13 +133,28 @@ export class VDFPropInfo {
 		return true;
 	}
 }
-export function T(typeOrTypeName: any) {
+export function T(type: Function);
+export function T(typeName: string);
+export function T(typeGetterFunc: ()=>Function);
+export function T(...args) {
     return (target, name)=> {
         //target.prototype[name].AddTags(new VDFPostDeserialize());
         //Prop(target, name, typeOrTypeName);
         //target.p(name, typeOrTypeName);
         var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-        propInfo.typeName = typeOrTypeName instanceof Function ? typeOrTypeName.name : typeOrTypeName;
+        if (typeof args[0] == "string") {
+			propInfo.typeName = args[0];
+		} else {
+			var func = args[0] as Function;
+			if ((func as any).name) {
+				let type = func;
+				propInfo.typeName = (type as any).name;
+			} else {
+				//propInfo.typeName = func.toString().match(/return (\w+?);/)[1];
+				let type = func();
+				propInfo.typeName = type.name;;
+			}
+		}
     };
 };
 export function P(includeL2 = true, popOutL2?: boolean): PropertyDecorator {

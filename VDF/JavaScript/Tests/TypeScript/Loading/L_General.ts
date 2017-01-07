@@ -54,12 +54,12 @@ module VDFTests { // added to match C# indentation
 		}
 		test("D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop", ()=>{ VDF.Deserialize("{boolProp:true}", "D1_MapWithEmbeddedDeserializeMethodThatTakesNoAction_Prop_Class").boolProp.Should().Be(true); });
 
-		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent {
-			@T("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child") @P()
-			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = null;
-		}
 		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child {
 			@_VDFDeserialize(true) static Deserialize(node: VDFNode, path: VDFNodePath, options: VDFLoadOptions): D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child { return null; }
+		}
+		class D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent {
+			@T(()=>D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child) @P()
+			child: D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Child = null;
 		}
 		test("D1_MapWithEmbeddedDeserializeFromParentMethod_Prop", ()=>{ ok(VDF.Deserialize("{child:{}}", "D1_MapWithEmbeddedDeserializeFromParentMethod_Prop_Class_Parent").child == null); });
 

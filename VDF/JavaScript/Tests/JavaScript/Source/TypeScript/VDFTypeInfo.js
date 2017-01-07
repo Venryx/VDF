@@ -14,13 +14,32 @@ System.register(["./VDF", "./VDFExtras"], function (exports_1, context_1) {
         };
     }
     exports_1("TypeInfo", TypeInfo);
-    function T(typeOrTypeName) {
+    function T() {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
         return function (target, name) {
             //target.prototype[name].AddTags(new VDFPostDeserialize());
             //Prop(target, name, typeOrTypeName);
             //target.p(name, typeOrTypeName);
             var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-            propInfo.typeName = typeOrTypeName instanceof Function ? typeOrTypeName.name : typeOrTypeName;
+            if (typeof args[0] == "string") {
+                propInfo.typeName = args[0];
+            }
+            else {
+                var func = args[0];
+                if (func.name) {
+                    var type = func;
+                    propInfo.typeName = type.name;
+                }
+                else {
+                    //propInfo.typeName = func.toString().match(/return (\w+?);/)[1];
+                    var type = func();
+                    propInfo.typeName = type.name;
+                    ;
+                }
+            }
         };
     }
     exports_1("T", T);
