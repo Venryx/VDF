@@ -216,6 +216,13 @@ System.register(["./VDF"], function (exports_1, context_1) {
                     enumerable: true,
                     configurable: true
                 });
+                // polyfills
+                List.prototype.entries = function () {
+                    var entries = [];
+                    for (var i = 0; i < this.length; i++)
+                        entries.push([i, this[i]]);
+                    return entries;
+                };
                 /*s.Indexes = function () {
                     var result = {};
                     for (var i = 0; i < this.length; i++)
@@ -242,26 +249,26 @@ System.register(["./VDF"], function (exports_1, context_1) {
                 List.prototype.Any = function (matchFunc) {
                     if (matchFunc == null)
                         return this.length > 0;
-                    for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                        var item = _a[_i];
-                        if (matchFunc.call(item, item))
+                    for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                        var _b = _a[_i], index = _b[0], item = _b[1];
+                        if (matchFunc.call(item, item, index))
                             return true;
                     }
                     return false;
                 };
                 List.prototype.All = function (matchFunc) {
-                    for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                        var item = _a[_i];
-                        if (!matchFunc.call(item, item))
+                    for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                        var _b = _a[_i], index = _b[0], item = _b[1];
+                        if (!matchFunc.call(item, item, index))
                             return false;
                     }
                     return true;
                 };
                 List.prototype.Select = function (selectFunc, itemType) {
                     var result = new List(itemType || "object");
-                    for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                        var item = _a[_i];
-                        result.Add(selectFunc.call(item, item));
+                    for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                        var _b = _a[_i], index = _b[0], item = _b[1];
+                        result.Add(selectFunc.call(item, item, index));
                     }
                     return result;
                 };
@@ -273,9 +280,9 @@ System.register(["./VDF"], function (exports_1, context_1) {
                 };
                 List.prototype.FirstOrDefault = function (matchFunc) {
                     if (matchFunc) {
-                        for (var _i = 0, _a = this; _i < _a.length; _i++) {
-                            var item = _a[_i];
-                            if (matchFunc.call(item, item))
+                        for (var _i = 0, _a = this.entries(); _i < _a.length; _i++) {
+                            var _b = _a[_i], index = _b[0], item = _b[1];
+                            if (matchFunc.call(item, item, index))
                                 return item;
                         }
                         return null;
@@ -291,9 +298,10 @@ System.register(["./VDF"], function (exports_1, context_1) {
                 };
                 List.prototype.LastOrDefault = function (matchFunc) {
                     if (matchFunc) {
-                        for (var i = this.length - 1; i >= 0; i--)
-                            if (matchFunc.call(this[i], this[i]))
+                        for (var i = this.length - 1; i >= 0; i--) {
+                            if (matchFunc.call(this[i], this[i], i))
                                 return this[i];
+                        }
                         return null;
                     }
                     else
@@ -331,18 +339,14 @@ System.register(["./VDF"], function (exports_1, context_1) {
                         for (var key in keyValuePairsObj)
                             this.Set(key, keyValuePairsObj[key]);
                 }
-                Object.defineProperty(Dictionary.prototype, "Keys", {
+                Object.defineProperty(Dictionary.prototype, "Pairs", {
                     // properties
-                    get: function () {
+                    /*get Keys() { // (note that this will return each key's toString() result (not the key itself, for non-string keys))
                         var result = {};
                         for (var i = 0; i < this.keys.length; i++)
-                            result[this.keys[i]] = null;
+                            result[<any>this.keys[i]] = null;
                         return result;
-                    },
-                    enumerable: true,
-                    configurable: true
-                });
-                Object.defineProperty(Dictionary.prototype, "Pairs", {
+                    }*/
                     get: function () {
                         var result = [];
                         for (var i = 0; i < this.keys.length; i++)

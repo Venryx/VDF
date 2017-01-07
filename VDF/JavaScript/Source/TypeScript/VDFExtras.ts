@@ -198,6 +198,14 @@ export class List<T> extends Array<T> {
 
 	get Count() { return this.length; }
 
+	// polyfills
+	entries() {
+		var entries = [];
+		for (var i = 0; i < this.length; i++)
+			entries.push([i, this[i]]);
+		return entries;
+	}
+
 	/*s.Indexes = function () {
 		var result = {};
 		for (var i = 0; i < this.length; i++)
@@ -215,53 +223,57 @@ export class List<T> extends Array<T> {
 	Remove(item) { return this.RemoveAt(this.indexOf(item)) != null; }
 	RemoveAt(index) { return this.splice(index, 1)[0]; }
 	RemoveRange(index, count) { return this.splice(index, count); }
-	Any(matchFunc?: (item: T)=>boolean) {
+	Any(matchFunc?: (item: T, index: number)=>boolean) {
 		if (matchFunc == null)
 			return this.length > 0;
-		for (let item of this)
-			if (matchFunc.call(item, item))
+		for (let [index, item] of this.entries()) {
+			if (matchFunc.call(item, item, index))
 				return true;
+		}
 		return false;
 	}
-	All(matchFunc: (item: T)=>boolean) {
-		for (let item of this)
-			if (!matchFunc.call(item, item))
+	All(matchFunc: (item: T, index: number)=>boolean) {
+		for (let [index, item] of this.entries()) {
+			if (!matchFunc.call(item, item, index))
 				return false;
+		}
 		return true;
 	}
-	Select<T2>(selectFunc: (item: T)=>T2, itemType?) {
+	Select<T2>(selectFunc: (item: T, index: number)=>T2, itemType?) {
 		var result = new List<T2>(itemType || "object");
-		for (let item of this)
-			result.Add(selectFunc.call(item, item));
+		for (let [index, item] of this.entries())
+			result.Add(selectFunc.call(item, item, index));
 		return result;
 	}
-	First(matchFunc?: (item: T)=>boolean) {
+	First(matchFunc?: (item: T, index: number)=>boolean) {
 		var result = this.FirstOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	}
-	FirstOrDefault(matchFunc?: (item: T)=>boolean) {
+	FirstOrDefault(matchFunc?: (item: T, index: number)=>boolean) {
 		if (matchFunc) {
-			for (let item of this)
-				if (matchFunc.call(item, item))
+			for (let [index, item] of this.entries()) {
+				if (matchFunc.call(item, item, index))
 					return item;
+			}
 			return null;
 		}
 		else
 			return this[0];
 	}
-	Last(matchFunc?: (item: T)=>boolean) {
+	Last(matchFunc?: (item: T, index: number)=>boolean) {
 		var result = this.LastOrDefault(matchFunc);
 		if (result == null)
 			throw new Error("Matching item not found.");
 		return result;
 	}
-	LastOrDefault(matchFunc?: (item: T)=>boolean) {
+	LastOrDefault(matchFunc?: (item: T, index: number)=>boolean) {
 		if (matchFunc) {
-			for (var i = this.length - 1; i >= 0; i--)
-				if (matchFunc.call(this[i], this[i]))
+			for (var i = this.length - 1; i >= 0; i--) {
+				if (matchFunc.call(this[i], this[i], i))
 					return this[i];
+			}
 			return null;
 		}
 		else
@@ -316,12 +328,12 @@ export class Dictionary<K, V> {
 	values: V[];
 
 	// properties
-	get Keys() { // (note that this will return each key's toString() result (not the key itself, for non-string keys))
+	/*get Keys() { // (note that this will return each key's toString() result (not the key itself, for non-string keys))
 		var result = {};
 		for (var i = 0; i < this.keys.length; i++)
 			result[<any>this.keys[i]] = null;
 		return result;
-	}
+	}*/
 	get Pairs() {
 		var result = [];
 		for (var i = 0; i < this.keys.length; i++)
