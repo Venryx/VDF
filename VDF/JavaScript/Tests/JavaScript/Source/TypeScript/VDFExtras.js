@@ -184,17 +184,24 @@ System.register([], function (exports_1, context_1) {
             exports_1("EnumValue", EnumValue);
             List = (function (_super) {
                 __extends(List, _super);
-                function List(itemType) {
-                    var items = [];
-                    for (var _i = 1; _i < arguments.length; _i++) {
-                        items[_i - 1] = arguments[_i];
+                function List() {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
                     }
                     var _this = 
                     //super(...items);
                     _super.call(this) || this;
                     _this.__proto__ = List.prototype;
+                    if (typeof args[0] == "string")
+                        var itemType = args[0], items = args.slice(1);
+                    else
+                        var itemTypeGetterFunc = args[0], items = args.slice(1);
                     _this.AddRange(items);
-                    _this.itemType = itemType;
+                    if (itemType)
+                        _this.itemType = itemType;
+                    else if (itemTypeGetterFunc)
+                        _this.itemType = itemTypeGetterFunc().name;
                     return _this;
                 }
                 Object.defineProperty(List.prototype, "Count", {
@@ -297,7 +304,14 @@ System.register([], function (exports_1, context_1) {
             exports_1("List", List);
             window["List"] = List;
             Dictionary = (function () {
-                function Dictionary(keyType, valueType, keyValuePairsObj) {
+                function Dictionary() {
+                    var args = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        args[_i] = arguments[_i];
+                    }
+                    var keyTypeOrGetterFunc = args[0], valueTypeOrGetterFunc = args[1], keyValuePairsObj = args[2];
+                    var keyType = keyTypeOrGetterFunc instanceof Function ? keyTypeOrGetterFunc().name : keyTypeOrGetterFunc;
+                    var valueType = valueTypeOrGetterFunc instanceof Function ? valueTypeOrGetterFunc().name : valueTypeOrGetterFunc;
                     //VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
                     this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
                     this.keyType = keyType;

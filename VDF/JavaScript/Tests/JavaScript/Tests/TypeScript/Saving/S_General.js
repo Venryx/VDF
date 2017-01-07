@@ -53,7 +53,7 @@ System.register(["../../../Source/TypeScript/VDFTypeInfo", "../../../Source/Type
                     // general
                     // ==========
                     test("NodePathToStringReturnsX", function () {
-                        var path = new VDFExtras_1.VDFNodePath(new VDFExtras_1.List("VDFNodePathNode"));
+                        var path = new VDFExtras_1.VDFNodePath(new VDFExtras_1.List(function () { return VDFExtras_1.VDFNodePathNode; }));
                         path.nodes.push(new VDFExtras_1.VDFNodePathNode(null, new VDFTypeInfo_1.VDFPropInfo("prop1", null, [])));
                         path.nodes.push(new VDFExtras_1.VDFNodePathNode(null, null, 1));
                         path.nodes.push(new VDFExtras_1.VDFNodePathNode(null, null, null, 2));
@@ -214,6 +214,38 @@ System.register(["../../../Source/TypeScript/VDFTypeInfo", "../../../Source/Type
                         var a = VDFSaver_1.VDFSaver.ToVDFNode(new VDFExtras_1.List("object", 0, 1), new VDFSaver_1.VDFSaveOptions({ useCommaSeparators: true }));
                         a.listChildren.Count.Should().Be(2);
                         a.ToVDF(new VDFSaver_1.VDFSaveOptions({ useCommaSeparators: true })).Should().Be("[0,1]");
+                    });
+                    // js only
+                    // ==========
+                    var SomeClass = (function () {
+                        function SomeClass() {
+                        }
+                        return SomeClass;
+                    }());
+                    var MergedTypeNotation_Class = (function () {
+                        function MergedTypeNotation_Class() {
+                        }
+                        return MergedTypeNotation_Class;
+                    }());
+                    __decorate([
+                        VDFTypeInfo_1.T(function () { return SomeClass; })
+                    ], MergedTypeNotation_Class.prototype, "prop1", void 0);
+                    test("MergedTypeNotation", function () {
+                        var propInfo = MergedTypeNotation_Class.typeInfo.props.prop1;
+                        propInfo.typeName.Should().Be("SomeClass");
+                    });
+                    var MergedTypeNotationInCollections_Class = (function () {
+                        function MergedTypeNotationInCollections_Class() {
+                            this.list = new VDFExtras_1.List(function () { return SomeClass; });
+                            this.dictionary = new VDFExtras_1.Dictionary(function () { return SomeClass; }, function () { return SomeClass; });
+                        }
+                        return MergedTypeNotationInCollections_Class;
+                    }());
+                    test("MergedTypeNotationInCollections", function () {
+                        var obj = new MergedTypeNotationInCollections_Class();
+                        obj.list.itemType.Should().Be("SomeClass");
+                        obj.dictionary.keyType.Should().Be("SomeClass");
+                        obj.dictionary.valueType.Should().Be("SomeClass");
                     });
                     // export all classes/enums to global scope
                     GeneralInit_1.ExportInternalClassesTo(window, function (str) { return eval(str); });

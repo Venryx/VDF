@@ -167,12 +167,21 @@ export class EnumValue {
 }
 
 export class List<T> extends Array<T> {
-	constructor(itemType?: string, ...items: T[]) {
+	constructor(itemType?: string, ...items: T[]);
+	constructor(itemTypeGetterFunc: ()=>new()=>T, ...items: T[]);
+	constructor(...args) {
 		//super(...items);
 		super();
 		(this as any).__proto__ = List.prototype;
+
+		if (typeof args[0] == "string") var [itemType, ...items] = args;
+		else var [itemTypeGetterFunc, ...items] = args;
+		
 		this.AddRange(items);
-		this.itemType = itemType;
+		if (itemType)
+			this.itemType = itemType;
+		else if (itemTypeGetterFunc)
+			this.itemType = itemTypeGetterFunc().name;
 	}
 
 	itemType: string;
@@ -259,7 +268,16 @@ export class List<T> extends Array<T> {
 window["List"] = List;
 
 export class Dictionary<K, V> {
-	constructor(keyType?: string, valueType?: string, keyValuePairsObj?) {
+	constructor(keyType?: string, valueType?: string, keyValuePairsObj?);
+	constructor(keyTypeGetterFunc?: ()=>new()=>K, valueType?: string, keyValuePairsObj?);
+	constructor(keyType?: string, valueTypeGetterFunc?: ()=>new()=>V, keyValuePairsObj?);
+	constructor(keyTypeGetterFunc?: ()=>new()=>K, valueTypeGetterFunc?: ()=>new()=>V, keyValuePairsObj?);
+	constructor(...args) {
+		var [keyTypeOrGetterFunc, valueTypeOrGetterFunc, keyValuePairsObj] = args;
+
+		var keyType: string = keyTypeOrGetterFunc instanceof Function ? keyTypeOrGetterFunc().name : keyTypeOrGetterFunc;
+		var valueType: string = valueTypeOrGetterFunc instanceof Function ? valueTypeOrGetterFunc().name : valueTypeOrGetterFunc;
+
 		//VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
 		this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
 		this.keyType = keyType;

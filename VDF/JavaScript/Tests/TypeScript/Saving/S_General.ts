@@ -1,7 +1,7 @@
 ﻿import {VDFPropInfo, TypeInfo, T, _VDFSerialize, P} from "../../../Source/TypeScript/VDFTypeInfo";
 import {VDFNode} from "../../../Source/TypeScript/VDFNode";
 import {VDFSaver, VDFSaveOptions} from "../../../Source/TypeScript/VDFSaver";
-import {VDFNodePathNode, VDFNodePath, List, Dictionary, object} from "../../../Source/TypeScript/VDFExtras";
+import {VDFNodePathNode, VDFNodePath, List, Dictionary, object, StringBuilder} from "../../../Source/TypeScript/VDFExtras";
 import {VDF} from "../../../Source/TypeScript/VDF";
 import {ExportInternalClassesTo} from "../GeneralInit";
 
@@ -43,7 +43,7 @@ module VDFTests { // added to match C# indentation
 		// ==========
 
 		test("NodePathToStringReturnsX", ()=> {
-			var path = new VDFNodePath(new List<VDFNodePathNode>("VDFNodePathNode"));
+			var path = new VDFNodePath(new List(()=>VDFNodePathNode));
 			path.nodes.push(new VDFNodePathNode(null, new VDFPropInfo("prop1", null, [])));
 			path.nodes.push(new VDFNodePathNode(null, null, 1));
 			path.nodes.push(new VDFNodePathNode(null, null, null, 2));
@@ -137,6 +137,29 @@ module VDFTests { // added to match C# indentation
 			var a = VDFSaver.ToVDFNode(new List<object>("object", 0, 1), new VDFSaveOptions({useCommaSeparators: true}));
 			a.listChildren.Count.Should().Be(2);
 			a.ToVDF(new VDFSaveOptions({useCommaSeparators: true})).Should().Be("[0,1]");
+		});
+
+		// js only
+		// ==========
+
+		class SomeClass {}
+
+		class MergedTypeNotation_Class {
+			@T(()=>SomeClass) prop1;
+		}
+		test("MergedTypeNotation", ()=> {
+			var propInfo = (MergedTypeNotation_Class as any).typeInfo.props.prop1 as VDFPropInfo;
+			propInfo.typeName.Should().Be("SomeClass");
+		});
+		class MergedTypeNotationInCollections_Class {
+			list = new List(()=>SomeClass);
+			dictionary = new Dictionary(()=>SomeClass, ()=>SomeClass);
+		}
+		test("MergedTypeNotationInCollections", ()=> {
+			var obj = new MergedTypeNotationInCollections_Class();
+			obj.list.itemType.Should().Be("SomeClass");
+			obj.dictionary.keyType.Should().Be("SomeClass");
+			obj.dictionary.valueType.Should().Be("SomeClass");
 		});
 
 		// export all classes/enums to global scope
