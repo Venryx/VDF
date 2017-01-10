@@ -169,13 +169,13 @@ export class EnumValue {
 
 export class List<T> extends Array<T> {
 	/** usage: @T(_=>List.G(_=>ItemType)) prop1; */
-	/*static G<T>(itemTypeGetterFunc: (_?)=>new()=>T): string {
+	/*static G<T>(itemTypeGetterFunc: (_?)=>new(..._)=>T): string {
 		var type = itemTypeGetterFunc() as any;
 		return `List(${type.name})`;
 	}*/
 
 	constructor(itemType?: string, ...items: T[]);
-	constructor(itemTypeGetterFunc: (_?)=>new()=>T, ...items: T[]);
+	constructor(itemTypeGetterFunc: (_?)=>new(..._)=>T, ...items: T[]);
 	constructor(...args) {
 		//super(...items);
 		super();
@@ -288,16 +288,16 @@ window["List"] = List;
 
 export class Dictionary<K, V> {
 	/** usage: @T(_=>Dictionary.G(_=>KeyType, _=>ValueType)) prop1; */
-	/*static G<K, V>(keyTypeGetterFunc: (_?)=>new()=>K, valueTypeGetterFunc: (_?)=>new()=>V): string {
+	/*static G<K, V>(keyTypeGetterFunc: (_?)=>new(..._)=>K, valueTypeGetterFunc: (_?)=>new(..._)=>V): string {
 		var keyType = keyTypeGetterFunc() as any;
 		var valueType = valueTypeGetterFunc() as any;
 		return `Dictionary(${keyType.name} ${valueType.name})`;
 	}*/
 
 	constructor(keyType?: string, valueType?: string, keyValuePairsObj?);
-	constructor(keyTypeGetterFunc?: (_?)=>new()=>K, valueType?: string, keyValuePairsObj?);
-	constructor(keyType?: string, valueTypeGetterFunc?: ()=>new()=>V, keyValuePairsObj?);
-	constructor(keyTypeGetterFunc?: (_?)=>new()=>K, valueTypeGetterFunc?: (_?)=>new()=>V, keyValuePairsObj?);
+	constructor(keyTypeGetterFunc?: (_?)=>new(..._)=>K, valueType?: string, keyValuePairsObj?);
+	constructor(keyType?: string, valueTypeGetterFunc?: ()=>new(..._)=>V, keyValuePairsObj?);
+	constructor(keyTypeGetterFunc?: (_?)=>new(..._)=>K, valueTypeGetterFunc?: (_?)=>new(..._)=>V, keyValuePairsObj?);
 	constructor(...args) {
 		var [keyTypeOrGetterFunc, valueTypeOrGetterFunc, keyValuePairsObj] = args;
 

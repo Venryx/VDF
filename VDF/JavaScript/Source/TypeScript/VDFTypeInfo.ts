@@ -133,9 +133,9 @@ export class VDFPropInfo {
 		return true;
 	}
 }
-export function T(type: new()=>any);
+export function T(type: new(..._)=>any);
 export function T(typeName: string);
-export function T(typeGetterFunc: (_?)=>new()=>any);
+export function T(typeGetterFunc: (_?)=>new(..._)=>any);
 export function T(typeNameGetterFunc: (_?)=>string);
 export function T(...args) {
     return (target, name)=> {
