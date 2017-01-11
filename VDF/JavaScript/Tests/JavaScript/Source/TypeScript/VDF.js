@@ -182,42 +182,42 @@ System.register(["./VDFSaver", "./VDFLoader", "./VDFExtras"], function (exports_
                         return {};
                     if (!type.hasOwnProperty("classPropsCache") || type.allowPropsCache === false || !allowGetFromCache) {
                         var result = {};
-                        var currentType = type;
-                        while (currentType && currentType != Object) {
-                            // get static props on constructor itself
-                            for (var _i = 0, _a = Object.getOwnPropertyNames(currentType); _i < _a.length; _i++) {
-                                var propName = _a[_i];
-                                if (propName in result)
-                                    continue;
-                                var propInfo = Object.getOwnPropertyDescriptor(currentType, propName);
-                                // don't include if prop is a getter or setter func (causes problems when enumerating)
-                                if (propInfo == null || (propInfo.get == null && propInfo.set == null))
-                                    result[propName] = currentType[propName];
-                            }
-                            // get "real" props on the prototype-object
-                            for (var _b = 0, _c = Object.getOwnPropertyNames(currentType.prototype); _b < _c.length; _b++) {
-                                var propName = _c[_b];
-                                if (propName in result)
-                                    continue;
-                                var propInfo = Object.getOwnPropertyDescriptor(currentType.prototype, propName);
-                                // don't include if prop is a getter or setter func (causes problems when enumerating)
-                                if (propInfo == null || (propInfo.get == null && propInfo.set == null))
-                                    result[propName] = currentType.prototype[propName];
-                            }
-                            currentType = Object.getPrototypeOf(currentType.prototype).constructor;
+                        // get static props on constructor itself
+                        for (var propName in VDF.GetObjectProps(type)) {
+                            if (propName in result)
+                                continue;
+                            result[propName] = type[propName];
+                        }
+                        // get "real" props on the prototype-object
+                        for (var propName in VDF.GetObjectProps(type.prototype)) {
+                            if (propName in result)
+                                continue;
+                            result[propName] = type.prototype[propName];
                         }
                         type.classPropsCache = result;
                     }
                     return type.classPropsCache;
                 };
-                VDF.GetObjectProps = function (obj) {
+                VDF.GetObjectProps = function (obj, includeInherited, includeGetterSetters) {
+                    if (includeInherited === void 0) { includeInherited = true; }
+                    if (includeGetterSetters === void 0) { includeGetterSetters = false; }
                     if (obj == null)
                         return {};
                     var result = {};
-                    for (var propName in VDF.GetClassProps(obj.constructor))
-                        result[propName] = null;
-                    for (var propName in obj)
-                        result[propName] = null;
+                    var currentHost = obj;
+                    while (currentHost && currentHost != Object && (currentHost == obj || includeInherited)) {
+                        for (var _i = 0, _a = Object.getOwnPropertyNames(currentHost); _i < _a.length; _i++) {
+                            var propName = _a[_i];
+                            if (propName in result)
+                                continue;
+                            var propInfo = Object.getOwnPropertyDescriptor(currentHost, propName);
+                            var isGetterSetter = propInfo && (propInfo.get || propInfo.set);
+                            // don't include if prop is a getter or setter func (causes problems when enumerating)
+                            if (!isGetterSetter)
+                                result[propName] = currentHost[propName];
+                        }
+                        currentHost = Object.getPrototypeOf(currentHost);
+                    }
                     return result;
                 };
                 VDF.Serialize = function (obj, declaredTypeName_orOptions, options_orNothing) {

@@ -226,37 +226,36 @@ export class VDF {
 		if (type == null) return {};
 		if (!type.hasOwnProperty("classPropsCache") || type.allowPropsCache === false || !allowGetFromCache) {
 			var result = {};
-			var currentType = type;
-			while (currentType && currentType != Object) {
-				// get static props on constructor itself
-				for (let propName of Object.getOwnPropertyNames(currentType)) {
-					if (propName in result) continue;
-					let propInfo = Object.getOwnPropertyDescriptor(currentType, propName);
-					// don't include if prop is a getter or setter func (causes problems when enumerating)
-					if (propInfo == null || (propInfo.get == null && propInfo.set == null))
-						result[propName] = currentType[propName];
-				}
-				// get "real" props on the prototype-object
-				for (let propName of Object.getOwnPropertyNames(currentType.prototype)) {
-					if (propName in result) continue;
-					let propInfo = Object.getOwnPropertyDescriptor(currentType.prototype, propName);
-					// don't include if prop is a getter or setter func (causes problems when enumerating)
-					if (propInfo == null || (propInfo.get == null && propInfo.set == null))
-						result[propName] = currentType.prototype[propName];
-				}
-				currentType = Object.getPrototypeOf(currentType.prototype).constructor;
+			// get static props on constructor itself
+			for (let propName in VDF.GetObjectProps(type)) {
+				if (propName in result) continue;
+				result[propName] = type[propName];
+			}
+			// get "real" props on the prototype-object
+			for (let propName in VDF.GetObjectProps(type.prototype)) {
+				if (propName in result) continue;
+				result[propName] = type.prototype[propName];
 			}
 			type.classPropsCache = result;
 		}
         return type.classPropsCache;
 	}
-	static GetObjectProps(obj): any {
+	static GetObjectProps(obj, includeInherited = true, includeGetterSetters = false): any {
 		if (obj == null) return {};
+
 		var result = {};
-		for (let propName in VDF.GetClassProps(obj.constructor))
-            result[propName] = null;
-        for (let propName in obj)
-            result[propName] = null;
+		var currentHost = obj;
+		while (currentHost && currentHost != Object && (currentHost == obj || includeInherited)) {
+			for (let propName of Object.getOwnPropertyNames(currentHost)) {
+				if (propName in result) continue;
+				let propInfo = Object.getOwnPropertyDescriptor(currentHost, propName);
+				let isGetterSetter = propInfo && (propInfo.get || propInfo.set);
+				// don't include if prop is a getter or setter func (causes problems when enumerating)
+				if (!isGetterSetter)
+					result[propName] = currentHost[propName];
+			}
+			currentHost = Object.getPrototypeOf(currentHost);
+		}
         return result;
 	}
 
