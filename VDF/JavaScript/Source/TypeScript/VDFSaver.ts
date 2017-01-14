@@ -1,5 +1,5 @@
 ﻿import {Dictionary, EnumValue, List, VDFNodePath, VDFNodePathNode} from "./VDFExtras";
-import {VDF} from "./VDF";
+import {Assert, VDF} from "./VDF";
 import {VDFNode} from "./VDFNode";
 import {
     VDFPostSerialize,
@@ -116,6 +116,8 @@ export class VDFSaver {
 			}
 			else { // if an object, with properties
 				result.isMap = true;
+
+				Assert(typeInfo, `Could not find type-info for type. @TypeName(${typeName})`);
 
 				// special fix; we need to write something for each declared prop (of those included anyway), so insert empty props for those not even existent on the instance
 				for (let propName in typeInfo.props) {

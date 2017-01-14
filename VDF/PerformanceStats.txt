@@ -1,0 +1,3 @@
+This data may be outdated. (check for when the file was last updated in the git repository to know)
+
+D5_SpeedTester2: ~200ms

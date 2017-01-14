@@ -198,7 +198,7 @@ export class List<T> extends Array<T> {
 
 	// properties
 	get Count() { return this.length; }
-	get Entries() {
+	get Entries(): [number, T][] {
 		var entries = [];
 		for (var i = 0; i < this.length; i++)
 			entries.push([i, this[i]]);
@@ -250,7 +250,7 @@ export class List<T> extends Array<T> {
 			throw new Error("Matching item not found.");
 		return result;
 	}
-	FirstOrX(matchFunc?: (item: T, index: number)=>boolean, x = null) {
+	FirstOrX(matchFunc?: (item: T, index: number)=>boolean, x: T = null) {
 		if (matchFunc) {
 			for (let [index, item] of this.Entries) {
 				if (matchFunc.call(item, item, index))
@@ -266,7 +266,7 @@ export class List<T> extends Array<T> {
 			throw new Error("Matching item not found.");
 		return result;
 	}
-	LastOrX(matchFunc?: (item: T, index: number)=>boolean, x = null) {
+	LastOrX(matchFunc?: (item: T, index: number)=>boolean, x: T = null) {
 		if (matchFunc) {
 			for (var i = this.length - 1; i >= 0; i--) {
 				if (matchFunc.call(this[i], this[i], i))
