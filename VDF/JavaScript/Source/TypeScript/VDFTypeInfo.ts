@@ -17,9 +17,9 @@ export class VDFType {
 	}
 }
 export class VDFTypeInfo {
-	static Get(type_orTypeName: any): VDFTypeInfo {
+	static Get(typeOrName: string | (new(..._)=>any)): VDFTypeInfo {
 		//var type = type_orTypeName instanceof Function ? type_orTypeName : window[type_orTypeName];
-		var typeName = type_orTypeName instanceof Function ? type_orTypeName.name : type_orTypeName;
+		var typeName = typeOrName instanceof Function ? typeOrName.name : typeOrName;
 
 		var typeNameBase = typeName.Contains("(") ? typeName.substr(0, typeName.indexOf("(")) : typeName;
 		if (VDF.GetIsTypeAnonymous(typeNameBase)) {
@@ -28,7 +28,7 @@ export class VDFTypeInfo {
 			return result;
 		}
 		
-		var typeBase = type_orTypeName instanceof Function ? type_orTypeName : window[typeNameBase];
+		var typeBase = typeOrName instanceof Function ? typeOrName : window[typeNameBase];
         /*if (typeBase == null)
 			throw new Error("Could not find constructor for type: " + typeNameBase);*/
         if (typeBase && !typeBase.hasOwnProperty("typeInfo")) {
@@ -158,7 +158,7 @@ export function T(...args) {
 }
 export function P(includeL2 = true, popOutL2?: boolean): PropertyDecorator {
     return function(target, name) {
-        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name as string);
+        var propInfo = VDFTypeInfo.Get(target.constructor as any).GetProp(name as string);
         propInfo.AddTags(new VDFProp(includeL2, popOutL2));
     };
 };

@@ -159,7 +159,7 @@ export class VDFSaver {
 						propValueNode.childPopOut = options.useChildPopOut && (propInfo && propInfo.propTag && propInfo.propTag.popOutL2 != null ? propInfo.propTag.popOutL2 : propValueNode.childPopOut);
 						result.SetMapChild(propNameNode, propValueNode);
 					}
-					/*catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }/**/finally{}
+					catch (ex) { ex.message += "\n==================\nRethrownAs) " + ("Error saving property '" + propName + "'.") + "\n"; throw ex; }/**/finally{}
 				}
 			}
 		}

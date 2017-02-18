@@ -1,6 +1,6 @@
 ﻿import {VDFSaver, VDFSaveOptions} from "./VDFSaver";
 import {VDFLoadOptions, VDFLoader} from "./VDFLoader";
-import {List} from "./VDFExtras";
+import {List, ConvertObjectTypeNameToVDFTypeName} from "./VDFExtras";
 import {
     VDFDeserialize,
     VDFDeserializeProp,
@@ -184,19 +184,6 @@ export class VDF {
 	static GetIsTypeAnonymous(typeName: string): boolean {
 		return typeName != null && typeName == "object";
 	}
-	static ConvertObjectTypeNameToVDFTypeName(objectTypeName: string) {
-		if (objectTypeName == "Boolean")
-			return "bool";
-		if (objectTypeName == "Number")
-			return "double";
-		if (objectTypeName == "String")
-			return "string";
-		if (objectTypeName == "Object") // if anonymous-object
-			return "object";
-		if (objectTypeName == "Array")
-			return "List(object)";
-		return objectTypeName;
-	}
 	static GetTypeNameOfObject(obj): string {
 		var rawType = typeof obj;
 		if (rawType == "object") { // if an object (i.e. a thing with real properties that could indicate a more specific type)
@@ -207,7 +194,7 @@ export class VDF {
 			var objectTypeName = obj.constructor.name_fake || obj.constructor.name || null;
 			if (objectTypeName == "Number")
 				return obj.toString().Contains(".") ? "double" : "int";
-			return VDF.ConvertObjectTypeNameToVDFTypeName(objectTypeName);
+			return ConvertObjectTypeNameToVDFTypeName(objectTypeName);
 		}
 		if (rawType == "boolean")
 			return "bool";
@@ -244,7 +231,7 @@ export class VDF {
 		if (obj == null) return {};
 
 		var result = {};
-		var currentHost = obj;
+		var currentHost = Object(obj); // coerce to object first, in case it's a primitive and we're in es5
 		while (currentHost && currentHost != Object && (currentHost == obj || includeInherited)) {
 			for (let propName of Object.getOwnPropertyNames(currentHost)) {
 				if (propName in result) continue;

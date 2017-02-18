@@ -79,6 +79,23 @@ export class VDFNodePath {
 	}
 }
 
+// helper functions
+// ==========
+
+export function ConvertObjectTypeNameToVDFTypeName(objectTypeName: string) {
+	if (objectTypeName == "Boolean")
+		return "bool";
+	if (objectTypeName == "Number")
+		return "double";
+	if (objectTypeName == "String")
+		return "string";
+	if (objectTypeName == "Object") // if anonymous-object
+		return "object";
+	if (objectTypeName == "Array")
+		return "List(object)";
+	return objectTypeName;
+}
+
 // helper classes
 // ==================
 
@@ -167,6 +184,12 @@ export class EnumValue {
 	static GetEnumStringForIntValue(enumTypeName: string, intValue: number) { return eval(enumTypeName + "[" + intValue + "]"); }
 }
 
+function TypeOrNameOrGetter_ToName<T>(typeOrNameOrGetter?: string | (new(..._)=>T) | ((_?)=>new(..._)=>T)): string {
+	return typeOrNameOrGetter instanceof Function && typeOrNameOrGetter.name ? typeOrNameOrGetter.name :
+		typeOrNameOrGetter instanceof Function ? (typeOrNameOrGetter as any)().name :
+		typeOrNameOrGetter;
+}
+
 export class List<T> extends Array<T> {
 	/** usage: @T(_=>List.G(_=>ItemType)) prop1; */
 	/*static G<T>(itemTypeGetterFunc: (_?)=>new(..._)=>T): string {
@@ -174,24 +197,17 @@ export class List<T> extends Array<T> {
 		return `List(${type.name})`;
 	}*/
 
-	constructor(itemType?: string, ...items: T[]);
-	constructor(itemTypeGetterFunc: (_?)=>new(..._)=>T, ...items: T[]);
-	constructor(...args) {
+	constructor(itemTypeOrNameOrGetter?: string | (new(..._)=>T) | ((_?)=>new(..._)=>T), ...items: T[]) {
 		//super(...items);
 		super();
 		(this as any).__proto__ = List.prototype;
 		//Object.setPrototypeOf(this, List.prototype);
 
-		if (typeof args[0] == "string") var [itemType, ...items] = args;
-		else if (args[0] instanceof Function) var [itemTypeGetterFunc, ...items] = args;
-		// third case can be when calling .slice on a List; it internally calls this constructor, passing a number for the first arg
-		else return;
+		// this can occur when calling .slice on a List; it internally calls this constructor, passing a number for the first arg
+		if (itemTypeOrNameOrGetter == null) return;
 		
 		this.AddRange(items);
-		if (itemType)
-			this.itemType = itemType;
-		else if (itemTypeGetterFunc)
-			this.itemType = VDF.ConvertObjectTypeNameToVDFTypeName(itemTypeGetterFunc().name);
+		this.itemType = ConvertObjectTypeNameToVDFTypeName(TypeOrNameOrGetter_ToName(itemTypeOrNameOrGetter));
 	}
 
 	itemType: string;
@@ -294,17 +310,11 @@ export class Dictionary<K, V> {
 		return `Dictionary(${keyType.name} ${valueType.name})`;
 	}*/
 
-	constructor(keyType?: string, valueType?: string, keyValuePairsObj?);
-	constructor(keyTypeGetterFunc?: (_?)=>new(..._)=>K, valueType?: string, keyValuePairsObj?);
-	constructor(keyType?: string, valueTypeGetterFunc?: ()=>new(..._)=>V, keyValuePairsObj?);
-	constructor(keyTypeGetterFunc?: (_?)=>new(..._)=>K, valueTypeGetterFunc?: (_?)=>new(..._)=>V, keyValuePairsObj?);
-	constructor(...args) {
-		var [keyTypeOrGetterFunc, valueTypeOrGetterFunc, keyValuePairsObj] = args;
-
-		var keyType: string = keyTypeOrGetterFunc instanceof Function
-			? VDF.ConvertObjectTypeNameToVDFTypeName(keyTypeOrGetterFunc().name) : keyTypeOrGetterFunc;
-		var valueType: string = valueTypeOrGetterFunc instanceof Function
-			? VDF.ConvertObjectTypeNameToVDFTypeName(valueTypeOrGetterFunc().name) : valueTypeOrGetterFunc;
+	constructor(keyTypeOrNameOrGetter?: string | (new(..._)=>K) | ((_?)=>new(..._)=>K),
+			valueTypeOrNameOrGetter?: string | (new(..._)=>V) | ((_?)=>new(..._)=>V),
+			keyValuePairsObj?) {
+		var keyType = ConvertObjectTypeNameToVDFTypeName(TypeOrNameOrGetter_ToName(keyTypeOrNameOrGetter));
+		var valueType = ConvertObjectTypeNameToVDFTypeName(TypeOrNameOrGetter_ToName(valueTypeOrNameOrGetter));
 
 		//VDFUtils.SetUpHiddenFields(this, true, "realTypeName", "keyType", "valueType", "keys", "values");
 		this.realTypeName = "Dictionary(" + keyType + " " + valueType + ")";
